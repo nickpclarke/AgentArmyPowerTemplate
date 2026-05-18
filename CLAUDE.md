@@ -52,6 +52,23 @@ Set the `Type` and `PI` fields on items so they're properly categorised.
 | CI/CD | `devops-engineer`, `deployment-engineer` |
 | Performance | `performance-engineer` |
 
+**Enterprise Architecture army** — TOGAF ADM-aligned specialists:
+
+| Concern | Agent |
+|---|---|
+| Architecture program (all phases) | `enterprise-architect` |
+| TOGAF ADM phase guidance / artifacts | `togaf-adm-advisor` |
+| Strategic positioning, Wardley maps | `wardley-strategist` or `/wardley` |
+| Business capabilities, value streams | `business-architect` or `/capability-map` |
+| Capability investment prioritization | `capability-planner` |
+| Solution architecture, vendor selection | `solution-architect` |
+| Data / information architecture | `information-architect` |
+| API strategy, integration patterns | `integration-architect` |
+| Enterprise security (Zero Trust, FedRAMP) | `security-architect` |
+| IDP, Team Topologies, platform design | `platform-architect` |
+| FISMA, HIPAA, CMMC, SOX, CCPA | `us-regulatory-architect` |
+| Architecture Decision Records | `/ea-adr` skill |
+
 Full roster: [docs/agents.md](docs/agents.md) | Copilot setup: [docs/copilot.md](docs/copilot.md)
 
 ### Issue type conventions
@@ -106,6 +123,9 @@ Run these with `/skill-name` in the Claude Code prompt:
 | `/security-review` | Security audit of current branch changes |
 | `/revise-claude-md` | Update this file with session learnings |
 | `/simplify` | Review and clean up changed code |
+| `/wardley [domain]` | Full Wardley analysis pipeline — value chain, map (OWM), doctrine, climate, gameplay |
+| `/ea-adr [decision topic]` | Architecture Decision Record in MADR v4.0 format |
+| `/capability-map [domain]` | Business capability model + investment heat map |
 
 ## GitHub Actions in This Repo
 

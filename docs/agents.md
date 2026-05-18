@@ -151,6 +151,64 @@ Use these for infrastructure, deployment, and reliability work.
 
 ---
 
+## Enterprise Architecture Agents
+
+TOGAF ADM-aligned EA specialists for US commercial and federal contexts. All agents are designed around NIST frameworks, FedRAMP, FISMA, and US regulatory requirements — no UK-specific framework dependencies.
+
+### EA Routing
+
+| Engagement | Start with | Then involve |
+|---|---|---|
+| New technology investment | `enterprise-architect` | All EA specialists in ADM phase sequence |
+| Strategic direction question | `wardley-strategist` (`/wardley`) | `capability-planner`, `enterprise-architect` |
+| Capability model / investment | `business-architect` (`/capability-map`) | `capability-planner` |
+| Platform / IDP architecture | `platform-architect` | `security-architect`, `integration-architect` |
+| FedRAMP / FISMA / CMMC | `us-regulatory-architect` | `security-architect` |
+| HIPAA data system | `us-regulatory-architect` | `information-architect`, `security-architect` |
+| Architecture Decision | `/ea-adr` | (standalone skill) |
+
+### EA Agents
+
+| Agent | TOGAF Phase | Purpose |
+|---|---|---|
+| `enterprise-architect` | All phases | TOGAF ADM orchestrator, Architecture Vision, Repository governance |
+| `togaf-adm-advisor` | All phases | Phase deliverable templates, ADM tailoring, artifact guidance |
+| `wardley-strategist` | A, B, E | Wardley Maps: value chain, evolution, doctrine, climate, gameplay |
+| `business-architect` | B | Business capabilities, value streams, operating models (BIZBOK) |
+| `solution-architect` | E, F | ABB→SBB, solution docs, vendor evaluation, transition architecture |
+| `information-architect` | C (Data) | Conceptual/logical data models, MDM, data governance (DAMA DMBOK) |
+| `capability-planner` | B, E, F | WSJF prioritization, investment heat maps, portfolio backlog |
+| `integration-architect` | C (App), D | API governance, EDA, canonical data model, ESB modernization |
+| `security-architect` | Cross-cutting | Zero Trust (NIST SP 800-207), NIST CSF 2.0, FedRAMP, CMMC |
+| `platform-architect` | D | IDP, Team Topologies, Backstage, golden paths, DORA metrics |
+| `us-regulatory-architect` | Cross-cutting | FISMA/RMF, HIPAA, CMMC 2.0, PCI DSS v4, SOX ITGC, CCPA/CPRA |
+
+### EA Skills
+
+| Skill | What it does |
+|---|---|
+| `/wardley [domain]` | Full 5-stage Wardley pipeline → OWM syntax for create.wardleymaps.ai |
+| `/ea-adr [decision]` | MADR v4.0 Architecture Decision Record |
+| `/capability-map [domain]` | Business capability model + investment heat map |
+
+### Full EA Program (TOGAF ADM)
+
+```
+1. enterprise-architect    → Architecture Vision (Phase A), Architecture Principles
+2. wardley-strategist      → strategic landscape map (/wardley)
+3. business-architect      → capabilities + value streams (Phase B)
+4. capability-planner      → WSJF investment priorities
+5. information-architect   → data architecture (Phase C)
+6. integration-architect   → application integration (Phase C)
+7. security-architect      → security by design (cross-cutting)
+8. us-regulatory-architect → compliance constraints (cross-cutting)
+9. platform-architect      → technology standards (Phase D)
+10. solution-architect     → solution building blocks + transitions (Phase E/F)
+11. enterprise-architect   → Architecture Contract (Phase G)
+```
+
+---
+
 ## Agent Chaining Patterns
 
 ### Feature implementation (SAFE Story)

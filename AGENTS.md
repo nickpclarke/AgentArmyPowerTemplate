@@ -273,6 +273,24 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `search-specialist` | haiku | Web search, information retrieval, fact-checking |
 | `trend-analyst` | sonnet | Technology and market trend analysis |
 
+### 11 · Enterprise Architecture (11 agents)
+
+TOGAF ADM-aligned EA agents for US commercial and federal contexts. See `.claude/agents/categories/11-enterprise-architecture/README.md` for engagement flows.
+
+| Agent | Model | TOGAF Phase | Purpose |
+|---|---|---|---|
+| `enterprise-architect` | opus | All | TOGAF ADM orchestrator, Architecture Vision, Repository governance |
+| `togaf-adm-advisor` | sonnet | All | Phase deliverables, artifact templates, ADM tailoring |
+| `wardley-strategist` | opus | A, B, E | Wardley value chains, evolution, doctrine, climate, gameplay |
+| `business-architect` | sonnet | B | Capability maps, value streams, BIZBOK operating models |
+| `solution-architect` | sonnet | E, F | ABB→SBB translation, solution docs, vendor evaluation, transition architecture |
+| `information-architect` | sonnet | C (Data) | CDM/LDM, MDM, data governance, lineage, DAMA DMBOK |
+| `capability-planner` | sonnet | B, E, F | WSJF investment prioritization, capability roadmaps |
+| `integration-architect` | sonnet | C (App), D | API strategy, EDA, canonical data model, ESB modernization |
+| `security-architect` | opus | Cross-cutting | Zero Trust (NIST SP 800-207), NIST CSF 2.0, FedRAMP, CMMC |
+| `platform-architect` | sonnet | D | IDP, Team Topologies, Backstage, golden paths, DORA |
+| `us-regulatory-architect` | sonnet | Cross-cutting | FISMA/RMF, HIPAA, CMMC 2.0, PCI DSS v4, SOX, CCPA/CPRA |
+
 ---
 
 ## Agent Selection Guide
@@ -287,6 +305,12 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | Multi-step complex task | `multi-agent-coordinator` + specialists |
 | GitHub board / issues | `github-projects-manager` |
 | Unknown — find an agent | `/subagent-catalog:search <keyword>` |
+| Enterprise architecture program | `enterprise-architect` (orchestrator) |
+| Strategic positioning / investment | `wardley-strategist` + `capability-planner` |
+| Business capability model | `business-architect` → `capability-planner` |
+| FedRAMP / FISMA / CMMC | `us-regulatory-architect` + `security-architect` |
+| Platform / IDP design | `platform-architect` + `integration-architect` |
+| TOGAF phase deliverable | `togaf-adm-advisor` |
 
 ## Agent Chaining Patterns
 
@@ -303,4 +327,33 @@ product-manager (backlog grooming) → scrum-master (iteration setup) → github
 **Production incident:**
 ```
 incident-responder (triage) → debugger (root cause) → sre-engineer (postmortem) → deployment-engineer (fix)
+```
+
+**Enterprise architecture program (full TOGAF ADM):**
+```
+enterprise-architect (Preliminary + Phase A: Vision)
+  → wardley-strategist (strategic landscape map)
+  → business-architect (Phase B: capabilities + value streams)
+  → capability-planner (WSJF scoring + investment case)
+  → information-architect (Phase C: data architecture)
+  → integration-architect (Phase C: application integration)
+  → security-architect (security by design, cross-cutting)
+  → us-regulatory-architect (compliance constraints)
+  → platform-architect (Phase D: technology standards)
+  → solution-architect (Phase E/F: SBBs + transition architecture)
+  → enterprise-architect (Phase G: Architecture Contract)
+```
+
+**Strategic investment decision:**
+```
+wardley-strategist (/wardley [domain]) → capability-planner (WSJF) → enterprise-architect (roadmap update)
+```
+
+**Platform engineering program:**
+```
+platform-architect (IDP architecture + Team Topologies)
+  → security-architect (shift-left security design)
+  → integration-architect (API gateway + service mesh)
+  → capability-planner (platform capability roadmap)
+  → sre-engineer (SLOs for platform services)
 ```

@@ -162,6 +162,14 @@ Full reference: [docs/github-projects.md](docs/github-projects.md)
 
 Plus built-in Claude Code skills: `update-config`, `simplify`, `fewer-permission-prompts`, `loop`, `claude-api`, `init`, `review`, `security-review`.
 
+**EA skills** (local commands in `.claude/commands/`):
+
+| Skill | What it does |
+|---|---|
+| `/wardley [domain]` | Full Wardley analysis pipeline — value chain, map (OWM), doctrine, climate, gameplay |
+| `/ea-adr [decision]` | Architecture Decision Record in MADR v4.0 format |
+| `/capability-map [domain]` | Business capability model + investment heat map |
+
 ### Board slash commands (no hosting required)
 
 Comment on any issue or PR to query the board — no server, no registration needed:
@@ -179,7 +187,9 @@ For the same queries inside GitHub Copilot Chat (`@board-manager`), `extensions/
 
 ### Agent roster
 
-100+ specialist agents available out of the box. See [docs/agents.md](docs/agents.md) for the full categorised roster and agent-chaining patterns.
+110+ specialist agents available out of the box across 11 categories, including a dedicated **Enterprise Architecture** category (11 agents) covering TOGAF ADM, Wardley Mapping, business capabilities, data architecture, platform engineering, and US regulatory compliance (FedRAMP, FISMA, HIPAA, CMMC, SOX, CCPA).
+
+See [docs/agents.md](docs/agents.md) for the full categorised roster and agent-chaining patterns.
 
 ---
 
