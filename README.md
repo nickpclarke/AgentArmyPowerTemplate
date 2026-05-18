@@ -4,39 +4,47 @@ A GitHub repository template for AI-powered software development using a coordin
 
 ## What Is This?
 
-AgentArmy wires three things together:
+AgentArmy deploys **two coordinated AI armies** against your codebase, unified by GitHub Projects v2 as the shared coordination plane:
 
 | Layer | What it does |
 |---|---|
-| **Claude Code** | AI coding assistant with 100+ specialised sub-agents — frontend, backend, security, devops, product, and more |
-| **GitHub Projects v2** | Structured board used as the shared source of truth for all tasks, stories, and features |
-| **GitHub Actions** | Automation that keeps the board and code in sync without manual triage |
+| **Claude Code army** | 100+ specialist sub-agents running locally — deep work, architecture, SAFE planning, complex implementation, security |
+| **GitHub Copilot army** | GitHub-native agents — inline PR review, simple task coding, IDE suggestions, natural language board queries |
+| **GitHub Projects v2** | Shared source of truth for all tasks, stories, and features — both armies read and write here |
+| **GitHub Actions** | Automation that routes issues to the right army and keeps the board in sync |
 
-The result is a development environment where specialist agents handle different concerns, work is tracked on a SAFE-aligned project board, and automation handles the mechanical housekeeping.
+The two armies divide work by complexity and context: Copilot handles fast, bounded, GitHub-integrated tasks; Claude Code handles deep, strategic, multi-file work. See [docs/copilot.md](docs/copilot.md) for the full division of duties.
 
 ## Concept
 
 ```
 You / Team
     │
-    ▼
-Claude Code
-    │
-    ├── Design-time agents
-    │     product-manager · architect-reviewer · business-analyst
-    │     scrum-master · ui-designer · ux-researcher
-    │
+    ├─────────────────────────────────────────────────────────────┐
+    ▼                                                             ▼
+Claude Code (local)                              GitHub Copilot (github-native)
+    │                                                             │
+    ├── Design-time agents                        ├── PR inline review (all PRs)
+    │     product-manager · architect-reviewer    ├── Coding agent (copilot-task label)
+    │     business-analyst · scrum-master         ├── IDE autocompletion
+    │                                             └── @board-manager extension
     ├── Build-time agents
-    │     frontend-developer · backend-developer · fullstack-developer
-    │     typescript-pro · python-pro · react-specialist · ...
+    │     frontend-developer · backend-developer
+    │     typescript-pro · python-pro · ...
     │
-    ├── Quality agents                          GitHub Projects v2
-    │     code-reviewer · security-auditor  ◄──  Todo / In Progress / Done
-    │     qa-expert · performance-engineer       Type · PI · Iteration · Priority
+    ├── Quality agents
+    │     code-reviewer · security-auditor
+    │     qa-expert · performance-engineer
     │
     └── Operations agents
-          devops-engineer · deployment-engineer
-          sre-engineer · cloud-architect
+          devops-engineer · sre-engineer
+          cloud-architect · deployment-engineer
+    │                                                             │
+    └─────────────────────┬───────────────────────────────────────┘
+                          │
+                 GitHub Projects v2
+          (shared board · Type · PI · Iteration)
+                routing labels: copilot-task / agent-army-task
 ```
 
 ## Quick Start
@@ -122,6 +130,8 @@ Full reference: [docs/github-projects.md](docs/github-projects.md)
 |---|---|---|
 | `auto-add-to-project` | Issue / PR opened | Adds every new item to the board automatically |
 | `auto-status` | PR opened / merged | Moves linked issues to *In Progress* or *Done* |
+| `copilot-review` | PR opened | Requests Copilot first-pass review; flags large PRs for deep review |
+| `copilot-coding-agent` | Issue labelled | Routes `copilot-task` to Copilot, `agent-army-task` to Claude Code |
 | `stale` | Mondays 09:00 UTC | Warns at 14 days idle, closes at 21 (P0/Epic exempt) |
 | `label-pr-size` | PR opened / synced | Labels PRs XS→XL by line count |
 | `pi-report` | Fridays 08:00 UTC | Posts a Todo/In Progress/Done summary to Actions |
@@ -141,6 +151,19 @@ Full reference: [docs/github-projects.md](docs/github-projects.md)
 | `playground` | Experimental sandbox |
 
 Plus built-in Claude Code skills: `update-config`, `simplify`, `fewer-permission-prompts`, `loop`, `claude-api`, `init`, `review`, `security-review`.
+
+### `@board-manager` Copilot Extension (`extensions/board-manager/`)
+
+A custom GitHub Copilot Extension for natural language board queries inside Copilot Chat:
+
+```
+@board-manager status
+@board-manager what's in the sprint?
+@board-manager PI-1 progress
+@board-manager show blocked items
+```
+
+Deploy to Vercel and register as a GitHub App. See [docs/copilot.md](docs/copilot.md).
 
 ### Agent roster
 
@@ -183,21 +206,30 @@ Full guide including workarounds: [docs/safe.md](docs/safe.md)
 ```
 .
 ├── .claude/
-│   └── settings.local.json   # Claude Code permissions (gitignore in your fork)
+│   └── settings.local.json        # Claude Code permissions (gitignore in your fork)
 ├── .github/
 │   └── workflows/
 │       ├── auto-add-to-project.yml
 │       ├── auto-status.yml
+│       ├── copilot-review.yml     # Copilot first-pass + deep-review flagging
+│       ├── copilot-coding-agent.yml  # Issue routing: copilot-task / agent-army-task
 │       ├── label-pr-size.yml
 │       ├── pi-report.yml
 │       └── stale.yml
+├── extensions/
+│   └── board-manager/             # @board-manager Copilot Extension
+│       ├── server.js
+│       ├── package.json
+│       ├── vercel.json
+│       └── .env.example
 ├── docs/
-│   ├── agents.md             # Agent roster and usage guide
-│   ├── github-projects.md    # Board field reference
-│   ├── safe.md               # SAFE workflow guide
-│   └── setup.md              # Detailed setup instructions
-├── CLAUDE.md                 # AI assistant guidance (read by Claude Code)
-└── README.md                 # This file
+│   ├── agents.md                  # Agent roster and usage guide
+│   ├── copilot.md                 # Two-army architecture and Copilot setup
+│   ├── github-projects.md         # Board field reference
+│   ├── safe.md                    # SAFE workflow guide
+│   └── setup.md                   # Detailed setup instructions
+├── CLAUDE.md                      # AI assistant guidance (read by Claude Code)
+└── README.md                      # This file
 ```
 
 ---
@@ -224,5 +256,6 @@ gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
 
 - [Full setup guide](docs/setup.md)
 - [Agent roster](docs/agents.md)
+- [GitHub Copilot integration & two-army architecture](docs/copilot.md)
 - [GitHub Projects field reference](docs/github-projects.md)
 - [SAFE workflow guide](docs/safe.md)

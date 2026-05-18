@@ -1,0 +1,19 @@
+{
+  "name": "@agent-army/board-manager",
+  "version": "1.0.0",
+  "description": "GitHub Copilot Extension — natural language board manager for AgentArmy",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@copilot-extensions/preview-sdk": "^1.0.0",
+    "@octokit/rest": "^21.0.0",
+    "express": "^4.19.0"
+  }
+}

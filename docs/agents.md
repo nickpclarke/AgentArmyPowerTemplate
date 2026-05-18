@@ -1,8 +1,19 @@
 # Agent Roster
 
-Claude Code provides 100+ specialist sub-agents. This guide covers the agents most relevant to an AgentArmy workflow, organised by phase.
+AgentArmy runs two agent armies. This document covers the **Claude Code army** — 100+ specialist sub-agents invoked from the local CLI. For the **GitHub Copilot army** (PR review, coding agent, `@board-manager` extension), see [docs/copilot.md](docs/copilot.md).
 
-## How to Use Agents
+## When to use Claude Code vs Copilot
+
+| Signal | Use |
+|--------|-----|
+| Issue Size XS/S + Type Bug/Story, clear acceptance criteria | Copilot coding agent (`copilot-task` label) |
+| Issue Size M+ or Type Feature/Enabler/Epic | Claude Code |
+| PR < 200 lines | Copilot auto-review is sufficient |
+| PR > 200 lines (`needs-deep-review` label) | Run `/review-pr` in Claude Code |
+| Architecture decision needed | Claude Code `architect-reviewer` |
+| Security-sensitive change | Claude Code `/security-review` |
+
+## How to Use Claude Code Agents
 
 Claude Code automatically routes to the right agent based on task description. You can also invoke explicitly:
 

@@ -1,0 +1,84 @@
+name: Route issues to Copilot coding agent
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  route-to-copilot:
+    runs-on: ubuntu-latest
+    if: github.event.label.name == 'copilot-task'
+    steps:
+      - name: Ensure copilot-task label exists with description
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "copilot-task" \
+            --color "0052cc" \
+            --description "Delegate to GitHub Copilot coding agent — bounded, well-defined tasks" \
+            --force
+
+      - name: Ensure agent-army-task label exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "agent-army-task" \
+            --color "7c3aed" \
+            --description "Delegate to Claude Code AgentArmy — complex, multi-file, architecture-heavy" \
+            --force
+
+      - name: Assign issue to Copilot coding agent
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Assign to Copilot — requires Copilot coding agent enabled for this org/repo
+          # Enable at: Settings → Copilot → Coding agent → Enable
+          gh issue edit ${{ github.event.issue.number }} \
+            --add-assignee "Copilot"
+        continue-on-error: true
+
+      - name: Post routing comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SIZE_LABEL=$(gh issue view ${{ github.event.issue.number }} \
+            --json labels --jq '[.labels[].name] | map(select(test("^(XS|S|M|L|XL)$"))) | first // "unknown"')
+
+          gh issue comment ${{ github.event.issue.number }} --body "$(cat <<EOF
+          **🤖 Routed to GitHub Copilot Coding Agent**
+
+          This issue (size: \`$SIZE_LABEL\`) has been assigned to Copilot for implementation.
+
+          **Copilot will:**
+          1. Create a branch from \`main\`
+          2. Implement the changes
+          3. Open a PR referencing this issue
+
+          **When the PR opens:**
+          - Copilot will auto-review it (first-pass)
+          - Run \`/review-pr\` in Claude Code for a deep review on PRs labelled \`needs-deep-review\`
+
+          _To handle this with Claude Code agents instead, remove the \`copilot-task\` label and add \`agent-army-task\`._
+          EOF
+          )"
+
+  route-to-agent-army:
+    runs-on: ubuntu-latest
+    if: github.event.label.name == 'agent-army-task'
+    steps:
+      - name: Post routing comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --body "$(cat <<EOF
+          **⚔️ Routed to Claude Code AgentArmy**
+
+          This issue has been flagged for the AgentArmy. Open Claude Code and run:
+
+          \`\`\`
+          Work on issue #${{ github.event.issue.number }}
+          \`\`\`
+
+          Claude Code will delegate to the appropriate specialist agent based on the issue \`Type\` field.
+          EOF
+          )"

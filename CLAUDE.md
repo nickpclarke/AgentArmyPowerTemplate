@@ -4,14 +4,15 @@ AI assistant guidance for the AgentArmy template repository.
 
 ## What This Repo Is
 
-AgentArmy is a starter template for AI-powered software development. It uses:
+AgentArmy is a starter template for AI-powered software development. It deploys two coordinated AI armies through a shared GitHub Projects v2 board:
 
-- **Claude Code** with a fleet of specialised sub-agents as the development engine
-- **GitHub Projects v2** as the shared task and project management backend
-- **GitHub Actions** for board/code sync automation
-- **SAFE** (Scaled Agile Framework) as the planning model at team and program level
+- **Claude Code army** — local, deep, strategic: architecture, complex features, SAFE planning, security audits
+- **GitHub Copilot army** — GitHub-native, fast, lightweight: PR review, simple task coding, board queries via `@board-manager`
+- **GitHub Projects v2** — shared coordination plane both armies read and write
+- **GitHub Actions** — routes issues to the right army, syncs board state, automates ceremonies
+- **SAFE** — the planning model at team and program level
 
-All significant work is tracked as GitHub issues assigned to the project board. Agents operate as specialists — delegate to the right agent rather than doing everything generalist.
+All significant work is tracked as GitHub issues on the project board. Agents operate as specialists — delegate to the right agent, in the right army, rather than doing everything generalist.
 
 ## Working in This Repo
 
@@ -27,9 +28,17 @@ gh project item-add 1 --owner OWNER --url "https://github.com/OWNER/AgentArmy/is
 
 Set the `Type` and `PI` fields on items so they're properly categorised.
 
-### Use the right agent for each concern
+### Route work to the right army first, then the right agent
 
-Don't do everything in one pass. Delegate:
+**Copilot army** — apply label and let automation handle it:
+
+| Trigger | Label | Copilot does |
+|---|---|---|
+| Bug or Story, Size XS/S | `copilot-task` | Creates branch, implements, opens PR |
+| Any PR | (automatic) | Inline first-pass review |
+| Board question | `@board-manager` in Copilot Chat | Queries board, returns status |
+
+**Claude Code army** — delegate to the right specialist:
 
 | Concern | Agent |
 |---|---|
@@ -38,13 +47,12 @@ Don't do everything in one pass. Delegate:
 | Sprint / PI planning | `scrum-master` |
 | Frontend implementation | `frontend-developer`, `react-specialist`, `typescript-pro` |
 | Backend implementation | `backend-developer`, `python-pro`, `node-specialist` |
-| Code review | `code-reviewer` |
-| Security review | `security-auditor` or `/security-review` skill |
-| PR review | `/review-pr` skill |
+| Deep code review (large PRs, `needs-deep-review` label) | `/review-pr` skill |
+| Security audit | `security-auditor` or `/security-review` skill |
 | CI/CD | `devops-engineer`, `deployment-engineer` |
 | Performance | `performance-engineer` |
 
-Full roster: [docs/agents.md](docs/agents.md)
+Full roster: [docs/agents.md](docs/agents.md) | Copilot setup: [docs/copilot.md](docs/copilot.md)
 
 ### Issue type conventions
 
@@ -105,6 +113,14 @@ Run these with `/skill-name` in the Claude Code prompt:
 |---|---|
 | `auto-add-to-project` | Runs on every new issue/PR — don't manually add items |
 | `auto-status` | Runs on PR open/merge — don't manually change Status unless correcting |
+| `copilot-review` | Adds Copilot as reviewer and flags large PRs — don't remove `needs-deep-review` label |
+| `copilot-coding-agent` | Routes labelled issues — trust the routing, don't reassign manually |
+
+## Copilot Handoff Conventions
+
+- When closing a `copilot-task` issue via PR, ensure the PR body contains `Closes #N` so `auto-status` fires correctly
+- If Copilot's PR needs a deep review, add `needs-deep-review` label and run `/review-pr`
+- If Copilot's implementation is wrong or too shallow, remove `copilot-task`, add `agent-army-task`, and handle with Claude Code
 
 ## Configuration Notes
 
