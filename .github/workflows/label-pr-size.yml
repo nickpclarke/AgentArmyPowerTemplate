@@ -1,0 +1,41 @@
+name: Label PR by size
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  label-size:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply size label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          ADDITIONS: ${{ github.event.pull_request.additions }}
+          DELETIONS: ${{ github.event.pull_request.deletions }}
+        run: |
+          CHANGES=$(( ADDITIONS + DELETIONS ))
+
+          if   [ "$CHANGES" -le 10  ]; then SIZE="XS"
+          elif [ "$CHANGES" -le 50  ]; then SIZE="S"
+          elif [ "$CHANGES" -le 200 ]; then SIZE="M"
+          elif [ "$CHANGES" -le 500 ]; then SIZE="L"
+          else SIZE="XL"
+          fi
+
+          echo "PR #$PR_NUM has $CHANGES changed lines -> $SIZE"
+
+          # Ensure all size labels exist with consistent colours
+          gh label create "XS" --color "0e8a16" --description "PR size: XS (≤10 lines)"  --force
+          gh label create "S"  --color "94d82d" --description "PR size: S (≤50 lines)"   --force
+          gh label create "M"  --color "f9c74f" --description "PR size: M (≤200 lines)"  --force
+          gh label create "L"  --color "f3722c" --description "PR size: L (≤500 lines)"  --force
+          gh label create "XL" --color "d62828" --description "PR size: XL (>500 lines)" --force
+
+          # Remove stale size labels before applying the new one
+          for label in XS S M L XL; do
+            gh pr edit "$PR_NUM" --remove-label "$label" 2>/dev/null || true
+          done
+
+          gh pr edit "$PR_NUM" --add-label "$SIZE"
