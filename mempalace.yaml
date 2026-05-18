@@ -1,0 +1,10 @@
+wing: sample1
+rooms:
+- name: www
+  description: Files from www/
+  keywords:
+  - www
+  - www
+- name: general
+  description: Files that don't fit other rooms
+  keywords: []

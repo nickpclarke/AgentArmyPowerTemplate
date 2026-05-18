@@ -1,0 +1,265 @@
+# AGENTS.md
+
+Critical guidance for AI agents working on this repository.
+
+## Project: index.html Demo App
+
+### Architecture
+- Single HTML file: all code in `index.html` with embedded HTML, CSS, and JavaScript
+- No build process: served directly from the filesystem
+- Entry point: open `index.html` in any modern browser
+
+### Commands
+- Run: open `index.html` in browser — no server, build, or install step
+- No lint, test, or typecheck commands exist
+
+### Key Files
+- `index.html` — sole source file
+- `CLAUDE.md` — AI assistant guidance
+- `README.md` — project documentation
+- `mempalace.yaml` — memory palace configuration
+- `swa-cli.config.json` — Azure Static Web Apps config (`appLocation: /`, `outputLocation: www`)
+
+### Constraints
+- Maintain single-file architecture unless explicitly approved
+- No external dependencies without explicit approval
+- Verification is manual only: visually confirm in browser
+
+---
+
+## Agent Library
+
+Subagents live in `.claude/agents/categories/`. Each is a `.md` file with YAML frontmatter (`name`, `description`, `tools`, `model`). They are usable as Claude Code subagents via `Agent(subagent_type: "<name>")`.
+
+### Tools
+
+`.claude/tools/subagent-catalog/` is a Claude Code slash-command skill for discovering and fetching agents from the upstream VoltAgent catalog.
+
+**Install** (run once):
+```bash
+cp -r .claude/tools/subagent-catalog ~/.claude/commands/
+```
+
+**Usage after install:**
+| Command | What it does |
+|---|---|
+| `/subagent-catalog:search <query>` | Find agents by name, description, or category |
+| `/subagent-catalog:fetch <name>` | Get full agent definition |
+| `/subagent-catalog:list` | Browse all categories |
+| `/subagent-catalog:invalidate` | Clear 12-hour cache |
+
+Cache lives at `~/.claude/cache/subagent-catalog.md`.
+
+---
+
+### 01 · Core Development (11 agents)
+
+| Agent | Model | Purpose |
+|---|---|---|
+| `api-designer` | sonnet | REST/GraphQL endpoint design, OpenAPI specs, auth patterns |
+| `backend-developer` | sonnet | Server-side architecture, APIs, databases, performance |
+| `design-bridge` | sonnet | Translates design specs into implementable technical requirements |
+| `electron-pro` | sonnet | Cross-platform desktop apps with Electron |
+| `frontend-developer` | sonnet | UI implementation, component architecture, state management |
+| `fullstack-developer` | sonnet | End-to-end feature development across full stack |
+| `graphql-architect` | sonnet | GraphQL schema design, resolvers, federation |
+| `microservices-architect` | opus | Service decomposition, inter-service communication, resilience |
+| `mobile-developer` | sonnet | Native and cross-platform mobile development |
+| `ui-designer` | sonnet | Visual design systems, component libraries, accessibility |
+| `websocket-engineer` | sonnet | Real-time communication, WebSocket servers and clients |
+
+### 02 · Language Specialists (30 agents)
+
+| Agent | Model | Purpose |
+|---|---|---|
+| `angular-architect` | sonnet | Angular apps, NgModules, RxJS, state management |
+| `cpp-pro` | sonnet | C++ systems, performance optimization, memory management |
+| `csharp-developer` | sonnet | C# applications, LINQ, async patterns |
+| `django-developer` | sonnet | Django web apps, ORM, middleware, REST APIs |
+| `dotnet-core-expert` | sonnet | .NET Core / .NET 5–8 services and APIs |
+| `dotnet-framework-4.8-expert` | sonnet | Legacy .NET Framework 4.8 applications |
+| `elixir-expert` | sonnet | Elixir, Phoenix, OTP concurrency patterns |
+| `expo-react-native-expert` | sonnet | Expo + React Native cross-platform apps |
+| `fastapi-developer` | sonnet | FastAPI services, Pydantic models, async Python |
+| `flutter-expert` | sonnet | Flutter apps for iOS, Android, web |
+| `golang-pro` | sonnet | Go services, goroutines, interfaces, performance |
+| `java-architect` | opus | Java enterprise architecture, JVM tuning |
+| `javascript-pro` | sonnet | Modern JS, ESM, async/await, browser APIs |
+| `kotlin-specialist` | sonnet | Kotlin Android, coroutines, multiplatform |
+| `laravel-specialist` | sonnet | Laravel apps, Eloquent, queues, Blade |
+| `nextjs-developer` | sonnet | Next.js SSR/SSG, App Router, Edge, API routes |
+| `node-specialist` | sonnet | Node.js services, streams, event loop, npm |
+| `php-pro` | sonnet | PHP applications, Composer, modern PHP patterns |
+| `powershell-5.1-expert` | sonnet | Windows PowerShell 5.1 scripting and modules |
+| `powershell-7-expert` | sonnet | PowerShell 7 cross-platform scripting |
+| `python-pro` | sonnet | Python applications, packaging, typing, async |
+| `rails-expert` | sonnet | Ruby on Rails, ActiveRecord, Hotwire |
+| `react-specialist` | sonnet | React components, hooks, context, performance |
+| `rust-engineer` | sonnet | Rust systems, ownership, lifetimes, async |
+| `spring-boot-engineer` | sonnet | Spring Boot services, DI, JPA, security |
+| `sql-pro` | sonnet | SQL query optimization, schema design, migrations |
+| `swift-expert` | sonnet | Swift iOS/macOS apps, SwiftUI, Combine |
+| `symfony-specialist` | sonnet | Symfony framework, DI container, Doctrine |
+| `typescript-pro` | sonnet | TypeScript, strict typing, generics, decorators |
+| `vue-expert` | sonnet | Vue 3, Composition API, Pinia, Nuxt |
+
+### 03 · Infrastructure (16 agents)
+
+| Agent | Model | Purpose |
+|---|---|---|
+| `azure-infra-engineer` | sonnet | Azure resources, ARM/Bicep, AKS, Azure networking |
+| `cloud-architect` | opus | Multi-cloud design, cost optimization, HA patterns |
+| `database-administrator` | sonnet | DB admin, backup/recovery, replication, tuning |
+| `deployment-engineer` | sonnet | CI/CD pipelines, release automation, rollback |
+| `devops-engineer` | sonnet | DevOps practices, automation, toolchain integration |
+| `devops-incident-responder` | sonnet | Production incidents, runbooks, RCA for DevOps |
+| `docker-expert` | sonnet | Dockerfiles, Compose, multi-stage builds, registries |
+| `incident-responder` | sonnet | On-call response, triage, escalation, postmortems |
+| `kubernetes-specialist` | sonnet | K8s deployments, Helm, operators, networking |
+| `network-engineer` | sonnet | Networking, DNS, load balancing, VPN, firewalls |
+| `platform-engineer` | sonnet | Internal developer platforms, golden paths, IDP |
+| `security-engineer` | sonnet | Security controls, IAM, secrets management, hardening |
+| `sre-engineer` | opus | SLIs/SLOs, error budgets, toil reduction, reliability |
+| `terraform-engineer` | sonnet | Terraform modules, state, providers, drift detection |
+| `terragrunt-expert` | sonnet | Terragrunt DRY configs, multi-account patterns |
+| `windows-infra-admin` | sonnet | Windows Server, AD, GPO, PowerShell DSC |
+
+### 04 · Quality & Security (16 agents)
+
+| Agent | Model | Purpose |
+|---|---|---|
+| `accessibility-tester` | sonnet | WCAG compliance, screen reader testing, a11y audits |
+| `ad-security-reviewer` | sonnet | Active Directory security posture reviews |
+| `ai-writing-auditor` | sonnet | Detect AI-generated content, writing quality audits |
+| `architect-reviewer` | opus | Architecture review, trade-off analysis, ADRs |
+| `chaos-engineer` | sonnet | Failure injection, resilience testing, GameDays |
+| `code-reviewer` | sonnet | Code review, style, correctness, security, maintainability |
+| `compliance-auditor` | sonnet | Regulatory compliance, SOC2, ISO 27001, GDPR |
+| `debugger` | sonnet | Root cause analysis, debugging strategies, fix validation |
+| `error-detective` | sonnet | Error pattern analysis, log triage, exception investigation |
+| `penetration-tester` | opus | Authorized pen testing, vulnerability assessment |
+| `performance-engineer` | sonnet | Profiling, benchmarking, bottleneck elimination |
+| `powershell-security-hardening` | sonnet | PowerShell security, constrained language mode, AMSI |
+| `qa-expert` | sonnet | Test strategy, test plans, defect management |
+| `security-auditor` | opus | Security audits, threat modeling, risk assessment |
+| `test-automator` | sonnet | Test automation frameworks, CI integration, coverage |
+| `ui-ux-tester` | sonnet | UX testing, usability heuristics, user flow validation |
+
+### 05 · Data & AI (13 agents)
+
+| Agent | Model | Purpose |
+|---|---|---|
+| `ai-engineer` | sonnet | AI system integration, LLM APIs, prompt pipelines |
+| `data-analyst` | sonnet | Data analysis, visualization, statistical insights |
+| `data-engineer` | sonnet | ETL/ELT pipelines, data lakes, orchestration |
+| `data-scientist` | sonnet | ML experiments, feature engineering, model evaluation |
+| `database-optimizer` | sonnet | Query tuning, index strategy, execution plan analysis |
+| `llm-architect` | opus | LLM system design, RAG, fine-tuning, evaluation |
+| `machine-learning-engineer` | sonnet | ML model training, serving, MLflow, experiment tracking |
+| `ml-engineer` | sonnet | Production ML systems, feature stores, monitoring |
+| `mlops-engineer` | sonnet | ML pipelines, model registry, drift detection, CD4ML |
+| `nlp-engineer` | sonnet | NLP models, text classification, NER, embeddings |
+| `postgres-pro` | sonnet | PostgreSQL internals, extensions, JSONB, partitioning |
+| `prompt-engineer` | sonnet | Prompt design, chain-of-thought, few-shot, evaluation |
+| `reinforcement-learning-engineer` | sonnet | RL algorithms, reward shaping, policy optimization |
+
+### 06 · Developer Experience (14 agents)
+
+| Agent | Model | Purpose |
+|---|---|---|
+| `build-engineer` | sonnet | Build systems, Webpack/Vite/Turbo, monorepos |
+| `cli-developer` | sonnet | CLI tool design, argument parsing, interactive prompts |
+| `dependency-manager` | sonnet | Dependency audits, upgrades, vulnerability remediation |
+| `documentation-engineer` | sonnet | Docs sites, API docs, architecture documentation |
+| `dx-optimizer` | sonnet | Developer experience improvements, tooling, onboarding |
+| `git-workflow-manager` | sonnet | Git branching strategies, hooks, large repo optimization |
+| `legacy-modernizer` | opus | Incremental modernization of legacy codebases |
+| `mcp-developer` | sonnet | MCP server/client implementation, JSON-RPC, SDK usage |
+| `powershell-module-architect` | sonnet | PowerShell module design, manifest, publishing |
+| `powershell-ui-architect` | sonnet | PowerShell GUI with WPF/WinForms/XAML |
+| `readme-generator` | haiku | README generation, badge setup, project documentation |
+| `refactoring-specialist` | sonnet | Safe refactoring, code smell removal, design patterns |
+| `slack-expert` | sonnet | Slack bot development, Bolt framework, block kit |
+| `tooling-engineer` | sonnet | Developer tooling, scripts, automation, linters |
+
+### 07 · Specialized Domains (13 agents)
+
+| Agent | Model | Purpose |
+|---|---|---|
+| `api-documenter` | sonnet | API reference docs, OpenAPI rendering, developer portals |
+| `blockchain-developer` | sonnet | Smart contracts, DeFi protocols, Web3 integration |
+| `embedded-systems` | sonnet | Embedded C/C++, RTOS, hardware interfaces |
+| `fintech-engineer` | opus | Financial systems, payments, regulatory compliance |
+| `game-developer` | sonnet | Game mechanics, Unity/Unreal, physics, networking |
+| `github-projects-manager` | sonnet | GitHub Projects v2 boards, issues, milestones, sprints |
+| `healthcare-admin` | sonnet | Healthcare IT, HL7/FHIR, EHR integrations |
+| `iot-engineer` | sonnet | IoT protocols (MQTT, CoAP), edge computing, firmware |
+| `m365-admin` | sonnet | Microsoft 365 admin, Exchange, SharePoint, Teams |
+| `mobile-app-developer` | sonnet | Mobile strategy, app store, push notifications |
+| `payment-integration` | sonnet | Payment gateways, Stripe/Braintree, PCI compliance |
+| `quant-analyst` | opus | Quantitative analysis, algorithmic trading, risk models |
+| `risk-manager` | sonnet | Risk identification, impact assessment, mitigation plans |
+| `seo-specialist` | sonnet | SEO audits, structured data, Core Web Vitals |
+
+### 08 · Business & Product (12 agents)
+
+| Agent | Model | Purpose |
+|---|---|---|
+| `business-analyst` | sonnet | Requirements elicitation, process mapping, gap analysis |
+| `content-marketer` | haiku | Content strategy, copywriting, SEO content |
+| `customer-success-manager` | haiku | Customer health, onboarding plans, churn prevention |
+| `legal-advisor` | opus | Legal risk review, contracts, licensing guidance |
+| `license-engineer` | sonnet | OSS license compliance, SBOM, dependency audits |
+| `product-manager` | sonnet | Roadmaps, PRDs, prioritization, stakeholder alignment |
+| `project-manager` | haiku | Project planning, WBS, risk register, status reporting |
+| `sales-engineer` | sonnet | Technical sales support, demos, POCs, RFP responses |
+| `scrum-master` | haiku | Sprint ceremonies, impediment removal, Scrum coaching |
+| `technical-writer` | sonnet | User guides, runbooks, API docs, style guides |
+| `ux-researcher` | sonnet | User research, usability studies, personas, journey maps |
+| `wordpress-master` | sonnet | WordPress theme/plugin development, WooCommerce |
+
+### 09 · Meta & Orchestration (11 agents)
+
+| Agent | Model | Purpose |
+|---|---|---|
+| `agent-installer` | sonnet | Install and configure subagents into Claude Code |
+| `agent-organizer` | sonnet | Organize, categorize, and route tasks to the right agent |
+| `codebase-orchestrator` | opus | Coordinate multi-agent work across a codebase |
+| `context-manager` | sonnet | Manage context windows, compress history, maintain state |
+| `error-coordinator` | sonnet | Cross-agent error aggregation, recovery coordination |
+| `it-ops-orchestrator` | opus | IT operations orchestration across systems and teams |
+| `knowledge-synthesizer` | opus | Synthesize findings across agents into coherent outputs |
+| `multi-agent-coordinator` | opus | Design and run multi-agent pipelines |
+| `performance-monitor` | sonnet | Monitor agent performance metrics and throughput |
+| `task-distributor` | sonnet | Break work into tasks and assign to appropriate agents |
+| `workflow-orchestrator` | opus | Business process workflows, state machines, saga patterns |
+
+### 10 · Research & Analysis (8 agents)
+
+| Agent | Model | Purpose |
+|---|---|---|
+| `competitive-analyst` | sonnet | Competitive landscape, feature comparison, positioning |
+| `data-researcher` | sonnet | Data gathering, source evaluation, synthesis |
+| `market-researcher` | sonnet | Market sizing, segmentation, trend identification |
+| `project-idea-validator` | sonnet | Validate project ideas, feasibility, market fit |
+| `research-analyst` | sonnet | Primary and secondary research, structured analysis |
+| `scientific-literature-researcher` | opus | Academic literature review, paper synthesis |
+| `search-specialist` | haiku | Web search, information retrieval, fact-checking |
+| `trend-analyst` | sonnet | Technology and market trend analysis |
+
+---
+
+## Agent Selection Guide
+
+Quick heuristics for choosing the right agent:
+
+| Task | Use |
+|---|---|
+| New feature end-to-end | `fullstack-developer` or `codebase-orchestrator` |
+| API design only | `api-designer` |
+| Language-specific work | matching language specialist |
+| Security concern | `security-auditor` → `penetration-tester` |
+| Slow queries / perf | `database-optimizer` or `performance-engineer` |
+| Multi-step complex task | `multi-agent-coordinator` + specialists |
+| GitHub board / issues | `github-projects-manager` |
+| Unknown — find an agent | `/subagent-catalog:search <keyword>` |

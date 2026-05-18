@@ -1,0 +1,12 @@
+{
+  "$schema": "https://aka.ms/azure/static-web-apps-cli/schema",
+  "configurations": {
+    "sample1": {
+      "appLocation": ".",
+      "outputLocation": "www",
+      "appName": "sample1",
+      "resourceGroup": "sample1-rg",
+      "subscriptionId": "387bf2a2-7ecd-4b87-acd0-1e11df88dc6e"
+    }
+  }
+}
