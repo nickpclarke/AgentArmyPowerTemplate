@@ -1,107 +1,228 @@
-# HTML5 Frontier Demo
+# AgentArmy
 
-A self-contained, single-file HTML5 interactive demo showcasing modern web technologies.
+A GitHub repository template for AI-powered software development using a coordinated fleet of Claude Code agents, with GitHub Projects v2 as the shared project management backbone.
 
-## Project Overview
+## What Is This?
 
-This is a comprehensive HTML5 demo that includes:
-- Interactive UI with dark/light theme toggle
-- Canvas-based particle system and drawing tools
-- Audio synthesis and visualization
-- CSS animation and transformation demonstrations
-- Browser intelligence dashboard
-- AI chat interface with Cerebras Cloud integration
+AgentArmy wires three things together:
 
-## Getting Started
+| Layer | What it does |
+|---|---|
+| **Claude Code** | AI coding assistant with 100+ specialised sub-agents — frontend, backend, security, devops, product, and more |
+| **GitHub Projects v2** | Structured board used as the shared source of truth for all tasks, stories, and features |
+| **GitHub Actions** | Automation that keeps the board and code in sync without manual triage |
+
+The result is a development environment where specialist agents handle different concerns, work is tracked on a SAFE-aligned project board, and automation handles the mechanical housekeeping.
+
+## Concept
+
+```
+You / Team
+    │
+    ▼
+Claude Code
+    │
+    ├── Design-time agents
+    │     product-manager · architect-reviewer · business-analyst
+    │     scrum-master · ui-designer · ux-researcher
+    │
+    ├── Build-time agents
+    │     frontend-developer · backend-developer · fullstack-developer
+    │     typescript-pro · python-pro · react-specialist · ...
+    │
+    ├── Quality agents                          GitHub Projects v2
+    │     code-reviewer · security-auditor  ◄──  Todo / In Progress / Done
+    │     qa-expert · performance-engineer       Type · PI · Iteration · Priority
+    │
+    └── Operations agents
+          devops-engineer · deployment-engineer
+          sre-engineer · cloud-architect
+```
+
+## Quick Start
 
 ### Prerequisites
 
-No build tools or dependencies required. This is a standalone HTML file.
+- [Claude Code](https://claude.ai/code) — CLI or desktop app
+- [GitHub CLI](https://cli.github.com) — `gh` in PATH, authenticated
+- GitHub account with a project board attached to this repo
 
-### Running the Project
+### 1. Fork and clone
 
-1. Open `index.html` directly in any modern web browser
-2. No server, build, or installation steps needed
-
-## Project Structure
-
-```
-index.html            # Single file containing all HTML, CSS, and JavaScript
-CLAUDE.md             # Guidance for AI code assistants
-README.md             # Project documentation (this file)
-mempalace.yaml        # Memory palace configuration for context management
-swa-cli.config.json   # Static Web Apps CLI configuration
-.env                  # Environment variables
+```bash
+gh repo fork nickpclarke/AgentArmy --clone
+cd AgentArmy
 ```
 
-## Key Features
+### 2. Authenticate GitHub CLI with project scope
 
-### Browser Intelligence
-- Real-time system monitoring (FPS, network, viewport, etc.)
-- Device and browser capability detection
-- User agent analysis
+```bash
+gh auth refresh -h github.com -s read:project,project
+```
 
-### Canvas Laboratory
-- Particle system with configurable gravity, count, and hue shifting
-- Drawing board with multiple tools (pen, line, circle, rectangle, eraser)
-- Fractal viewer with zoom and color scheme options
+Complete the device flow at `https://github.com/login/device`.
 
-### Audio Laboratory
-- Web Audio API synthesizer with waveform selection
-- ADSR envelope controls
-- Real-time audio visualization
-- Piano keyboard interface
+### 3. Create your GitHub Project board
 
-### CSS Showcase
-- 15+ CSS animations (spin, pulse, bounce, shake, wave, flip 3D, morph, float, etc.)
-- 3D transforms with perspective controls
-- CSS filters (blur, grayscale, sepia, hue-rotate, etc.)
-- Gradient and color demonstrations
-- Typography effects (gradient text, neon glow, outlined text)
-- Clip-path shapes and mix blend modes
+```bash
+gh project create --owner YOUR_USERNAME --title "AgentArmy"
 
-### API Demos
-- Cerebras AI chat integration
-- Local storage for API key persistence
-- JSON export functionality
+gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
+  --name "Type" --data-type "SINGLE_SELECT" \
+  --single-select-options "Epic,Feature,Story,Enabler,Bug,Spike"
 
-## Development Workflow
+gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
+  --name "PI" --data-type "TEXT"
+```
 
-Since this is a single-file project, development involves:
-1. Editing `index.html` directly
-2. Refreshing the browser to see changes
-3. Using browser developer tools for debugging
+### 4. Install Claude Code plugins
 
-## Best Practices for Future Reference
+Open Claude Code in this directory and run:
 
-### For Developers
-- All code is contained in `index.html` - look for HTML, CSS, and JavaScript sections
-- CSS custom properties (variables) are defined in `:root` for theme management
-- The dark/light theme toggle is implemented via the `data-theme` attribute
-- Event listeners are attached using standard DOM methods
+```
+/plugin
+/reload-plugins
+```
 
-### For AI Assistants
-- Refer to `CLAUDE.md` for specific guidance
-- The `mempalace.yaml` file configures memory context for AI interactions
-- This `README.md` provides project overview and structure
+### 5. Set the PROJECT_TOKEN secret
 
-## Configuration Files
+GitHub Actions need a PAT with `project` scope:
 
-### mempalace.yaml
-Configures memory palace "rooms" for organizing context:
-- `www`: Files from www/ directory
-- `general`: Files that don't fit other categories
+1. Go to `https://github.com/settings/tokens` → **Tokens (classic)**
+2. Generate a token with only the **`project`** scope checked
+3. Store it: `gh secret set PROJECT_TOKEN --repo YOUR_USERNAME/AgentArmy`
 
-### swa-cli.config.json
-Configuration for Azure Static Web Apps CLI.
+See [docs/setup.md](docs/setup.md) for the complete setup guide including updating the hardcoded owner/project references in the workflow files.
 
-### .env
-Environment variables for the application.
+---
 
-## Contributing
+## What's Included
 
-Since this is a self-contained demo, contributions should maintain the single-file structure unless explicitly discussed.
+### GitHub Projects board — 21 fields
 
-## License
+Key fields for SAFE:
 
-[Specify license here]
+| Field | Type | Purpose |
+|---|---|---|
+| Status | Single Select | Todo / In Progress / Done — auto-managed |
+| **Type** | Single Select | Epic / Feature / Story / Enabler / Bug / Spike |
+| **PI** | Text | Program Increment (e.g. `PI-1`) |
+| Priority | Single Select | P0 / P1 / P2 |
+| Size | Single Select | XS / S / M / L / XL |
+| Estimate | Number | Story points |
+| Iteration | Iteration | Sprint assignment |
+| Start / Target date | Date | Sprint planning dates |
+| Parent issue | — | Feature → Story hierarchy |
+
+Full reference: [docs/github-projects.md](docs/github-projects.md)
+
+### GitHub Actions (`.github/workflows/`)
+
+| Workflow | Trigger | What it does |
+|---|---|---|
+| `auto-add-to-project` | Issue / PR opened | Adds every new item to the board automatically |
+| `auto-status` | PR opened / merged | Moves linked issues to *In Progress* or *Done* |
+| `stale` | Mondays 09:00 UTC | Warns at 14 days idle, closes at 21 (P0/Epic exempt) |
+| `label-pr-size` | PR opened / synced | Labels PRs XS→XL by line count |
+| `pi-report` | Fridays 08:00 UTC | Posts a Todo/In Progress/Done summary to Actions |
+
+### Claude Code plugins (9 installed via `/plugin`)
+
+| Plugin | Key skills |
+|---|---|
+| `commit-commands` | `/commit`, `/commit-push-pr`, `/clean_gone` |
+| `pr-review-toolkit` | `/review-pr` — multi-agent PR review |
+| `mempalace` | Cross-session memory palace for agent context |
+| `claude-md-management` | `/revise-claude-md`, CLAUDE.md quality auditing |
+| `skill-creator` | Build, test, and benchmark custom skills |
+| `claude-code-setup` | Automation workflow recommender |
+| `frontend-design` | Production-grade UI generation |
+| `figma` | Figma ↔ code design translation |
+| `playground` | Experimental sandbox |
+
+Plus built-in Claude Code skills: `update-config`, `simplify`, `fewer-permission-prompts`, `loop`, `claude-api`, `init`, `review`, `security-review`.
+
+### Agent roster
+
+100+ specialist agents available out of the box. See [docs/agents.md](docs/agents.md) for the full categorised roster and agent-chaining patterns.
+
+---
+
+## SAFE Support
+
+This template maps SAFE constructs onto GitHub's object model, working well at team and program level.
+
+**What works well:**
+- Sprint/iteration cadence via the Iteration field
+- Feature → Story 2-level hierarchy via Parent issue
+- PI tracking via Milestones + PI text field
+- Priority and estimation fields
+- Automated status flow via GitHub Actions
+
+**Known limitations:**
+- Hierarchy is max 2 levels — Epics tracked by label convention
+- No native PI construct — use Milestones as the container
+- No WSJF calculator — script it as a future Action
+- No dependency graph — use linked issues + `blocked-by` label
+- No capacity planning — tracked manually per sprint
+
+Full guide including workarounds: [docs/safe.md](docs/safe.md)
+
+---
+
+## Security Notes
+
+- `.claude/settings.local.json` contains personal permissions — **gitignore this in your fork**
+- `.env` contains API keys — also gitignore
+- `PROJECT_TOKEN` must never be committed — store as a repo secret only
+
+---
+
+## Repository Structure
+
+```
+.
+├── .claude/
+│   └── settings.local.json   # Claude Code permissions (gitignore in your fork)
+├── .github/
+│   └── workflows/
+│       ├── auto-add-to-project.yml
+│       ├── auto-status.yml
+│       ├── label-pr-size.yml
+│       ├── pi-report.yml
+│       └── stale.yml
+├── docs/
+│   ├── agents.md             # Agent roster and usage guide
+│   ├── github-projects.md    # Board field reference
+│   ├── safe.md               # SAFE workflow guide
+│   └── setup.md              # Detailed setup instructions
+├── CLAUDE.md                 # AI assistant guidance (read by Claude Code)
+└── README.md                 # This file
+```
+
+---
+
+## Extending the Template
+
+**Add a custom skill:**
+```
+/skill-creator
+```
+
+**Add a project board field:**
+```bash
+gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
+  --name "FIELD_NAME" --data-type "SINGLE_SELECT" \
+  --single-select-options "opt1,opt2,opt3"
+```
+
+**Add a GitHub Action:** drop a `.yml` in `.github/workflows/`. Use `secrets.PROJECT_TOKEN` for any action that writes to the project board.
+
+---
+
+## Docs
+
+- [Full setup guide](docs/setup.md)
+- [Agent roster](docs/agents.md)
+- [GitHub Projects field reference](docs/github-projects.md)
+- [SAFE workflow guide](docs/safe.md)
