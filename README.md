@@ -12,6 +12,7 @@ AgentArmy deploys **two coordinated AI armies** against your codebase, unified b
 | **GitHub Copilot army** | GitHub-native agents — inline PR review, simple task coding, IDE suggestions, natural language board queries |
 | **GitHub Projects v2** | Shared source of truth for all tasks, stories, and features — both armies read and write here |
 | **GitHub Actions** | Automation that routes issues to the right army and keeps the board in sync |
+| **MemPalace** | Cross-session persistent memory — Claude retains context across conversations via Stop and PreCompact hooks |
 
 The two armies divide work by complexity and context: Copilot handles fast, bounded, GitHub-integrated tasks; Claude Code handles deep, strategic, multi-file work. See [docs/copilot.md](docs/copilot.md) for the full division of duties.
 
@@ -83,7 +84,16 @@ gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
   --name "PI" --data-type "TEXT"
 ```
 
-### 4. Install Claude Code plugins
+### 4. Install MemPalace
+
+```bash
+pip install mempalace
+mempalace init
+```
+
+The hooks are already wired — Claude will automatically save and load context across sessions.
+
+### 5. Install Claude Code plugins
 
 Open Claude Code in this directory and run:
 
@@ -92,7 +102,7 @@ Open Claude Code in this directory and run:
 /reload-plugins
 ```
 
-### 5. Set the PROJECT_TOKEN secret
+### 6. Set the PROJECT_TOKEN secret
 
 GitHub Actions need a PAT with `project` scope:
 
@@ -229,6 +239,7 @@ Full guide including workarounds: [docs/safe.md](docs/safe.md)
 │   ├── agents.md                  # Agent roster and usage guide
 │   ├── copilot.md                 # Two-army architecture and Copilot setup
 │   ├── github-projects.md         # Board field reference
+│   ├── mempalace.md               # MemPalace install, rooms, MCP tools, troubleshooting
 │   ├── safe.md                    # SAFE workflow guide
 │   └── setup.md                   # Detailed setup instructions
 ├── CLAUDE.md                      # AI assistant guidance (read by Claude Code)
@@ -261,4 +272,5 @@ gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
 - [Agent roster](docs/agents.md)
 - [GitHub Copilot integration & two-army architecture](docs/copilot.md)
 - [GitHub Projects field reference](docs/github-projects.md)
+- [MemPalace setup](docs/mempalace.md)
 - [SAFE workflow guide](docs/safe.md)

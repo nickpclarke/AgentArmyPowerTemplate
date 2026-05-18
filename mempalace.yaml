@@ -1,10 +1,30 @@
-wing: sample1
+wing: agentarmy
 rooms:
-- name: www
-  description: Files from www/
+- name: agents
+  description: Agent definitions, categories, and selection guidance
   keywords:
-  - www
-  - www
+  - agent
+  - subagent
+  - specialist
+  - claude
+- name: github
+  description: GitHub Projects, Actions workflows, board commands, and SAFE planning
+  keywords:
+  - github
+  - project
+  - board
+  - workflow
+  - sprint
+  - pi
+  - safe
+- name: docs
+  description: Setup guides, architecture docs, and configuration references
+  keywords:
+  - docs
+  - setup
+  - readme
+  - guide
+  - config
 - name: general
   description: Files that don't fit other rooms
   keywords: []

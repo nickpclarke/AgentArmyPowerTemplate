@@ -1,54 +1,80 @@
 # AGENTS.md
 
-Critical guidance for AI agents working on this repository.
+Critical guidance for AI agents working in this repository.
 
-## Project: index.html Demo App
+## What This Repo Is
 
-### Architecture
-- Single HTML file: all code in `index.html` with embedded HTML, CSS, and JavaScript
-- No build process: served directly from the filesystem
-- Entry point: open `index.html` in any modern browser
+AgentArmy is a starter template — not an application. There is no source code to build or run. The deliverables are:
 
-### Commands
-- Run: open `index.html` in browser — no server, build, or install step
-- No lint, test, or typecheck commands exist
+- GitHub Actions in `.github/workflows/`
+- Claude Code agent definitions in `.claude/agents/categories/`
+- Docs in `docs/`
+- Configuration files at the repo root
 
-### Key Files
-- `index.html` — sole source file
-- `CLAUDE.md` — AI assistant guidance
-- `README.md` — project documentation
-- `mempalace.yaml` — memory palace configuration
-- `swa-cli.config.json` — Azure Static Web Apps config (`appLocation: /`, `outputLocation: www`)
+**There is no `index.html` or app to work on.** When a user asks you to "implement something", they mean updating docs, workflows, or config — not writing app code.
 
-### Constraints
-- Maintain single-file architecture unless explicitly approved
-- No external dependencies without explicit approval
-- Verification is manual only: visually confirm in browser
+## GitHub Projects as the Task Backbone
+
+All work items live in the attached GitHub Projects v2 board. Before starting any task:
+
+1. Check the board for existing items: `gh project item-list PROJECT_NUM --owner OWNER`
+2. Create issues for non-trivial work: `gh issue create --title "..." --body "Closes #N"`
+3. Apply routing labels: `copilot-task` (bounded) or `agent-army-task` (complex/multi-file)
+
+PR bodies must include `Closes #ISSUE_NUMBER` to trigger auto-status workflow.
+
+## Agent Routing
+
+| Task type | Route to |
+|---|---|
+| XS/S bugs, well-scoped stories | Copilot (`copilot-task` label) |
+| M/L/XL stories, architecture, multi-file | Claude Code (`agent-army-task` label) |
+| PRs ≤ 200 lines | Copilot first-pass review (automatic) |
+| PRs > 200 lines | `/review-pr` in Claude Code |
+| Security-sensitive PRs | `security-auditor` + `/security-review` |
+
+## Issue Type Conventions
+
+| Label | GitHub object | Fields to set |
+|---|---|---|
+| Epic | Issue + `epic` label | Type=Epic, PI, Priority |
+| Feature | Issue + `feature` label | Type=Feature, Parent Epic |
+| Story | Issue | Type=Story, Size, Estimate, Iteration |
+| Bug | Issue + `bug` label | Type=Bug, Priority, Size |
+| Spike | Issue + `spike` label | Type=Spike, PI |
+
+## Available Skills
+
+| Skill | Command | What it does |
+|---|---|---|
+| Commit | `/commit` | Stage, write message, commit |
+| Commit + PR | `/commit-push-pr` | Commit, push, open PR |
+| PR review | `/review-pr` | Multi-agent deep review |
+| Security review | `/security-review` | Security-focused review |
+| CLAUDE.md audit | `/revise-claude-md` | Improve AI guidance quality |
+| Skill builder | `/skill-creator` | Build and benchmark new skills |
 
 ---
 
 ## Agent Library
 
-Subagents live in `.claude/agents/categories/`. Each is a `.md` file with YAML frontmatter (`name`, `description`, `tools`, `model`). They are usable as Claude Code subagents via `Agent(subagent_type: "<name>")`.
+Subagents live in `.claude/agents/categories/`. Each is a `.md` file with YAML frontmatter (`name`, `description`, `tools`, `model`). Invoke with `Agent(subagent_type: "<name>")`.
 
-### Tools
+### Subagent Catalog Tool
 
-`.claude/tools/subagent-catalog/` is a Claude Code slash-command skill for discovering and fetching agents from the upstream VoltAgent catalog.
+`.claude/tools/subagent-catalog/` is a slash-command skill for discovering agents from the upstream VoltAgent catalog.
 
 **Install** (run once):
 ```bash
 cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 ```
 
-**Usage after install:**
 | Command | What it does |
 |---|---|
 | `/subagent-catalog:search <query>` | Find agents by name, description, or category |
 | `/subagent-catalog:fetch <name>` | Get full agent definition |
 | `/subagent-catalog:list` | Browse all categories |
 | `/subagent-catalog:invalidate` | Clear 12-hour cache |
-
-Cache lives at `~/.claude/cache/subagent-catalog.md`.
 
 ---
 
@@ -182,7 +208,7 @@ Cache lives at `~/.claude/cache/subagent-catalog.md`.
 | `slack-expert` | sonnet | Slack bot development, Bolt framework, block kit |
 | `tooling-engineer` | sonnet | Developer tooling, scripts, automation, linters |
 
-### 07 · Specialized Domains (13 agents)
+### 07 · Specialized Domains (14 agents)
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -251,8 +277,6 @@ Cache lives at `~/.claude/cache/subagent-catalog.md`.
 
 ## Agent Selection Guide
 
-Quick heuristics for choosing the right agent:
-
 | Task | Use |
 |---|---|
 | New feature end-to-end | `fullstack-developer` or `codebase-orchestrator` |
@@ -263,3 +287,20 @@ Quick heuristics for choosing the right agent:
 | Multi-step complex task | `multi-agent-coordinator` + specialists |
 | GitHub board / issues | `github-projects-manager` |
 | Unknown — find an agent | `/subagent-catalog:search <keyword>` |
+
+## Agent Chaining Patterns
+
+**Feature implementation:**
+```
+product-manager → architect-reviewer → fullstack-developer → code-reviewer → security-auditor
+```
+
+**PI Planning:**
+```
+product-manager (backlog grooming) → scrum-master (iteration setup) → github-projects-manager (board population)
+```
+
+**Production incident:**
+```
+incident-responder (triage) → debugger (root cause) → sre-engineer (postmortem) → deployment-engineer (fix)
+```

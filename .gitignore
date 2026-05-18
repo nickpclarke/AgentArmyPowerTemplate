@@ -1,0 +1,12 @@
+# Personal Claude Code settings — contains API keys and permissions
+.claude/settings.local.json
+
+# Environment variables — contains Azure/API credentials
+.env
+extensions/board-manager/.env
+
+# Dependencies
+node_modules/
+
+# Azure SWA config has user-specific subscription IDs — keep .example only
+swa-cli.config.json

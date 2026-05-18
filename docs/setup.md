@@ -106,7 +106,38 @@ gh secret set PROJECT_TOKEN --repo YOUR_USERNAME/AgentArmy
 # Paste your PAT when prompted
 ```
 
-## Step 6 — Install Claude Code plugins
+## Step 6 — Install and configure MemPalace
+
+MemPalace provides cross-session memory for Claude Code. Install it once:
+
+```bash
+pip install mempalace
+mempalace init
+```
+
+The hooks are already wired in `.claude/settings.json`. Verify they work:
+
+```bash
+mempalace --version
+mempalace status
+```
+
+To also expose palace tools inside Claude Code as MCP tools, add to `.claude/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "mempalace": {
+      "command": "mempalace",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+See [docs/mempalace.md](mempalace.md) for the full MemPalace reference including room configuration, MCP tools, and troubleshooting.
+
+## Step 7 — Install Claude Code plugins
 
 Open Claude Code in the repo directory:
 
@@ -202,6 +233,7 @@ swa deploy --deployment-token YOUR_SWA_TOKEN
 - [ ] GitHub Project board created with Type and PI fields
 - [ ] Workflow files updated with your username and project IDs
 - [ ] `PROJECT_TOKEN` secret set
+- [ ] MemPalace installed (`pip install mempalace && mempalace init`)
 - [ ] Claude Code plugins installed (`/plugin` + `/reload-plugins`)
 - [ ] `.claude/settings.local.json` configured and gitignored
 - [ ] Test issue auto-added to board
