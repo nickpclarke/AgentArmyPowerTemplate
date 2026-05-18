@@ -152,18 +152,20 @@ Full reference: [docs/github-projects.md](docs/github-projects.md)
 
 Plus built-in Claude Code skills: `update-config`, `simplify`, `fewer-permission-prompts`, `loop`, `claude-api`, `init`, `review`, `security-review`.
 
-### `@board-manager` Copilot Extension (`extensions/board-manager/`)
+### Board slash commands (no hosting required)
 
-A custom GitHub Copilot Extension for natural language board queries inside Copilot Chat:
+Comment on any issue or PR to query the board — no server, no registration needed:
 
 ```
-@board-manager status
-@board-manager what's in the sprint?
-@board-manager PI-1 progress
-@board-manager show blocked items
+/board-status       → Todo / In Progress / Done + % complete
+/sprint             → items in the current iteration
+/blocked            → open issues with blocked-by label
+/p0                 → open P0 priority items
+/pi PI-1            → progress for a specific Program Increment
+/board-help         → command reference
 ```
 
-Deploy to Vercel and register as a GitHub App. See [docs/copilot.md](docs/copilot.md).
+For the same queries inside GitHub Copilot Chat (`@board-manager`), `extensions/board-manager/` contains an Azure-deployable Copilot Extension. See [docs/copilot.md](docs/copilot.md).
 
 ### Agent roster
 
@@ -211,16 +213,17 @@ Full guide including workarounds: [docs/safe.md](docs/safe.md)
 │   └── workflows/
 │       ├── auto-add-to-project.yml
 │       ├── auto-status.yml
-│       ├── copilot-review.yml     # Copilot first-pass + deep-review flagging
-│       ├── copilot-coding-agent.yml  # Issue routing: copilot-task / agent-army-task
+│       ├── board-commands.yml         # /board-status /sprint /blocked /p0 /pi
+│       ├── copilot-review.yml         # Copilot first-pass + deep-review flagging
+│       ├── copilot-coding-agent.yml   # Issue routing: copilot-task / agent-army-task
 │       ├── label-pr-size.yml
 │       ├── pi-report.yml
 │       └── stale.yml
 ├── extensions/
-│   └── board-manager/             # @board-manager Copilot Extension
+│   └── board-manager/             # @board-manager Copilot Extension (optional, Azure-deployable)
 │       ├── server.js
 │       ├── package.json
-│       ├── vercel.json
+│       ├── Dockerfile
 │       └── .env.example
 ├── docs/
 │   ├── agents.md                  # Agent roster and usage guide
