@@ -72,6 +72,8 @@
       background-size: 44px 44px;
       pointer-events: none;
       z-index: 0;
+      will-change: transform;
+      transform: translateZ(0);
     }
 
     /* ── Header ── */
@@ -940,7 +942,7 @@ if ('serviceWorker' in navigator) {
         <button class="btn-sm" onclick="toggleBalance()">Toggle text-wrap: balance</button>
         <button class="btn-sm" id="clamp-btn" onclick="toggleClamp()">Show Less</button>
       </div>
-      <div style="max-width:220px;margin-top:0.4rem;font-size:0.75rem;color:var(--muted)" id="balance-text" style="text-wrap:balance">A short headline that benefits from balanced line wrapping in CSS.</div>
+      <div style="max-width:220px;margin-top:0.4rem;font-size:0.75rem;color:var(--muted);text-wrap:balance" id="balance-text">A short headline that benefits from balanced line wrapping in CSS.</div>
       <div id="clamp-text" style="margin-top:0.4rem;font-size:0.72rem;color:var(--muted);overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2">This is a long paragraph that will be clamped to two lines by default. It contains lots of interesting text that you might want to read but first you need to click the show more button to reveal all of it here.</div>
     </div>
   </div>
@@ -1071,7 +1073,7 @@ if ('serviceWorker' in navigator) {
 
   <!-- CARD 11: Glassmorphism -->
   <div class="card" style="--accent:var(--cyan)">
-    <div class="card-head"><span class="card-icon">���</span><span class="card-title">Glassmorphism</span></div>
+    <div class="card-head"><span class="card-icon">🪟</span><span class="card-title">Glassmorphism</span></div>
     <div class="card-body" style="position:relative;min-height:150px;overflow:hidden;border-radius:8px;background:linear-gradient(135deg,#0a0a1a,#1a0a2e)">
       <div style="position:absolute;width:100px;height:100px;background:var(--purple);border-radius:50%;top:-30px;left:-30px;filter:blur(30px);opacity:0.7"></div>
       <div style="position:absolute;width:100px;height:100px;background:var(--cyan);border-radius:50%;bottom:-30px;right:-30px;filter:blur(30px);opacity:0.7"></div>
@@ -1360,15 +1362,21 @@ function yesNo(v) {
 let currentTab = 'tab-intel';
 
 function switchTab(id) {
-  $$('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+  $$('.tab-btn').forEach(b => {
+    const active = b.dataset.tab === id;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-selected', active);
+  });
   $$('.tab-panel').forEach(p => p.style.display = p.id === id ? 'block' : 'none');
   currentTab = id;
+  localStorage.setItem('frontier-tab', id);
   onTabActivate(id);
 }
 
 function onTabActivate(id) {
   if (id === 'tab-intel') animateBars();
   if (id === 'tab-canvas') initCanvasIfNeeded();
+  if (id === 'tab-audio' && analyser && !vizRafId) drawViz();
 }
 
 function switchSubTab(contentId, btn) {
@@ -1384,10 +1392,17 @@ function switchSubTab(contentId, btn) {
 
 // ── LIVE BAR ──────────────────────────────────────────────────────────────────
 let lastFrame = performance.now(), fps = 60;
+const fpsHistory = [];
+const lbFps = document.getElementById('lb-fps');
 function fpsLoop(now) {
-  fps = Math.round(1000 / (now - lastFrame));
+  const delta = now - lastFrame;
   lastFrame = now;
-  $('#lb-fps').textContent = fps;
+  if (delta > 0) {
+    fpsHistory.push(delta);
+    if (fpsHistory.length > 10) fpsHistory.shift();
+    fps = Math.round(1000 / (fpsHistory.reduce((a, b) => a + b, 0) / fpsHistory.length));
+  }
+  lbFps.textContent = fps;
   requestAnimationFrame(fpsLoop);
 }
 requestAnimationFrame(fpsLoop);
@@ -1397,7 +1412,8 @@ function updateLive() {
   $('#lb-net').textContent = navigator.onLine ? 'Online' : 'Offline';
   $('#lb-vp').textContent = `${window.innerWidth}×${window.innerHeight}`;
 }
-document.addEventListener('mousemove', e => { $('#lb-xy').textContent = `${e.clientX}, ${e.clientY}`; });
+const lbXy = document.getElementById('lb-xy');
+document.addEventListener('mousemove', e => { lbXy.textContent = `${e.clientX}, ${e.clientY}`; }, { passive: true });
 window.addEventListener('scroll', () => {
   const tot = document.documentElement.scrollHeight - window.innerHeight;
   const pct = tot > 0 ? Math.round(window.scrollY / tot * 100) : 0;
@@ -1857,13 +1873,11 @@ function resizeDrawCanvas() {
 }
 function saveState() {
   if (undoStack.length > 10) undoStack.shift();
-  undoStack.push(dCanvas.toDataURL());
+  undoStack.push(dCtx.getImageData(0, 0, dCanvas.width, dCanvas.height));
 }
 function undoDraw() {
   if (undoStack.length > 0) {
-    const img = new Image();
-    img.src = undoStack.pop();
-    img.onload = () => { dCtx.clearRect(0,0,dCanvas.width,dCanvas.height); dCtx.drawImage(img,0,0); };
+    dCtx.putImageData(undoStack.pop(), 0, 0);
   }
 }
 function clearDraw() { dCtx.clearRect(0,0,dCanvas.width,dCanvas.height); undoStack = []; }
@@ -1901,9 +1915,10 @@ dCanvas?.addEventListener('pointermove', e => {
     dCtx.lineTo(x, y);
     dCtx.stroke();
   } else if (tool === 'eraser') {
-    dCtx.strokeStyle = '#0d0d1a';
+    dCtx.globalCompositeOperation = 'destination-out';
     dCtx.lineTo(x, y);
     dCtx.stroke();
+    dCtx.globalCompositeOperation = 'source-over';
   }
   lastX = x; lastY = y;
 });
@@ -1918,13 +1933,17 @@ dCanvas?.addEventListener('pointerup', e => {
   dCtx.strokeStyle = color;
   dCtx.lineWidth = size;
   
-  if (tool === 'line') {
-    dCtx.beginPath(); dCtx.moveTo(lastX, lastY); dCtx.lineTo(e.offsetX, e.offsetY); dCtx.stroke();
-  } else if (tool === 'circle') {
-    const r = Math.sqrt(Math.pow(e.offsetX-lastX,2) + Math.pow(e.offsetY-lastY,2));
-    dCtx.beginPath(); dCtx.arc(lastX, lastY, r, 0, Math.PI*2); dCtx.stroke();
-  } else if (tool === 'rect') {
-    dCtx.strokeRect(lastX, lastY, e.offsetX-lastX, e.offsetY-lastY);
+  if (tool === 'line' || tool === 'circle' || tool === 'rect') {
+    const rect = dCanvas.getBoundingClientRect();
+    const ex = e.clientX - rect.left, ey = e.clientY - rect.top;
+    if (tool === 'line') {
+      dCtx.beginPath(); dCtx.moveTo(lastX, lastY); dCtx.lineTo(ex, ey); dCtx.stroke();
+    } else if (tool === 'circle') {
+      const r = Math.sqrt(Math.pow(ex-lastX,2) + Math.pow(ey-lastY,2));
+      dCtx.beginPath(); dCtx.arc(lastX, lastY, r, 0, Math.PI*2); dCtx.stroke();
+    } else if (tool === 'rect') {
+      dCtx.strokeRect(lastX, lastY, ex-lastX, ey-lastY);
+    }
   }
   drawing = false;
 });
@@ -2034,14 +2053,18 @@ function stopNote() {
     osc = null;
   }
 }
+let vizRafId = null;
+let vizDataArray = null;
 function drawViz() {
-  if (currentTab !== 'tab-audio') { requestAnimationFrame(drawViz); return; }
+  if (!analyser) { vizRafId = null; return; }
+  if (currentTab !== 'tab-audio') { vizRafId = null; return; }
   const canvas = $('#viz-canvas');
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height;
   const bufferLength = analyser.frequencyBinCount;
-  const dataArray = new Uint8Array(bufferLength);
-  analyser.getByteFrequencyData(dataArray);
+  if (!vizDataArray || vizDataArray.length !== bufferLength) vizDataArray = new Uint8Array(bufferLength);
+  analyser.getByteFrequencyData(vizDataArray);
+  const dataArray = vizDataArray;
   
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, w, h);
@@ -2062,7 +2085,7 @@ function drawViz() {
   const nyquist = audioCtx.sampleRate / 2;
   const freq = maxVal > 0 ? Math.round(maxIdx * nyquist / bufferLength) : 0;
   $('#dom-freq').textContent = freq;
-  requestAnimationFrame(drawViz);
+  vizRafId = requestAnimationFrame(drawViz);
 }
 
 // Piano
@@ -2284,13 +2307,13 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // Intersection Observer
+const ioVisible = new Set();
 const ioObs = new IntersectionObserver(es => {
-  let c = 0;
   es.forEach(e => {
-    if (e.isIntersecting) { e.target.style.background = 'var(--cyan)'; e.target.style.color = '#000'; c++; }
-    else { e.target.style.background = 'var(--card)'; e.target.style.color = 'var(--text)'; }
+    if (e.isIntersecting) { e.target.style.background = 'var(--cyan)'; e.target.style.color = '#000'; ioVisible.add(e.target); }
+    else { e.target.style.background = 'var(--card)'; e.target.style.color = 'var(--text)'; ioVisible.delete(e.target); }
   });
-  $('#io-count').textContent = c;
+  $('#io-count').textContent = ioVisible.size;
 }, { threshold: 0.5, root: $('#io-container') });
 $$('#io-container .io-item').forEach(el => ioObs.observe(el));
 
@@ -2298,8 +2321,10 @@ $$('#io-container .io-item').forEach(el => ioObs.observe(el));
 function exportJSON() {
   const payload = { generated: new Date().toISOString(), identity: { browser: ua.browser, version: ua.version, engine: ua.engine, os: ua.os, userAgent: navigator.userAgent }, hardware: { cores: navigator.hardwareConcurrency, mem: navigator.deviceMemory }, features: FEATURES };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `frontier-${Date.now()}.json` });
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement('a'), { href: url, download: `frontier-${Date.now()}.json` });
   a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
   showToast('✓ Exported');
 }
 
@@ -2336,18 +2361,11 @@ document.addEventListener('keydown', e => {
 });
 
 // ── LOCALSTORAGE PERSISTENCE ───────────────────────────────────────────────────
-// Restore last active tab
+// Restore last active tab, defaulting to tab-intel on first visit
 (function() {
   const lastTab = localStorage.getItem('frontier-tab');
-  if (lastTab && document.getElementById(lastTab)) switchTab(lastTab);
+  switchTab((lastTab && document.getElementById(lastTab)) ? lastTab : 'tab-intel');
 })();
-
-// Save tab on switch (patch switchTab to also persist)
-const _switchTab = switchTab;
-switchTab = function(id) {
-  _switchTab(id);
-  localStorage.setItem('frontier-tab', id);
-};
 
 // Persist model selection
 $('#model-select')?.addEventListener('change', e => {
