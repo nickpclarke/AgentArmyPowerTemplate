@@ -4,15 +4,26 @@ AI assistant guidance for the AgentArmy template repository.
 
 ## What This Repo Is
 
-AgentArmy is a starter template for AI-powered software development. It deploys two coordinated AI armies through a shared GitHub Projects v2 board:
+AgentArmy is a starter template for AI-powered software development. It deploys three coordinated AI armies through a shared GitHub Projects v2 board:
 
 - **Claude Code army** — local, deep, strategic: architecture, complex features, SAFE planning, security audits
 - **GitHub Copilot army** — GitHub-native, fast, lightweight: PR review, simple task coding, board queries via `@board-manager`
-- **GitHub Projects v2** — shared coordination plane both armies read and write
+- **dlt army** — data pipeline specialists: source connectors, ELT pipelines, incremental loading, schema evolution, destination wiring
+- **GitHub Projects v2** — shared coordination plane all armies read and write
 - **GitHub Actions** — routes issues to the right army, syncs board state, automates ceremonies
 - **SAFE** — the planning model at team and program level
 
 All significant work is tracked as GitHub issues on the project board. Agents operate as specialists — delegate to the right agent, in the right army, rather than doing everything generalist.
+
+## Repository Layout
+
+```
+.claude/agents/categories/  → 168+ specialist agent definitions (11 categories)
+.claude/commands/           → local slash commands (/wardley, /ea-adr, /capability-map)
+.github/workflows/          → 8 Actions: auto-status, routing, board commands, stale, PR size
+docs/                       → agents.md, copilot.md, safe.md, setup.md, github-projects.md
+extensions/board-manager/   → Azure-deployable Copilot Chat extension (@board-manager)
+```
 
 ## Working in This Repo
 
@@ -51,6 +62,18 @@ Set the `Type` and `PI` fields on items so they're properly categorised.
 | Security audit | `security-auditor` or `/security-review` skill |
 | CI/CD | `devops-engineer`, `deployment-engineer` |
 | Performance | `performance-engineer` |
+
+**dlt army** — data pipeline work (agent: `.claude/agents/categories/05-data-ai/dlt-engineer.md`):
+
+| Concern | Agent |
+|---|---|
+| Source → destination pipelines (any API, DB, file) | `dlt-engineer` |
+| SEC EDGAR / proxy filing extraction | `dlt-engineer` |
+| Incremental loading, schema evolution | `dlt-engineer` |
+| DuckDB / BigQuery / Snowflake wiring | `dlt-engineer` |
+| Pipeline orchestration (Actions, Airflow, Prefect) | `dlt-engineer` + `devops-engineer` |
+| Data quality, freshness SLAs | `dlt-engineer` + `data-engineer` |
+| Analytics on top of loaded data | `data-analyst`, `data-scientist` |
 
 **Enterprise Architecture army** — TOGAF ADM-aligned specialists:
 
@@ -104,12 +127,10 @@ PR body must contain `Closes #N`, `Fixes #N`, or `Resolves #N` to trigger the `a
 
 ## SAFE Workflow Summary
 
-- **PI** = Program Increment (~10 weeks / 5 sprints). Track with a GitHub Milestone.
-- **Sprint** = 2-week iteration. Use the `Iteration` field.
-- **Hierarchy**: Feature (parent issue) → Story (sub-issue). Epics live at the Milestone level.
-- **PI Planning**: Create the next PI's Milestone, create Feature issues under it, break Features into Stories.
-- **Definition of Ready**: Issue has Type, PI, Size, and Estimate set, and acceptance criteria in the body.
-- **Definition of Done**: PR merged, issue auto-moved to Done, linked PR references the issue.
+- **PI** = Program Increment (~10 weeks / 5 sprints), tracked as a GitHub Milestone.
+- **Sprint** = 2-week iteration via the `Iteration` field.
+- **Definition of Ready**: Type, PI, Size, Estimate set + acceptance criteria in the body.
+- **Definition of Done**: PR merged with a `Closes #N` link so `auto-status` moves the issue.
 
 ## Available Skills (Claude Code)
 
@@ -142,8 +163,10 @@ Run these with `/skill-name` in the Claude Code prompt:
 - If Copilot's PR needs a deep review, add `needs-deep-review` label and run `/review-pr`
 - If Copilot's implementation is wrong or too shallow, remove `copilot-task`, add `agent-army-task`, and handle with Claude Code
 
-## Configuration Notes
+## Gotchas
 
-- `secrets.PROJECT_TOKEN` — PAT with `project` scope, required by Actions that write to the board
-- `secrets.GITHUB_TOKEN` — built-in, used by `stale` and `label-pr-size`
-- `.claude/settings.local.json` — local permissions file; **should be gitignored in forks**
+- **This is a template repo.** When forked into a real project, owner/project references in `.github/workflows/*.yml` are hardcoded (e.g. `nickpclarke`, project number `1`) and must be edited by hand — see [docs/setup.md](docs/setup.md).
+- **`PROJECT_TOKEN`** must be a **classic** PAT with the `project` scope checked — the default `GITHUB_TOKEN` cannot write to Projects v2 boards. Used by every workflow that updates the board.
+- **`GITHUB_TOKEN`** (built-in) is only enough for `stale` and `label-pr-size`.
+- `.claude/settings.local.json` contains personal permissions — gitignore in forks.
+- `auto-status` only fires when a PR body contains `Closes #N` / `Fixes #N` / `Resolves #N`. Without it, the linked issue stays in *In Progress*.
