@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Big Four Intelligence | KPMG</title>
+  <style>
+    :root {
+      --kpmg-navy:  #00338D;
+      --kpmg-light: #00A3E0;
+      --bg:         #05081a;
+      --panel-bg:   rgba(0, 30, 90, 0.82);
+      --border:     rgba(0, 163, 224, 0.32);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hdr {
+      height: 52px;
+      background: var(--kpmg-navy);
+      display: flex; align-items: center;
+      padding: 0 24px; gap: 20px;
+      border-bottom: 2px solid var(--kpmg-light);
+      flex-shrink: 0;
+    }
+    .hdr-logo {
+      font-size: 20px; font-weight: 900;
+      letter-spacing: 6px; color: #fff;
+    }
+    .hdr-rule { width: 1px; height: 22px; background: rgba(255,255,255,0.25); }
+    .hdr-title {
+      font-size: 11px; letter-spacing: 2px;
+      text-transform: uppercase; color: rgba(255,255,255,0.6);
+    }
+    .hdr-pill {
+      margin-left: auto;
+      font-size: 10px; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--kpmg-light);
+      border: 1px solid var(--kpmg-light);
+      padding: 3px 11px; border-radius: 2px;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      gap: 16px;
+    }
+
+    .intro {
+      font-size: 11px; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--kpmg-light);
+      margin-bottom: 8px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      width: 100%;
+      max-width: 820px;
+    }
+
+    .card {
+      display: block;
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 24px 22px;
+      text-decoration: none;
+      color: #fff;
+      backdrop-filter: blur(14px);
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .card:hover {
+      border-color: var(--kpmg-light);
+      background: rgba(0, 50, 141, 0.6);
+    }
+    .card-label {
+      font-size: 9px; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--kpmg-light);
+      margin-bottom: 10px;
+    }
+    .card-title {
+      font-size: 16px; font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .card-desc {
+      font-size: 12px; line-height: 1.6;
+      color: rgba(255,255,255,0.45);
+    }
+
+    .watermark {
+      text-align: center;
+      padding: 16px;
+      font-size: 10px; letter-spacing: 1px;
+      color: rgba(255,255,255,0.18);
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 480px) {
+      .hdr-title, .hdr-rule { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-logo">KPMG</div>
+  <div class="hdr-rule"></div>
+  <div class="hdr-title">Big Four SLT &nbsp;·&nbsp; Intelligence Views</div>
+  <div class="hdr-pill">Illustrative</div>
+</header>
+
+<main>
+  <div class="intro">Select a visualisation</div>
+  <div class="cards">
+    <a class="card" href="big4-hypergraph.html">
+      <div class="card-label">3D · Interactive</div>
+      <div class="card-title">Board &amp; Association Hypergraph</div>
+      <div class="card-desc">3D force graph showing shared board seats, alumni networks, and prior employers across all four firms.</div>
+    </a>
+    <a class="card" href="big4-network.html">
+      <div class="card-label">2D · Network</div>
+      <div class="card-title">SLT Connection Network</div>
+      <div class="card-desc">Flat network diagram of leader-to-leader connections across the Big Four.</div>
+    </a>
+    <a class="card" href="big4-mobile.html">
+      <div class="card-label">Mobile · Optimised</div>
+      <div class="card-title">Mobile View</div>
+      <div class="card-desc">Streamlined visualisation optimised for smaller screens.</div>
+    </a>
+  </div>
+</main>
+
+<div class="watermark">Illustrative / Representative Data — Not Factual</div>
+
+</body>
+</html>
