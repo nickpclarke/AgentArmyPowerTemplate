@@ -1,0 +1,409 @@
+index,BoardMemberName,CompanyName,Source
+0,Charlene Barshefsky,American Express Company,Bloomberg Research
+1,Ursula Burns,American Express Company,Bloomberg Research
+2,Kenneth Chenault,American Express Company,Bloomberg Research
+3,Peter Chernin,American Express Company,Bloomberg Research
+4,Anne Lauvergeon Ph.D.,American Express Company,Bloomberg Research
+5,Michael Leavitt,American Express Company,Bloomberg Research
+6,Theodore Leonsis,American Express Company,Bloomberg Research
+7,Richard Levin Ph.D.,American Express Company,Bloomberg Research
+8,Samuel Palmisano,American Express Company,Bloomberg Research
+9,Daniel Vasella M.D.,American Express Company,Bloomberg Research
+10,Robert Walter,American Express Company,Bloomberg Research
+11,Ronald Williams,American Express Company,Bloomberg Research
+12,Timothy Cook,Apple Inc.,Bloomberg Research
+13,Albert Gore Jr.,Apple Inc.,Bloomberg Research
+14,Robert Iger,Apple Inc.,Bloomberg Research
+15,Andrea Jung,Apple Inc.,Bloomberg Research
+16,Arthur Levinson Ph.D.,Apple Inc.,Bloomberg Research
+17,Ronald Sugar Ph.D.,Apple Inc.,Bloomberg Research
+18,Susan Wagner,Apple Inc.,Bloomberg Research
+19,David Calhoun,Boeing Company (The),Bloomberg Research
+20,Arthur Collins Jr.,Boeing Company (The),Bloomberg Research
+21,Kenneth Duberstein,Boeing Company (The),Bloomberg Research
+22,Yves Galland,Boeing Company (The),Bloomberg Research
+23,"Edmund Giambastiani Jr., US Navy (retired)",Boeing Company (The),Bloomberg Research
+24,Lawrence Kellner,Boeing Company (The),Bloomberg Research
+25,Edward Liddy,Boeing Company (The),Bloomberg Research
+26,W. McNerney Jr.,Boeing Company (The),Bloomberg Research
+27,Susan Schwab Ph.D.,Boeing Company (The),Bloomberg Research
+28,Ronald Williams,Boeing Company (The),Bloomberg Research
+29,Mike Zafirovski,Boeing Company (The),Bloomberg Research
+30,David Calhoun,Caterpillar,Bloomberg Research
+31,Daniel Dickinson J.D.,Caterpillar,Bloomberg Research
+32,Juan Gallardo,Caterpillar,Bloomberg Research
+33,Jesse Greene Jr.,Caterpillar,Bloomberg Research
+34,Jon Huntsman Jr.,Caterpillar,Bloomberg Research
+35,Dennis Muilenburg,Caterpillar,Bloomberg Research
+36,Douglas Oberhelman,Caterpillar,Bloomberg Research
+37,William Osborn,Caterpillar,Bloomberg Research
+38,Debra Reed,Caterpillar,Bloomberg Research
+39,Edward Rust Jr.,Caterpillar,Bloomberg Research
+40,Susan Schwab Ph.D.,Caterpillar,Bloomberg Research
+41,Miles White,Caterpillar,Bloomberg Research
+42,Alexander Cummings Jr.,Chevron Corporation,Bloomberg Research
+43,Linnet Deily,Chevron Corporation,Bloomberg Research
+44,Robert Denham,Chevron Corporation,Bloomberg Research
+45,Alice Gast,Chevron Corporation,Bloomberg Research
+46,Enrique Hernandez Jr.,Chevron Corporation,Bloomberg Research
+47,Jon Huntsman Jr.,Chevron Corporation,Bloomberg Research
+48,Charles Moorman IV,Chevron Corporation,Bloomberg Research
+49,James Seutloadi,Chevron Corporation,Bloomberg Research
+50,John Stumpf,Chevron Corporation,Bloomberg Research
+51,Ronald Sugar Ph.D.,Chevron Corporation,Bloomberg Research
+52,Inge Thulin,Chevron Corporation,Bloomberg Research
+53,Carl Ware,Chevron Corporation,Bloomberg Research
+54,John Watson,Chevron Corporation,Bloomberg Research
+55,Carol Bartz Ph.D.,"Cisco Systems, Inc.",Bloomberg Research
+56,M. Burns,"Cisco Systems, Inc.",Bloomberg Research
+57,Michael Capellas,"Cisco Systems, Inc.",Bloomberg Research
+58,John Chambers,"Cisco Systems, Inc.",Bloomberg Research
+59,Owen Chan,"Cisco Systems, Inc.",Bloomberg Research
+60,Brian Halla,"Cisco Systems, Inc.",Bloomberg Research
+61,John Hennessy Ph.D.,"Cisco Systems, Inc.",Bloomberg Research
+62,Kristina Johnson Ph.D.,"Cisco Systems, Inc.",Bloomberg Research
+63,Roderick McGeary,"Cisco Systems, Inc.",Bloomberg Research
+64,John Morgridge,"Cisco Systems, Inc.",Bloomberg Research
+65,Charles Robbins,"Cisco Systems, Inc.",Bloomberg Research
+66,Arun Sarin,"Cisco Systems, Inc.",Bloomberg Research
+67,Phil Smith,"Cisco Systems, Inc.",Bloomberg Research
+68,Steven West,"Cisco Systems, Inc.",Bloomberg Research
+69,Marcelo de Andrade Ph.D.,E.I. du Pont de Nemours and Company,Bloomberg Research
+70,Lamberto Andreotti,E.I. du Pont de Nemours and Company,Bloomberg Research
+71,Edward Breen,E.I. du Pont de Nemours and Company,Bloomberg Research
+72,Robert Brown,E.I. du Pont de Nemours and Company,Bloomberg Research
+73,Jason Clay Ph.D.,E.I. du Pont de Nemours and Company,Bloomberg Research
+74,Bertrand Collomb Ph.D.,E.I. du Pont de Nemours and Company,Bloomberg Research
+75,Alexander Cutler,E.I. du Pont de Nemours and Company,Bloomberg Research
+76,Edward Donnelly Jr.,E.I. du Pont de Nemours and Company,Bloomberg Research
+77,"Kevin Fitzgerald S.J., Ph.D.",E.I. du Pont de Nemours and Company,Bloomberg Research
+78,James Gallogly,E.I. du Pont de Nemours and Company,Bloomberg Research
+79,Rebecca Goldburg Ph.D.,E.I. du Pont de Nemours and Company,Bloomberg Research
+80,John Groves,E.I. du Pont de Nemours and Company,Bloomberg Research
+81,Marillyn Hewson,E.I. du Pont de Nemours and Company,Bloomberg Research
+82,Lois Juliber,E.I. du Pont de Nemours and Company,Bloomberg Research
+83,Ellen Kullman,E.I. du Pont de Nemours and Company,Bloomberg Research
+84,Jiayang Li Ph.D.,E.I. du Pont de Nemours and Company,Bloomberg Research
+85,Chebet Maikut,E.I. du Pont de Nemours and Company,Bloomberg Research
+86,John Myers,E.I. du Pont de Nemours and Company,Bloomberg Research
+87,Nelson Peltz,E.I. du Pont de Nemours and Company,Bloomberg Research
+88,Deepak Pental Ph.D.,E.I. du Pont de Nemours and Company,Bloomberg Research
+89,Eleuthère du Pont II,E.I. du Pont de Nemours and Company,Bloomberg Research
+90,Ulf Schneider,E.I. du Pont de Nemours and Company,Bloomberg Research
+91,Lee Thomas,E.I. du Pont de Nemours and Company,Bloomberg Research
+92,Sven Thormahlen Ph.D.,E.I. du Pont de Nemours and Company,Bloomberg Research
+93,Patrick Ward,E.I. du Pont de Nemours and Company,Bloomberg Research
+94,Arthur Winkleblack,E.I. du Pont de Nemours and Company,Bloomberg Research
+95,Robert Zatta,E.I. du Pont de Nemours and Company,Bloomberg Research
+96,Michael Boskin Ph.D.,Exxon Mobil,Bloomberg Research
+97,Peter Brabeck-Letmathe,Exxon Mobil,Bloomberg Research
+98,Ursula Burns,Exxon Mobil,Bloomberg Research
+99,Larry Faulkner,Exxon Mobil,Bloomberg Research
+100,Jay Fishman,Exxon Mobil,Bloomberg Research
+101,Henrietta Fore,Exxon Mobil,Bloomberg Research
+102,Kenneth Frazier,Exxon Mobil,Bloomberg Research
+103,Douglas Oberhelman,Exxon Mobil,Bloomberg Research
+104,Samuel Palmisano,Exxon Mobil,Bloomberg Research
+105,Steven Reinemund,Exxon Mobil,Bloomberg Research
+106,Hugh Thompson,Exxon Mobil,Bloomberg Research
+107,Rex Tillerson,Exxon Mobil,Bloomberg Research
+108,William Weldon,Exxon Mobil,Bloomberg Research
+109,William Beattie J.D.,General Electric Company,Bloomberg Research
+110,John Brennan CFA,General Electric Company,Bloomberg Research
+111,"James Cash Jr., Ph.D.",General Electric Company,Bloomberg Research
+112,Francisco D’Souza,General Electric Company,Bloomberg Research
+113,Marijn Dekkers Ph.D.,General Electric Company,Bloomberg Research
+114,Susan Hockfield Ph.D.,General Electric Company,Bloomberg Research
+115,Jeffrey Immelt,General Electric Company,Bloomberg Research
+116,Andrea Jung,General Electric Company,Bloomberg Research
+117,Robert Lane,General Electric Company,Bloomberg Research
+118,Rochelle Lazarus,General Electric Company,Bloomberg Research
+119,Mark Little Ph.D.,General Electric Company,Bloomberg Research
+120,James Mulva,General Electric Company,Bloomberg Research
+121,James Rohr,General Electric Company,Bloomberg Research
+122,Mary Schapiro J.D.,General Electric Company,Bloomberg Research
+123,Keith Sherin,General Electric Company,Bloomberg Research
+124,Robert Swieringa,General Electric Company,Bloomberg Research
+125,James Tisch,General Electric Company,Bloomberg Research
+126,Douglas Warner III,General Electric Company,Bloomberg Research
+127,Ari Bousbib,Home Depot,Bloomberg Research
+128,Gregory Brenneman,Home Depot,Bloomberg Research
+129,J. Brown,Home Depot,Bloomberg Research
+130,Albert Carey,Home Depot,Bloomberg Research
+131,Armando Codina,Home Depot,Bloomberg Research
+132,Helena Foulkes,Home Depot,Bloomberg Research
+133,Wayne Hewett,Home Depot,Bloomberg Research
+134,Karen Katen,Home Depot,Bloomberg Research
+135,Craig Menear,Home Depot,Bloomberg Research
+136,Mark Vadon,Home Depot,Bloomberg Research
+137,Charlene Barshefsky,Intel Corporation,Bloomberg Research
+138,Aneel Bhusri,Intel Corporation,Bloomberg Research
+139,Andy Bryant,Intel Corporation,Bloomberg Research
+140,Susan Decker,Intel Corporation,Bloomberg Research
+141,John Donahoe II,Intel Corporation,Bloomberg Research
+142,"Reed Hundt J.D., Esq.",Intel Corporation,Bloomberg Research
+143,Brian Krzanich,Intel Corporation,Bloomberg Research
+144,James Plummer Ph.D.,Intel Corporation,Bloomberg Research
+145,David Pottruck,Intel Corporation,Bloomberg Research
+146,Frank Yeary,Intel Corporation,Bloomberg Research
+147,David Yoffie,Intel Corporation,Bloomberg Research
+148,Charles Barnett FACHE,International Business Machines Corporation,Bloomberg Research
+149,Michael Barr,International Business Machines Corporation,Bloomberg Research
+150,Alain Belda,International Business Machines Corporation,Bloomberg Research
+151,"William Brody M.D., Ph.D.",International Business Machines Corporation,Bloomberg Research
+152,Herbert Chase,International Business Machines Corporation,Bloomberg Research
+153,Kenneth Chenault,International Business Machines Corporation,Bloomberg Research
+154,Lynda Chin M.D.,International Business Machines Corporation,Bloomberg Research
+155,Christopher Coburn,International Business Machines Corporation,Bloomberg Research
+156,Michael Eskew,International Business Machines Corporation,Bloomberg Research
+157,David Farr,International Business Machines Corporation,Bloomberg Research
+158,Alex Gorsky,International Business Machines Corporation,Bloomberg Research
+159,"Douglas Henley M.D., FAAFP",International Business Machines Corporation,Bloomberg Research
+160,Shirley Jackson Ph.D.,International Business Machines Corporation,Bloomberg Research
+161,Andrew Liveris,International Business Machines Corporation,Bloomberg Research
+162,Michael Magill,International Business Machines Corporation,Bloomberg Research
+163,W. McNerney Jr.,International Business Machines Corporation,Bloomberg Research
+164,James Owens Ph.D.,International Business Machines Corporation,Bloomberg Research
+165,Virginia Rometty,International Business Machines Corporation,Bloomberg Research
+166,Steven Shapiro M.D.,International Business Machines Corporation,Bloomberg Research
+167,Joan Spero,International Business Machines Corporation,Bloomberg Research
+168,David Spriggs M.D.,International Business Machines Corporation,Bloomberg Research
+169,Sidney Taurel,International Business Machines Corporation,Bloomberg Research
+170,Peter Voser C.E.,International Business Machines Corporation,Bloomberg Research
+171,Linda B. Bammann,J.P. Morgan Chase & Co.,http://www.jpmorganchase.com/corporate/About-JPMC/board-of-directors.htm
+172,James Bell,J.P. Morgan Chase & Co.,http://www.jpmorganchase.com/corporate/About-JPMC/board-of-directors.htm
+173,Crandall Bowles,J.P. Morgan Chase & Co.,http://www.jpmorganchase.com/corporate/About-JPMC/board-of-directors.htm
+174,Stephen Burke,J.P. Morgan Chase & Co.,http://www.jpmorganchase.com/corporate/About-JPMC/board-of-directors.htm
+175,James Crown,J.P. Morgan Chase & Co.,http://www.jpmorganchase.com/corporate/About-JPMC/board-of-directors.htm
+176,James Dimon,J.P. Morgan Chase & Co.,http://www.jpmorganchase.com/corporate/About-JPMC/board-of-directors.htm
+177,Timothy Flynn,J.P. Morgan Chase & Co.,http://www.jpmorganchase.com/corporate/About-JPMC/board-of-directors.htm
+178,"Laban P. Jackson, Jr.",J.P. Morgan Chase & Co.,http://www.jpmorganchase.com/corporate/About-JPMC/board-of-directors.htm
+179,Michael A. Neal,J.P. Morgan Chase & Co.,http://www.jpmorganchase.com/corporate/About-JPMC/board-of-directors.htm
+180,Lee R. Raymond,J.P. Morgan Chase & Co.,http://www.jpmorganchase.com/corporate/About-JPMC/board-of-directors.htm
+181,William Weldon,J.P. Morgan Chase & Co.,http://www.jpmorganchase.com/corporate/About-JPMC/board-of-directors.htm
+182,Mary Coleman Ph.D.,Johnson & Johnson,Bloomberg Research
+183,D. Davis,Johnson & Johnson,Bloomberg Research
+184,Ian Davis,Johnson & Johnson,Bloomberg Research
+185,Alex Gorsky,Johnson & Johnson,Bloomberg Research
+186,Susan Lindquist Ph.D.,Johnson & Johnson,Bloomberg Research
+187,"Mark McClellan M.D., Ph.D.",Johnson & Johnson,Bloomberg Research
+188,Anne Mulcahy,Johnson & Johnson,Bloomberg Research
+189,William Perez,Johnson & Johnson,Bloomberg Research
+190,Charles Prince III,Johnson & Johnson,Bloomberg Research
+191,"A. Washington M.D., M.Sc.",Johnson & Johnson,Bloomberg Research
+192,Ronald Williams,Johnson & Johnson,Bloomberg Research
+193,Leslie Brun,"Merck & Co., Inc.",Bloomberg Research
+194,Thomas Cech Ph.D.,"Merck & Co., Inc.",Bloomberg Research
+195,Kenneth Frazier,"Merck & Co., Inc.",Bloomberg Research
+196,Thomas Glocer,"Merck & Co., Inc.",Bloomberg Research
+197,William Harrison Jr.,"Merck & Co., Inc.",Bloomberg Research
+198,C. Kidder,"Merck & Co., Inc.",Bloomberg Research
+199,Rochelle Lazarus,"Merck & Co., Inc.",Bloomberg Research
+200,Carlos Represas,"Merck & Co., Inc.",Bloomberg Research
+201,Patricia Russo,"Merck & Co., Inc.",Bloomberg Research
+202,Craig Thompson M.D.,"Merck & Co., Inc.",Bloomberg Research
+203,Wendell Weeks,"Merck & Co., Inc.",Bloomberg Research
+204,Peter Wendell,"Merck & Co., Inc.",Bloomberg Research
+205,William Gates III,Microsoft Corporation,Bloomberg Research
+206,Maria Klawe Ph.D.,Microsoft Corporation,Bloomberg Research
+207,Teri List-Stoll CPA,Microsoft Corporation,Bloomberg Research
+208,Garrison Morfit CFA,Microsoft Corporation,Bloomberg Research
+209,Satya Nadella,Microsoft Corporation,Bloomberg Research
+210,Charles Noski,Microsoft Corporation,Bloomberg Research
+211,Helmut Panke Ph.D.,Microsoft Corporation,Bloomberg Research
+212,Charles Scharf,Microsoft Corporation,Bloomberg Research
+213,John Stanton,Microsoft Corporation,Bloomberg Research
+214,John Thompson,Microsoft Corporation,Bloomberg Research
+215,Dennis Ausiello M.D.,Pfizer,Bloomberg Research
+216,W. Cornwell,Pfizer,Bloomberg Research
+217,Frances Fergusson Ph.D.,Pfizer,Bloomberg Research
+218,Charles Hagel,Pfizer,Bloomberg Research
+219,Helen Hobbs M.D.,Pfizer,Bloomberg Research
+220,Constance Horner,Pfizer,Bloomberg Research
+221,Suzanne Johnson,Pfizer,Bloomberg Research
+222,James Kilts,Pfizer,Bloomberg Research
+223,Shantanu Narayen,Pfizer,Bloomberg Research
+224,Ian Read,Pfizer,Bloomberg Research
+225,Stephen Sanger,Pfizer,Bloomberg Research
+226,James Smith,Pfizer,Bloomberg Research
+227,Francis Blake,Procter & Gamble Company (The),Bloomberg Research
+228,Angela Braly,Procter & Gamble Company (The),Bloomberg Research
+229,Kenneth Chenault,Procter & Gamble Company (The),Bloomberg Research
+230,Scott Cook,Procter & Gamble Company (The),Bloomberg Research
+231,Susan Desmond-Hellmann M.D.,Procter & Gamble Company (The),Bloomberg Research
+232,Alan Lafley,Procter & Gamble Company (The),Bloomberg Research
+233,Ernesto de Leon,Procter & Gamble Company (The),Bloomberg Research
+234,Terry Lundgren,Procter & Gamble Company (The),Bloomberg Research
+235,W. McNerney Jr.,Procter & Gamble Company (The),Bloomberg Research
+236,Margaret Whitman,Procter & Gamble Company (The),Bloomberg Research
+237,Mary Wilderotter,Procter & Gamble Company (The),Bloomberg Research
+238,Patricia Woertz,Procter & Gamble Company (The),Bloomberg Research
+239,Herbert Allen,The Coca-Cola Company,Bloomberg Research
+240,Ronald Allen,The Coca-Cola Company,Bloomberg Research
+241,Marc Bolland,The Coca-Cola Company,Bloomberg Research
+242,John Brock III,The Coca-Cola Company,Bloomberg Research
+243,Howard Buffett,The Coca-Cola Company,Bloomberg Research
+244,K. Chan,The Coca-Cola Company,Bloomberg Research
+245,Richard Daley,The Coca-Cola Company,Bloomberg Research
+246,Barry Diller,The Coca-Cola Company,Bloomberg Research
+247,"Helene Gayle M.D., M.P.H.",The Coca-Cola Company,Bloomberg Research
+248,Evan Greenberg,The Coca-Cola Company,Bloomberg Research
+249,Alexis Herman,The Coca-Cola Company,Bloomberg Research
+250,Muhtar Kent,The Coca-Cola Company,Bloomberg Research
+251,Zahi Khouri,The Coca-Cola Company,Bloomberg Research
+252,Robert Kotick,The Coca-Cola Company,Bloomberg Research
+253,Maria Lagomasino,The Coca-Cola Company,Bloomberg Research
+254,Samuel Nunn Jr.,The Coca-Cola Company,Bloomberg Research
+255,Ana Botín-Sanz De Sautuola y O'Shea,The Coca-Cola Company,Bloomberg Research
+256,Masahiko Uotani,The Coca-Cola Company,Bloomberg Research
+257,David Weinberg,The Coca-Cola Company,Bloomberg Research
+258,Lloyd Blankfein,"The Goldman Sachs Group, Inc.",Bloomberg Research
+259,M. Burns,"The Goldman Sachs Group, Inc.",Bloomberg Research
+260,Paulo Carvalho Leme,"The Goldman Sachs Group, Inc.",Bloomberg Research
+261,"Sonjoy Chatterjee BE, PGDM","The Goldman Sachs Group, Inc.",Bloomberg Research
+262,Gary Cohn,"The Goldman Sachs Group, Inc.",Bloomberg Research
+263,Frank Ennis,"The Goldman Sachs Group, Inc.",Bloomberg Research
+264,Mark Flaherty,"The Goldman Sachs Group, Inc.",Bloomberg Research
+265,William George,"The Goldman Sachs Group, Inc.",Bloomberg Research
+266,James Johnson,"The Goldman Sachs Group, Inc.",Bloomberg Research
+267,Lakshmi Mittal B.Com.,"The Goldman Sachs Group, Inc.",Bloomberg Research
+268,Adebayo Ogunlesi J.D.,"The Goldman Sachs Group, Inc.",Bloomberg Research
+269,Peter Oppenheimer,"The Goldman Sachs Group, Inc.",Bloomberg Research
+270,Debora Spar,"The Goldman Sachs Group, Inc.",Bloomberg Research
+271,Mark Tucker ACA,"The Goldman Sachs Group, Inc.",Bloomberg Research
+272,David Viniar,"The Goldman Sachs Group, Inc.",Bloomberg Research
+273,Marius Winkelman,"The Goldman Sachs Group, Inc.",Bloomberg Research
+274,Robert Zoellick J.D.,"The Goldman Sachs Group, Inc.",Bloomberg Research
+275,Susan Arnold,The Walt Disney Company,Bloomberg Research
+276,Andy Bird,The Walt Disney Company,Bloomberg Research
+277,Robert Chapek,The Walt Disney Company,Bloomberg Research
+278,John Chen,The Walt Disney Company,Bloomberg Research
+279,Jack Dorsey,The Walt Disney Company,Bloomberg Research
+280,Alan Horn,The Walt Disney Company,Bloomberg Research
+281,Robert Iger,The Walt Disney Company,Bloomberg Research
+282,Fred Langhammer,The Walt Disney Company,Bloomberg Research
+283,Aylwin Lewis,The Walt Disney Company,Bloomberg Research
+284,Monica Lozano,The Walt Disney Company,Bloomberg Research
+285,Robert Matschullat,The Walt Disney Company,Bloomberg Research
+286,Sheryl Sandberg,The Walt Disney Company,Bloomberg Research
+287,Ben Sherwood,The Walt Disney Company,Bloomberg Research
+288,John Skipper,The Walt Disney Company,Bloomberg Research
+289,Orin Smith,The Walt Disney Company,Bloomberg Research
+290,Ivan Tavrin,The Walt Disney Company,Bloomberg Research
+291,John Faraci,United Technologies,Bloomberg Research
+292,Jean-Pierre Garnier Ph.D.,United Technologies,Bloomberg Research
+293,Gregory Hayes,United Technologies,Bloomberg Research
+294,Edward Kangas CPA,United Technologies,Bloomberg Research
+295,Ellen Kullman,United Technologies,Bloomberg Research
+296,Marshall Larsen,United Technologies,Bloomberg Research
+297,Harold McGraw III,United Technologies,Bloomberg Research
+298,Richard Myers,United Technologies,Bloomberg Research
+299,H. Swygert Esq.,United Technologies,Bloomberg Research
+300,André-Francoise Villeneuve,United Technologies,Bloomberg Research
+301,Christine Whitman,United Technologies,Bloomberg Research
+302,William Ballard Jr.,UnitedHealth Group,Bloomberg Research
+303,Edson de Godoy Bueno M.D.,UnitedHealth Group,Bloomberg Research
+304,Richard Burke Sr.,UnitedHealth Group,Bloomberg Research
+305,James Campbell,UnitedHealth Group,Bloomberg Research
+306,Robert Darretta Jr.,UnitedHealth Group,Bloomberg Research
+307,Stephen Hemsley,UnitedHealth Group,Bloomberg Research
+308,Michele Hooper,UnitedHealth Group,Bloomberg Research
+309,Rodger Lawson,UnitedHealth Group,Bloomberg Research
+310,Glenn Renwick,UnitedHealth Group,Bloomberg Research
+311,Kenneth Shine M.D.,UnitedHealth Group,Bloomberg Research
+312,Gail Wilensky Ph.D.,UnitedHealth Group,Bloomberg Research
+313,Shellye Archambeau,Verizon Communications,Bloomberg Research
+314,Mark Bertolini,Verizon Communications,Bloomberg Research
+315,Richard Carrion,Verizon Communications,Bloomberg Research
+316,Melanie Healey,Verizon Communications,Bloomberg Research
+317,M. Keeth,Verizon Communications,Bloomberg Research
+318,Lowell McAdam,Verizon Communications,Bloomberg Research
+319,Donald Nicolaisen,Verizon Communications,Bloomberg Research
+320,Clarence Otis Jr.,Verizon Communications,Bloomberg Research
+321,"Rodney Slater J.D., BS",Verizon Communications,Bloomberg Research
+322,Kathryn Tesija,Verizon Communications,Bloomberg Research
+323,Gregory Wasson,Verizon Communications,Bloomberg Research
+324,Aida Alvarez,Wal-Mart Stores,Bloomberg Research
+325,Dennis Archer,Wal-Mart Stores,Bloomberg Research
+326,"James Cash Jr., Ph.D.",Wal-Mart Stores,Bloomberg Research
+327,"Roger Corbett AO, BCom, FAIM, FRMIA",Wal-Mart Stores,Bloomberg Research
+328,Pamela Craig,Wal-Mart Stores,Bloomberg Research
+329,Douglas Daft,Wal-Mart Stores,Bloomberg Research
+330,Michael Duke,Wal-Mart Stores,Bloomberg Research
+331,Timothy Flynn,Wal-Mart Stores,Bloomberg Research
+332,Thomas Horton,Wal-Mart Stores,Bloomberg Research
+333,Claudia Kennedy U.S. Army (Ret.),Wal-Mart Stores,Bloomberg Research
+334,Vilma Martinez,Wal-Mart Stores,Bloomberg Research
+335,Marissa Mayer,Wal-Mart Stores,Bloomberg Research
+336,C. McMillon,Wal-Mart Stores,Bloomberg Research
+337,Gregory Penner,Wal-Mart Stores,Bloomberg Research
+338,Steven Reinemund,Wal-Mart Stores,Bloomberg Research
+339,Eduardo Solórzano Morales,Wal-Mart Stores,Bloomberg Research
+340,Kevin Systrom,Wal-Mart Stores,Bloomberg Research
+341,Jim Walton,Wal-Mart Stores,Bloomberg Research
+342,S. Walton J.D.,Wal-Mart Stores,Bloomberg Research
+343,Linda Wolf,Wal-Mart Stores,Bloomberg Research
+344,Alan Graf Jr.,Nike Inc,Bloomberg Research
+345,Orin Smith,Nike Inc,Bloomberg Research
+346,Timothy Cook,Nike Inc,Bloomberg Research
+347,Phyllis Wise Ph.D.,Nike Inc,Bloomberg Research
+348,Douglas Houser,Nike Inc,Bloomberg Research
+349,John Thompson Jr.,Nike Inc,Bloomberg Research
+350,John Connors CPA,Nike Inc,Bloomberg Research
+351,Johnathan Rodgers,Nike Inc,Bloomberg Research
+352,John Lechleiter Ph.D.,Nike Inc,Bloomberg Research
+353,Elizabeth Comstock,Nike Inc,Bloomberg Research
+354,Michelle Peluso,Nike Inc,Bloomberg Research
+355,John Donahoe II,Nike Inc,Bloomberg Research
+356,Philip Knight,Nike Inc,Bloomberg Research
+357,Mark Parker,Nike Inc,Bloomberg Research
+358,Bob Hurley,Nike Inc,Bloomberg Research
+359,Charles Scharf,Visa Inc.,Bloomberg Research
+360,Robert Matschullat,Visa Inc.,Bloomberg Research
+361,"Mary Cranston J.D., Esq.",Visa Inc.,Bloomberg Research
+362,Suzanne Johnson,Visa Inc.,Bloomberg Research
+363,Alfred Kelly Jr.,Visa Inc.,Bloomberg Research
+364,Cathy Minehan,Visa Inc.,Bloomberg Research
+365,Jung Pang,Visa Inc.,Bloomberg Research
+366,William Shanahan,Visa Inc.,Bloomberg Research
+367,John Swainson,Visa Inc.,Bloomberg Research
+368,Francisco Fernandez-Carbajal,Visa Inc.,Bloomberg Research
+369,Maynard Webb Jr.,Visa Inc.,Bloomberg Research
+370,Lloyd Carney,Visa Inc.,Bloomberg Research
+371,Jay Fishman,Travelers Insurance,Bloomberg Research
+372,Thomas Hodgson Ph.D.,Travelers Insurance,Bloomberg Research
+373,Kenneth Duberstein,Travelers Insurance,Bloomberg Research
+374,John Dasburg J.D.,Travelers Insurance,Bloomberg Research
+375,Laurie Thomsen,Travelers Insurance,Bloomberg Research
+376,Donald Shepard,Travelers Insurance,Bloomberg Research
+377,Janet Dolan,Travelers Insurance,Bloomberg Research
+378,Cleve Killingsworth Jr.,Travelers Insurance,Bloomberg Research
+379,Patricia Higgins,Travelers Insurance,Bloomberg Research
+380,Alan Beller,Travelers Insurance,Bloomberg Research
+381,William Kane,Travelers Insurance,Bloomberg Research
+382,Philip Ruegger III,Travelers Insurance,Bloomberg Research
+383,Stephen Easterbrook,McDonald's,Bloomberg Research
+384,Andrew McKenna J.D.,McDonald's,Bloomberg Research
+385,Pat Donahue,McDonald's,Bloomberg Research
+386,Eikoh Harada,McDonald's,Bloomberg Research
+387,Enrique Hernandez Jr.,McDonald's,Bloomberg Research
+388,Jeanne Jackson,McDonald's,Bloomberg Research
+389,Walter Massey,McDonald's,Bloomberg Research
+390,Robert Eckert,McDonald's,Bloomberg Research
+391,Miles White,McDonald's,Bloomberg Research
+392,Roger Stone,McDonald's,Bloomberg Research
+393,John Rogers Jr.,McDonald's,Bloomberg Research
+394,Richard Lenny,McDonald's,Bloomberg Research
+395,Sheila Penrose,McDonald's,Bloomberg Research
+396,Susan Arnold,McDonald's,Bloomberg Research
+397,Mary Margaret Georgiadis,McDonald's,Bloomberg Research
+398,Inge Thulin,3M,Bloomberg Research
+399,Edward Liddy,3M,Bloomberg Research
+400,Vance Coffman,3M,Bloomberg Research
+401,Michael Eskew,3M,Bloomberg Research
+402,Herbert Henkel,3M,Bloomberg Research
+403,Linda Alvarado,3M,Bloomberg Research
+404,Robert Ulrich,3M,Bloomberg Research
+405,Muhtar Kent,3M,Bloomberg Research
+406,Thomas Brown,3M,Bloomberg Research
+407,Sondra Barbour,3M,Bloomberg Research

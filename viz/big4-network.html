@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>Big Four Leadership Network | KPMG Intelligence</title>
+  <style>
+    :root {
+      --navy:   #00338D;
+      --blue:   #005EB8;
+      --light:  #00A3E0;
+      --bg:     #04061a;
+      --panel:  rgba(0,20,72,0.93);
+      --border: rgba(0,163,224,0.25);
+      --text:   rgba(255,255,255,0.88);
+      --muted:  rgba(255,255,255,0.38);
+
+      --kpmg:     #00A3E0;
+      --deloitte: #86BC25;
+      --ey:       #FFD700;
+      --pwc:      #E05206;
+      --ctx:      rgba(180,220,255,0.7);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+    html,body { height:100%; background:var(--bg); overflow:hidden; font-family:Arial,Helvetica,sans-serif; color:var(--text); }
+
+    /* ── Header ── */
+    .hdr {
+      position:fixed; top:0; left:0; right:0; z-index:60;
+      height:48px; background:var(--navy);
+      display:flex; align-items:center; gap:12px; padding:0 14px;
+      border-bottom:2px solid var(--light);
+    }
+    .logo { font-size:16px; font-weight:900; letter-spacing:5px; flex-shrink:0; }
+    .hdr-divider { width:1px; height:18px; background:rgba(255,255,255,0.22); }
+    .search-wrap { flex:1; position:relative; }
+    .search {
+      width:100%; background:rgba(0,0,0,0.35); border:1px solid var(--border);
+      border-radius:3px; padding:5px 10px 5px 30px;
+      color:var(--text); font-size:12px; outline:none;
+    }
+    .search::placeholder { color:var(--muted); }
+    .search-icon {
+      position:absolute; left:8px; top:50%; transform:translateY(-50%);
+      color:var(--muted); font-size:13px; pointer-events:none;
+    }
+    .clear-btn {
+      position:absolute; right:8px; top:50%; transform:translateY(-50%);
+      background:none; border:none; color:var(--muted); font-size:14px;
+      cursor:pointer; padding:0 2px; display:none;
+    }
+
+    /* ── Canvas ── */
+    #graph {
+      position:fixed; top:48px; left:0; right:0; bottom:88px;
+      width: 100%; height: 100%;
+      touch-action:none;
+    }
+
+    /* ── Filter bar ── */
+    .filters {
+      position:fixed; bottom:0; left:0; right:0; z-index:60;
+      height:88px; background:var(--panel);
+      border-top:1px solid var(--border);
+      display:flex; flex-direction:column;
+      padding:8px 12px 10px;
+      gap:6px;
+    }
+    .filter-row { display:flex; gap:6px; flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; }
+    .filter-row::-webkit-scrollbar { display:none; }
+    .chip {
+      flex-shrink:0; padding:4px 11px; border-radius:20px;
+      font-size:11px; letter-spacing:0.5px; cursor:pointer;
+      border:1px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.06);
+      color:var(--muted); transition:all 0.15s;
+    }
+    .chip.active { background:var(--navy); border-color:var(--light); color:#fff; }
+    .chip.firm-kpmg.active     { background:#003d6b; border-color:var(--kpmg); color:var(--kpmg); }
+    .chip.firm-deloitte.active { background:#1a3006; border-color:var(--deloitte); color:var(--deloitte); }
+    .chip.firm-ey.active       { background:#3d3000; border-color:var(--ey); color:var(--ey); }
+    .chip.firm-pwc.active      { background:#3d1200; border-color:var(--pwc); color:var(--pwc); }
+
+    /* ── Detail panel ── */
+    .detail {
+      position:fixed; bottom:88px; left:0; right:0; z-index:70;
+      background:var(--panel); border-top:1px solid var(--border);
+      padding:14px 16px 16px; transform:translateY(100%);
+      transition:transform 0.22s cubic-bezier(0.4,0,0.2,1);
+      max-height:42vh; overflow-y:auto;
+    }
+    .detail.open { transform:translateY(0); }
+    .detail-close {
+      position:absolute; top:12px; right:14px;
+      background:none; border:none; color:var(--muted);
+      font-size:18px; cursor:pointer;
+    }
+    .d-name { font-size:15px; font-weight:700; margin-bottom:2px; padding-right:24px; }
+    .d-org  { font-size:10px; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; }
+    .d-meta { font-size:11px; color:var(--muted); margin-bottom:4px; }
+    .d-conns-title { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--light); margin:10px 0 6px; }
+    .d-conn-item {
+      font-size:11px; color:rgba(255,255,255,0.65);
+      padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.05);
+      display:flex; justify-content:space-between;
+    }
+    .d-conn-type { font-size:9.5px; color:var(--muted); }
+
+    /* ── Legend (mini, top-right) ── */
+    .legend {
+      position:fixed; top:58px; right:10px; z-index:55;
+      background:var(--panel); border:1px solid var(--border);
+      border-radius:3px; padding:8px 10px; font-size:10px;
+    }
+    .leg-row { display:flex; align-items:center; gap:6px; margin-bottom:5px; color:var(--muted); }
+    .leg-row:last-child { margin-bottom:0; }
+    .leg-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .leg-diamond {
+      width:8px; height:8px; flex-shrink:0;
+      border:1.5px solid rgba(180,220,255,0.7); transform:rotate(45deg) scale(0.72);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="hdr">
+  <div class="logo">KPMG</div>
+  <div class="hdr-divider"></div>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="search" id="search" type="search" placeholder="Search leaders…" autocomplete="off">
+    <button class="clear-btn" id="clear-btn">×</button>
+  </div>
+</header>
+
+<!-- Graph canvas -->
+<canvas id="graph"></canvas>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="leg-row"><div class="leg-dot" style="background:var(--kpmg)"></div>KPMG</div>
+  <div class="leg-row"><div class="leg-dot" style="background:var(--deloitte)"></div>Deloitte</div>
+  <div class="leg-row"><div class="leg-dot" style="background:var(--ey)"></div>EY</div>
+  <div class="leg-row"><div class="leg-dot" style="background:var(--pwc)"></div>PwC</div>
+  <div class="leg-row"><div class="leg-diamond"></div>Context</div>
+</div>
+
+<!-- Detail panel -->
+<div class="detail" id="detail">
+  <button class="detail-close" id="detail-close">×</button>
+  <div class="d-name" id="d-name"></div>
+  <div class="d-org"  id="d-org"></div>
+  <div class="d-meta" id="d-role"></div>
+  <div class="d-meta" id="d-layer"></div>
+  <div class="d-conns-title" id="d-conns-title"></div>
+  <div id="d-conns"></div>
+</div>
+
+<!-- Filters -->
+<div class="filters">
+  <div class="filter-row" id="firm-row">
+    <div class="chip firm-kpmg active"     data-filter="firm" data-val="KPMG">KPMG</div>
+    <div class="chip firm-deloitte active" data-filter="firm" data-val="Deloitte">Deloitte</div>
+    <div class="chip firm-ey active"       data-filter="firm" data-val="EY">EY</div>
+    <div class="chip firm-pwc active"      data-filter="firm" data-val="PwC">PwC</div>
+    <div class="chip active" data-filter="firm" data-val="ctx">Contexts</div>
+  </div>
+  <div class="filter-row" id="type-row">
+    <div class="chip active" data-filter="type" data-val="all">All Types</div>
+    <div class="chip" data-filter="type" data-val="Forum / Initiative">Initiatives</div>
+    <div class="chip" data-filter="type" data-val="Corporate Board">Corp Boards</div>
+    <div class="chip" data-filter="type" data-val="Regulatory">Regulatory</div>
+  </div>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+// ─── Colour map ────────────────────────────────────────────────────────────
+const FIRM_COLOR = { KPMG:'#00A3E0', Deloitte:'#86BC25', EY:'#FFD700', PwC:'#E05206' };
+const LAYER_R    = { L1:11, L2:8, L3:6 };
+const CTX_R      = 7;
+
+// ─── Data ──────────────────────────────────────────────────────────────────
+const rawPeople = [{"id":"p01","name":"Timothy Flynn","firm":"KPMG","layer":"L1","role":"Former US Chair & CEO (2005\u201310) \u2713"},{"id":"p02","name":"Lynne Doughtie","firm":"KPMG","layer":"L2","role":"Former US Chair & CEO (2015\u201320)"},{"id":"p03","name":"John Veihmeyer","firm":"KPMG","layer":"L2","role":"Former US & Global Chair (2010\u201315)"},{"id":"p04","name":"Paul Knopp","firm":"KPMG","layer":"L2","role":"US Chair & CEO"},{"id":"p05","name":"Sharon Allen","firm":"Deloitte","layer":"L1","role":"Former US Chair (2003\u201311)"},{"id":"p06","name":"Jim Quigley","firm":"Deloitte","layer":"L1","role":"Former CEO (2007\u201311)"},{"id":"p07","name":"Joe Ucuzoglu","firm":"Deloitte","layer":"L1","role":"Global CEO"},{"id":"p08","name":"David Cruikshank","firm":"Deloitte","layer":"L2","role":"Former Global Chair (2015\u201319)"},{"id":"p09","name":"Jim Turley","firm":"EY","layer":"L1","role":"Former Global Chair & CEO (2006\u201313)"},{"id":"p10","name":"Mark Weinberger","firm":"EY","layer":"L1","role":"Former Global Chair & CEO (2013\u201319)"},{"id":"p11","name":"Carmine Di Sibio","firm":"EY","layer":"L2","role":"Former Global Chair & CEO (2019\u201323)"},{"id":"p12","name":"Beth Brooke","firm":"EY","layer":"L2","role":"Former Global Vice Chair"},{"id":"p13","name":"Bob Herz","firm":"PwC","layer":"L1","role":"Former Senior Partner / FASB Chair"},{"id":"p14","name":"Dennis Nally","firm":"PwC","layer":"L1","role":"Former Global Chair (2009\u201316)"},{"id":"p15","name":"Robert Moritz","firm":"PwC","layer":"L2","role":"Global Chair"},{"id":"p16","name":"Tim Ryan","firm":"PwC","layer":"L2","role":"Former US Chair & Senior Partner"}];
+
+const rawContexts = [{"id":"c01","name":"Business Roundtable","type":"Forum / Initiative"},{"id":"c02","name":"CEO Action for Diversity","type":"Forum / Initiative"},{"id":"c03","name":"ConocoPhillips","type":"Corporate Board"},{"id":"c04","name":"J.P. Morgan Chase & Co.","type":"Corporate Board"},{"id":"c05","name":"PCAOB Advisory","type":"Regulatory"},{"id":"c06","name":"Partnership for NYC","type":"Forum / Initiative"},{"id":"c07","name":"U.S. Chamber of Commerce","type":"Regulatory"},{"id":"c08","name":"UN Global Compact","type":"Forum / Initiative"},{"id":"c09","name":"World Economic Forum","type":"Forum / Initiative"}];
+
+// Edges: person → context
+const rawEdges = [["p01","c04"],["p01","c05"],["p01","c01"],["p02","c01"],["p02","c06"],["p03","c05"],["p03","c01"],["p03","c07"],["p04","c01"],["p04","c02"],["p04","c06"],["p05","c01"],["p05","c05"],["p06","c03"],["p06","c05"],["p06","c01"],["p06","c07"],["p07","c01"],["p07","c08"],["p07","c06"],["p07","c02"],["p08","c09"],["p08","c01"],["p08","c08"],["p09","c03"],["p09","c01"],["p09","c07"],["p10","c04"],["p10","c05"],["p10","c01"],["p10","c06"],["p11","c09"],["p11","c01"],["p11","c08"],["p11","c02"],["p12","c09"],["p12","c05"],["p12","c07"],["p13","c05"],["p13","c07"],["p14","c01"],["p14","c05"],["p14","c07"],["p15","c09"],["p15","c01"],["p15","c08"],["p15","c02"],["p16","c02"],["p16","c01"],["p16","c06"],["p16","c07"]];
+
+// ─── Build node / link arrays ───────────────────────────────────────────────
+
+const personById  = Object.fromEntries(rawPeople.map(p => [p.id, p]));
+const contextById = Object.fromEntries(rawContexts.map(c => [c.id, c]));
+
+// Firm cluster centres (unit circle, scaled later)
+const CLUSTER = {
+  KPMG:     { ax:-1, ay:-1 },
+  Deloitte: { ax: 1, ay:-1 },
+  EY:       { ax: 1, ay: 1 },
+  PwC:      { ax:-1, ay: 1 },
+};
+
+const nodes = [
+  ...rawPeople.map(p => ({
+    ...p, isCtx:false,
+    r: LAYER_R[p.layer],
+    color: FIRM_COLOR[p.firm],
+    cluster: p.firm,
+    tx: CLUSTER[p.firm].ax, ty: CLUSTER[p.firm].ay,  // target cluster direction
+    visible: true,
+  })),
+  ...rawContexts.map(c => ({
+    ...c, isCtx:true,
+    r: CTX_R,
+    color: 'rgba(180,220,255,0.65)',
+    cluster:'ctx',
+    tx:0, ty:0,
+    visible: true,
+  })),
+];
+
+const nodeById = Object.fromEntries(nodes.map(n => [n.id, n]));
+
+const links = rawEdges.map(([s,t]) => ({
+  source: nodeById[s],
+  target: nodeById[t],
+  visible: true,
+}));
+
+// Adjacency for detail panel
+const adjCtx  = {};  // person id → [ctx ids]
+const adjPeople = {};  // ctx id → [person ids]
+rawEdges.forEach(([pid, cid]) => {
+  (adjCtx[pid]    || (adjCtx[pid]    = [])).push(cid);
+  (adjPeople[cid] || (adjPeople[cid] = [])).push(pid);
+});
+
+// ─── Canvas & DPR ──────────────────────────────────────────────────────────
+
+const canvas = document.getElementById('graph');
+const ctx    = canvas.getContext('2d');
+let W = window.innerWidth, H = window.innerHeight - 136, dpr = 1;
+let CLUSTER_DIST = Math.min(W, H) * 0.28;
+
+function resize() {
+  const rect = canvas.getBoundingClientRect();
+  W   = rect.width  > 0 ? rect.width  : window.innerWidth;
+  H   = rect.height > 0 ? rect.height : window.innerHeight - 136;
+  dpr = window.devicePixelRatio || 1;
+  canvas.width  = Math.round(W * dpr);
+  canvas.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);   // replaces ctx.scale — safe to call multiple times
+  CLUSTER_DIST = Math.min(W, H) * 0.28;
+}
+
+// Defer first resize until after layout
+requestAnimationFrame(() => { resize(); render(); });
+
+// Use ResizeObserver for reliable resize events
+if (typeof ResizeObserver !== 'undefined') {
+  new ResizeObserver(() => { resize(); render(); }).observe(canvas);
+} else {
+  window.addEventListener('resize', () => { resize(); render(); });
+}
+
+// ─── Force simulation ───────────────────────────────────────────────────────
+
+const CLUSTER_STRENGTH = 0.06;
+
+const sim = d3.forceSimulation(nodes)
+  .force('link', d3.forceLink(links).id(d => d.id).distance(50).strength(0.4))
+  .force('charge', d3.forceManyBody().strength(-90))
+  .force('collision', d3.forceCollide(d => d.r + 4))
+  .force('clusterX', d3.forceX(d => d.isCtx ? 0 : d.tx * CLUSTER_DIST).strength(CLUSTER_STRENGTH))
+  .force('clusterY', d3.forceY(d => d.isCtx ? 0 : d.ty * CLUSTER_DIST).strength(CLUSTER_STRENGTH))
+  .force('center', d3.forceCenter(0, 0).strength(0.02))
+  .on('tick', render);
+
+// ─── Zoom & pan ────────────────────────────────────────────────────────────
+
+let transform = d3.zoomIdentity;
+
+const zoom = d3.zoom()
+  .scaleExtent([0.25, 4])
+  .on('zoom', e => { transform = e.transform; render(); });
+
+d3.select(canvas).call(zoom);
+
+// ─── State ─────────────────────────────────────────────────────────────────
+
+let selected    = null;
+let highlighted = new Set();
+let filterFirms = new Set(['KPMG','Deloitte','EY','PwC','ctx']);
+let filterType  = 'all';
+let searchTerm  = '';
+
+// Initial camera: centre on origin (must be after state vars to avoid TDZ in render())
+zoom.translateTo(d3.select(canvas), 0, 0);
+
+function applyVisibility() {
+  nodes.forEach(n => {
+    if (n.isCtx) {
+      const typeOk = filterType === 'all' || n.type === filterType;
+      n.visible = filterFirms.has('ctx') && typeOk;
+    } else {
+      n.visible = filterFirms.has(n.firm);
+    }
+  });
+  links.forEach(l => {
+    l.visible = l.source.visible && l.target.visible;
+  });
+  render();
+}
+
+// ─── Render ─────────────────────────────────────────────────────────────────
+
+function nodeAlpha(n) {
+  if (!n.visible) return 0;
+  if (highlighted.size === 0) return 1;
+  return highlighted.has(n.id) ? 1 : 0.12;
+}
+
+function linkAlpha(l) {
+  if (!l.visible) return 0;
+  if (highlighted.size === 0) return 0.18;
+  const sid = l.source.id, tid = l.target.id;
+  return (highlighted.has(sid) && highlighted.has(tid)) ? 0.85 : 0.04;
+}
+
+function drawDiamond(x, y, r) {
+  ctx.beginPath();
+  ctx.moveTo(x,     y - r);
+  ctx.lineTo(x + r, y    );
+  ctx.lineTo(x,     y + r);
+  ctx.lineTo(x - r, y    );
+  ctx.closePath();
+}
+
+function render() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+
+  // Apply zoom transform (centred on canvas)
+  ctx.translate(W / 2 + transform.x, H / 2 + transform.y);
+  ctx.scale(transform.k, transform.k);
+
+  // ── Draw links
+  links.forEach(l => {
+    const a = linkAlpha(l);
+    if (a === 0) return;
+    ctx.beginPath();
+    ctx.moveTo(l.source.x, l.source.y);
+    ctx.lineTo(l.target.x, l.target.y);
+    ctx.strokeStyle = `rgba(0,163,224,${a})`;
+    ctx.lineWidth = highlighted.size > 0 && a > 0.5 ? 1.2 : 0.5;
+    ctx.stroke();
+  });
+
+  // ── Draw nodes
+  nodes.forEach(n => {
+    const a = nodeAlpha(n);
+    if (a === 0) return;
+
+    ctx.globalAlpha = a;
+
+    if (n.isCtx) {
+      // Diamond outline
+      drawDiamond(n.x, n.y, n.r + 1);
+      ctx.fillStyle = 'rgba(0,163,224,0.07)';
+      ctx.fill();
+      ctx.strokeStyle = n.color;
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    } else {
+      // Circle with firm colour fill + subtle white ring
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = n.color;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Highlight ring for selected
+      if (n.id === (selected && selected.id)) {
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r + 4, 0, Math.PI * 2);
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    }
+
+    ctx.globalAlpha = 1;
+
+    // Label: always show for selected + its direct neighbours; show others only at zoom ≥ 1.8
+    const showLabel = (selected && highlighted.has(n.id)) ||
+                      transform.k >= 1.8;
+    if (showLabel) {
+      const label = n.isCtx ? n.name : n.name.split(' ').slice(-1)[0]; // last name only unless zoomed
+      const fullLabel = transform.k >= 2.2 ? n.name : label;
+      ctx.font = `${n.isCtx ? 9 : 10}px Arial`;
+      ctx.fillStyle = n.isCtx ? 'rgba(180,220,255,0.8)' : '#fff';
+      ctx.textAlign = 'center';
+      ctx.fillText(fullLabel, n.x, n.y - n.r - 3);
+    }
+  });
+
+  ctx.restore();
+}
+
+// ─── Hit detection ──────────────────────────────────────────────────────────
+
+function nodeAt(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  const cx = clientX - rect.left;
+  const cy = clientY - rect.top;
+  // Invert zoom transform (origin = canvas centre)
+  const wx = (cx - W/2 - transform.x) / transform.k;
+  const wy = (cy - H/2 - transform.y) / transform.k;
+
+  let best = null, bestDist = Infinity;
+  nodes.forEach(n => {
+    if (!n.visible) return;
+    const r = n.isCtx
+      ? (Math.abs(wx - n.x) + Math.abs(wy - n.y)) // Manhattan for diamond
+      : Math.hypot(wx - n.x, wy - n.y);
+    const threshold = n.r + 6;
+    if (r < threshold && r < bestDist) { best = n; bestDist = r; }
+  });
+  return best;
+}
+
+// ─── Interaction ────────────────────────────────────────────────────────────
+
+function selectNode(n) {
+  if (!n) { clearSelection(); return; }
+  selected = n;
+
+  // Build 1-hop neighbourhood
+  highlighted.clear();
+  highlighted.add(n.id);
+  links.forEach(l => {
+    if (l.source.id === n.id) highlighted.add(l.target.id);
+    if (l.target.id === n.id) highlighted.add(l.source.id);
+  });
+
+  showDetail(n);
+  render();
+}
+
+function clearSelection() {
+  selected = null;
+  highlighted.clear();
+  closeDetail();
+  render();
+}
+
+// Click / tap
+canvas.addEventListener('click', e => {
+  const n = nodeAt(e.clientX, e.clientY);
+  if (n) selectNode(n); else clearSelection();
+});
+
+// Touch tap (single finger, short duration)
+let touchStart = null;
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) touchStart = { x:e.touches[0].clientX, y:e.touches[0].clientY, t:Date.now() };
+}, { passive:true });
+canvas.addEventListener('touchend', e => {
+  if (!touchStart) return;
+  const dt = Date.now() - touchStart.t;
+  const dx = e.changedTouches[0].clientX - touchStart.x;
+  const dy = e.changedTouches[0].clientY - touchStart.y;
+  if (dt < 300 && Math.hypot(dx, dy) < 10) {
+    const n = nodeAt(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    if (n) selectNode(n); else clearSelection();
+  }
+  touchStart = null;
+}, { passive:true });
+
+// ─── Detail panel ────────────────────────────────────────────────────────────
+
+function showDetail(n) {
+  const panel = document.getElementById('detail');
+  const color = n.isCtx ? 'var(--light)' : FIRM_COLOR[n.firm];
+
+  document.getElementById('d-name').textContent  = n.name;
+  document.getElementById('d-name').style.color  = color;
+
+  if (n.isCtx) {
+    document.getElementById('d-org').textContent  = n.type;
+    document.getElementById('d-org').style.color  = 'var(--muted)';
+    document.getElementById('d-role').textContent = 'Connection context (hyperedge)';
+    document.getElementById('d-layer').textContent = '';
+    document.getElementById('d-conns-title').textContent = 'Members';
+
+    const members = (adjPeople[n.id] || []).map(pid => personById[pid]).filter(Boolean);
+    document.getElementById('d-conns').innerHTML = members.map(p =>
+      `<div class="d-conn-item">
+        <span style="color:${FIRM_COLOR[p.firm]}">${p.name}</span>
+        <span class="d-conn-type">${p.firm} · ${p.layer}</span>
+      </div>`
+    ).join('');
+  } else {
+    document.getElementById('d-org').textContent  = n.firm;
+    document.getElementById('d-org').style.color  = color;
+    document.getElementById('d-role').textContent = n.role;
+    const layerDesc = { L1:'Global/Regional Chair or CEO', L2:'C-Suite / Senior VP', L3:'Managing Partner / Sector Lead' };
+    document.getElementById('d-layer').textContent = `${n.layer} — ${layerDesc[n.layer]}`;
+    document.getElementById('d-conns-title').textContent = 'Shared Contexts';
+
+    const ctxIds = adjCtx[n.id] || [];
+    document.getElementById('d-conns').innerHTML = ctxIds.map(cid => {
+      const c = contextById[cid];
+      return c ? `<div class="d-conn-item"><span>${c.name}</span><span class="d-conn-type">${c.type}</span></div>` : '';
+    }).join('');
+  }
+
+  panel.classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detail').classList.remove('open');
+}
+
+document.getElementById('detail-close').addEventListener('click', clearSelection);
+
+// ─── Filters ─────────────────────────────────────────────────────────────────
+
+document.querySelectorAll('[data-filter="firm"]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const val = chip.dataset.val;
+    if (filterFirms.has(val)) filterFirms.delete(val);
+    else filterFirms.add(val);
+    chip.classList.toggle('active', filterFirms.has(val));
+    clearSelection();
+    applyVisibility();
+  });
+});
+
+document.querySelectorAll('[data-filter="type"]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    filterType = chip.dataset.val;
+    document.querySelectorAll('[data-filter="type"]').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    clearSelection();
+    applyVisibility();
+  });
+});
+
+// ─── Search ──────────────────────────────────────────────────────────────────
+
+const searchEl   = document.getElementById('search');
+const clearBtnEl = document.getElementById('clear-btn');
+
+searchEl.addEventListener('input', () => {
+  searchTerm = searchEl.value.trim().toLowerCase();
+  clearBtnEl.style.display = searchTerm ? 'block' : 'none';
+
+  if (!searchTerm) { clearSelection(); return; }
+
+  const match = nodes.find(n =>
+    n.visible && n.name.toLowerCase().includes(searchTerm)
+  );
+  if (match) {
+    selectNode(match);
+    // Pan camera to the matched node
+    zoom.translateTo(d3.select(canvas), match.x, match.y);
+  }
+});
+
+clearBtnEl.addEventListener('click', () => {
+  searchEl.value = '';
+  clearBtnEl.style.display = 'none';
+  searchTerm = '';
+  clearSelection();
+});
+
+// ─── Bootstrap ───────────────────────────────────────────────────────────────
+
+// Wait for simulation to settle a bit before first render
+sim.alpha(1).restart();
+
+</script>
+</body>
+</html>
