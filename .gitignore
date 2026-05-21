@@ -8,5 +8,15 @@ extensions/board-manager/.env
 # Dependencies
 node_modules/
 
+# Python build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+
+# Pipeline runtime output (DuckDB files, parquet, dlt state)
+pipelines/data/
+pipelines/.dlt/
+
 # Azure SWA config has user-specific subscription IDs — keep .example only
 swa-cli.config.json
