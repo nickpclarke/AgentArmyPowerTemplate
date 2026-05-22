@@ -56,13 +56,18 @@ Set the `Type` and `PI` fields on items so they're properly categorised.
 | Requirements / user stories | `business-analyst` |
 | Architecture decisions | `architect-reviewer` |
 | Sprint / PI planning | `scrum-master` |
-| Frontend implementation | `frontend-developer`, `react-specialist`, `typescript-pro` |
-| Responsive web / mobile web | `mobile-web-specialist` |
-| Backend implementation | `backend-developer`, `python-pro`, `node-specialist` |
+| Frontend implementation | `frontend-developer` (greenfield / multi-framework), `react-specialist` (existing React optimization) |
+| Frontend: Language-level | `javascript-pro`, `typescript-pro` |
+| Frontend: Mobile/responsive | `mobile-web-specialist`, `mobile-developer` (cross-platform) |
+| Backend implementation | See **Language Specialists Routing Rules** (below) |
+| Backend: Language-level | `python-pro`, `golang-pro`, `rust-engineer`, `java-architect`, etc. (see category 02) |
 | Deep code review (large PRs, `needs-deep-review` label) | `/review-pr` skill |
 | Security audit | `security-auditor` or `/security-review` skill |
-| CI/CD | `devops-engineer`, `deployment-engineer` |
-| Performance | `performance-engineer` |
+| Agent governance / MECE validation | `agent-distinctiveness-advocate` (pre-merge agent onboarding, routing ambiguity diagnosis) |
+| CI/CD orchestration | `devops-engineer` (infrastructure automation, build optimization) |
+| CI/CD releases & rollbacks | `deployment-engineer` (release strategy, deployment automation) |
+| Reliability & SLOs | `sre-engineer` (error budgets, toil reduction, reliability culture) |
+| Performance | `performance-engineer` (diagnose bottlenecks across any layer) |
 
 **dlt army** — data pipeline work (agent: `.claude/agents/categories/05-data-ai/dlt-engineer.md`):
 
@@ -93,7 +98,29 @@ Set the `Type` and `PI` fields on items so they're properly categorised.
 | FISMA, HIPAA, CMMC, SOX, CCPA | `us-regulatory-architect` |
 | Architecture Decision Records | `/ea-adr` skill |
 
-Full roster: [docs/agents.md](docs/agents.md) | Copilot setup: [docs/copilot.md](docs/copilot.md)
+### Language Specialists Routing Rules (Category 02)
+
+**The three tiers** for language work (structured for MECE distinctiveness):
+
+| Tier | When to Use | Example Agents |
+|------|---|---|
+| **Languages/** | Need language idioms, type system, performance, runtime semantics | `python-pro`, `golang-pro`, `typescript-pro`, `rust-engineer`, `java-architect` |
+| **Frameworks/web/** | Building an app WITH a web framework (conventions, libraries, ORM) | `django-developer`, `fastapi-developer`, `react-specialist`, `nextjs-developer`, `rails-expert` |
+| **Frameworks/mobile/** | Building a mobile app (React Native, Flutter) | `expo-react-native-expert`, `flutter-expert` |
+| **Platforms/** | Version-pinned (.NET versions) or OS-bound work (Windows automation) | `dotnet-core-expert`, `dotnet-framework-4.8-expert`, `powershell-7-expert` |
+
+**Quick decision rule:**
+- "Build a REST API in Python" → `python-pro` (design) → `fastapi-developer` (framework implementation)
+- "Optimize React component perf" → `react-specialist`
+- "Debug async/await issue" → `javascript-pro` or `typescript-pro`
+- "Migrate to .NET Core" → `dotnet-framework-4.8-expert` → `dotnet-core-expert`
+
+**Full routing guide & tie-breakers:** See [.claude/agents/categories/02-language-specialists/TAXONOMY.md](.claude/agents/categories/02-language-specialists/TAXONOMY.md) for:
+- 15+ concrete examples (framework vs. language decision)
+- Edge case handling (JavaScript/TypeScript, .NET versions, PowerShell, mobile)
+- Escalation patterns (when to involve multiple agents)
+
+Full roster: [docs/agents.md](docs/agents.md) | Language routing: [TAXONOMY.md](.claude/agents/categories/02-language-specialists/TAXONOMY.md) | Copilot setup: [docs/copilot.md](docs/copilot.md)
 
 ### Issue type conventions
 

@@ -246,10 +246,11 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `ux-researcher` | sonnet | User research, usability studies, personas, journey maps |
 | `wordpress-master` | sonnet | WordPress theme/plugin development, WooCommerce |
 
-### 09 · Meta & Orchestration (11 agents)
+### 09 · Meta & Orchestration (12 agents)
 
 | Agent | Model | Purpose |
 |---|---|---|
+| `agent-distinctiveness-advocate` | sonnet | Validate new agents for MECE compliance; diagnose routing ambiguity; maintain agent semantic distinctiveness |
 | `agent-installer` | sonnet | Install and configure subagents into Claude Code |
 | `agent-organizer` | sonnet | Organize, categorize, and route tasks to the right agent |
 | `codebase-orchestrator` | opus | Coordinate multi-agent work across a codebase |
