@@ -1,0 +1,62 @@
+site_name: AgentArmy
+site_description: AI-powered software development template with coordinated Claude Code, GitHub Copilot, and dlt agents
+site_author: nickpclarke
+repo_url: https://github.com/nickpclarke/AgentArmy
+repo_name: AgentArmy
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - content.code.copy
+    - content.action.edit
+    - toc.follow
+
+plugins:
+  - search
+  - table-reader
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      use_pygments: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:pymdownx.emoji.twemoji
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - toc:
+      permalink: true
+  - tables
+  - attr_list
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Setup: setup.md
+  - Armies & Workflow:
+    - Agent Roster: agents.md
+    - Copilot Army: copilot.md
+    - GitHub Projects: github-projects.md
+    - SAFe Framework: safe.md
+  - Resources:
+    - Memory Palace: mempalace.md
+  - Audits:
+    - MECE Audit Summary: mece-audit/MECE_AUDIT_SUMMARY.md
+    - Agent MECE Audit Scorecard: mece-audit/AGENT_MECE_AUDIT_SCORECARD.md
+    - MECE Implementation: mece-audit/MECE_IMPLEMENTATION_SUMMARY.md
+    - Routing Validation Tests: mece-audit/ROUTING_VALIDATION_TESTS.md
