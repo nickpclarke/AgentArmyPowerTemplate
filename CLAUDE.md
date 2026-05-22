@@ -57,6 +57,7 @@ Set the `Type` and `PI` fields on items so they're properly categorised.
 | Architecture decisions | `architect-reviewer` |
 | Sprint / PI planning | `scrum-master` |
 | Frontend implementation | `frontend-developer`, `react-specialist`, `typescript-pro` |
+| Responsive web / mobile web | `mobile-web-specialist` |
 | Backend implementation | `backend-developer`, `python-pro`, `node-specialist` |
 | Deep code review (large PRs, `needs-deep-review` label) | `/review-pr` skill |
 | Security audit | `security-auditor` or `/security-review` skill |

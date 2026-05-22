@@ -91,6 +91,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `graphql-architect` | sonnet | GraphQL schema design, resolvers, federation |
 | `microservices-architect` | opus | Service decomposition, inter-service communication, resilience |
 | `mobile-developer` | sonnet | Native and cross-platform mobile development |
+| `mobile-web-specialist` | sonnet | Responsive web for phones/tablets, touch UX, mobile media queries, canvas sizing |
 | `ui-designer` | sonnet | Visual design systems, component libraries, accessibility |
 | `websocket-engineer` | sonnet | Real-time communication, WebSocket servers and clients |
 
@@ -178,6 +179,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `ai-engineer` | sonnet | AI system integration, LLM APIs, prompt pipelines |
 | `data-analyst` | sonnet | Data analysis, visualization, statistical insights |
 | `data-engineer` | sonnet | ETL/ELT pipelines, data lakes, orchestration |
+| `dlt-engineer` | sonnet | dlt pipelines, source connectors, incremental loading, DuckDB/BigQuery/Snowflake |
 | `data-scientist` | sonnet | ML experiments, feature engineering, model evaluation |
 | `database-optimizer` | sonnet | Query tuning, index strategy, execution plan analysis |
 | `llm-architect` | opus | LLM system design, RAG, fine-tuning, evaluation |

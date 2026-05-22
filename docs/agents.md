@@ -80,6 +80,7 @@ Use these during sprint execution.
 
 | Agent | Speciality |
 |---|---|
+| `dlt-engineer` | dlt pipelines, source connectors, incremental loading, DuckDB/BigQuery/Snowflake |
 | `data-engineer` | Pipelines, ETL/ELT, data platforms |
 | `ml-engineer` | Model serving, training pipelines, MLOps |
 | `ai-engineer` | End-to-end AI systems, RAG, fine-tuning |
@@ -92,6 +93,7 @@ Use these during sprint execution.
 
 | Agent | Speciality |
 |---|---|
+| `mobile-web-specialist` | Responsive web, touch UX, mobile media queries, canvas/WebGL sizing, iOS Safari quirks |
 | `react-native` / `expo-react-native-expert` | Cross-platform mobile, native modules |
 | `flutter-expert` | Flutter 3+, custom UI, iOS/Android/Web |
 | `swift-expert` | Native iOS/macOS, SwiftUI, async/await |
