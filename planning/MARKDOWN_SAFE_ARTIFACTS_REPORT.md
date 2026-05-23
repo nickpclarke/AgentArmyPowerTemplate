@@ -8,9 +8,9 @@
 
 ## Executive Summary
 
-After migrating all 25 GitHub issues to the GitHub Projects board and establishing it as the source of truth for work tracking, the markdown SAFE program artifacts in the repository should be **rationalized to 8 core files**.
+After migrating all 25 GitHub issues to the GitHub Projects board and establishing it as the source of truth for work tracking, the markdown SAFE program artifacts in the repository should be **rationalized to 9 core files**.
 
-**Net result:** 8 lean, strategic markdown files + GitHub Projects board (source of truth for sprints, burndown, issue tracking)
+**Net result:** 9 lean, strategic markdown files + GitHub Projects board (source of truth for sprints, burndown, issue tracking)
 
 ---
 
@@ -69,6 +69,7 @@ These markdown files should be **deleted** because their content is now on the G
 | **FILE_ORGANIZATION.md** | Folder strategy, naming conventions, artifact lifecycle, enforcement rules. Prevents clutter and establishes patterns for Spokes | Team | `planning/governance/` | Reference (update if structure changes) |
 | **PLANNING_CEREMONIES.md** (planned) | Sprint planning, standups, PI planning, principle review cadence. Defines recurring meetings and decision points | Scrum Master | `planning/meta/ceremonies/` | Reference (timeless) |
 | **INCIDENT_TO_PRINCIPLE_WORKFLOW.md** (planned) | Learning loop: production incident → error-coordinator → knowledge-synthesizer → KB → quarterly principle review → agent validation | Knowledge | `planning/meta/learning/` | Reference (timeless) |
+| **DECISION_FRAMEWORK.md** (planned) | How we choose between trade-offs (build vs. buy, prioritization, risk acceptance). Standardizes decision criteria referenced by ARMY_PRINCIPLES (observable decisions) and HITL escalation | Architecture Lead | `planning/meta/decisions/` | Reference (timeless) |
 
 **Why keep:** These define HOW we operate and make decisions, not WHAT work we're doing. GitHub Projects cannot express process/ceremony schedules or learning workflows.
 
@@ -91,7 +92,7 @@ Velocity/metrics     ← Burndown, completion rate, cycle time
 Governance           ← ARMY_PRINCIPLES.md, AGENT_ONBOARDING_RUBRIC.md
 Strategic vision     ← PLATFORM_ROADMAP.md
 Research/rationale   ← ARCKIT_SYNTHESIS.md
-Process definitions  ← FILE_ORGANIZATION.md, PLANNING_CEREMONIES.md, INCIDENT_WORKFLOW.md
+Process definitions  ← FILE_ORGANIZATION.md, PLANNING_CEREMONIES.md, INCIDENT_WORKFLOW.md, DECISION_FRAMEWORK.md
 Spoke templates      ← SPOKE_META_PLANNING_TEMPLATE.md
 ```
 
@@ -106,14 +107,14 @@ Spoke templates      ← SPOKE_META_PLANNING_TEMPLATE.md
 | Governance & Principles | 3 | No change |
 | Strategic Vision | 1 | No change |
 | Research & Synthesis | 1 | No change |
-| Process & Governance | 3 | New (planned) |
-| **Total Core Artifacts** | **8** | **+3 (planned)** |
+| Process & Governance | 4 | New (planned) |
+| **Total Core Artifacts** | **9** | **+3 (planned)** |
 | Deleted Workarounds | 3 | **DELETE** |
-| **Net after cleanup** | **8** | **-3 workarounds** |
+| **Net after cleanup** | **9** | **-3 workarounds** |
 
 ---
 
-## Content Outline: The 8 Remaining Artifacts
+## Content Outline: The 9 Remaining Artifacts
 
 ### 1. ARMY_PRINCIPLES.md (16KB)
 - 7 principles with implementation guidance
@@ -171,6 +172,13 @@ Spoke templates      ← SPOKE_META_PLANNING_TEMPLATE.md
 - KB-to-training feedback
 - Current status: 🔄 Planned
 
+### 9. DECISION_FRAMEWORK.md (4KB) — PLAN TO CREATE
+- Decision criteria (build vs. buy, prioritization, risk acceptance)
+- Trade-off scoring and tie-breakers
+- When to escalate to HITL (hitl-coordinator)
+- Links to ARMY_PRINCIPLES (observable decisions)
+- Current status: 🔄 Planned
+
 ---
 
 ## Execution: Rationalization Sequence
@@ -196,7 +204,7 @@ Board is now source of truth for:
 - Epic-to-feature relationships
 - Timeline and milestones
 
-Remaining markdown artifacts (8 files) focus on governance, strategy, and learning loops."
+Remaining markdown artifacts (9 files) focus on governance, strategy, and learning loops."
 
 git push origin main
 ```
@@ -204,6 +212,7 @@ git push origin main
 ### Phase 3: Create Missing Governance Docs (Optional But Recommended)
 1. Create `PLANNING_CEREMONIES.md` (sprint/PI/retrospective cadence)
 2. Create `INCIDENT_TO_PRINCIPLE_WORKFLOW.md` (learning loop process)
+3. Create `DECISION_FRAMEWORK.md` (decision criteria & trade-off framework)
 
 ---
 
@@ -213,7 +222,7 @@ After rationalization:
 
 - [ ] GitHub Projects board has all 25 issues with correct fields
 - [ ] 3 markdown workarounds deleted (BACKLOG_ISSUES_INDEX, release-train-index, board-population-checklist)
-- [ ] 8 core governance/strategy/process artifacts remain
+- [ ] 9 core governance/strategy/process artifacts remain
 - [ ] No issue tracking or sprint data in markdown (all on board)
 - [ ] CLAUDE.md references board for work tracking
 - [ ] SPOKE_META_PLANNING_TEMPLATE.md points fork users to board + governance
@@ -243,8 +252,8 @@ After rationalization:
 | **Governance Principles** | 3 | `/planning/meta/` |
 | **Strategic Vision** | 1 | `/planning/roadmap/` |
 | **Research & Architecture** | 1 | `/planning/synthesis/` |
-| **Process Definitions** | 3 | `/planning/meta/{ceremonies,learning}/` (planned) |
-| **Total Markdown SAFE Artifacts** | **8** | **Core, permanent** |
+| **Process Definitions** | 4 | `/planning/meta/{ceremonies,learning,decisions}/` (planned) |
+| **Total Markdown SAFE Artifacts** | **9** | **Core, permanent** |
 | **GitHub Projects Board** | 25 issues | **Source of truth for work** |
 
 ---

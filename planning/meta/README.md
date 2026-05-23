@@ -19,10 +19,8 @@ Strategic governance for how AgentArmy template system itself evolves and improv
 
 ## Folders
 
-- **`principles/`** — Foundational axioms (ARMY_PRINCIPLES.md, DISTINCTIVE_PRINCIPLES.md, etc.)
-- **`ceremonies/`** — Planning rituals (sprint planning, retrospectives, principle review cadence)
-- **`decisions/`** — Decision frameworks (build vs. buy, agent onboarding rubric, priority frameworks)
-- **`learning/`** — Learning workflows (incident → KB → principle update → training)
+- **`principles/`** — Foundational axioms (ARMY_PRINCIPLES.md)
+- **`decisions/`** — Decision frameworks (AGENT_ONBOARDING_RUBRIC.md)
 - **`spoke-templates/`** — What a forked Spoke should set up in its own `/planning/meta/`
 
 ---
@@ -32,11 +30,10 @@ Strategic governance for how AgentArmy template system itself evolves and improv
 | Document | Purpose | Audience | Cadence |
 |---|---|---|---|
 | `principles/ARMY_PRINCIPLES.md` | Core axioms for how the army operates | All agents, team, Spoke authors | Review quarterly |
-| `principles/AGENT_ONBOARDING_RUBRIC.md` | Checklist for validating new agents | `agent-distinctiveness-advocate`, architects | Per-agent (before merge) |
-| `ceremonies/PLANNING_CEREMONIES.md` | Standup, sprint, PI planning, principle review | Team leads, scrum master | Reference (timeless) |
-| `decisions/DECISION_FRAMEWORK.md` | How we choose between trade-offs | Decision-makers | Reference (timeless) |
-| `learning/INCIDENT_TO_PRINCIPLE_WORKFLOW.md` | Feedback loop from production → KB → principles | error-coordinator, knowledge-synthesizer | Reference (timeless) |
+| `decisions/AGENT_ONBOARDING_RUBRIC.md` | Checklist for validating new agents | `agent-distinctiveness-advocate`, architects | Per-agent (before merge) |
 | `spoke-templates/SPOKE_META_PLANNING_TEMPLATE.md` | What a Spoke should create in its own `/planning/meta/` | Fork users | Reference (timeless) |
+
+> **Planned (not yet created):** `ceremonies/PLANNING_CEREMONIES.md` (planning cadence), `decisions/DECISION_FRAMEWORK.md` (trade-off framework), and `learning/INCIDENT_TO_PRINCIPLE_WORKFLOW.md` (production → KB → principle loop). Status is tracked in [`../MARKDOWN_SAFE_ARTIFACTS_REPORT.md`](../MARKDOWN_SAFE_ARTIFACTS_REPORT.md). The Governance Loop below describes how these fit once they exist.
 
 ---
 
@@ -82,8 +79,6 @@ This is what **closes the learning loop**.
 ## Quick Navigation
 
 - **Starting to add a new agent?** → `decisions/AGENT_ONBOARDING_RUBRIC.md`
-- **Planning ceremony schedule?** → `ceremonies/PLANNING_CEREMONIES.md`
-- **Incident feedback loop?** → `learning/INCIDENT_TO_PRINCIPLE_WORKFLOW.md`
 - **Foundational axioms?** → `principles/ARMY_PRINCIPLES.md`
 - **Forking into a Spoke?** → `spoke-templates/SPOKE_META_PLANNING_TEMPLATE.md`
 
