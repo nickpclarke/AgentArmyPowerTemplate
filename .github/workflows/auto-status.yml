@@ -6,6 +6,7 @@ on:
 
 env:
   PROJECT_ID: PVT_kwHOAK2BFM4BYEPx
+  PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER || '1' }}
   STATUS_FIELD_ID: PVTSSF_lAHOAK2BFM4BYEPxzhTMpA8
   OPT_IN_PROGRESS: 47fc9ee4
   OPT_DONE: 98236657
@@ -59,7 +60,7 @@ jobs:
               -f owner="$REPO_OWNER" \
               -f repo="$REPO_NAME" \
               -F issue="$ISSUE_NUM" \
-              --jq '.data.repository.issue.projectItems.nodes[] | select(.project.number == 1) | .id' \
+              --jq ".data.repository.issue.projectItems.nodes[] | select(.project.number == ($PROJECT_NUMBER | tonumber)) | .id" \
               2>/dev/null || true)
 
             if [[ -z "$ITEM_ID" ]]; then

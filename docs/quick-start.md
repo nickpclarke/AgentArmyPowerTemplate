@@ -23,10 +23,20 @@ cd AgentArmy
 
 ## 3. Set up GitHub Actions
 
-1. Create a **classic Personal Access Token** with `project` scope: [GitHub Settings](https://github.com/settings/tokens)
-2. Add it as a secret: **Settings → Secrets → Actions → New repository secret**
+1. Create a **classic Personal Access Token** with `project`, `repo`, `workflow`, and `read:org` scopes: [GitHub Settings](https://github.com/settings/tokens)
+2. Add it as a secret: **Settings -> Secrets and variables -> Actions -> Secrets -> New repository secret**
    - Name: `PROJECT_TOKEN`
    - Value: Your PAT
+3. Add the project number as a variable: **Settings -> Secrets and variables -> Actions -> Variables -> New repository variable**
+   - Name: `PROJECT_NUMBER`
+   - Value: `1` unless your board uses a different number
+
+Command-line equivalent:
+
+```bash
+gh secret set PROJECT_TOKEN --repo YOUR-USERNAME/AgentArmy
+gh variable set PROJECT_NUMBER --repo YOUR-USERNAME/AgentArmy --body "1"
+```
 
 ## 4. Create Your First Issue
 
@@ -55,6 +65,7 @@ Pick a task and delegate to the right specialist:
 
 ## Next Steps
 
+- **[Onboarding Sanity Check](onboarding.md)** - Verify local auth, runner secrets, project access, and auto-add
 - **[Agent Roster](agents.md)** — Find specialists for your work
 - **[GitHub Projects](github-projects.md)** — Master the coordination plane
 - **[SAFe Framework](safe.md)** — Plan your first PI

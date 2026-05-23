@@ -28,12 +28,14 @@ gh repo fork nickpclarke/AgentArmy --clone --remote
 cd AgentArmy
 ```
 
-## Step 2 — GitHub CLI auth with project scope
+## Step 2 — GitHub CLI auth for local setup
 
-The default OAuth scopes do not include Projects v2 write access:
+Local `gh` authentication is only for commands you run on your machine or inside a local agent session. It does not automatically flow into GitHub Actions or an external microVM runner.
+
+Use the practical setup scopes for this template:
 
 ```bash
-gh auth refresh -h github.com -s read:project,project
+gh auth login -h github.com -p https -s repo,workflow,read:org,project
 ```
 
 Complete the device flow: visit `https://github.com/login/device` and enter the code shown in your terminal.
@@ -43,6 +45,12 @@ Verify:
 ```bash
 gh auth status
 # Should show: 'project', 'read:org', 'repo', 'workflow' in Token scopes
+```
+
+If you are already logged in and only need to add missing scopes:
+
+```bash
+gh auth refresh -h github.com -s repo,workflow,read:org,project
 ```
 
 ## Step 3 — Create the GitHub Project board
@@ -101,20 +109,59 @@ gh api graphql -f query='
   --jq '.data.user.projectV2.id'
 ```
 
-## Step 5 — Create the PROJECT_TOKEN secret
+## Step 5 — Create the PROJECT_TOKEN secret and PROJECT_NUMBER variable
 
-GitHub Actions need a PAT with `project` scope because the built-in `GITHUB_TOKEN` cannot write to Projects v2.
+GitHub Actions and microVM-style runners do not use your local `gh` keyring. They need their own token injected as an environment secret.
+
+Use this naming exactly:
+
+| Name | GitHub storage type | Sensitive? | Used by |
+|---|---|---|---|
+| `PROJECT_TOKEN` | Actions secret | Yes | Project-writing workflows and runner-side `GH_TOKEN` |
+| `PROJECT_NUMBER` | Actions variable | No | Workflows that need to know which Project v2 board to use |
+
+Do not store the PAT as a variable. Do not name it only `PAT` unless you also edit every workflow to read `secrets.PAT`.
+
+For the default AgentArmy workflows, create a classic PAT with these practical scopes:
+
+| Scope | Why it is needed |
+|---|---|
+| `project` | Read and write GitHub Projects v2 items and fields |
+| `repo` | Create/comment/close issues and read private repo metadata |
+| `workflow` | Support agent workflows that dispatch or update workflow automation |
+| `read:org` | Read org-owned projects and org repository metadata when applicable |
 
 1. Go to `https://github.com/settings/tokens`
 2. Click **Generate new token (classic)**
 3. Name it (e.g. `AgentArmy Actions`)
-4. Check the **`project`** scope only
+4. Check `project`, `repo`, `workflow`, and `read:org`
 5. Generate and copy the token (shown once)
 
 ```bash
 gh secret set PROJECT_TOKEN --repo YOUR_USERNAME/AgentArmy
 # Paste your PAT when prompted
+
+gh variable set PROJECT_NUMBER --repo YOUR_USERNAME/AgentArmy --body "PROJECT_NUM"
 ```
+
+Verification:
+
+```bash
+gh secret list --repo YOUR_USERNAME/AgentArmy
+# Should include PROJECT_TOKEN
+
+gh variable list --repo YOUR_USERNAME/AgentArmy
+# Should include PROJECT_NUMBER    PROJECT_NUM
+```
+
+In GitHub Actions steps that call `gh`, expose the secret as `GH_TOKEN`:
+
+```yaml
+env:
+  GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+```
+
+The built-in `GITHUB_TOKEN` can handle many repository operations, but it cannot access GitHub Projects v2 reliably. Use `PROJECT_TOKEN` for board automation.
 
 ## Step 6 — Install and configure MemPalace
 
@@ -175,7 +222,7 @@ This installs 9 community plugins. Reload when prompted:
 | `figma` | Figma ↔ code translation |
 | `playground` | Experimental sandbox |
 
-## Step 7 — Configure Claude Code permissions
+## Step 8 — Configure Claude Code permissions
 
 Create `.claude/settings.local.json` (gitignore this file — it's personal):
 
@@ -212,27 +259,41 @@ Codex should read `AGENTS.md` first, then use `CLAUDE.md` and `.claude/agents/ca
 
 Keep machine-specific Codex settings in your user-level Codex config, environment variables, or an untracked `.codex/config.local.toml` file. See [Using Codex](codex.md) for the Codex-specific workflow and hook guidance.
 
-## Step 8 — Verify everything works
+## Step 9 — Run the onboarding sanity checks
 
 ```bash
 # Confirm project board is accessible
 gh project list --owner YOUR_USERNAME
 
-# Confirm secrets are set
+# Confirm runner configuration names are set
 gh secret list --repo YOUR_USERNAME/AgentArmy
+gh variable list --repo YOUR_USERNAME/AgentArmy
 
 # Confirm workflows are present
 ls .github/workflows/
-
-# Open a test issue to trigger auto-add-to-project
-gh issue create \
-  --title "Setup verification" \
-  --body "Testing auto-add-to-project workflow." \
-  --label "enhancement"
-
-# Check it appeared on the board
-gh project item-list PROJECT_NUM --owner YOUR_USERNAME --format json
 ```
+
+Run the local sanity script from the repository root:
+
+```powershell
+.\scripts\onboarding-check.ps1 -Owner YOUR_USERNAME -Repo AgentArmy -ProjectNumber PROJECT_NUM
+```
+
+If Windows blocks local scripts, run the same check with an execution-policy override for this process:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\onboarding-check.ps1 -Owner YOUR_USERNAME -Repo AgentArmy -ProjectNumber PROJECT_NUM
+```
+
+For a full end-to-end auto-add test, allow the script to create and close a temporary issue:
+
+```powershell
+.\scripts\onboarding-check.ps1 -Owner YOUR_USERNAME -Repo AgentArmy -ProjectNumber PROJECT_NUM -CreateTestIssue
+```
+
+After pushing your fork, also run **Actions -> Template sanity check -> Run workflow**. This validates the runner-side `PROJECT_TOKEN` and `PROJECT_NUMBER`, which local `gh auth status` cannot prove.
+
+See [AgentArmy Onboarding Sanity Check](onboarding.md) for the full checklist and troubleshooting table.
 
 ## Optional: Azure Static Web Apps
 
@@ -250,9 +311,11 @@ swa deploy --deployment-token YOUR_SWA_TOKEN
 - [ ] GitHub Project board created with Type and PI fields
 - [ ] Workflow files updated with your username and project IDs
 - [ ] `PROJECT_TOKEN` secret set
+- [ ] `PROJECT_NUMBER` variable set
 - [ ] MemPalace installed (`pip install mempalace && mempalace init`)
 - [ ] Docs tooling installed (`python3 -m pip install -r requirements-docs.txt`)
 - [ ] Claude Code plugins installed (`/plugin` + `/reload-plugins`)
 - [ ] `.claude/settings.local.json` configured and gitignored
 - [ ] Optional Codex local config kept outside committed `.codex/config.toml`
-- [ ] Test issue auto-added to board
+- [ ] Local onboarding sanity check passes
+- [ ] Template sanity check workflow passes

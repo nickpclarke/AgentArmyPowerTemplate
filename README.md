@@ -106,15 +106,16 @@ Open Claude Code in this directory and run:
 /reload-plugins
 ```
 
-### 6. Set the PROJECT_TOKEN secret
+### 6. Set the PROJECT_TOKEN secret and PROJECT_NUMBER variable
 
-GitHub Actions need a PAT with `project` scope:
+GitHub Actions and external runners do not inherit your local `gh` login. Store the runner token as a secret and the non-sensitive project number as a variable:
 
 1. Go to `https://github.com/settings/tokens` → **Tokens (classic)**
-2. Generate a token with only the **`project`** scope checked
+2. Generate a token with `project`, `repo`, `workflow`, and `read:org` scopes
 3. Store it: `gh secret set PROJECT_TOKEN --repo YOUR_USERNAME/AgentArmy`
+4. Store the board number: `gh variable set PROJECT_NUMBER --repo YOUR_USERNAME/AgentArmy --body "PROJECT_NUM"`
 
-See [docs/setup.md](docs/setup.md) for the complete setup guide including updating the hardcoded owner/project references in the workflow files.
+Use `PROJECT_TOKEN` exactly. A secret named `PAT` will not be read unless you also edit the workflows. See [docs/setup.md](docs/setup.md) for the complete setup guide and [docs/onboarding.md](docs/onboarding.md) for sanity checks.
 
 ---
 
@@ -149,6 +150,7 @@ Full reference: [docs/github-projects.md](docs/github-projects.md)
 | `stale` | Mondays 09:00 UTC | Warns at 14 days idle, closes at 21 (P0/Epic exempt) |
 | `label-pr-size` | PR opened / synced | Labels PRs XS→XL by line count |
 | `pi-report` | Fridays 08:00 UTC | Posts a Todo/In Progress/Done summary to Actions |
+| `template-sanity-check` | Manual dispatch | Verifies runner-side `PROJECT_TOKEN`, `PROJECT_NUMBER`, and optional end-to-end issue auto-add |
 
 ### Codex support
 
@@ -232,6 +234,7 @@ Full guide including workarounds: [docs/safe.md](docs/safe.md)
 - `.claude/settings.local.json` contains personal permissions — **gitignore this in your fork**
 - `.env` contains API keys — also gitignore
 - `PROJECT_TOKEN` must never be committed — store as a repo secret only
+- `PROJECT_NUMBER` is not sensitive; store it as a repo variable, not a secret
 
 ---
 
@@ -250,6 +253,7 @@ Full guide including workarounds: [docs/safe.md](docs/safe.md)
 │       ├── copilot-coding-agent.yml   # Issue routing: copilot-task / agent-army-task
 │       ├── label-pr-size.yml
 │       ├── pi-report.yml
+│       ├── template-sanity-check.yml
 │       └── stale.yml
 ├── extensions/
 │   └── board-manager/             # @board-manager Copilot Extension (optional, Azure-deployable)
@@ -262,6 +266,7 @@ Full guide including workarounds: [docs/safe.md](docs/safe.md)
 │   ├── copilot.md                 # Two-army architecture and Copilot setup
 │   ├── github-projects.md         # Board field reference
 │   ├── mempalace.md               # MemPalace install, rooms, MCP tools, troubleshooting
+│   ├── onboarding.md              # Template setup and runner sanity checks
 │   ├── safe.md                    # SAFE workflow guide
 │   └── setup.md                   # Detailed setup instructions
 ├── CLAUDE.md                      # AI assistant guidance (read by Claude Code)
@@ -286,11 +291,19 @@ gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
 
 **Add a GitHub Action:** drop a `.yml` in `.github/workflows/`. Use `secrets.PROJECT_TOKEN` for any action that writes to the project board.
 
+**Run an onboarding sanity check:**
+```powershell
+.\scripts\onboarding-check.ps1 -Owner YOUR_USERNAME -Repo AgentArmy -ProjectNumber 1
+```
+
+If Windows blocks local scripts, use `powershell -ExecutionPolicy Bypass -File .\scripts\onboarding-check.ps1 -Owner YOUR_USERNAME -Repo AgentArmy -ProjectNumber 1`.
+
 ---
 
 ## Docs
 
 - [Full setup guide](docs/setup.md)
+- [Onboarding sanity check](docs/onboarding.md)
 - [Agent roster](docs/agents.md)
 - [GitHub Copilot integration & two-army architecture](docs/copilot.md)
 - [GitHub Projects field reference](docs/github-projects.md)

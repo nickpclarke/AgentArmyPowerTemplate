@@ -20,6 +20,12 @@ All significant work is tracked as GitHub issues on the project board. Agents op
   
   [Setup Guide →](setup.md)
 
+- :white_check_mark: **Onboarding Check**
+
+  Verify local auth, runner secrets, Project v2 access, and optional auto-add behavior before real work starts.
+
+  [Run Sanity Check →](onboarding.md)
+
 - :busts_in_silhouette: **Agent Roster**
   
   Specialist agent definitions across 11 categories. Find the right expert for your task.
@@ -97,6 +103,7 @@ pipelines/                    → dlt data pipeline toolkit
 
 - **Agent routing questions?** See [Agent Roster](agents.md) and [Setup Guide](setup.md)
 - **GitHub Projects setup?** See [GitHub Projects Guide](github-projects.md)
+- **Runner token or setup validation?** See [Onboarding Sanity Check](onboarding.md)
 - **SAFE planning?** See [SAFe Framework](safe.md)
 - **Copilot Chat?** See [Copilot Army Guide](copilot.md)
 

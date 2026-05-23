@@ -1,0 +1,67 @@
+name: Template sanity check
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_number:
+        description: "GitHub Projects v2 number to validate"
+        required: false
+        default: "1"
+      create_test_issue:
+        description: "Create and close a temporary issue to test auto-add end to end"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  sanity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required runner configuration
+        env:
+          PROJECT_TOKEN_PRESENT: ${{ secrets.PROJECT_TOKEN != '' }}
+          PROJECT_NUMBER: ${{ inputs.project_number || vars.PROJECT_NUMBER || '1' }}
+        run: |
+          if [[ "$PROJECT_TOKEN_PRESENT" != "true" ]]; then
+            echo "::error::Missing repository secret PROJECT_TOKEN."
+            exit 1
+          fi
+
+          if [[ -z "$PROJECT_NUMBER" ]]; then
+            echo "::error::PROJECT_NUMBER is empty."
+            exit 1
+          fi
+
+          echo "PROJECT_TOKEN is configured."
+          echo "PROJECT_NUMBER=$PROJECT_NUMBER"
+
+      - name: Validate Project board access from the runner
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          PROJECT_NUMBER: ${{ inputs.project_number || vars.PROJECT_NUMBER || '1' }}
+        run: |
+          gh project list --owner "$OWNER"
+          gh project item-list "$PROJECT_NUMBER" --owner "$OWNER" --format json --limit 10
+
+      - name: Optional end-to-end auto-add probe
+        if: ${{ inputs.create_test_issue }}
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          PROJECT_NUMBER: ${{ inputs.project_number || vars.PROJECT_NUMBER || '1' }}
+        run: |
+          TITLE="Test: AgentArmy template sanity check $(date -u +%Y%m%d-%H%M%S)"
+          BODY="Temporary issue created by the Template sanity check workflow to verify PROJECT_TOKEN and Projects v2 auto-add. Safe to close."
+          ISSUE_URL="$(gh issue create --repo "$OWNER/$REPO" --title "$TITLE" --body "$BODY")"
+          ISSUE_NUMBER="${ISSUE_URL##*/}"
+
+          echo "Created $ISSUE_URL"
+          sleep 10
+
+          ITEMS_JSON="$(gh project item-list "$PROJECT_NUMBER" --owner "$OWNER" --format json --limit 100)"
+          echo "$ITEMS_JSON" | jq -e --argjson issue "$ISSUE_NUMBER" '.items[] | select(.content.number == $issue)' >/dev/null
+
+          gh issue close "$ISSUE_NUMBER" --repo "$OWNER/$REPO" --comment "Template sanity check complete; closing temporary verification issue."
+          echo "Temporary issue #$ISSUE_NUMBER appeared on Project $PROJECT_NUMBER and was closed."
