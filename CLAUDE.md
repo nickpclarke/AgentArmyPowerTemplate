@@ -28,9 +28,16 @@ When in doubt, infer intent from the issue/task context (e.g., “update the tem
 ```
 .claude/agents/categories/  → specialist agent definitions (11 categories)
 .claude/commands/           → local slash commands (/wardley, /ea-adr, /capability-map)
-.github/workflows/          → 8 Actions: auto-status, routing, board commands, stale, PR size
-docs/                       → agents.md, copilot.md, safe.md, setup.md, github-projects.md
+.github/workflows/          → GitHub Actions: auto-status, routing, agent-onboarding-validation
+docs/                       → user-facing docs: agents.md, setup.md, github-projects.md, capabilities
 extensions/board-manager/   → Azure-deployable Copilot Chat extension (@board-manager)
+planning/
+  ├── release-trains/       → RT1–RT4 strategic roadmap & issue planning
+  ├── backlog/              → GitHub Issues index, board population checklist
+  ├── synthesis/            → ArcKit integration, research artifacts
+  ├── roadmap/              → Platform 6-month vision
+  ├── governance/           → FILE_ORGANIZATION.md (folder strategy)
+  └── meta/                 → Governance layer: principles, agent validation, learning loops
 ```
 
 ## Working in This Repo
@@ -111,6 +118,30 @@ Set the `Type` and `PI` fields on items so they're properly categorised.
 | IDP, Team Topologies, platform design | `platform-architect` |
 | FISMA, HIPAA, CMMC, SOX, CCPA | `us-regulatory-architect` |
 | Architecture Decision Records | `/ea-adr` skill |
+
+### Meta-Planning & Governance (ARMY_PRINCIPLES)
+
+The agent army operates under **7 foundational principles** defined in `/planning/meta/principles/ARMY_PRINCIPLES.md`:
+
+1. **Error Escalation** — Every agent escalates failures to `error-coordinator`
+2. **Knowledge Feedback** — Agents feed insights to `knowledge-synthesizer`
+3. **Skill Scaffolding** — Reusable, composable skills exposed by agents
+4. **Hook Integration** — Agents listen to session lifecycle events
+5. **Delegation Direction** — Down-hierarchy only, no UP-delegation, no circular references
+6. **MECE** (Mutual Exclusive, Collectively Exhaustive) — Boundary rules disambiguate routing
+7. **Observable Decisions** — Decision-making is logged and queryable
+
+**New agents must pass `AGENT_ONBOARDING_RUBRIC.md` before merge**, which operationalizes these principles. See `/planning/meta/decisions/AGENT_ONBOARDING_RUBRIC.md` for validation checklist.
+
+**Planning structure (3 layers):**
+
+| Layer | Location | Purpose | Cadence |
+|---|---|---|---|
+| **Tasks** | GitHub Projects board | Issue tracking, sprints, burndown | Per-sprint |
+| **Strategy** | `/planning/release-trains/` | Feature delivery roadmap (RT1–RT4) | Quarterly |
+| **Governance** | `/planning/meta/` | Principles, agent validation, learning loops | Quarterly + continuous |
+
+**For fork users (Spokes):** See `/planning/meta/spoke-templates/SPOKE_META_PLANNING_TEMPLATE.md` for how to inherit Hub principles while customizing for your layer.
 
 ### Language Specialists Routing Rules (Category 02)
 
