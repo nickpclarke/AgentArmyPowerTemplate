@@ -62,10 +62,10 @@ jobs:
                   FIRST=$(echo "$DECISION_ISSUES" | head -1)
                   DECISION_REF=" See decision artifact #$FIRST for details."
                 fi
+                HITL_MSG=$(printf '> [!NOTE]\n> PR opened but status not advanced to **In Progress** — this issue is awaiting a HITL decision (`awaiting-human` label).%s Once the decision is closed, remove the `awaiting-human` label and apply `copilot-task` or `agent-army-task` to resume.' "$DECISION_REF")
                 gh issue comment "$ISSUE_NUM" \
                   --repo "$REPO_OWNER/$REPO_NAME" \
-                  --body "> [!NOTE]
-> PR opened but status not advanced to **In Progress** — this issue is awaiting a HITL decision (\`awaiting-human\` label).$DECISION_REF Once the decision is closed, remove the \`awaiting-human\` label and apply \`copilot-task\` or \`agent-army-task\` to resume."
+                  --body "$HITL_MSG"
                 echo "Issue #$ISSUE_NUM is awaiting human decision — skipping In Progress transition"
                 continue
               fi
