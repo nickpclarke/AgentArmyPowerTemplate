@@ -1,0 +1,19 @@
+# Copilot Coding Agent — Environment Setup
+# This file configures the microVM environment for the GitHub Copilot coding agent.
+# It runs before the agent starts working on any issue.
+#
+# Docs: https://docs.github.com/en/copilot/customizing-copilot/customizing-the-development-environment-for-copilot-coding-agent
+
+steps:
+  - name: Set up Python for docs validation
+    uses: actions/setup-python@v5
+    with:
+      python-version: "3.12"
+
+  - name: Install documentation dependencies
+    run: pip install -r requirements-docs.txt
+
+  - name: Set up Node.js (for board-manager extension)
+    uses: actions/setup-node@v4
+    with:
+      node-version: "20"
