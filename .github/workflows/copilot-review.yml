@@ -4,6 +4,18 @@ on:
   pull_request:
     types: [opened, ready_for_review]
 
+# Least-privilege GITHUB_TOKEN scopes, so this workflow does not depend on the
+# repo-wide "Read and write" Actions setting.
+permissions:
+  contents: read
+  issues: write          # gh label create (repo labels live under the issues API)
+  pull-requests: write   # request Copilot reviewer + gh pr edit --add-label
+
+# This workflow has no checkout, so gh resolves the target repo from GH_REPO
+# rather than a local git remote.
+env:
+  GH_REPO: ${{ github.repository }}
+
 jobs:
   request-copilot-review:
     runs-on: ubuntu-latest

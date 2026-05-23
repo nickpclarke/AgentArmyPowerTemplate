@@ -4,6 +4,18 @@ on:
   pull_request:
     types: [opened, synchronize]
 
+# Least-privilege GITHUB_TOKEN scopes, so this workflow does not depend on the
+# repo-wide "Read and write" Actions setting.
+permissions:
+  contents: read
+  issues: write          # gh label create (repo labels live under the issues API)
+  pull-requests: write   # gh pr edit --add-label / --remove-label
+
+# This workflow has no checkout, so gh resolves the target repo from GH_REPO
+# rather than a local git remote.
+env:
+  GH_REPO: ${{ github.repository }}
+
 jobs:
   label-size:
     runs-on: ubuntu-latest

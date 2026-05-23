@@ -7,6 +7,16 @@ on:
   issue_comment:
     types: [created]
 
+# Least-privilege scopes for the built-in GITHUB_TOKEN (the "Acknowledge with
+# reaction" step). issue_comment fires on both issues and PRs, and the reactions
+# endpoint needs issues:write for issue comments and pull-requests:write for PR
+# comments. The board query/post steps use PROJECT_TOKEN, which is unaffected by
+# this block.
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   board-command:
     runs-on: ubuntu-latest

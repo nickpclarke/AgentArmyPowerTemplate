@@ -6,6 +6,10 @@ on:
       - '.claude/agents/**/*.md'
       - '.claude/agents/**/plugin.json'
 
+# Only needs to check out and diff the repo via the built-in GITHUB_TOKEN.
+permissions:
+  contents: read
+
 jobs:
   validate-agent-mece:
     runs-on: ubuntu-latest

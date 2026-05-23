@@ -5,6 +5,11 @@ on:
     - cron: '0 8 * * 5'  # Fridays at 08:00 UTC
   workflow_dispatch:
 
+# Report authenticates with PROJECT_TOKEN (Projects v2 reads) and writes only to the
+# step summary; the ambient GITHUB_TOKEN needs nothing, so lock it to a read-only floor.
+permissions:
+  contents: read
+
 jobs:
   report:
     runs-on: ubuntu-latest
