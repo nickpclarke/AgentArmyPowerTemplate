@@ -23,6 +23,11 @@ PR opened
   ├─ Security scan runs (always)
   └─ Copilot auto-reviews (if enabled)
   ↓
+`review-loop` label on the PR?
+  ├─ YES → Claude auto-addresses bot comments → pushes → bots re-review → repeat
+  │         until clean, or escalate to a HITL Decision artifact at the round cap
+  └─ NO → continue
+  ↓
 Need strategic input?
   ├─ YES → @claude in a comment
   │         Claude responds with analysis
@@ -41,6 +46,7 @@ All checks pass + approved?
 | **Claude** | You mention @claude | PR conversation + code | >200 lines OR strategic decision needed |
 | **Copilot Coding Agent** | `copilot-task` label | Issue description + workflow comment | XS/S bugs and stories, bounded scope |
 | **Copilot Code Review** | Every PR (if enabled) | Code diff | First-pass feedback (automatic) |
+| **Autonomous review loop** | `review-loop` label on a PR | Bot review comments | Auto-fixes Gemini/Copilot/Codex feedback until clean ([details](../docs/pr-review-loop.md)) |
 | **Security Scan** | Every push/PR | Full codebase | Dependency + code vulnerabilities (automatic) |
 
 ## When to Mention @claude
@@ -93,6 +99,7 @@ When security scan fails on a PR:
 - [x] GitHub Copilot enabled (code review + coding agent)
 - [x] Gemini GitHub App installed
 - [x] Claude GitHub App installed
+- [ ] `CLAUDE_CODE_OAUTH_TOKEN` secret set (enables `@claude` + the autonomous review loop)
 - [x] Vercel GitHub App installed
 - [x] Security scanning enabled
 - [ ] PR template updated (optional — good-to-have)

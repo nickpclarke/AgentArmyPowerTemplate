@@ -114,6 +114,7 @@ nav:
     - SAFe Framework: safe.md
     - Issue Conventions: issue-conventions.md
     - Human-in-the-Loop: hitl.md
+    - Autonomous Review Loop: pr-review-loop.md
   - MECE Audit & Architecture:
     - N-Layer Architecture: n-layer-architecture.md
     - Audit Overview: mece-audit/MECE_AUDIT_SUMMARY.md

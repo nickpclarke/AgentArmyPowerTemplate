@@ -203,6 +203,21 @@ The PR-automation workflows (`label-pr-size`, `copilot-review`, `copilot-coding-
 
 If you use the Copilot workflows, also enable the matching features under **Settings → Copilot** (code review and/or coding agent). See [docs/copilot.md](copilot.md).
 
+### Claude responder token (`CLAUDE_CODE_OAUTH_TOKEN`)
+
+The `@claude` responder and the [autonomous review loop](pr-review-loop.md) need the Claude GitHub App plus a subscription token:
+
+1. Install the **Claude GitHub App** on the repo: <https://github.com/apps/claude>
+2. Generate an OAuth token from your Claude subscription and store it as a secret:
+
+   ```bash
+   claude setup-token
+   gh secret set CLAUDE_CODE_OAUTH_TOKEN --repo YOUR_USERNAME/AgentArmy
+   # paste the token when prompted
+   ```
+
+Claude's `claude.yml` workflow pushes fix-commits with `PROJECT_TOKEN` (not the built-in `GITHUB_TOKEN`) so those commits re-trigger Gemini/Copilot reviews — that is what lets the review loop converge.
+
 ## Step 6 — Install and configure MemPalace
 
 MemPalace provides cross-session memory for Claude Code and Codex. Install it once:
@@ -375,6 +390,7 @@ swa deploy --deployment-token YOUR_SWA_TOKEN
 - [ ] `PROJECT_TOKEN` secret set
 - [ ] `PROJECT_NUMBER` variable set
 - [ ] Actions **Workflow permissions** set to read & write (lets the built-in `GITHUB_TOKEN` manage labels)
+- [ ] `CLAUDE_CODE_OAUTH_TOKEN` secret set + Claude GitHub App installed (for `@claude` and the review loop)
 - [ ] MemPalace installed (`pip install mempalace && mempalace init`)
 - [ ] Docs tooling installed (`python3 -m pip install -r requirements-docs.txt`)
 - [ ] Claude Code plugins installed (`/plugin` + `/reload-plugins`)
