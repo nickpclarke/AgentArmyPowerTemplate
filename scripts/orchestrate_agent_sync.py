@@ -136,8 +136,8 @@ class AgentSyncOrchestrator:
         # Count sources
         claude_count = self.count_agents(self.claude_agents_dir)
         codex_count = self.count_agents(self.codex_agents_dir) if self.codex_agents_dir.exists() else 0
-        antigravity_count = self.count_agents(antigravity_plugins_dir) if antigravity_plugins_dir.exists() else 0
-        plugin_groups = len(list(antigravity_plugins_dir.iterdir())) if antigravity_plugins_dir.exists() else 0
+        antigravity_count = self.count_agents(antigravity_plugins_dir) if antigravity_plugins_dir.is_dir() else 0
+        plugin_groups = len([p for p in antigravity_plugins_dir.iterdir() if p.is_dir()]) if antigravity_plugins_dir.is_dir() else 0
 
         # Check hooks
         hooks_file = self.repo_root / '.codex' / 'hooks.json'
