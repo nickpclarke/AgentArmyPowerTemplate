@@ -1,0 +1,132 @@
+site_name: AgentArmy
+site_description: AI-powered software development template with coordinated Claude Code, GitHub Copilot, and dlt agents
+site_author: nickpclarke
+repo_url: https://github.com/nickpclarke/AgentArmy
+repo_name: AgentArmy
+repo_branches:
+  - main
+edit_uri: edit/main/docs/
+docs_dir: docs
+site_dir: site
+copyright: Copyright © 2024 Nick Clarke. All rights reserved.
+
+theme:
+  name: material
+  logo: null
+  favicon: null
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.expand
+    - navigation.path
+    - navigation.indexes
+    - navigation.top
+    - navigation.prune
+    - content.code.copy
+    - content.code.select
+    - content.code.annotate
+    - content.action.edit
+    - content.action.view
+    - content.tooltips
+    - toc.follow
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - search.share
+
+plugins:
+  - search:
+      lang: en
+      separator: '[\\s\\-,:!=\\[\\]()"/]+|(?<!\\w)(?=\\w)|(?!\\w)(?=\\w)'
+      min_search_length: 2
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      use_pygments: true
+  - pymdownx.inlinehilite
+  - pymdownx.emoji:
+      emoji_index: !!python/name:pymdownx.emoji.twemoji
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.snippets
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - tables
+  - attr_list
+  - footnotes
+  - md_in_html
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/nickpclarke/AgentArmy
+      name: GitHub Repository
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation & Setup: setup.md
+    - Quick Start: quick-start.md
+  - Armies Overview:
+    - The Three Armies: armies-overview.md
+    - Routing Matrix: routing-matrix.md
+  - Claude Code Army:
+    - All 159 Agents: agents-glossary/index.md
+    - Original Roster: agents.md
+    - Language Routing Guide: language-routing.md
+    - Using Claude Code: claude-code-guide.md
+  - GitHub Copilot Army:
+    - Copilot Setup: copilot.md
+    - Task Labeling: copilot-tasks.md
+    - Board Manager Extension: board-manager.md
+  - Coordination & Planning:
+    - GitHub Projects v2: github-projects.md
+    - SAFe Framework: safe.md
+    - Issue Conventions: issue-conventions.md
+  - MECE Audit & Architecture:
+    - Audit Overview: mece-audit/MECE_AUDIT_SUMMARY.md
+    - Audit Scorecard: mece-audit/AGENT_MECE_AUDIT_SCORECARD.md
+    - Implementation Details: mece-audit/MECE_IMPLEMENTATION_SUMMARY.md
+    - Routing Validation Tests: mece-audit/ROUTING_VALIDATION_TESTS.md
+  - dlt Data Pipelines:
+    - Pipeline Architecture: dlt-pipelines.md
+    - Source Connectors: dlt-sources.md
+    - Incremental Loading: dlt-incremental.md
+  - Enterprise Architecture:
+    - Wardley Maps: wardley-maps-examples.md
+    - Wardley Mapping Guide: wardley.md
+    - Capability Maps: capability-maps.md
+    - ADRs: architecture-decisions.md
+  - Resources:
+    - Memory Palace System: mempalace.md
+    - FAQ: faq.md
+    - Glossary: glossary.md
+    - Contributing: contributing.md
