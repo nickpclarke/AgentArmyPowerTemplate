@@ -138,7 +138,10 @@ Use these for infrastructure, deployment, and reliability work.
 | `devops-engineer` | CI/CD pipelines, containerisation, deployment workflows |
 | `deployment-engineer` | Pipeline design, deployment automation strategies |
 | `sre-engineer` | SLOs, error budgets, reliability, incident response |
-| `cloud-architect` | Multi-cloud strategy, migration, cost optimisation |
+| `cloud-architect` | Multi-cloud strategy, migration, cost optimisation (use provider-specific agents for implementation) |
+| `gcp-infra-engineer` | GCP Cloud Run, GKE, Cloud SQL, Vertex AI, IAM, Terraform for GCP |
+| `aws-infra-engineer` | ECS/Fargate, RDS/Aurora, Bedrock, EKS, CDK/CloudFormation, IAM/SCP |
+| `vercel-engineer` | Vercel Functions (serverless + edge), Postgres/KV/Blob, edge middleware, preview deploys, AI SDK |
 | `kubernetes-specialist` | K8s cluster design, workload management |
 | `terraform-engineer` | Infrastructure as code, multi-cloud IaC |
 | `docker-expert` | Container images, orchestration, security hardening |

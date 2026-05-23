@@ -684,13 +684,53 @@ routing_policy:
       army: claude_code
       agent: cloud-architect
       conditions:
-        keywords: ["AWS", "Azure", "GCP", "cloud architecture", "Well-Architected", "landing zone"]
-        concern: "Cloud platform architecture — AWS/Azure/GCP design and Well-Architected review"
-      rationale: "cloud-architect designs cloud-native solutions; terraform-engineer implements them."
-      example: "Design an AWS landing zone with multi-account strategy."
+        keywords: ["multi-cloud", "cloud architecture", "Well-Architected", "landing zone", "cloud migration", "cloud provider selection"]
+        concern: "Multi-cloud architecture strategy — provider selection, landing zone, Well-Architected review"
+      rationale: "cloud-architect handles multi-cloud strategy; use provider-specific agents (gcp-infra-engineer, aws-infra-engineer, azure-infra-engineer, vercel-engineer) for implementation."
+      example: "Design a multi-cloud landing zone strategy across AWS and GCP."
+
+    - id: infra-gcp
+      priority: 186
+      army: claude_code
+      agent: gcp-infra-engineer
+      conditions:
+        keywords: ["GCP", "Cloud Run", "GKE", "Cloud SQL", "Vertex AI", "GCP IAM", "Artifact Registry", "Cloud Build", "Cloud Deploy", "gcloud", "GCP project", "Google Cloud", "Workload Identity"]
+        concern: "GCP-specific infrastructure — Cloud Run, GKE, Cloud SQL, Vertex AI, IAM"
+      rationale: "gcp-infra-engineer owns GCP-specific implementation; cloud-architect handles multi-cloud strategy."
+      example: "Deploy a FastAPI container to Cloud Run with a Cloud SQL connection and Workload Identity service account."
+
+    - id: infra-aws
+      priority: 187
+      army: claude_code
+      agent: aws-infra-engineer
+      conditions:
+        keywords: ["AWS", "ECS", "Fargate", "App Runner", "AWS Lambda", "RDS Aurora", "DynamoDB", "ECR", "AWS IAM", "CDK", "CloudFormation", "AWS Bedrock", "S3 bucket policy", "AWS Organizations", "SCP", "Cost Explorer", "CodePipeline"]
+        concern: "AWS-specific infrastructure — Fargate, RDS, Bedrock, CDK, IAM/SCP"
+      rationale: "aws-infra-engineer owns AWS-specific implementation; cloud-architect handles multi-cloud strategy."
+      example: "Write CDK constructs for an ECS Fargate service with RDS Aurora and an ECR image pipeline."
+
+    - id: infra-azure
+      priority: 188
+      army: claude_code
+      agent: azure-infra-engineer
+      conditions:
+        keywords: ["Azure", "Azure Container Apps", "AKS", "Azure SQL", "Azure OpenAI", "Bicep", "ARM template", "Entra ID", "Azure Functions", "Azure DevOps", "az cli", "Azure subscription"]
+        concern: "Azure-specific infrastructure — Container Apps, AKS, Azure SQL, Bicep, Entra ID"
+      rationale: "azure-infra-engineer owns Azure-specific implementation; cloud-architect handles multi-cloud strategy."
+      example: "Deploy a container to Azure Container Apps with a Bicep template and Entra ID managed identity."
+
+    - id: infra-vercel
+      priority: 189
+      army: claude_code
+      agent: vercel-engineer
+      conditions:
+        keywords: ["Vercel", "vercel.json", "Vercel Functions", "Vercel Postgres", "Vercel KV", "Vercel Blob", "edge middleware", "Vercel AI SDK", "preview deployment", "vercel deploy", "Neon Postgres"]
+        concern: "Vercel platform configuration — functions, storage, edge middleware, monorepo"
+      rationale: "vercel-engineer owns Vercel platform config; nextjs-developer owns Next.js framework code on Vercel."
+      example: "Set up Vercel Postgres and KV for a Next.js app with scoped environment variables per deployment environment."
 
     - id: infra-sre
-      priority: 186
+      priority: 190
       army: claude_code
       agent: sre-engineer
       conditions:
@@ -700,7 +740,7 @@ routing_policy:
       example: "Define SLOs and error budget policy for the payments service."
 
     - id: infra-observability
-      priority: 187
+      priority: 191
       army: claude_code
       agent: observability-engineer
       conditions:
@@ -710,7 +750,7 @@ routing_policy:
       example: "Instrument a FastAPI service with OpenTelemetry and push to Grafana Cloud."
 
     - id: infra-finops
-      priority: 188
+      priority: 192
       army: claude_code
       agent: finops-engineer
       conditions:
@@ -720,7 +760,7 @@ routing_policy:
       example: "Analyse EC2 rightsizing opportunities and recommend reserved instance commitments."
 
     - id: infra-api-gateway
-      priority: 189
+      priority: 193
       army: claude_code
       agent: api-gateway-engineer
       conditions:
@@ -730,7 +770,7 @@ routing_policy:
       example: "Configure rate limiting and JWT validation on Kong for all spoke APIs."
 
     - id: infra-docker
-      priority: 190
+      priority: 194
       army: claude_code
       agent: docker-expert
       conditions:

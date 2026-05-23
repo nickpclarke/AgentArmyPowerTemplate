@@ -1,6 +1,6 @@
 # Agent Roster
 
-Complete glossary of 169 AI specialist agents organized by expertise.
+Complete glossary of 172 AI specialist agents organized by expertise.
 
 !!! note "Documents as Code"
     These agent definitions are auto-generated from source files in `.claude/agents/categories/`.
@@ -15,7 +15,7 @@ pieLand
     "Data Ai": 14
     "Developer Experience": 15
     "Enterprise Architecture": 11
-    "Infrastructure": 19
+    "Infrastructure": 22
     "Language Specialists": 30
     "Meta Orchestration": 14
     "Quality Security": 17
@@ -110,14 +110,16 @@ pieLand
 ### Infrastructure
 
 - **api-gateway-engineer** — Use this agent to configure and operate API gateways — rate limiting, edge authentication/authorization, request routing across spoke APIs, and developer portal setup. Owns gateway runtime configuration and policy; use api-designer for the upstream contract spec and network-engineer for lower-level networking.
+- **aws-infra-engineer** — Use when designing, deploying, or managing AWS infrastructure — ECS/Fargate, RDS/Aurora, Lambda, App Runner, Bedrock, EKS, ECR, IAM/SCP, CloudFormation/CDK, and cost optimization with Cost Explorer. Use cloud-architect for multi-cloud strategy decisions; use aws-infra-engineer for AWS-specific implementation.
 - **azure-infra-engineer** — Use when designing, deploying, or managing Azure infrastructure with focus on network architecture, Entra ID integration, PowerShell automation, and Bicep IaC.
-- **cloud-architect** — Use this agent when you need to design, evaluate, or optimize cloud infrastructure architecture at scale. Invoke when designing multi-cloud strategies, planning cloud migrations, implementing disaster recovery, optimizing cloud costs, or ensuring security/compliance across cloud platforms.
+- **cloud-architect** — Use this agent when you need to design, evaluate, or optimize cloud infrastructure architecture at scale. Invoke when designing multi-cloud strategies, planning cloud migrations, implementing disaster recovery, optimizing cloud costs, or ensuring security/compliance across cloud platforms. For provider-specific implementation use: gcp-infra-engineer (GCP), aws-infra-engineer (AWS), azure-infra-engineer (Azure), vercel-engineer (Vercel).
 - **database-administrator** — Use this agent for database infrastructure operations: implementing high-availability architectures, setting up disaster recovery, backup strategy, replication setup, and managing database infrastructure for production systems. For query/index optimization across multiple databases, use database-optimizer. For PostgreSQL-specific optimization and advanced features, use postgres-pro.
 - **deployment-engineer** — Use this agent for release and rollout strategy on top of existing pipelines — deployment strategies (canary, blue-green, rolling), artifact promotion, GitOps, and rollback safety. Owns how releases reach production; use devops-engineer to build the CI/CD system and infrastructure automation underneath, and release-manager to coordinate release trains across multiple spoke repos.
 - **devops-engineer** — Use this agent when building or operating the CI/CD system and delivery platform itself — infrastructure automation, pipeline construction, containerization, and dev↔ops collaboration. Owns the pipelines and platform; use deployment-engineer for release/rollout strategy (canary/blue-green/rollback) that runs on top of them.
 - **devops-incident-responder** — Use when actively responding to production incidents, diagnosing critical service failures, or conducting incident postmortems to implement permanent fixes and preventative measures.
 - **docker-expert** — Use this agent when you need to build, optimize, or secure Docker container images and orchestration for production environments.
 - **finops-engineer** — Use this agent for cloud cost engineering — cost visibility, unit economics, rightsizing, Reserved Instance/Savings Plan commitments, and showback/chargeback across spokes. Owns cost as the primary deliverable; use cloud-architect for architecture decisions and sre-engineer for reliability.
+- **gcp-infra-engineer** — Use when designing, deploying, or managing Google Cloud Platform infrastructure — Cloud Run, GKE, Cloud SQL, Vertex AI, IAM, Artifact Registry, Cloud Build, and Terraform for GCP. Use cloud-architect for multi-cloud strategy decisions; use gcp-infra-engineer for GCP-specific implementation.
 - **incident-responder** — Use this agent when an active security breach, service outage, or operational incident requires immediate response, evidence preservation, and coordinated recovery.
 - **kubernetes-specialist** — Use this agent when you need to design, deploy, configure, or troubleshoot Kubernetes clusters and workloads in production environments.
 - **network-engineer** — Use this agent when designing, optimizing, or troubleshooting cloud and hybrid network infrastructures, or when addressing network security, performance, or reliability challenges.
@@ -127,6 +129,7 @@ pieLand
 - **sre-engineer** — Use this agent when you need to establish or improve system reliability through SLO definition, error budget management, and automation. Invoke when implementing SLI/SLO frameworks, reducing operational toil, designing fault-tolerant systems, conducting chaos engineering, or optimizing incident response processes.
 - **terraform-engineer** — Use when building, refactoring, or scaling infrastructure as code using Terraform with focus on multi-cloud deployments, module architecture, and enterprise-grade state management.
 - **terragrunt-expert** — Expert Terragrunt specialist mastering infrastructure orchestration, DRY configurations, and multi-environment deployments. Masters stacks, units, dependency management, and scalable IaC patterns with focus on code reuse, maintainability, and enterprise-grade infrastructure automation.
+- **vercel-engineer** — Use when deploying, configuring, or optimizing on the Vercel platform — serverless and edge Functions, Vercel Postgres (Neon), KV (Upstash Redis), Blob storage, preview deployments, monorepo config, environment variables, and Vercel AI SDK integration. Vercel is a full-stack PaaS, not only frontend. Use nextjs-developer for Next.js framework code patterns (App Router, RSC, data fetching); use deployment-engineer for multi-service rollout strategy.
 - **windows-infra-admin** — Use when managing Windows Server infrastructure, Active Directory, DNS, DHCP, and Group Policy configurations, especially for enterprise-scale deployments requiring safe automation and compliance validation.
 
 ### Language Specialists

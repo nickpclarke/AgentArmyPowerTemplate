@@ -82,6 +82,12 @@ Set the `Type` and `PI` fields on items so they're properly categorised.
 | Creative/architectural divergence needs human input | `hitl-coordinator` |
 | Surfacing decision artifacts to GitHub Projects board | `hitl-coordinator` |
 | Agent governance / MECE validation | `agent-distinctiveness-advocate` (pre-merge agent onboarding, routing ambiguity diagnosis) |
+| GCP infrastructure (Cloud Run, Cloud SQL, GKE, Vertex AI, IAM, Cloud Build) | `gcp-infra-engineer` |
+| AWS infrastructure (Fargate, RDS, Bedrock, EKS, CDK/CloudFormation, IAM/SCP) | `aws-infra-engineer` |
+| Azure infrastructure (Container Apps, Bicep, Entra ID, Azure OpenAI) | `azure-infra-engineer` |
+| Vercel platform (Functions, Postgres/KV/Blob, edge middleware, monorepo, AI SDK) | `vercel-engineer` |
+| Multi-cloud strategy, provider selection, landing zone design | `cloud-architect` |
+| Cloud provider / stack choice guide | See [docs/cloud-serving.md](docs/cloud-serving.md) |
 | CI/CD system & infra automation | `devops-engineer` (builds/operates pipelines, containerization, infra automation) |
 | Release & rollout strategy (single service) | `deployment-engineer` (canary/blue-green/rollback, artifact promotion, GitOps) |
 | Cross-spoke release trains | `release-manager` (dependency-order cut & tagging, cross-repo changelog aggregation) |

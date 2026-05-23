@@ -80,7 +80,10 @@ Use for version-specific or OS-specific platforms where version matters.
 | **PowerShell 7+** | `powershell-7-expert` | Cloud automation, cross-platform |
 | **PowerShell 5.1** | `powershell-5.1-expert` | Legacy Windows automation |
 | **Windows Server** | `windows-infra-admin` | Infrastructure, Group Policy |
-| **Azure** | `azure-infra-engineer` | Cloud infrastructure |
+| **Azure** | `azure-infra-engineer` | Azure-specific infrastructure (Container Apps, Bicep, Entra ID) |
+| **GCP** | `gcp-infra-engineer` | GCP-specific infrastructure (Cloud Run, Cloud SQL, Vertex AI) |
+| **AWS** | `aws-infra-engineer` | AWS-specific infrastructure (Fargate, RDS, Bedrock, CDK) |
+| **Vercel** | `vercel-engineer` | Vercel platform (Functions, Postgres/KV/Blob, edge, AI SDK) |
 
 **Decision Rule**: "Migrate from .NET Framework 4.8 to Core" → Start with `dotnet-framework-4.8-expert`, then involve `dotnet-core-expert`.
 

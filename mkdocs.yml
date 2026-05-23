@@ -96,6 +96,7 @@ nav:
     - Installation & Setup: setup.md
     - Onboarding Sanity Check: onboarding.md
     - Quick Start: quick-start.md
+    - Cloud Serving Landscape: cloud-serving.md
     - Using Codex: codex.md
   - Armies Overview:
     - The Three Armies: armies-overview.md
