@@ -1,5 +1,53 @@
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHONUTF8=1 mempalace hook run --hook session-start --harness claude-code",
+            "timeout": 30,
+            "statusMessage": "Loading memories from MemPalace..."
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHONUTF8=1 mempalace hook run --hook user-prompt-submit --harness claude-code",
+            "timeout": 10,
+            "statusMessage": "Enriching prompt with MemPalace context..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHONUTF8=1 mempalace hook run --hook pre-tool-use --harness claude-code",
+            "timeout": 10,
+            "statusMessage": "Pre-tool MemPalace check..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PYTHONUTF8=1 mempalace hook run --hook post-tool-use --harness claude-code",
+            "timeout": 10,
+            "statusMessage": "Post-tool MemPalace update..."
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
