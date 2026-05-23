@@ -60,66 +60,29 @@ plugins:
       lang: en
       separator: '[\\s\\-,:!=\\[\\]()"/]+|(?<!\\w)(?=\\w)|(?!\\w)(?=\\w)'
       min_search_length: 2
-  - table-reader
-  - minify:
-      minify_html: true
-      minify_css: true
-      minify_js: true
-  - awesome-pages
-  - mermaid2
-  - macros
-  - with-pdf:
-      enabled_if_pages: 1
-      output_path: pdf/agentarmy-docs.pdf
-      cover_title: AgentArmy Documentation
-      cover_subtitle: AI-Powered Software Development Template
-      margin_top: 2
-      margin_bottom: 2
-      margin_left: 1
-      margin_right: 1
-      custom_template_path: NONE
 
 markdown_extensions:
   - admonition
   - pymdownx.details
-  - pymdownx.superfences:
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
-      slugify: !!python/object:pymdownx.slugs.slugify
-        case: lower
   - pymdownx.highlight:
       use_pygments: true
-      anchor_linenums: true
-      line_spans: __span
-      pygments_lang_class: required
   - pymdownx.inlinehilite
   - pymdownx.emoji:
       emoji_index: !!python/name:pymdownx.emoji.twemoji
       emoji_generator: !!python/name:pymdownx.emoji.to_svg
-  - pymdownx.arithmatex:
-      generic: true
-  - pymdownx.snippets:
-      auto_append:
-        - docs/includes/abbreviations.md
   - pymdownx.tasklist:
       custom_checkbox: true
-  - pymdownx.blocks.admonition
-  - pymdownx.blocks.details
-  - pymdownx.blocks.tab
+  - pymdownx.snippets
   - toc:
       permalink: true
       toc_depth: 3
-      slugify: !!python/object:pymdownx.slugs.slugify
-        case: lower
   - tables
   - attr_list
-  - md_in_html
   - footnotes
-  - meta
+  - md_in_html
 
 extra:
   social:
