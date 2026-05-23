@@ -79,7 +79,7 @@ gh project create --owner YOUR_USERNAME --title "AgentArmy"
 # Add SAFE-specific custom fields
 gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
   --name "Type" --data-type "SINGLE_SELECT" \
-  --single-select-options "Epic,Feature,Story,Enabler,Bug,Spike,Decision"
+  --single-select-options "Epic,Feature,Story,Enabler,Bug,Spike"
 
 gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
   --name "PI" --data-type "TEXT"
@@ -109,7 +109,7 @@ In `.github/workflows/auto-status.yml`, update the env block:
 env:
   PROJECT_ID: <your project node ID from GraphQL>
   STATUS_FIELD_ID: <your Status field ID>
-  OPT_IN_PROGRESS: <your "In Progress" option ID>
+  OPT_IN_PROGRESS: <your "In progress" option ID>
   OPT_DONE: <your "Done" option ID>
 ```
 
@@ -179,44 +179,6 @@ env:
 ```
 
 The built-in `GITHUB_TOKEN` can handle many repository operations, but it cannot access GitHub Projects v2 reliably. Use `PROJECT_TOKEN` for board automation.
-
-### Two-token model — which workflows use what
-
-AgentArmy's Actions use **two** token paths. Keep them straight:
-
-| Token | Workflows | Why |
-|---|---|---|
-| `PROJECT_TOKEN` (classic PAT) | `auto-add-to-project`, `auto-status`, `board-commands`, `hitl-decision`, `pi-report`, `template-sanity-check` | GitHub **Projects v2** reads/writes — the built-in token can't do these reliably |
-| `GITHUB_TOKEN` (built-in) | `label-pr-size`, `copilot-review`, `copilot-coding-agent`, `stale`, `board-commands` | Create/apply issue & PR labels, request reviewers, comment, close stale items |
-
-### Let the built-in token write (Workflow permissions)
-
-A fork's `GITHUB_TOKEN` defaults to **read-only**, which makes the label/PR workflows fail with `Resource not accessible by integration`. Fix it once:
-
-**Settings → Actions → General → Workflow permissions → select _Read and write permissions_** (and tick *Allow GitHub Actions to create and approve pull requests* if you use PR-creating automation).
-
-The PR-automation workflows (`label-pr-size`, `copilot-review`, `copilot-coding-agent`) also declare explicit least-privilege `permissions:` blocks, so they work even on a read-only default — but enabling read-write is the simplest catch-all and also covers `stale` and `board-commands`.
-
-> Two failure signatures tell you this layer is misconfigured:
-> - `Resource not accessible by integration` → token lacks label/issue/PR write → raise **Workflow permissions** above.
-> - `fatal: not a git repository` → a `gh` step has no repo context → the template sets `GH_REPO: ${{ github.repository }}` to avoid this (no action needed).
-
-If you use the Copilot workflows, also enable the matching features under **Settings → Copilot** (code review and/or coding agent). See [docs/copilot.md](copilot.md).
-
-### Claude responder token (`CLAUDE_CODE_OAUTH_TOKEN`)
-
-The `@claude` responder and the [autonomous review loop](pr-review-loop.md) need the Claude GitHub App plus a subscription token:
-
-1. Install the **Claude GitHub App** on the repo: <https://github.com/apps/claude>
-2. Generate an OAuth token from your Claude subscription and store it as a secret:
-
-   ```bash
-   claude setup-token
-   gh secret set CLAUDE_CODE_OAUTH_TOKEN --repo YOUR_USERNAME/AgentArmy
-   # paste the token when prompted
-   ```
-
-Claude's `claude.yml` workflow pushes fix-commits with `PROJECT_TOKEN` (not the built-in `GITHUB_TOKEN`) so those commits re-trigger Gemini/Copilot reviews — that is what lets the review loop converge.
 
 ## Step 6 — Install and configure MemPalace
 
@@ -372,72 +334,6 @@ After pushing your fork, also run **Actions -> Template sanity check -> Run work
 
 See [AgentArmy Onboarding Sanity Check](onboarding.md) for the full checklist and troubleshooting table.
 
-## What can be automated vs. what requires manual steps
-
-Some setup steps require a human with browser access; others can run inside an agent session. Know which is which before delegating setup to Claude Code or Copilot.
-
-| Step | Human required? | Can agent automate? | Notes |
-|---|---|---|---|
-| Fork + clone the repo | Yes (first time) | No | Needs GitHub account + browser for fork |
-| `gh auth login` | Yes | No | Requires device-flow browser interaction |
-| Create the Project board | Yes | Partially | `gh project create` works in an authed shell, but the board fields and views must be created in the web UI |
-| Create `PROJECT_TOKEN` PAT | Yes | No | Token generation requires browser + 2FA |
-| Set `PROJECT_TOKEN` / `PROJECT_NUMBER` | Yes | Yes (after auth) | `gh secret set` + `gh variable set` work in an authed shell |
-| Update workflow files with username | No | Yes | `sed -i 's/nickpclarke/YOUR_USERNAME/g' .github/workflows/*.yml` |
-| Create required labels | No | Yes | `gh label create` with appropriate colors + descriptions |
-| Run onboarding sanity check | No | Yes | `.\scripts\onboarding-check.ps1 ...` or bash equivalent |
-| Install MemPalace | No | Yes | `pip install mempalace && mempalace init` |
-| Enable Workflow permissions (read/write) | Yes | No | Settings → Actions → General — browser only |
-| Enable Copilot features | Yes | No | Settings → Copilot — browser only |
-| Install Claude GitHub App | Yes | No | Browser install at github.com/apps/claude |
-
-**Agent session checklist (what Claude Code or Copilot can do autonomously):**
-
-```bash
-# 1. Verify repo is a fork and has required files
-git remote -v
-ls .github/workflows/ CLAUDE.md
-
-# 2. Update hardcoded owner references if the fork owner differs
-grep -r "nickpclarke" .github/workflows/ --include="*.yml" -l
-
-# 3. Verify secrets/variables are configured (will 401/404 if missing)
-gh secret list --repo YOUR_USERNAME/AgentArmy
-gh variable list --repo YOUR_USERNAME/AgentArmy
-
-# 4. Create routing labels if missing
-gh label create "agent-army-task" --description "Task routed to the Claude Code agent army" --color "7B61FF" --repo YOUR_USERNAME/AgentArmy
-gh label create "copilot-task" --description "Task routed to the Copilot coding agent" --color "0075ca" --repo YOUR_USERNAME/AgentArmy
-gh label create "hitl-decision" --description "Decision artifact requiring human or AI-app judgment" --color "e4e669" --repo YOUR_USERNAME/AgentArmy
-
-# 5. Run the sanity check
-.\scripts\onboarding-check.ps1 -Owner YOUR_USERNAME -Repo AgentArmy -ProjectNumber PROJECT_NUM
-```
-
-## Agent-runtime onboarding path
-
-When Claude Code (or another AI agent runtime) starts fresh in a forked AgentArmy repo — for example, during a remote cloud session or a CI-triggered agent run — it should self-verify before doing real work. The `SessionStart` hook in `.claude/settings.json` is the right place to wire this, but you can also run it manually:
-
-```bash
-# Quick sanity: is this a properly configured AgentArmy fork?
-OWNER=$(gh repo view --json owner -q .owner.login 2>/dev/null || echo "UNKNOWN")
-PROJECT_NUM=$(gh variable list --json name,value 2>/dev/null | \
-  python3 -c "import json,sys; v=[x for x in json.load(sys.stdin) if x['name']=='PROJECT_NUMBER']; print(v[0]['value'] if v else 'NOT SET')")
-
-echo "Owner:          $OWNER"
-echo "Project number: $PROJECT_NUM"
-echo "Branch:         $(git branch --show-current)"
-echo "Workflows:      $(ls .github/workflows/*.yml 2>/dev/null | wc -l) files"
-echo "Open RT1 items: $(gh issue list --label rt-1 --state open --json number -q length 2>/dev/null || echo '??')"
-```
-
-**What to check before delegating work in an agent session:**
-
-1. `PROJECT_TOKEN` secret is set — if `gh project list` returns a 401, the board commands will fail silently. Escalate to a human to refresh the PAT.
-2. The `agent-army-task` label exists — if it's missing, the routing workflow will not fire for Claude Code tasks. Create it with `gh label create` (see above).
-3. The branch has not diverged unexpectedly — run `git status` and `git log --oneline -3` to confirm the working state.
-4. Required workflow files are present — the `auto-status`, `auto-add-to-project`, and `claude` workflows must exist for the board automation to function.
-
 ## Optional: Azure Static Web Apps
 
 This repo includes `swa-cli.config.json` for Azure SWA deployment. To enable:
@@ -472,6 +368,10 @@ export GCP_OBSERVABILITY_MCP_URL="https://your-observability-mcp-server-url/mcp"
 
 * **Claude Code**: Picks up these servers automatically at the project scope using [.mcp.json](file:///C:/dev/agentarmy/.mcp.json).
 * **Codex**: Reads them via [.codex/config.toml](file:///C:/dev/agentarmy/.codex/config.toml).
+* **Antigravity CLI**: Uses a user-level configuration file (`~/.gemini/antigravity-cli/mcp_config.json`). You can automatically write your GCP settings to it by running:
+  ```bash
+  python scripts/sync_mcp_to_antigravity.py
+  ```
 
 ### 2. Codex Agent Synchronization
 The large library of specialist agents in `.claude/agents/categories/` is automatically synchronized into Codex-compatible TOML subagent definitions under `.codex/agents/` when a Codex session starts (via the `SessionStart` hook in `.codex/hooks.json`). 
@@ -481,6 +381,15 @@ You can also run the synchronization manually:
 python scripts/sync_agents_to_codex.py
 ```
 
+### 3. Antigravity Agent Synchronization
+You can sync the repository's 160+ specialist agents to your local Antigravity CLI installation (as native plugins under `~/.gemini/antigravity-cli/plugins/`) by running:
+```bash
+python scripts/sync_agents_to_antigravity.py
+```
+After running, restart or reload your active Antigravity CLI session to pick up the new specialist agent plugins.
+
+
+
 ## Checklist
 
 - [ ] Repo forked and cloned
@@ -489,8 +398,6 @@ python scripts/sync_agents_to_codex.py
 - [ ] Workflow files updated with your username and project IDs
 - [ ] `PROJECT_TOKEN` secret set
 - [ ] `PROJECT_NUMBER` variable set
-- [ ] Actions **Workflow permissions** set to read & write (lets the built-in `GITHUB_TOKEN` manage labels)
-- [ ] `CLAUDE_CODE_OAUTH_TOKEN` secret set + Claude GitHub App installed (for `@claude` and the review loop)
 - [ ] MemPalace installed (`pip install mempalace && mempalace init`)
 - [ ] Docs tooling installed (`python3 -m pip install -r requirements-docs.txt`)
 - [ ] Claude Code plugins installed (`/plugin` + `/reload-plugins`)
