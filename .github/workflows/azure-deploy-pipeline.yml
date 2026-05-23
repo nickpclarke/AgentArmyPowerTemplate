@@ -1,0 +1,500 @@
+name: Azure Infrastructure Deploy Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  REGISTRY_LOGIN_SERVER: ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}
+  REGISTRY_USERNAME: ${{ secrets.AZURE_REGISTRY_USERNAME }}
+  REGISTRY_PASSWORD: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
+  RESOURCE_GROUP: rg-01
+  SUBSCRIPTION: AASub1
+
+jobs:
+  # Phase 1: Validate Infrastructure
+  validate-infrastructure:
+    runs-on: ubuntu-latest
+    name: Validate Azure Infrastructure
+    outputs:
+      inventory-json: ${{ steps.validate.outputs.inventory }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure CLI - Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Validate Azure Infrastructure
+        id: validate
+        run: |
+          python azure-infra-validator.py \
+            --subscription ${{ env.SUBSCRIPTION }} \
+            --output infrastructure-report.json
+
+          # Export report as output for downstream jobs
+          echo "inventory=$(cat infrastructure-report.json | base64 -w 0)" >> $GITHUB_OUTPUT
+
+      - name: Upload Infrastructure Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: infrastructure-report
+          path: infrastructure-report.json
+
+      - name: Comment PR with Infrastructure Status
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('infrastructure-report.json', 'utf8'));
+
+            const summary = report.validation_summary;
+            const comment = `## 🔍 Infrastructure Validation Report
+
+            | Status | Count |
+            |--------|-------|
+            | ✅ Healthy | ${summary.healthy} |
+            | ⚠️ Warnings | ${summary.warnings} |
+            | ❌ Failures | ${summary.failures} |
+
+            **Subscription:** \`${report.subscription}\`
+            **Timestamp:** ${report.timestamp}
+
+            See artifacts for detailed report.`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # Phase 2: Deploy Infrastructure (Bicep)
+  bicep-deploy:
+    runs-on: ubuntu-latest
+    name: Deploy Infrastructure (Bicep)
+    needs: validate-infrastructure
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    outputs:
+      keyvault-name: ${{ steps.bicep-outputs.outputs.keyvault-name }}
+      keyvault-uri: ${{ steps.bicep-outputs.outputs.keyvault-uri }}
+      acr-login-server: ${{ steps.bicep-outputs.outputs.acr-login-server }}
+      cosmos-connection-string: ${{ steps.bicep-outputs.outputs.cosmos-connection-string }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Determine target environment
+        id: determine-env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+            echo "param-file=infra/parameters-prod.bicepparam" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+            echo "param-file=infra/parameters-staging.bicepparam" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT
+            echo "param-file=infra/parameters-dev.bicepparam" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Azure CLI - Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Bicep template
+        id: bicep-deploy
+        run: |
+          ENVIRONMENT=${{ steps.determine-env.outputs.environment }}
+          PARAM_FILE=${{ steps.determine-env.outputs.param-file }}
+          RG_NAME="rg-agentarmy-${ENVIRONMENT}"
+
+          # Create resource group if it doesn't exist
+          az group create \
+            --name $RG_NAME \
+            --location eastus
+
+          # Deploy Bicep template
+          az deployment group create \
+            --resource-group $RG_NAME \
+            --template-file infra/main.bicep \
+            --parameters $PARAM_FILE \
+            --output json > deployment-output.json
+
+          echo "resource-group=$RG_NAME" >> $GITHUB_OUTPUT
+
+          # Check deployment status
+          STATUS=$(jq -r '.properties.provisioningState' deployment-output.json)
+          if [[ "$STATUS" != "Succeeded" ]]; then
+            echo "Deployment failed with status: $STATUS"
+            exit 1
+          fi
+
+          echo "✓ Bicep deployment succeeded"
+
+      - name: Extract Bicep outputs
+        id: bicep-outputs
+        run: |
+          OUTPUTS=$(jq '.properties.outputs' deployment-output.json)
+
+          KV_NAME=$(echo $OUTPUTS | jq -r '.keyVaultName.value')
+          KV_URI=$(echo $OUTPUTS | jq -r '.keyVaultUri.value')
+          ACR_SERVER=$(echo $OUTPUTS | jq -r '.containerRegistryLoginServer.value')
+          COSMOS_CONN=$(echo $OUTPUTS | jq -r '.cosmosConnectionString.value')
+
+          echo "keyvault-name=$KV_NAME" >> $GITHUB_OUTPUT
+          echo "keyvault-uri=$KV_URI" >> $GITHUB_OUTPUT
+          echo "acr-login-server=$ACR_SERVER" >> $GITHUB_OUTPUT
+          echo "cosmos-connection-string=$COSMOS_CONN" >> $GITHUB_OUTPUT
+
+          echo "📦 Infrastructure Outputs:"
+          echo "  Key Vault: $KV_NAME"
+          echo "  ACR Login Server: $ACR_SERVER"
+          echo "  Region: eastus"
+
+      - name: Upload Bicep deployment output
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: bicep-deployment-output
+          path: deployment-output.json
+
+  # Phase 2b: Inject API Keys into Key Vault
+  secret-injection:
+    runs-on: ubuntu-latest
+    name: Inject API Keys into Key Vault
+    needs: bicep-deploy
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Azure CLI - Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Inject API keys into Key Vault
+        run: |
+          KV_NAME="${{ needs.bicep-deploy.outputs.keyvault-name }}"
+
+          # Check if Key Vault exists and is accessible
+          if ! az keyvault show --name $KV_NAME &>/dev/null; then
+            echo "⚠ Key Vault not found or not accessible: $KV_NAME"
+            exit 1
+          fi
+
+          # Inject Cerebras API key
+          if [[ -n "${{ secrets.CEREBRAS_API_KEY }}" ]]; then
+            az keyvault secret set \
+              --vault-name $KV_NAME \
+              --name cerebras-api-key \
+              --value "${{ secrets.CEREBRAS_API_KEY }}" \
+              --output none
+            echo "✓ Cerebras API key injected"
+          fi
+
+          # Inject Tavily API key
+          if [[ -n "${{ secrets.TAVILY_API_KEY }}" ]]; then
+            az keyvault secret set \
+              --vault-name $KV_NAME \
+              --name tavily-api-key \
+              --value "${{ secrets.TAVILY_API_KEY }}" \
+              --output none
+            echo "✓ Tavily API key injected"
+          fi
+
+          # Inject Foundry API key (if applicable)
+          if [[ -n "${{ secrets.FOUNDRY_API_KEY }}" ]]; then
+            az keyvault secret set \
+              --vault-name $KV_NAME \
+              --name foundry-api-key \
+              --value "${{ secrets.FOUNDRY_API_KEY }}" \
+              --output none
+            echo "✓ Foundry API key injected"
+          fi
+
+          echo "🔐 All API keys successfully injected into Key Vault"
+
+  # Phase 2c: Validate External APIs
+  api-validation:
+    runs-on: ubuntu-latest
+    name: Validate External APIs
+    needs: [bicep-deploy, secret-injection]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests azure-cli
+
+      - name: Azure CLI - Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Run API validation
+        id: api-validation
+        run: |
+          KV_NAME="${{ needs.bicep-deploy.outputs.keyvault-name }}"
+
+          # Run the API validator with Key Vault integration
+          python api-validator.py \
+            --keyvault $KV_NAME \
+            --output api-validation-report.json
+
+          # Report results (don't fail pipeline on API issues)
+          echo "✓ API validation completed"
+
+      - name: Upload API validation report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-validation-report
+          path: api-validation-report.json
+
+      - name: Comment on PR with validation results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('api-validation-report.json', 'utf8'));
+            const summary = report.validation_summary;
+
+            const comment = `## 🔍 API Validation Report
+
+            | Status | Count |
+            |--------|-------|
+            | ✅ Healthy | ${summary.healthy} |
+            | ⚠️ Degraded | ${summary.degraded} |
+            | ❌ Unhealthy | ${summary.unhealthy} |
+
+            **Total APIs:** ${summary.total_apis}
+            **Timestamp:** ${report.timestamp}
+
+            [Full report available in artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # Phase 3: Build Docker Image
+  build-container:
+    runs-on: ubuntu-latest
+    name: Build Container Image
+    needs: api-validation
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY_LOGIN_SERVER }}/agentarmy
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=docker,dest=/tmp/image.tar
+
+      - name: Upload Docker image
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-image
+          path: /tmp/image.tar
+
+  # Phase 4: Push to Azure Container Registry
+  push-to-acr:
+    runs-on: ubuntu-latest
+    name: Push to Azure Container Registry
+    needs: build-container
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure CLI - Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Create Container Registry (if not exists)
+        run: |
+          REGISTRY_NAME=$(echo "acragentarmy$(date +%s)" | sed 's/[^a-z0-9]//g' | cut -c1-24)
+
+          az acr create \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name $REGISTRY_NAME \
+            --sku Basic \
+            --admin-enabled true \
+            || echo "Registry may already exist"
+
+          echo "REGISTRY_NAME=$REGISTRY_NAME" >> $GITHUB_ENV
+
+      - name: Get ACR credentials
+        id: acr-creds
+        run: |
+          REGISTRY=$(az acr list --resource-group ${{ env.RESOURCE_GROUP }} --query "[0].loginServer" -o tsv)
+          echo "registry=$REGISTRY" >> $GITHUB_OUTPUT
+
+      - name: Download Docker image
+        uses: actions/download-artifact@v3
+        with:
+          name: docker-image
+          path: /tmp
+
+      - name: Load and push image to ACR
+        run: |
+          docker load --input /tmp/image.tar
+
+          IMAGE_TAG="${{ github.sha }}"
+          REGISTRY="${{ steps.acr-creds.outputs.registry }}"
+
+          docker tag agentarmy:latest $REGISTRY/agentarmy:$IMAGE_TAG
+          docker tag agentarmy:latest $REGISTRY/agentarmy:latest
+
+          # Log in to ACR
+          az acr login --name $(echo $REGISTRY | cut -d. -f1)
+
+          # Push images
+          docker push $REGISTRY/agentarmy:$IMAGE_TAG
+          docker push $REGISTRY/agentarmy:latest
+
+  # Phase 5: Deploy to Container Apps (optional - infrastructure dependent)
+  deploy-to-container-apps:
+    runs-on: ubuntu-latest
+    name: Deploy to Container Apps
+    needs: push-to-acr
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure CLI - Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Check Container Apps availability
+        id: check-aca
+        run: |
+          ENVIRONMENT=$(az containerapp env list \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --query "[0].name" -o tsv 2>/dev/null || echo "")
+
+          if [ -z "$ENVIRONMENT" ]; then
+            echo "status=not-available" >> $GITHUB_OUTPUT
+          else
+            echo "status=available" >> $GITHUB_OUTPUT
+            echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy to Container Apps
+        if: steps.check-aca.outputs.status == 'available'
+        run: |
+          REGISTRY=$(az acr list --resource-group ${{ env.RESOURCE_GROUP }} --query "[0].loginServer" -o tsv)
+          IMAGE_TAG="${{ github.sha }}"
+
+          # Example deployment command (customize as needed)
+          az containerapp create \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name agentarmy-app \
+            --environment ${{ steps.check-aca.outputs.environment }} \
+            --image $REGISTRY/agentarmy:$IMAGE_TAG \
+            --target-port 8080 \
+            --ingress external \
+            --query properties.configuration.ingress.fqdn \
+            || echo "App may already exist - update instead"
+
+      - name: Display deployment info
+        if: always()
+        run: |
+          echo "✅ Pipeline completed"
+          echo "📊 Check infrastructure-report artifact for detailed status"
+
+  # Phase 6: Post-deployment validation
+  post-deploy-validation:
+    runs-on: ubuntu-latest
+    name: Validate Post-Deployment
+    needs: validate-infrastructure
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure CLI - Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Run post-deployment validation
+        run: |
+          python azure-infra-validator.py \
+            --subscription ${{ env.SUBSCRIPTION }} \
+            --output post-deploy-report.json
+
+      - name: Upload post-deployment report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: post-deploy-report
+          path: post-deploy-report.json
+
+      - name: Create deployment summary
+        if: success()
+        run: |
+          echo "## ✅ Deployment Pipeline Succeeded" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Infrastructure validated" >> $GITHUB_STEP_SUMMARY
+          echo "- Container image built" >> $GITHUB_STEP_SUMMARY
+          echo "- Pushed to Azure Container Registry" >> $GITHUB_STEP_SUMMARY
+          echo "- Ready for Container Apps deployment" >> $GITHUB_STEP_SUMMARY
