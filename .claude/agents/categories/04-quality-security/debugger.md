@@ -1,6 +1,6 @@
 ---
 name: debugger
-description: "Use this agent when you need to diagnose and fix bugs, identify root causes of failures, or analyze error logs and stack traces to resolve issues."
+description: "Use this agent when you need to diagnose and fix bugs in a single service or local codebase, identify root causes of failures within one system, or analyze error logs and stack traces to resolve issues. For distributed system error correlation across multiple services, use error-detective."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

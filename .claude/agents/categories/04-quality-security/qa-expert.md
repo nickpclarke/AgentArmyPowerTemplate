@@ -1,6 +1,6 @@
 ---
 name: qa-expert
-description: "Use this agent when you need comprehensive quality assurance strategy, test planning across the entire development cycle, or quality metrics analysis to improve overall software quality."
+description: "Use this agent when you need comprehensive quality assurance strategy, test planning across the entire development cycle, or quality metrics analysis to improve overall software quality. For building and implementing automated test frameworks and CI/CD integration, use test-automator."
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---
