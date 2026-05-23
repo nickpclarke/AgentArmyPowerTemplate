@@ -121,7 +121,8 @@ nav:
     - Source Connectors: dlt-sources.md
     - Incremental Loading: dlt-incremental.md
   - Enterprise Architecture:
-    - Wardley Mapping: wardley.md
+    - Wardley Maps: wardley-maps-examples.md
+    - Wardley Mapping Guide: wardley.md
     - Capability Maps: capability-maps.md
     - ADRs: architecture-decisions.md
   - Resources:
