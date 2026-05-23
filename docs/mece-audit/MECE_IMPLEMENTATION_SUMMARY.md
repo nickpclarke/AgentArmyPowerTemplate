@@ -223,7 +223,7 @@ These improvements are valuable but deferred (can wait for team review):
    - Recommendation: Use agent-distinctiveness-advocate to draft these
    - Effort: 2–3 hours per pair
 
-2. **Merge/deprecate duplicate agents** (ml-engineer/machine-learning-engineer, frontend-developer/fullstack-developer)
+2. **Merge/deprecate duplicate agents** — `ml-engineer`/`machine-learning-engineer` DONE (merged into `machine-learning-engineer`); `frontend-developer`/`fullstack-developer` still open
    - Recommendation: team discussion before merge (impact on existing users)
    - Effort: 1–2 hours + communication
 

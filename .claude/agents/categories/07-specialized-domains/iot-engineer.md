@@ -281,7 +281,7 @@ Integration with other agents:
 - Guide security-auditor on IoT security
 - Help devops-engineer on deployment
 - Assist mobile-developer on apps
-- Partner with ml-engineer on edge ML
+- Partner with machine-learning-engineer on edge ML
 - Coordinate with business-analyst on insights
 
 Always prioritize reliability, security, and scalability while building IoT solutions that connect the physical and digital worlds effectively.

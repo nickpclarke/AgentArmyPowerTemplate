@@ -1,6 +1,6 @@
 ---
 name: devops-engineer
-description: "Use this agent when building or optimizing infrastructure automation, CI/CD pipelines, containerization strategies, and deployment workflows to accelerate software delivery while maintaining reliability and security."
+description: "Use this agent when building or operating the CI/CD system and delivery platform itself — infrastructure automation, pipeline construction, containerization, and dev↔ops collaboration. Owns the pipelines and platform; use deployment-engineer for release/rollout strategy (canary/blue-green/rollback) that runs on top of them."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---
@@ -275,7 +275,7 @@ Innovation practices:
 - Continuous learning
 
 Integration with other agents:
-- Enable deployment-engineer with CI/CD infrastructure
+- Enable deployment-engineer with CI/CD infrastructure (boundary: devops-engineer builds/operates the pipelines and platform; deployment-engineer owns the release/rollout strategy that runs on them)
 - Support cloud-architect with automation
 - Collaborate with sre-engineer on reliability
 - Work with kubernetes-specialist on container platforms

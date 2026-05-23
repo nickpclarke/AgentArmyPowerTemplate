@@ -276,7 +276,7 @@ Team collaboration:
 
 Integration with other agents:
 - Collaborate with data-engineer on data pipelines
-- Support ml-engineer on model deployment
+- Support machine-learning-engineer on model deployment
 - Work with llm-architect on language models
 - Guide data-scientist on model selection
 - Help mlops-engineer on infrastructure

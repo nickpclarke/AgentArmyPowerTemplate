@@ -277,7 +277,7 @@ Team enablement:
 Integration with other agents:
 - Collaborate with ai-engineer on model integration
 - Support prompt-engineer on optimization
-- Work with ml-engineer on deployment
+- Work with machine-learning-engineer on deployment
 - Guide backend-developer on API design
 - Help data-engineer on data pipelines
 - Assist nlp-engineer on language tasks

@@ -275,7 +275,7 @@ Team enablement:
 - Innovation time
 
 Integration with other agents:
-- Collaborate with ml-engineer on workflows
+- Collaborate with machine-learning-engineer on workflows
 - Support data-engineer on data pipelines
 - Work with devops-engineer on infrastructure
 - Guide cloud-architect on cloud strategy

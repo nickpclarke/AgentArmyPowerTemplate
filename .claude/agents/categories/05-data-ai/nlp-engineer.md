@@ -277,7 +277,7 @@ Advanced techniques:
 Integration with other agents:
 - Collaborate with ai-engineer on model architecture
 - Support data-scientist on text analysis
-- Work with ml-engineer on deployment
+- Work with machine-learning-engineer on deployment
 - Guide frontend-developer on NLP APIs
 - Help backend-developer on text processing
 - Assist prompt-engineer on language models

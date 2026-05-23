@@ -46,15 +46,10 @@ LLM specialist designing and deploying large language model solutions. Expert in
 
 **Use when:** Implementing LLM solutions, designing prompt strategies, fine-tuning models, building chatbots, or creating AI-powered applications.
 
-### [**machine-learning-engineer**](machine-learning-engineer.md) - Machine learning systems expert
-ML engineering specialist building end-to-end machine learning systems. Masters the entire ML lifecycle from data to deployment. Ensures models work reliably in production.
+### [**machine-learning-engineer**](machine-learning-engineer.md) - Production ML lifecycle expert
+ML engineering specialist owning the production ML lifecycle — training pipelines, deployment, serving/inference, optimization, and automated retraining at scale. Masters the entire path from data to reliable production predictions.
 
-**Use when:** Building ML pipelines, implementing ML systems, deploying models, creating ML infrastructure, or productionizing ML solutions.
-
-### [**ml-engineer**](ml-engineer.md) - Machine learning specialist
-Machine learning expert developing and optimizing ML models. Proficient in various algorithms, frameworks, and techniques. Solves complex problems with machine learning.
-
-**Use when:** Training ML models, selecting algorithms, optimizing model performance, implementing ML solutions, or experimenting with new techniques.
+**Use when:** Building ML training pipelines, deploying and serving models, optimizing model performance, or automating retraining. Use data-scientist for experimentation/modeling and mlops-engineer for the underlying ML platform and CI/CD.
 
 ### [**mlops-engineer**](mlops-engineer.md) - MLOps and model deployment expert
 MLOps specialist ensuring smooth ML model deployment and operations. Masters CI/CD for ML, model monitoring, and versioning. Brings DevOps practices to machine learning.
@@ -81,6 +76,11 @@ RL specialist designing environments, shaping rewards, and training agents with 
 
 **Use when:** Designing RL environments, training game AI or robotics agents, implementing policy gradient methods, optimizing reward functions, or deploying autonomous decision-making systems.
 
+### [**schema-migration-engineer**](schema-migration-engineer.md) - Database schema versioning and migration specialist
+Migration expert who owns the migration artifact lifecycle and execution. Masters Flyway/Liquibase/Alembic migrations, the expand-and-contract pattern, and zero-downtime online schema change across spokes. Keeps schema changes contract-safe so spokes deploy without coordinated outages.
+
+**Use when:** Versioning database schemas, orchestrating Flyway/Liquibase/Alembic migrations, planning zero-downtime schema evolution, or ensuring backward/forward-compatible schema changes across spokes.
+
 ## Quick Selection Guide
 
 | If you need to... | Use this subagent |
@@ -91,20 +91,20 @@ RL specialist designing environments, shaping rewards, and training agents with 
 | Create ML models | **data-scientist** |
 | Optimize databases | **database-optimizer** |
 | Work with LLMs | **llm-architect** |
-| Build ML systems | **machine-learning-engineer** |
-| Train ML models | **ml-engineer** |
+| Build ML systems / train ML models | **machine-learning-engineer** |
 | Deploy ML models | **mlops-engineer** |
 | Process text data | **nlp-engineer** |
 | Optimize PostgreSQL | **postgres-pro** |
 | Design AI prompts | **prompt-engineer** |
 | Train RL agents | **reinforcement-learning-engineer** |
+| Version / migrate DB schemas | **schema-migration-engineer** |
 
 ## Common Data & AI Patterns
 
 **End-to-End ML System:**
 - **data-engineer** for data pipeline
 - **data-scientist** for model development
-- **ml-engineer** for model optimization
+- **machine-learning-engineer** for model optimization
 - **mlops-engineer** for deployment
 
 **AI Application:**
@@ -127,7 +127,7 @@ RL specialist designing environments, shaping rewards, and training agents with 
 
 **RL Systems:**
 - **reinforcement-learning-engineer** for agent training
-- **ml-engineer** for training infrastructure
+- **machine-learning-engineer** for training infrastructure
 - **mlops-engineer** for model deployment
 - **ai-engineer** for system integration
 

@@ -56,6 +56,11 @@ Scientific literature specialist using [BGPT MCP](https://github.com/connerlambd
 
 **Use when:** Searching scientific literature, conducting systematic reviews, synthesizing experimental evidence, fact-checking claims against published data, or building evidence-grounded research reports.
 
+### [**spike-researcher**](spike-researcher.md) - Time-boxed technical spike specialist
+Technical investigation expert who produces runnable proof-of-concept code and a build-vs-buy recommendation. Masters library and framework evaluation, PoC implementation, and feasibility analysis. Delivers a decision-ready recommendation backed by a PoC branch.
+
+**Use when:** Running time-boxed technical spikes, evaluating libraries or frameworks with working evidence, building a runnable PoC, reducing technical unknowns quickly, or making a build-vs-buy decision.
+
 ## Quick Selection Guide
 
 | If you need to... | Use this subagent |
@@ -68,6 +73,7 @@ Scientific literature specialist using [BGPT MCP](https://github.com/connerlambd
 | Pressure-test product ideas | **project-idea-validator** |
 | Analyze data patterns | **data-researcher** |
 | Search scientific papers | **scientific-literature-researcher** |
+| Run a time-boxed technical spike | **spike-researcher** |
 
 ## Common Research Patterns
 

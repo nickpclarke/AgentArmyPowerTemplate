@@ -72,12 +72,28 @@ Set the `Type` and `PI` fields on items so they're properly categorised.
 | Deep code review (large PRs, `needs-deep-review` label) | `/review-pr` skill |
 | Security audit | `security-auditor` or `/security-review` skill |
 | Agent governance / MECE validation | `agent-distinctiveness-advocate` (pre-merge agent onboarding, routing ambiguity diagnosis) |
-| CI/CD orchestration | `devops-engineer` (infrastructure automation, build optimization) |
-| CI/CD releases & rollbacks | `deployment-engineer` (release strategy, deployment automation) |
+| CI/CD system & infra automation | `devops-engineer` (builds/operates pipelines, containerization, infra automation) |
+| Release & rollout strategy (single service) | `deployment-engineer` (canary/blue-green/rollback, artifact promotion, GitOps) |
+| Cross-spoke release trains | `release-manager` (dependency-order cut & tagging, cross-repo changelog aggregation) |
 | Reliability & SLOs | `sre-engineer` (error budgets, toil reduction, reliability culture) |
+| Telemetry & instrumentation | `observability-engineer` (OpenTelemetry, metrics/logs/traces pipelines, Grafana/Prometheus) |
+| Cloud cost / FinOps | `finops-engineer` (cost visibility, unit economics, rightsizing, commitments) |
+| API gateway & edge policy | `api-gateway-engineer` (rate limiting, edge authN/Z, routing across spoke APIs) |
 | Performance | `performance-engineer` (diagnose bottlenecks across any layer) |
+| Feature flags & progressive delivery | `feature-flag-engineer` (targeting, lifecycle, kill switches, flag-debt) |
+| Event-driven messaging | `async-messaging-engineer` (Kafka/RabbitMQ/SQS-SNS/NATS, AsyncAPI schemas, DLQ) |
+| Contract testing across spokes | `contract-test-engineer` (Pact, provider verification, schema-drift) |
+| DB schema migrations | `schema-migration-engineer` (Flyway/Liquibase/Alembic, zero-downtime evolution) |
 | Data pipeline work (dlt, ELT, connectors) | `dlt-engineer` (source → destination, incremental loading, schema evolution) |
 | Data analysis & modeling | `data-analyst`, `data-scientist`, `data-engineer` |
+| Production ML lifecycle | `machine-learning-engineer` (training pipelines, serving, retraining); `mlops-engineer` (ML platform/CI-CD) |
+| Technical spike / build-vs-buy PoC | `spike-researcher` (time-boxed, runnable PoC + recommendation) |
+| Developer adoption / DevRel | `developer-advocate` (sample apps, external tutorials, community) |
+
+**Cross-cutting routing clusters** (pick by lifecycle stage, not by keyword overlap):
+
+- **Contract cluster:** `api-designer` (design the contract) → `contract-test-engineer` (enforce it at runtime/CI across spokes) → `schema-migration-engineer` (evolve the DB behind it safely).
+- **Delivery/ops cluster:** `devops-engineer` (build & operate CI/CD + infra) → `deployment-engineer` (release/rollout strategy for one service) → `release-manager` (coordinate release trains across spoke repos) → `observability-engineer` (produce telemetry) → `sre-engineer` (consume it for SLOs/error budgets) → `finops-engineer` (govern cost) → `api-gateway-engineer` (edge policy).
 
 **Enterprise Architecture specialists** — TOGAF ADM-aligned:
 

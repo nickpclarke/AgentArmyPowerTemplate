@@ -13,7 +13,8 @@
 |--------|-------|--------|-----------|
 | `devops-engineer` + `deployment-engineer` | Both own CI/CD; no boundary rule | High — users don't know which to pick | 2 hrs |
 | `debugger` + `error-detective` | Identical scope (root cause diagnosis) | Medium — duplicate capability | Merge or split by local vs. distributed |
-| `ml-engineer` + `machine-learning-engineer` | Literally the same role, different names | Medium — duplicate | Merge; keep one |
+| `ml-engineer` + `machine-learning-engineer` | RESOLVED — merged into `machine-learning-engineer`; `ml-engineer` removed | — | Done |
+| `devops-engineer` + `deployment-engineer` | RESOLVED — boundary rule added (devops = build/operate CI/CD + infra; deployment = release/rollout strategy) | — | Done |
 | `react-specialist` + `frontend-developer` | Both own React; no rule for greenfield vs. optimization | High — 15% of React tasks ambiguous | Add rule: "frontend-developer=greenfield, react-specialist=optimization" |
 | `backend-developer` + `node-specialist` + `fastapi-developer` | Architecture vs. language vs. framework confusion | High — many server-side tasks ambiguous | Add rule: "backend-developer=cross-language architecture, specialists=language/framework idioms" |
 

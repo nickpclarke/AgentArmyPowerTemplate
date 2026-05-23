@@ -45,6 +45,7 @@ Use these during PI planning, sprint planning, and feature refinement.
 | `api-designer` | REST/GraphQL API design, OpenAPI specs, versioning strategy |
 | `data-scientist` | Analytics requirements, ML feasibility, data modelling |
 | `market-researcher` | Competitive analysis, market sizing, customer discovery |
+| `spike-researcher` | Time-boxed technical spikes: library eval, runnable PoC code, build-vs-buy recommendation |
 
 ---
 
@@ -69,6 +70,7 @@ Use these during sprint execution.
 | Agent | Speciality |
 |---|---|
 | `backend-developer` | APIs, microservices, scalability, production architecture |
+| `async-messaging-engineer` | Event-driven messaging: brokers (Kafka/RabbitMQ/SQS-SNS/NATS), AsyncAPI schemas, DLQ, consumer groups |
 | `python-pro` | FastAPI, async Python, type-safe production code |
 | `node-specialist` | Node.js APIs, CLIs, microservices |
 | `golang-pro` | Concurrent Go systems, microservices, cloud-native |
@@ -83,11 +85,12 @@ Use these during sprint execution.
 |---|---|
 | `dlt-engineer` | dlt pipelines, source connectors, incremental loading, DuckDB/BigQuery/Snowflake |
 | `data-engineer` | Pipelines, ETL/ELT, data platforms |
-| `ml-engineer` | Model serving, training pipelines, MLOps |
+| `machine-learning-engineer` | Model serving, training pipelines, MLOps |
 | `ai-engineer` | End-to-end AI systems, RAG, fine-tuning |
 | `llm-architect` | LLM system design, inference, multi-model deployments |
 | `nlp-engineer` | NLP pipelines, text processing, domain-specific models |
 | `database-administrator` | High-availability, backup, disaster recovery |
+| `schema-migration-engineer` | DB schema versioning & migration orchestration (Flyway/Liquibase/Alembic), zero-downtime evolution |
 | `sql-pro` | Query optimisation, schema design, multi-database |
 
 ### Mobile & Desktop
@@ -114,6 +117,7 @@ Run these before merging or releasing.
 | `penetration-tester` | Authorised offensive testing, vulnerability validation |
 | `qa-expert` | Test strategy, quality metrics, test planning |
 | `test-automator` | Automated test frameworks, CI/CD test integration |
+| `contract-test-engineer` | Consumer-driven contract testing (Pact), provider verification, cross-spoke schema-drift detection |
 | `performance-engineer` | Bottleneck identification, profiling, optimisation |
 | `accessibility-tester` | WCAG compliance, assistive technology support |
 
@@ -138,6 +142,11 @@ Use these for infrastructure, deployment, and reliability work.
 | `docker-expert` | Container images, orchestration, security hardening |
 | `network-engineer` | Cloud network design, hybrid connectivity |
 | `database-optimizer` | Query optimisation, indexing, execution plans |
+| `observability-engineer` | Telemetry production: OpenTelemetry instrumentation, metrics/logs/traces pipelines, Grafana/Prometheus dashboards |
+| `finops-engineer` | Cloud cost engineering: cost visibility, unit economics, rightsizing, commitments, showback/chargeback |
+| `api-gateway-engineer` | API gateway config & policy: rate limiting, edge authN/Z, routing across spokes, developer portal |
+| `feature-flag-engineer` | Feature flags & progressive delivery: targeting, lifecycle, kill switches, flag-debt cleanup |
+| `release-manager` | Cross-spoke release trains: dependency-order cut & tagging, cross-repo changelog aggregation, semver |
 
 ---
 
@@ -151,6 +160,7 @@ Use these for infrastructure, deployment, and reliability work.
 | `compliance-auditor` | GDPR, HIPAA, PCI DSS, SOC 2 compliance |
 | `technical-writer` | API docs, user guides, SDK documentation |
 | `documentation-engineer` | Documentation systems, architecture docs |
+| `developer-advocate` | DevRel: sample apps, external tutorials, community, developer feedback loops |
 
 ---
 

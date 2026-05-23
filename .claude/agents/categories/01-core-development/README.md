@@ -20,6 +20,11 @@ The architect who designs beautiful, intuitive, and scalable APIs. Expert in RES
 
 **Use when:** Designing new APIs, refactoring existing endpoints, implementing API standards, or creating comprehensive API documentation.
 
+### [**async-messaging-engineer**](async-messaging-engineer.md) - Event-driven messaging specialist
+The engineer who owns the broker layer and event-schema contracts. Expert in message broker design and operation (Kafka, RabbitMQ, SQS/SNS, NATS), AsyncAPI event-schema governance, dead-letter-queue strategy, and consumer-group coordination across spokes. Ensures durable contracts, exactly-once intent, and resilient cross-spoke event flow.
+
+**Use when:** Designing or operating message brokers, governing AsyncAPI event schemas, building dead-letter-queue strategies, or coordinating consumer groups across spokes.
+
 ### [**backend-developer**](backend-developer.md) - Server-side expert for scalable APIs
 Your go-to specialist for building robust server applications, RESTful APIs, and microservices. Excels at database design, authentication systems, and performance optimization. Perfect for creating the backbone of your application with Node.js, Python, Java, or other backend technologies.
 
@@ -87,6 +92,7 @@ Specialist in WordPress ecosystem who builds everything from simple blogs to ent
 | Translate DESIGN.md to instructions | **design-bridge** |
 | Create a desktop application | **electron-pro** |
 | Design a new API structure | **api-designer** |
+| Build event-driven messaging | **async-messaging-engineer** |
 | Implement GraphQL | **graphql-architect** |
 | Build a distributed system | **microservices-architect** |
 | Add real-time features | **websocket-engineer** |

@@ -41,6 +41,11 @@ DX expert identifying and eliminating developer friction. Analyzes workflows, to
 
 **Use when:** Improving developer workflows, analyzing productivity bottlenecks, selecting developer tools, optimizing development environments, or measuring developer experience.
 
+### [**feature-flag-engineer**](feature-flag-engineer.md) - Feature flags and progressive delivery specialist
+Feature flag expert who owns flag definitions, targeting, and lifecycle. Masters flag strategy, targeting and segmentation, kill-switch design, and flag-debt cleanup. Enables safe rollouts and auditable runtime decisions across spokes while keeping flag debt low.
+
+**Use when:** Designing feature flag strategy, building targeting and segmentation rules, implementing kill switches, or cleaning up stale flag debt.
+
 ### [**git-workflow-manager**](git-workflow-manager.md) - Git workflow and branching expert
 Git specialist designing efficient version control workflows. Masters branching strategies, merge conflict resolution, and Git automation. Ensures smooth collaboration through Git best practices.
 
@@ -95,6 +100,7 @@ Tooling expert building and integrating developer tools. Masters IDE configurati
 | Manage packages | **dependency-manager** |
 | Write documentation | **documentation-engineer** |
 | Improve workflows | **dx-optimizer** |
+| Manage feature flags | **feature-flag-engineer** |
 | Design Git strategies | **git-workflow-manager** |
 | Modernize legacy code | **legacy-modernizer** |
 | Build MCP integrations | **mcp-developer** |

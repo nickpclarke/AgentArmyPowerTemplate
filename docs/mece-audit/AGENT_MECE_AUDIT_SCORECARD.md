@@ -156,11 +156,11 @@ Your agent army achieves **reasonable** MECE separation by *category* (architect
 
 **Critical Findings**: **Three high-severity overlaps**:
 1. `data-engineer` vs `dlt-engineer`: Both build ELT pipelines. dlt is a *tool*; data-engineer is a *role*. This is vertical, not horizontal overlap.
-2. `ml-engineer` vs `machine-learning-engineer`: **Identical scope.** One must go or be redefined.
+2. `ml-engineer` vs `machine-learning-engineer`: **RESOLVED** — merged into `machine-learning-engineer` (broader training/retraining scope folded in); `ml-engineer` removed.
 3. `data-analyst` vs `data-scientist`: Unclear boundary (both do analysis). Rule needed.
 
 **Recommendation**:
-1. **Consolidate**: Merge `ml-engineer` and `machine-learning-engineer` into one agent. (Keep `machine-learning-engineer`; deprecate `ml-engineer`.)
+1. **Consolidate** (DONE): Merged `ml-engineer` and `machine-learning-engineer` into one agent. (Kept `machine-learning-engineer`; removed `ml-engineer`.)
 2. **Clarify**: `dlt-engineer` is a *specialist* (dlt framework), not a replacement for `data-engineer`. Update descriptions:
    - `data-engineer`: "Design & build ETL/ELT pipelines using any tool (SQL, Spark, Airflow, dlt)"
    - `dlt-engineer`: "Build & optimize dlt-specific pipelines for complex source-to-destination workflows"

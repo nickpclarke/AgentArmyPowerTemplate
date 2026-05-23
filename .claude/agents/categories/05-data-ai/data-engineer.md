@@ -280,7 +280,7 @@ Integration with other agents:
 - Work with ai-engineer on ML pipelines
 - Guide backend-developer on data APIs
 - Help cloud-architect on infrastructure
-- Assist ml-engineer on feature stores
+- Assist machine-learning-engineer on feature stores
 - Partner with devops-engineer on deployment
 - Coordinate with business-analyst on metrics
 

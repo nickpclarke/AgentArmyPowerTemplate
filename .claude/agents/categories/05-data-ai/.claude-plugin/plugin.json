@@ -16,11 +16,11 @@
     "./database-optimizer.md",
     "./llm-architect.md",
     "./machine-learning-engineer.md",
-    "./ml-engineer.md",
     "./mlops-engineer.md",
     "./nlp-engineer.md",
     "./postgres-pro.md",
     "./prompt-engineer.md",
-    "./reinforcement-learning-engineer.md"
+    "./reinforcement-learning-engineer.md",
+    "./schema-migration-engineer.md"
   ]
 }

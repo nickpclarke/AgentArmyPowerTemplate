@@ -32,6 +32,11 @@ Customer success specialist ensuring users achieve their goals. Expert in onboar
 
 **Use when:** Designing onboarding flows, improving user retention, gathering customer feedback, building success metrics, or creating customer programs.
 
+### [**developer-advocate**](developer-advocate.md) - Developer relations and adoption specialist
+DevRel expert who owns external developer adoption and community. Masters sample applications, external-audience tutorials, SDK/API onboarding, and developer-feedback loops back to product. Shortens time-to-first-call and builds durable developer communities.
+
+**Use when:** Driving external developer adoption, building sample apps and tutorials, engaging developer communities, or closing feedback loops from developers back into product.
+
 ### [**legal-advisor**](legal-advisor.md) - Legal and compliance specialist
 Legal expert navigating technology law and compliance. Masters privacy regulations, intellectual property, and contract negotiations. Protects businesses while enabling innovation.
 
@@ -79,6 +84,7 @@ User research specialist uncovering user needs and behaviors. Expert in research
 | Define requirements | **business-analyst** |
 | Create content | **content-marketer** |
 | Retain customers | **customer-success-manager** |
+| Drive developer adoption | **developer-advocate** |
 | Handle legal matters | **legal-advisor** |
 | Design software licensing | **license-engineer** |
 | Shape product vision | **product-manager** |

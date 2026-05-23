@@ -279,7 +279,7 @@ Integration with other agents:
 - Support ai-engineer on LLM integration
 - Work with data-scientist on evaluation
 - Guide backend-developer on API design
-- Help ml-engineer on deployment
+- Help machine-learning-engineer on deployment
 - Assist nlp-engineer on language tasks
 - Partner with product-manager on requirements
 - Coordinate with qa-expert on testing

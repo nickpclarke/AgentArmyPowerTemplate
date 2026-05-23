@@ -10,6 +10,7 @@
   "license": "MIT",
   "agents": [
     "./api-designer.md",
+    "./async-messaging-engineer.md",
     "./backend-developer.md",
     "./design-bridge.md",
     "./electron-pro.md",

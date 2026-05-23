@@ -56,6 +56,11 @@ Performance specialist monitoring and optimizing agent systems. Expert in metric
 
 **Use when:** Monitoring agent performance, identifying bottlenecks, optimizing workflows, implementing metrics, or improving system efficiency.
 
+### [**release-manager**](release-manager.md) - Cross-spoke release train coordinator
+Release coordination expert who owns multi-spoke release trains across many independent repositories. Masters dependency-ordered release cuts, semantic versioning coordination, and aggregated multi-repo changelogs. Ships interdependent spokes safely and in the correct order without coupling their codebases.
+
+**Use when:** Coordinating cross-spoke release trains, ordering release cuts by dependency, tagging and publishing across repos, or aggregating cross-repo changelogs.
+
 ### [**task-distributor**](task-distributor.md) - Task allocation specialist
 Task distribution expert optimizing work allocation across agents. Masters load balancing, capability matching, and priority scheduling. Ensures efficient use of all available agents.
 
@@ -82,6 +87,7 @@ Workflow specialist designing and executing sophisticated AI workflows. Expert i
 | Combine knowledge sources | **knowledge-synthesizer** |
 | Scale agent operations | **multi-agent-coordinator** |
 | Monitor performance | **performance-monitor** |
+| Coordinate cross-spoke releases | **release-manager** |
 | Distribute tasks | **task-distributor** |
 | Manage projects with AI agents | **[taskade](https://github.com/taskade/mcp)** |
 | Automate workflows | **workflow-orchestrator** |

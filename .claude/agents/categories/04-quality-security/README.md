@@ -51,6 +51,11 @@ Compliance specialist ensuring adherence to regulations and standards. Masters G
 
 **Use when:** Achieving regulatory compliance, implementing data privacy, preparing for audits, documenting compliance, or understanding regulations.
 
+### [**contract-test-engineer**](contract-test-engineer.md) - Consumer-driven contract testing specialist
+Contract testing expert who owns contract enforcement at runtime. Masters consumer-driven contract testing across services and spokes, Pact broker setup, provider verification, and schema-drift detection. Catches breaking changes before they reach integration and keeps versioned contracts honest between spokes.
+
+**Use when:** Setting up consumer-driven contract tests, configuring a Pact broker, running provider verification, or detecting cross-spoke schema drift.
+
 ### [**debugger**](debugger.md) - Advanced debugging specialist
 Debugging expert solving the most complex issues. Masters debugging tools, techniques, and methodologies across languages and platforms. Finds root causes where others give up.
 
@@ -106,6 +111,7 @@ Interaction-heavy testing specialist that drives web or desktop interfaces again
 | Test system resilience | **chaos-engineer** |
 | Review code quality | **code-reviewer** |
 | Achieve compliance | **compliance-auditor** |
+| Test cross-spoke contracts | **contract-test-engineer** |
 | Debug complex issues | **debugger** |
 | Investigate errors | **error-detective** |
 | Test security | **penetration-tester** |

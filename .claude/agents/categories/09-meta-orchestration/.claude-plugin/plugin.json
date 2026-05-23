@@ -17,6 +17,7 @@
     "./knowledge-synthesizer.md",
     "./multi-agent-coordinator.md",
     "./performance-monitor.md",
+    "./release-manager.md",
     "./task-distributor.md",
     "./workflow-orchestrator.md"
   ]

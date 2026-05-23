@@ -14,6 +14,7 @@
     "./dependency-manager.md",
     "./documentation-engineer.md",
     "./dx-optimizer.md",
+    "./feature-flag-engineer.md",
     "./git-workflow-manager.md",
     "./legacy-modernizer.md",
     "./mcp-developer.md",

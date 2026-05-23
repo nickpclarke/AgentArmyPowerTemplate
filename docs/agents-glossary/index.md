@@ -1,6 +1,6 @@
 # Agent Roster
 
-Complete glossary of 159 AI specialist agents organized by expertise.
+Complete glossary of 168 AI specialist agents organized by expertise.
 
 !!! note "Documents as Code"
     These agent definitions are auto-generated from source files in `.claude/agents/categories/`.
@@ -10,16 +10,16 @@ Complete glossary of 159 AI specialist agents organized by expertise.
 
 ```mermaid
 pieLand
-    "Business Product": 12
-    "Core Development": 12
+    "Business Product": 13
+    "Core Development": 13
     "Data Ai": 14
-    "Developer Experience": 14
+    "Developer Experience": 15
     "Enterprise Architecture": 11
-    "Infrastructure": 16
+    "Infrastructure": 19
     "Language Specialists": 30
-    "Meta Orchestration": 12
-    "Quality Security": 16
-    "Research Analysis": 8
+    "Meta Orchestration": 13
+    "Quality Security": 17
+    "Research Analysis": 9
     "Specialized Domains": 14
 ```
 
@@ -31,6 +31,7 @@ pieLand
 - **business-analyst** — Use when analyzing business processes, gathering requirements from stakeholders, or identifying process improvement opportunities to drive operational efficiency and measurable business value.
 - **content-marketer** — Use this agent when you need to develop comprehensive content strategies, create SEO-optimized marketing content, or execute multi-channel content campaigns to drive engagement and conversions. Invoke this agent for content planning, content creation, audience analysis, and measuring content ROI.
 - **customer-success-manager** — Use this agent when you need to assess customer health, develop retention strategies, identify upsell opportunities, or maximize customer lifetime value. Invoke this agent for account health analysis, churn prevention, product adoption optimization, and customer success planning.
+- **developer-advocate** — Use this agent to drive external developer adoption — sample applications, external-audience tutorials, community engagement, and developer-feedback loops back to product. Owns adoption and community; use technical-writer for reference documentation, documentation-engineer for the docs toolchain, and content-marketer for marketing funnels.
 - **legal-advisor** — Use this agent when you need to draft contracts, review compliance requirements, develop IP protection strategies, or assess legal risks for technology businesses.
 - **license-engineer** — Use this agent when architecting, implementing, or optimizing end-to-end legal licensing systems—from OSI standard selection and dependency compliance pipelines to proprietary deployment and risk monitoring.
 - **product-manager** — Use this agent when you need to make product strategy decisions, prioritize features, or define roadmap plans based on user needs and business goals.
@@ -44,6 +45,7 @@ pieLand
 ### Core Development
 
 - **api-designer** — Use this agent when designing new APIs, creating API specifications, or refactoring existing API architecture for scalability and developer experience. Invoke when you need REST/GraphQL endpoint design, OpenAPI documentation, authentication patterns, or API versioning strategies.
+- **async-messaging-engineer** — Use this agent for event-driven messaging — message broker design and operation (Kafka, RabbitMQ, SQS/SNS, NATS), AsyncAPI event-schema governance, dead-letter-queue strategy, and consumer-group coordination across spokes. Owns the broker layer and event-schema contracts; use integration-architect for pattern selection and websocket-engineer for client realtime transport.
 - **backend-developer** — Use this agent when building server-side APIs, microservices, and backend systems that require robust architecture, scalability planning, and production-ready implementation.
 - **design-bridge** — Use this agent when you need to translate a DESIGN.md from the VoltAgent/awesome-design-md repository into polished Claude Code instructions for building user interfaces that faithfully match the chosen brand. Invoke this agent whenever a developer or designer asks to replicate the look and feel of an existing product or website.
 - **electron-pro** — Use this agent when building Electron desktop applications that require native OS integration, cross-platform distribution, security hardening, and performance optimization. Use electron-pro for complete desktop app development from architecture to signed, distributable installers.
@@ -65,13 +67,13 @@ pieLand
 - **database-optimizer** — Use this agent when you need to analyze slow queries, optimize database performance across multiple systems, or implement indexing strategies to improve query execution.
 - **dlt-engineer** — Use this agent when building, debugging, or optimizing data pipelines with dlt (data load tool). Invoke for source connector development, incremental loading strategies, schema evolution, destination configuration (DuckDB, BigQuery, Snowflake, Postgres, filesystem), pipeline orchestration with Airflow/Prefect/GitHub Actions, and transforming raw API/file/database sources into analytics-ready datasets. Also the right agent for SEC EDGAR extraction, REST API pipelines, and any source → destination ELT work in this repo.
 - **llm-architect** — Use when designing LLM systems for production, implementing fine-tuning or RAG architectures, optimizing inference serving infrastructure, or managing multi-model deployments.
-- **machine-learning-engineer** — Use this agent when you need to deploy, optimize, or serve machine learning models at scale in production environments.
-- **ml-engineer** — Use this agent when building production ML systems requiring model training pipelines, model serving infrastructure, performance optimization, and automated retraining.
+- **machine-learning-engineer** — Use this agent for the production ML lifecycle: model training pipelines, deployment, serving/inference infrastructure, optimization, and automated retraining at scale. Use data-scientist for experimentation/modeling and mlops-engineer for the underlying ML platform, CI/CD, and experiment-tracking infrastructure.
 - **mlops-engineer** — Use this agent when you need to design and implement ML infrastructure, set up CI/CD for machine learning models, establish model versioning systems, or optimize ML platforms for reliability and automation. Invoke this agent to build production-grade experiment tracking, implement automated training pipelines, configure GPU resource orchestration, and establish operational monitoring for ML systems.
 - **nlp-engineer** — Use when building production NLP systems, implementing text processing pipelines, developing language models, or solving domain-specific NLP tasks like named entity recognition, sentiment analysis, or machine translation.
 - **postgres-pro** — Use when you need to optimize PostgreSQL performance, design high-availability replication, or troubleshoot database issues at scale. Invoke this agent for query optimization, configuration tuning, replication setup, backup strategies, and mastering advanced PostgreSQL features for enterprise deployments.
 - **prompt-engineer** — Use this agent when you need to design, optimize, test, or evaluate prompts for large language models in production systems.
 - **reinforcement-learning-engineer** — Use when designing RL environments, training agents with reward optimization, implementing policy gradient methods, or deploying decision-making systems for robotics, gaming, and autonomous operations.
+- **schema-migration-engineer** — Use this agent for database schema versioning and migration orchestration — Flyway/Liquibase/Alembic migrations, zero-downtime and contract-safe schema evolution across spokes. Owns the migration artifact lifecycle and execution; use database-administrator for database operations and tuning.
 
 ### Developer Experience
 
@@ -80,6 +82,7 @@ pieLand
 - **dependency-manager** — Use this agent when you need to audit dependencies for vulnerabilities, resolve version conflicts, optimize bundle sizes, or implement automated dependency updates.
 - **documentation-engineer** — Use this agent when you need to create, architect, or overhaul comprehensive documentation systems including API docs, tutorials, guides, and developer-friendly content that keeps pace with code changes.
 - **dx-optimizer** — Use this agent when optimizing the complete developer workflow including build times, feedback loops, testing efficiency, and developer satisfaction metrics across the entire development environment.
+- **feature-flag-engineer** — Use this agent for feature flag and progressive delivery engineering — flag strategy, targeting and lifecycle management, kill switches, and flag-debt cleanup. Owns flag definitions, targeting, and lifecycle; use deployment-engineer for the deployment strategy (canary percentages, ring rollouts) that flags enable.
 - **git-workflow-manager** — Use this agent when you need to design, establish, or optimize Git workflows, branching strategies, and merge management for a project or team.
 - **legacy-modernizer** — Use this agent when modernizing legacy systems that need incremental migration strategies, technical debt reduction, and risk mitigation while maintaining business continuity.
 - **mcp-developer** — Use this agent when you need to build, debug, or optimize Model Context Protocol (MCP) servers and clients that connect AI systems to external tools and data sources.
@@ -106,6 +109,7 @@ pieLand
 
 ### Infrastructure
 
+- **api-gateway-engineer** — Use this agent to configure and operate API gateways — rate limiting, edge authentication/authorization, request routing across spoke APIs, and developer portal setup. Owns gateway runtime configuration and policy; use api-designer for the upstream contract spec and network-engineer for lower-level networking.
 - **azure-infra-engineer** — Use when designing, deploying, or managing Azure infrastructure with focus on network architecture, Entra ID integration, PowerShell automation, and Bicep IaC.
 - **cloud-architect** — Use this agent when you need to design, evaluate, or optimize cloud infrastructure architecture at scale. Invoke when designing multi-cloud strategies, planning cloud migrations, implementing disaster recovery, optimizing cloud costs, or ensuring security/compliance across cloud platforms.
 - **database-administrator** — Use this agent when optimizing database performance, implementing high-availability architectures, setting up disaster recovery, or managing database infrastructure for production systems.
@@ -113,9 +117,11 @@ pieLand
 - **devops-engineer** — Use this agent when building or optimizing infrastructure automation, CI/CD pipelines, containerization strategies, and deployment workflows to accelerate software delivery while maintaining reliability and security.
 - **devops-incident-responder** — Use when actively responding to production incidents, diagnosing critical service failures, or conducting incident postmortems to implement permanent fixes and preventative measures.
 - **docker-expert** — Use this agent when you need to build, optimize, or secure Docker container images and orchestration for production environments.
+- **finops-engineer** — Use this agent for cloud cost engineering — cost visibility, unit economics, rightsizing, Reserved Instance/Savings Plan commitments, and showback/chargeback across spokes. Owns cost as the primary deliverable; use cloud-architect for architecture decisions and sre-engineer for reliability.
 - **incident-responder** — Use this agent when an active security breach, service outage, or operational incident requires immediate response, evidence preservation, and coordinated recovery.
 - **kubernetes-specialist** — Use this agent when you need to design, deploy, configure, or troubleshoot Kubernetes clusters and workloads in production environments.
 - **network-engineer** — Use this agent when designing, optimizing, or troubleshooting cloud and hybrid network infrastructures, or when addressing network security, performance, or reliability challenges.
+- **observability-engineer** — Use this agent when instrumenting applications and services for telemetry — OpenTelemetry instrumentation, metrics/logs/traces pipelines, collector configuration, and Prometheus/Grafana dashboards. Owns producing observability data; use sre-engineer for SLOs and error budgets that consume it, and performance-engineer to diagnose bottlenecks from it.
 - **platform-engineer** — Use when building or improving internal developer platforms (IDPs), designing self-service infrastructure, or optimizing developer workflows to reduce friction and accelerate delivery. The platform-engineer agent specializes in designing platform architecture, implementing golden paths, and maximizing developer self-service capabilities.
 - **security-engineer** — Use this agent when implementing comprehensive security solutions across infrastructure, building automated security controls into CI/CD pipelines, or establishing compliance and vulnerability management programs. Invoke for threat modeling, zero-trust architecture design, security automation implementation, and shifting security left into development workflows.
 - **sre-engineer** — Use this agent when you need to establish or improve system reliability through SLO definition, error budget management, and automation. Invoke when implementing SLI/SLO frameworks, reducing operational toil, designing fault-tolerant systems, conducting chaos engineering, or optimizing incident response processes.
@@ -168,6 +174,7 @@ pieLand
 - **knowledge-synthesizer** — Use when you need to extract actionable patterns from agent interactions, synthesize insights across multiple workflows, and enable organizational learning from collective experience.
 - **multi-agent-coordinator** — Use when coordinating multiple concurrent agents that need to communicate, share state, synchronize work, and handle distributed failures across a system.
 - **performance-monitor** — Use when establishing observability infrastructure to track system metrics, detect performance anomalies, and optimize resource usage across multi-agent environments.
+- **release-manager** — Use this agent to coordinate cross-spoke release trains across multiple repositories — cut ordering by dependency, dependency-order tagging, cross-repo changelog aggregation, and semver coordination. Owns multi-spoke release coordination only; use deployment-engineer for single-service release/rollout and git-workflow-manager for branch strategy.
 - **task-distributor** — Use when distributing tasks across multiple agents or workers, managing queues, and balancing workloads to maximize throughput while respecting priorities and deadlines.
 - **workflow-orchestrator** — Use this agent when you need to design, implement, or optimize complex business process workflows with multiple states, error handling, and transaction management.
 
@@ -180,6 +187,7 @@ pieLand
 - **chaos-engineer** — Use this agent when you need to design and execute controlled failure experiments, validate system resilience before incidents occur, or conduct game day exercises to test your team's incident response capabilities.
 - **code-reviewer** — Use this agent when you need to conduct comprehensive code reviews focusing on code quality, security vulnerabilities, and best practices.
 - **compliance-auditor** — Use this agent when you need to achieve regulatory compliance, implement compliance controls, or prepare for audits across frameworks like GDPR, HIPAA, PCI DSS, SOC 2, and ISO standards.
+- **contract-test-engineer** — Use this agent for consumer-driven contract testing across services and spokes — Pact broker setup, provider verification, and schema-drift detection. Owns contract enforcement at runtime; use test-automator for other automated tests (unit/integration/e2e/load) and api-designer for authoring the contract.
 - **debugger** — Use this agent when you need to diagnose and fix bugs, identify root causes of failures, or analyze error logs and stack traces to resolve issues.
 - **error-detective** — Use this agent when you need to diagnose why errors are occurring in your system, correlate errors across services, identify root causes, and prevent future failures.
 - **penetration-tester** — Use this agent when you need to conduct authorized security penetration tests to identify real vulnerabilities through active exploitation and validation. Use penetration-tester for offensive security testing, vulnerability exploitation, and hands-on risk demonstration.
@@ -199,6 +207,7 @@ pieLand
 - **research-analyst** — Use this agent when you need comprehensive research across multiple sources with synthesis of findings into actionable insights, trend identification, and detailed reporting.
 - **scientific-literature-researcher** — Use when you need to search scientific literature and retrieve structured experimental data from published studies. Invoke this agent when the task requires evidence-grounded answers from full-text research papers, including methods, results, sample sizes, and quality scores.
 - **search-specialist** — Use when you need to find specific information across multiple sources using advanced search strategies, query optimization, and targeted information retrieval. Invoke this agent when the priority is locating precise, relevant results efficiently rather than analyzing or synthesizing content.
+- **spike-researcher** — Use this agent for time-boxed technical spikes that produce runnable proof-of-concept code and a build-vs-buy recommendation — library/framework evaluation with working evidence. Produces a PoC branch plus recommendation; use research-analyst for written analysis without code and project-idea-validator for product idea validation.
 - **trend-analyst** — Use when analyzing emerging patterns, predicting industry shifts, or developing future scenarios to inform strategic planning and competitive positioning.
 
 ### Specialized Domains

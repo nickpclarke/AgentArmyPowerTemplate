@@ -276,7 +276,7 @@ Research practices:
 
 Integration with other agents:
 - Collaborate with data-engineer on data pipelines
-- Support ml-engineer on productionization
+- Support machine-learning-engineer on productionization
 - Work with business-analyst on metrics
 - Guide product-manager on experiments
 - Help ai-engineer on model selection

@@ -278,7 +278,7 @@ Integration with other agents:
 - Collaborate with risk-manager on risk models
 - Support fintech-engineer on trading systems
 - Work with data-engineer on data pipelines
-- Guide ml-engineer on ML models
+- Guide machine-learning-engineer on ML models
 - Help backend-developer on system architecture
 - Assist database-optimizer on tick data
 - Partner with cloud-architect on infrastructure

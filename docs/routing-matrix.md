@@ -23,7 +23,7 @@ Complete decision tree for delegating work to the right army and agent.
 | **Story** | Copilot or Claude | 1-sprint deliverable with clear acceptance criteria |
 | **Enabler** | Claude Code | Infrastructure, exploration, tooling |
 | **Bug** | Copilot or Claude | Size determines routing |
-| **Spike** | Claude Code | Time-boxed research, max 3 days |
+| **Spike** | Claude Code | Time-boxed research, max 3 days (`spike-researcher` for PoC code + build-vs-buy) |
 
 ### By Domain
 
@@ -38,6 +38,8 @@ Spring Boot             → spring-boot-engineer
 Node.js                 → node-specialist
 Go/Rust                 → golang-pro / rust-engineer
 Microservices           → microservices-architect
+Event-Driven Messaging  → async-messaging-engineer
+Message Brokers (Kafka/RabbitMQ/SQS-SNS/NATS) → async-messaging-engineer
 ```
 
 #### Frontend
@@ -65,6 +67,8 @@ Data Warehousing        → data-engineer
 Analytics               → data-analyst / data-scientist
 ML Model Development    → machine-learning-engineer
 ML Production Serving   → mlops-engineer
+Schema Migration (Flyway/Liquibase/Alembic) → schema-migration-engineer
+Zero-Downtime Schema Evolution → schema-migration-engineer
 ```
 
 #### Infrastructure & DevOps
@@ -75,6 +79,11 @@ CI/CD Pipelines         → deployment-engineer
 Terraform/IaC           → terraform-engineer
 AWS/Azure/GCP           → cloud-architect
 Monitoring/Observability → sre-engineer
+Telemetry Instrumentation (OpenTelemetry, dashboards) → observability-engineer
+Cloud Cost / FinOps     → finops-engineer
+API Gateway (rate limiting, edge auth, routing) → api-gateway-engineer
+Feature Flags / Progressive Delivery → feature-flag-engineer
+Cross-Spoke Release Trains → release-manager
 ```
 
 #### Enterprise Architecture
@@ -92,6 +101,9 @@ Code Review (deep)      → /review-pr skill
 Performance Bottleneck  → performance-engineer
 Database Optimization   → database-optimizer / postgres-pro
 Git Workflow            → git-workflow-manager
+Contract Testing (Pact, schema drift) → contract-test-engineer
+Technical Spike / PoC   → spike-researcher
+Developer Relations / Adoption → developer-advocate
 ```
 
 ---

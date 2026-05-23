@@ -265,7 +265,7 @@ Best practices:
 - Thorough documentation
 
 Integration with other agents:
-- Collaborate with ml-engineer on training infrastructure
+- Collaborate with machine-learning-engineer on training infrastructure
 - Support data-engineer on experience data pipelines
 - Work with ai-engineer on deployment architecture
 - Guide data-scientist on experiment design

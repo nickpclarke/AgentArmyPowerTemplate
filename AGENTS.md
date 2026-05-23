@@ -78,11 +78,12 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 
 ---
 
-### 01 · Core Development (11 agents)
+### 01 · Core Development (13 agents)
 
 | Agent | Model | Purpose |
 |---|---|---|
 | `api-designer` | sonnet | REST/GraphQL endpoint design, OpenAPI specs, auth patterns |
+| `async-messaging-engineer` | sonnet | Event-driven messaging: brokers (Kafka/RabbitMQ/SQS-SNS/NATS), AsyncAPI schemas, DLQ, consumer groups |
 | `backend-developer` | sonnet | Server-side architecture, APIs, databases, performance |
 | `design-bridge` | sonnet | Translates design specs into implementable technical requirements |
 | `electron-pro` | sonnet | Cross-platform desktop apps with Electron |
@@ -130,10 +131,11 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `typescript-pro` | sonnet | TypeScript, strict typing, generics, decorators |
 | `vue-expert` | sonnet | Vue 3, Composition API, Pinia, Nuxt |
 
-### 03 · Infrastructure (16 agents)
+### 03 · Infrastructure (19 agents)
 
 | Agent | Model | Purpose |
 |---|---|---|
+| `api-gateway-engineer` | sonnet | API gateway config & policy: rate limiting, edge authN/Z, routing across spokes, developer portal |
 | `azure-infra-engineer` | sonnet | Azure resources, ARM/Bicep, AKS, Azure networking |
 | `cloud-architect` | opus | Multi-cloud design, cost optimization, HA patterns |
 | `database-administrator` | sonnet | DB admin, backup/recovery, replication, tuning |
@@ -141,9 +143,11 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `devops-engineer` | sonnet | DevOps practices, automation, toolchain integration |
 | `devops-incident-responder` | sonnet | Production incidents, runbooks, RCA for DevOps |
 | `docker-expert` | sonnet | Dockerfiles, Compose, multi-stage builds, registries |
+| `finops-engineer` | sonnet | Cloud cost engineering: cost visibility, unit economics, rightsizing, commitments, showback/chargeback |
 | `incident-responder` | sonnet | On-call response, triage, escalation, postmortems |
 | `kubernetes-specialist` | sonnet | K8s deployments, Helm, operators, networking |
 | `network-engineer` | sonnet | Networking, DNS, load balancing, VPN, firewalls |
+| `observability-engineer` | sonnet | Telemetry production: OpenTelemetry instrumentation, metrics/logs/traces pipelines, Grafana/Prometheus dashboards |
 | `platform-engineer` | sonnet | Internal developer platforms, golden paths, IDP |
 | `security-engineer` | sonnet | Security controls, IAM, secrets management, hardening |
 | `sre-engineer` | opus | SLIs/SLOs, error budgets, toil reduction, reliability |
@@ -151,7 +155,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `terragrunt-expert` | sonnet | Terragrunt DRY configs, multi-account patterns |
 | `windows-infra-admin` | sonnet | Windows Server, AD, GPO, PowerShell DSC |
 
-### 04 · Quality & Security (16 agents)
+### 04 · Quality & Security (17 agents)
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -162,6 +166,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `chaos-engineer` | sonnet | Failure injection, resilience testing, GameDays |
 | `code-reviewer` | sonnet | Code review, style, correctness, security, maintainability |
 | `compliance-auditor` | sonnet | Regulatory compliance, SOC2, ISO 27001, GDPR |
+| `contract-test-engineer` | sonnet | Consumer-driven contract testing (Pact), provider verification, cross-spoke schema-drift detection |
 | `debugger` | sonnet | Root cause analysis, debugging strategies, fix validation |
 | `error-detective` | sonnet | Error pattern analysis, log triage, exception investigation |
 | `penetration-tester` | opus | Authorized pen testing, vulnerability assessment |
@@ -172,7 +177,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `test-automator` | sonnet | Test automation frameworks, CI integration, coverage |
 | `ui-ux-tester` | sonnet | UX testing, usability heuristics, user flow validation |
 
-### 05 · Data & AI (13 agents)
+### 05 · Data & AI (14 agents)
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -183,15 +188,15 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `data-scientist` | sonnet | ML experiments, feature engineering, model evaluation |
 | `database-optimizer` | sonnet | Query tuning, index strategy, execution plan analysis |
 | `llm-architect` | opus | LLM system design, RAG, fine-tuning, evaluation |
-| `machine-learning-engineer` | sonnet | ML model training, serving, MLflow, experiment tracking |
-| `ml-engineer` | sonnet | Production ML systems, feature stores, monitoring |
+| `machine-learning-engineer` | sonnet | Production ML lifecycle: training pipelines, serving, automated retraining, feature stores, monitoring |
 | `mlops-engineer` | sonnet | ML pipelines, model registry, drift detection, CD4ML |
 | `nlp-engineer` | sonnet | NLP models, text classification, NER, embeddings |
 | `postgres-pro` | sonnet | PostgreSQL internals, extensions, JSONB, partitioning |
 | `prompt-engineer` | sonnet | Prompt design, chain-of-thought, few-shot, evaluation |
 | `reinforcement-learning-engineer` | sonnet | RL algorithms, reward shaping, policy optimization |
+| `schema-migration-engineer` | sonnet | DB schema versioning & migration orchestration (Flyway/Liquibase/Alembic), zero-downtime evolution |
 
-### 06 · Developer Experience (14 agents)
+### 06 · Developer Experience (15 agents)
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -200,6 +205,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `dependency-manager` | sonnet | Dependency audits, upgrades, vulnerability remediation |
 | `documentation-engineer` | sonnet | Docs sites, API docs, architecture documentation |
 | `dx-optimizer` | sonnet | Developer experience improvements, tooling, onboarding |
+| `feature-flag-engineer` | sonnet | Feature flags & progressive delivery: targeting, lifecycle, kill switches, flag-debt cleanup |
 | `git-workflow-manager` | sonnet | Git branching strategies, hooks, large repo optimization |
 | `legacy-modernizer` | opus | Incremental modernization of legacy codebases |
 | `mcp-developer` | sonnet | MCP server/client implementation, JSON-RPC, SDK usage |
@@ -229,13 +235,14 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `risk-manager` | sonnet | Risk identification, impact assessment, mitigation plans |
 | `seo-specialist` | sonnet | SEO audits, structured data, Core Web Vitals |
 
-### 08 · Business & Product (12 agents)
+### 08 · Business & Product (13 agents)
 
 | Agent | Model | Purpose |
 |---|---|---|
 | `business-analyst` | sonnet | Requirements elicitation, process mapping, gap analysis |
 | `content-marketer` | haiku | Content strategy, copywriting, SEO content |
 | `customer-success-manager` | haiku | Customer health, onboarding plans, churn prevention |
+| `developer-advocate` | sonnet | DevRel: sample apps, external tutorials, community, developer feedback loops |
 | `legal-advisor` | opus | Legal risk review, contracts, licensing guidance |
 | `license-engineer` | sonnet | OSS license compliance, SBOM, dependency audits |
 | `product-manager` | sonnet | Roadmaps, PRDs, prioritization, stakeholder alignment |
@@ -246,7 +253,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `ux-researcher` | sonnet | User research, usability studies, personas, journey maps |
 | `wordpress-master` | sonnet | WordPress theme/plugin development, WooCommerce |
 
-### 09 · Meta & Orchestration (12 agents)
+### 09 · Meta & Orchestration (13 agents)
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -260,10 +267,11 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `knowledge-synthesizer` | opus | Synthesize findings across agents into coherent outputs |
 | `multi-agent-coordinator` | opus | Design and run multi-agent pipelines |
 | `performance-monitor` | sonnet | Monitor agent performance metrics and throughput |
+| `release-manager` | sonnet | Cross-spoke release trains: dependency-order cut & tagging, cross-repo changelog aggregation, semver |
 | `task-distributor` | sonnet | Break work into tasks and assign to appropriate agents |
 | `workflow-orchestrator` | opus | Business process workflows, state machines, saga patterns |
 
-### 10 · Research & Analysis (8 agents)
+### 10 · Research & Analysis (9 agents)
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -274,6 +282,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `research-analyst` | sonnet | Primary and secondary research, structured analysis |
 | `scientific-literature-researcher` | opus | Academic literature review, paper synthesis |
 | `search-specialist` | haiku | Web search, information retrieval, fact-checking |
+| `spike-researcher` | sonnet | Time-boxed technical spikes: library eval, runnable PoC code, build-vs-buy recommendation |
 | `trend-analyst` | sonnet | Technology and market trend analysis |
 
 ### 11 · Enterprise Architecture (11 agents)

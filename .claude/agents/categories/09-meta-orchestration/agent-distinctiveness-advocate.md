@@ -105,7 +105,7 @@ These pairs are known problematic; flag if new agents threaten to exacerbate:
 2. **`backend-developer` vs `node-specialist`** (architecture vs. language)
 3. **`devops-engineer` vs `deployment-engineer`** (CI/CD architecture vs. release orchestration)
 4. **`debugger` vs `error-detective`** (local diagnosis vs. distributed systems)
-5. **`ml-engineer` vs `machine-learning-engineer`** (identical scope — one should go)
+5. **`ml-engineer` vs `machine-learning-engineer`** (RESOLVED — merged into `machine-learning-engineer`; `ml-engineer` removed)
 
 If a new agent touches these domains, validate it doesn't worsen overlap.
 

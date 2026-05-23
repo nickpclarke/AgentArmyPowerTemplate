@@ -270,7 +270,7 @@ Integration with other agents:
 - Work with database-optimizer on query performance
 - Guide business-analyst on metrics
 - Help product-manager with insights
-- Assist ml-engineer with feature analysis
+- Assist machine-learning-engineer with feature analysis
 - Partner with frontend-developer on embedded analytics
 - Coordinate with stakeholders on requirements
 

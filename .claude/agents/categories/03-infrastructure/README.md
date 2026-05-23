@@ -16,6 +16,11 @@ Use these subagents when you need to:
 
 ## Available Subagents
 
+### [**api-gateway-engineer**](api-gateway-engineer.md) - API gateway configuration and policy specialist
+Edge gateway expert who owns gateway runtime configuration and policy. Masters rate limiting, edge authentication/authorization, request routing across spoke APIs, and developer portal setup. Ensures policy enforcement, runtime resilience, and safe progressive delivery at the edge.
+
+**Use when:** Configuring API gateways, enforcing rate limits and edge authN/Z, routing traffic across spoke APIs, or standing up a developer portal.
+
 ### [**azure-infra-engineer**](azure-infra-engineer.md) - Azure cloud infrastructure and automation specialist  
 Expert in Azure resource design, virtual networking, identity integration, and infrastructure-as-code patterns via PowerShell, Bicep, and Az modules.
 
@@ -51,6 +56,11 @@ Incident response specialist for DevOps environments. Masters troubleshooting, r
 
 **Use when:** Responding to production incidents, setting up incident management processes, performing root cause analysis, or implementing incident prevention measures.
 
+### [**finops-engineer**](finops-engineer.md) - Cloud cost engineering specialist
+FinOps expert who owns cost as the primary deliverable. Masters cost visibility, unit economics, rightsizing, Reserved Instance/Savings Plan commitments, and showback/chargeback across spokes. Drives down spend per unit of value while preserving reliability and engineering velocity.
+
+**Use when:** Building cost visibility, improving unit economics, rightsizing resources, planning commitments, or implementing showback/chargeback across spokes.
+
 ### [**incident-responder**](incident-responder.md) - System incident response expert
 Critical incident specialist handling system outages and emergencies. Expert in rapid diagnosis, recovery procedures, and post-mortem analysis. Restores service quickly while learning from failures.
 
@@ -65,6 +75,11 @@ Kubernetes expert managing containerized applications at scale. Masters cluster 
 Network architecture expert designing secure, performant networks. Masters SDN, load balancing, and network security. Ensures reliable connectivity and optimal network performance.
 
 **Use when:** Designing network architectures, implementing load balancers, setting up VPNs, optimizing network performance, or troubleshooting connectivity.
+
+### [**observability-engineer**](observability-engineer.md) - Telemetry instrumentation specialist
+Observability expert who owns producing telemetry data. Masters OpenTelemetry instrumentation, metrics/logs/traces pipelines, collector configuration, and Prometheus/Grafana dashboards. Ensures signal quality, cardinality control, and trustworthy data that powers reliability and performance work.
+
+**Use when:** Instrumenting services with OpenTelemetry, building metrics/logs/traces pipelines, configuring collectors, or creating Prometheus/Grafana dashboards.
 
 ### [**platform-engineer**](platform-engineer.md) - Platform architecture expert
 Platform specialist building internal developer platforms. Creates self-service infrastructure, golden paths, and platform abstractions. Empowers developers while maintaining governance.
@@ -100,6 +115,9 @@ Deep expertise in automating AD, DNS, DHCP, GPO, server configuration, and domai
 
 | If you need to... | Use this subagent |
 |-------------------|-------------------|
+| Configure an API gateway | **api-gateway-engineer** |
+| Engineer cloud cost / FinOps | **finops-engineer** |
+| Instrument telemetry / observability | **observability-engineer** |
 | Design cloud architecture | **cloud-architect** |
 | Manage databases | **database-administrator** |
 | Build/optimize containers | **docker-expert** |
