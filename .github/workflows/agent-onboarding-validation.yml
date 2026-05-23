@@ -7,6 +7,9 @@ on:
       - '.claude/agents/**/plugin.json'
       - '.codex/agents/**/*.toml'
       - 'scripts/sync_agents_to_codex.py'
+      - '.agents/plugins/**/*.md'
+      - '.agents/plugins/**/plugin.json'
+      - 'scripts/sync_agents_to_antigravity.py'
 
 jobs:
   validate-agent-mece:
@@ -140,6 +143,21 @@ jobs:
             echo "✅ Codex agents are in sync"
           fi
 
+      - name: Validate Antigravity Agent Synchronization (No Drift)
+        run: |
+          echo "Running synchronization script..."
+          python scripts/sync_agents_to_antigravity.py
+
+          # Check for changes in the workspace
+          if [ -n "$(git status --porcelain .agents/plugins/)" ]; then
+            echo "❌ ERROR: Antigravity local agents are out of sync with Claude agent definitions!"
+            echo "Please run 'python scripts/sync_agents_to_antigravity.py' locally and commit the updated files in '.agents/plugins/'."
+            git diff .agents/plugins/
+            exit 1
+          else
+            echo "✅ Antigravity local agents are in sync"
+          fi
+
       - name: Summary
         if: always()
         run: |
@@ -152,6 +170,7 @@ jobs:
           echo "  - Plugin.json integrity (no phantoms, no invisible agents)"
           echo "  - Model tier assignment sanity"
           echo "  - Codex agent synchronization check"
+          echo "  - Antigravity agent synchronization check"
           echo ""
           echo "⚠️  Review recommended:"
           echo "  - Check boundary rules for overlapping agents"

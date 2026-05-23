@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
 Sync Claude agent definitions (.claude/agents/categories/)
-to Antigravity CLI plugins (~/.gemini/antigravity-cli/plugins/)
-as native agent plugins.
+to Antigravity CLI workspace-local plugins (.agents/plugins/) by default,
+or to global user plugins (~/.gemini/antigravity-cli/plugins/) via --global.
 """
 
 import os
+import sys
 import json
 import shutil
 from pathlib import Path
@@ -14,17 +15,39 @@ def main():
     repo_root = Path(__file__).parent.parent
     categories_dir = repo_root / '.claude' / 'agents' / 'categories'
     
-    home = Path.home()
-    antigravity_plugins_dir = home / '.gemini' / 'antigravity-cli' / 'plugins'
+    # Check for --global flag
+    use_global = '--global' in sys.argv
+
+    if use_global:
+        home = Path.home()
+        antigravity_plugins_dir = home / '.gemini' / 'antigravity-cli' / 'plugins'
+        print("Syncing globally to Antigravity CLI user directory...")
+    else:
+        antigravity_plugins_dir = repo_root / '.agents' / 'plugins'
+        print("Syncing locally to workspace-level .agents/plugins/ directory...")
 
     if not categories_dir.exists():
         print(f"Error: Categories directory not found at {categories_dir}")
-        return
+        sys.exit(1)
 
-    # Find all categories with a .claude-plugin/plugin.json
+    # Clean existing plugin directory to avoid stale files
+    if antigravity_plugins_dir.exists():
+        try:
+            shutil.rmtree(antigravity_plugins_dir)
+        except Exception as e:
+            print(f"Warning: Could not clean existing plugins directory {antigravity_plugins_dir}: {e}")
+
+    # Create target directory
+    try:
+        antigravity_plugins_dir.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        print(f"Error creating directory {antigravity_plugins_dir}: {e}")
+        sys.exit(1)
+
     count_plugins = 0
     count_agents = 0
 
+    # Find all categories with a .claude-plugin/plugin.json
     for category_path in categories_dir.iterdir():
         if not category_path.is_dir():
             continue
@@ -45,17 +68,9 @@ def main():
             print(f"Warning: No plugin name defined in {plugin_json_path}")
             continue
 
-        # Target directory for this plugin in Antigravity CLI
+        # Target directory for this plugin
         target_dir = antigravity_plugins_dir / plugin_name
 
-        # Clean existing plugin directory to avoid stale files
-        if target_dir.exists():
-            try:
-                shutil.rmtree(target_dir)
-            except Exception as e:
-                print(f"Warning: Could not clean existing plugin directory {target_dir}: {e}")
-
-        # Create target directory
         try:
             target_dir.mkdir(parents=True, exist_ok=True)
         except Exception as e:
@@ -91,7 +106,7 @@ def main():
         count_plugins += 1
         count_agents += agents_copied
 
-    print(f"\nSuccessfully synced {count_plugins} plugins and {count_agents} total agents to Antigravity CLI!")
+    print(f"\nSuccessfully synced {count_plugins} plugins and {count_agents} total agents to {antigravity_plugins_dir}")
 
 if __name__ == '__main__':
     main()
