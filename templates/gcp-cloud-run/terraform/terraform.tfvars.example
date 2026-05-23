@@ -1,0 +1,32 @@
+project_id          = "my-gcp-project"
+region              = "us-central1"
+service_name        = "my-service"
+github_repo         = "nickpclarke/my-api-spoke"
+artifact_repository = "containers"
+allow_unauthenticated = false
+
+# Plaintext, non-sensitive config:
+env = {
+  LOG_LEVEL = "info"
+}
+
+# ENV_VAR_NAME => Secret Manager secret id. Terraform creates the secret
+# containers and grants the runtime identity read access.
+secrets = {
+  DB_PASSWORD = "db-password"
+  API_KEY     = "api-key"
+}
+
+# Optional: seed initial secret values here (sensitive). PREFER adding versions
+# out of band so values never land in Terraform state:
+#   echo -n "s3cr3t" | gcloud secrets versions add db-password --data-file=-
+# secret_values = {
+#   DB_PASSWORD = "change-me"
+# }
+
+labels = {
+  team        = "platform"
+  env         = "prod"
+  cost-center = "engineering"
+  spoke       = "my-api-spoke"
+}
