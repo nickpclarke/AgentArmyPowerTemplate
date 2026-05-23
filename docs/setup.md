@@ -276,6 +276,28 @@ Codex should read `AGENTS.md` first, then use `CLAUDE.md` and `.claude/agents/ca
 
 Keep machine-specific Codex settings in your user-level Codex config, environment variables, or an untracked `.codex/config.local.toml` file. See [Using Codex](codex.md) for the Codex-specific workflow and hook guidance.
 
+### Recommended parallel-agent worktree strategy
+
+When Claude Code and Codex are both active on the same PC, avoid pointing them at the same mutable checkout.
+
+Recommended local model:
+
+| Runtime | Preferred checkout |
+|---|---|
+| Claude Code | Main repository folder, for stewardship and integration work |
+| Codex | A Codex UI-created worktree for isolated task work |
+| Additional agents | Their own Codex UI-created worktree or equivalent isolated checkout |
+
+Use the Codex desktop **New worktree** action instead of manually creating worktree folders. This keeps the branch/folder wiring visible in Codex and avoids one agent changing the branch or dirty state underneath another.
+
+Before starting agent work, verify where the agent is standing:
+
+```bash
+git branch --show-current
+git status --short --branch
+git worktree list
+```
+
 ## Step 9 — Run the onboarding sanity checks
 
 ```bash

@@ -74,11 +74,14 @@ Do not commit personal API keys or provider choices in `.codex/config.toml`. Kee
 
 ## Practical Codex Workflow
 
-1. Start with `AGENTS.md`, then inspect the relevant docs and file structure.
-2. Classify the work: docs, workflow, agent definition, setup, review, or helper tooling.
-3. For non-trivial scope, create or update an ExecPlan under `.agent/plans/`.
-4. Make the smallest template-level change.
-5. Run docs or script validation when available.
-6. Summarize changed files, validation, and residual risks.
+1. Prefer the Codex desktop **New worktree** flow for task work when Claude Code or another agent may also be active.
+2. Start with `AGENTS.md`, then inspect the relevant docs and file structure.
+3. Classify the work: docs, workflow, agent definition, setup, review, or helper tooling.
+4. For non-trivial scope, create or update an ExecPlan under `.agent/plans/`.
+5. Make the smallest template-level change.
+6. Run docs or script validation when available.
+7. Summarize changed files, validation, and residual risks.
+
+When Codex is running in a worktree, keep changes on that worktree's branch and merge them back through the main repository checkout or a PR. If Codex needs the latest Claude Code work, that work must be committed and available through `main` or another branch first.
 
 For GitHub-board-backed work, use the same board conventions as Claude Code: create issues for non-trivial changes, apply `copilot-task` or `agent-army-task`, and include `Closes #N` in PR bodies.

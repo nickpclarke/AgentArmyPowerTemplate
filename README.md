@@ -156,6 +156,8 @@ Full reference: [docs/github-projects.md](docs/github-projects.md)
 
 Codex uses `AGENTS.md` as its repository instruction file, `.codex/hooks.json` for MemPalace lifecycle hooks, and `.codex/config.toml` for committed project-safe defaults. Keep personal API keys in local user config, environment variables, or an untracked `.codex/config.local.toml`.
 
+When Claude Code and Codex are both active on one PC, use Codex desktop's **New worktree** flow for Codex task work. Keep Claude Code in the main repository folder for stewardship/integration, and let Codex work in its own isolated branch/folder.
+
 See [docs/codex.md](docs/codex.md) for the Codex workflow, including how to reuse Claude Code agent definitions as routing and review lenses.
 
 ### Claude Code plugins (9 installed via `/plugin`)
