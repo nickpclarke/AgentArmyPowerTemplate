@@ -193,4 +193,4 @@ Track planned vs actual BV on the PI Objectives issue.
 
 ### Flow metrics
 
-The `pi-report.yml` Action generates a weekly snapshot of Todo / In progress / Done counts. For flow efficiency and cycle time, export the board data and analyse in a spreadsheet or BI tool using the `Created` and `Closed` date fields.
+The `pi-report.yml` Action generates a weekly snapshot of per-Status counts (Todo / Ready / In Progress / In Review / Done / Awaiting Decision). For flow efficiency and cycle time, export the board data and analyse in a spreadsheet or BI tool using the `Created` and `Closed` date fields.

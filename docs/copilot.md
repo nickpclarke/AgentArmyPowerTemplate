@@ -75,7 +75,7 @@ Comment on any issue or PR to query the board:
 
 | Command | What you get |
 |---------|-------------|
-| `/board-status` | Todo / In progress / Done count + % complete |
+| `/board-status` | Status breakdown + % complete |
 | `/sprint` | Items in the current iteration |
 | `/blocked` | Open issues with `blocked-by` label |
 | `/p0` | Open P0 priority items |

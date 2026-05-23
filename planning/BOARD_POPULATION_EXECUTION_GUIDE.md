@@ -167,7 +167,7 @@ After deletion, the remaining markdown SAFE program artifacts are:
 - ✅ Parent-child relationships (Epic → Features)
 - ✅ Iteration/Sprint assignments
 - ✅ Start/Target dates
-- ✅ Status tracking (Todo → In progress → Done)
+- ✅ Status tracking (Todo → Ready → In Progress → In Review → Done)
 - ✅ Burndown/velocity reports
 - ✅ Sprint planning views
 

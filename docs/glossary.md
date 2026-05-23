@@ -20,7 +20,7 @@
 
 **PR (Pull Request)** — Code change proposed for merge. Must link back to issue with `Closes #N`.
 
-**Type** — Custom field on issue: Epic, Feature, Story, Enabler, Bug, Spike. Defines hierarchy and kind of work.
+**Type** — Custom field on issue: Epic, Feature, Story, Enabler, Bug, Spike, Decision. Defines hierarchy and kind of work.
 
 **Size** — Custom field on issue: XS, S, M, L, XL. T-shirt estimate for routing and effort prediction.
 
@@ -30,7 +30,7 @@
 
 **PI (Program Increment)** — ~10-week planning horizon with a goal, multiple sprints, and quarterly business review. Tracked as GitHub Milestone.
 
-**Status** — Auto-managed field: Todo → In progress → Done, with **Awaiting Decision** as a hold state when a HITL decision is required. Updated by the `auto-status` workflow (In progress on PR open, Done on PR merge with `Closes #N`).
+**Status** — Field tracking work state: Todo → Ready → In Progress → In Review → Done, with **Awaiting Decision** as a hold state when a HITL decision is required. The `auto-status` workflow sets In Progress on PR open and Done on PR merge (with `Closes #N`); Ready and In Review are set manually.
 
 **Iteration** — 2-week sprint. Assigned to issues during sprint planning.
 

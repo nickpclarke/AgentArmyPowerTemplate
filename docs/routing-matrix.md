@@ -144,12 +144,12 @@ Every issue must have these fields set **before** delegating:
 
 | Field | Options | When to Set |
 |-------|---------|------------|
-| **Type** | Epic, Feature, Story, Enabler, Bug, Spike | At creation |
+| **Type** | Epic, Feature, Story, Enabler, Bug, Spike, Decision | At creation |
 | **PI** | PI-1, PI-2, etc. | At creation |
 | **Size** | XS, S, M, L, XL | At creation |
 | **Estimate** | Story points (1,2,3,5,8,13) | During planning |
 | **Priority** | P0, P1, P2 | At creation or during grooming |
-| **Status** | Todo→In progress→Done (+ Awaiting Decision for HITL) | Auto-managed, don't override |
+| **Status** | Todo→Ready→In Progress→In Review→Done (+ Awaiting Decision for HITL) | Auto-managed, don't override |
 
 ---
 

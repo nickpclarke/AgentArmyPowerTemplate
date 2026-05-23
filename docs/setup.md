@@ -79,7 +79,7 @@ gh project create --owner YOUR_USERNAME --title "AgentArmy"
 # Add SAFE-specific custom fields
 gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
   --name "Type" --data-type "SINGLE_SELECT" \
-  --single-select-options "Epic,Feature,Story,Enabler,Bug,Spike"
+  --single-select-options "Epic,Feature,Story,Enabler,Bug,Spike,Decision"
 
 gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
   --name "PI" --data-type "TEXT"
@@ -109,7 +109,7 @@ In `.github/workflows/auto-status.yml`, update the env block:
 env:
   PROJECT_ID: <your project node ID from GraphQL>
   STATUS_FIELD_ID: <your Status field ID>
-  OPT_IN_PROGRESS: <your "In progress" option ID>
+  OPT_IN_PROGRESS: <your "In Progress" option ID>
   OPT_DONE: <your "Done" option ID>
 ```
 

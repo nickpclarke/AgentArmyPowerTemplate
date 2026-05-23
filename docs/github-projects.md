@@ -39,14 +39,16 @@ The AgentArmy project board has 21 fields. This document covers what each field 
 
 ## Status Values
 
-These four values are the complete set of Status options on the board. Workflow code that filters by status must match these names **exactly** (case-sensitive) — note that the board stores **`In progress`** with a lowercase "p". Verify the live set with `gh project field-list <number> --owner <owner> --format json`.
+These six values are the complete set of Status options on the board. Workflow code that filters by status must match these names **exactly** (case-sensitive). Verify the live set with `gh project field-list <number> --owner <owner> --format json`.
 
 | Value | Meaning | How it's set |
 |---|---|---|
 | Todo | In backlog, not started | Default when added to board |
-| In progress | Work has started | Auto-set by `auto-status` when a PR referencing this issue is opened |
-| Awaiting Decision | Blocked on a HITL decision artifact | Set via the HITL flow (`hitl-coordinator` / `hitl-decision`); `auto-status` skips the In progress transition for `awaiting-human` items |
+| Ready | Refined and ready to start — Definition of Ready met | Set manually during grooming / sprint planning |
+| In Progress | Work has started | Auto-set by `auto-status` when a PR referencing this issue is opened |
+| In Review | PR is open and under review | Set manually when review begins |
 | Done | Work is complete | Auto-set by `auto-status` when that PR is merged |
+| Awaiting Decision | Blocked on a HITL decision artifact | Set via the HITL flow (`hitl-coordinator` / `hitl-decision`); `auto-status` skips the In Progress transition for `awaiting-human` items |
 
 To manually override status:
 
@@ -66,7 +68,7 @@ Views are how the board's fields turn into a usable workspace. GitHub Projects v
 | View | Layout | Group by | Filter | Sort | Purpose |
 |---|---|---|---|---|---|
 | **Backlog** | Table | `PI` | `-status:Done` | Priority ↓ | Refinement — every SAFE field as a column |
-| **Sprint Board** | Board | `Status` | `iteration:@current` | Priority ↓ | Active sprint kanban (Todo → In progress → Done) |
+| **Sprint Board** | Board | `Status` | `iteration:@current` | Priority ↓ | Active sprint kanban (Todo → Ready → In Progress → In Review → Done) |
 | **Roadmap** | Roadmap | `PI` | `is:open` | Start date ↑ | Timeline using Start date → Target date |
 | **Release Trains** | Table | `Parent issue` | `type:Epic,Feature` | — | Epic → Feature rollup with Sub-issues progress |
 | **By Type** | Board | `Type` | `is:open` | — | Distribution across Epic/Feature/Story/Enabler/Decision |
@@ -75,7 +77,7 @@ Views are how the board's fields turn into a usable workspace. GitHub Projects v
 Filter syntax notes (Projects v2 query language):
 
 - Single-select fields filter by token: `status:Todo`, `type:Epic`, `priority:P0`, `size:L`
-- Values with spaces need quotes: `status:"Awaiting Decision"`, `status:"In progress"`
+- Values with spaces need quotes: `status:"Awaiting Decision"`, `status:"In Progress"`, `status:"In Review"`
 - The text `PI` field filters by value: `PI:PI-1`
 - Iteration shortcuts: `iteration:@current`, `iteration:@next`
 - HITL slices also work off labels: `label:hitl-decision`, `label:"assignee:human"` (quote label values that contain a colon)

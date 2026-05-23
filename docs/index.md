@@ -89,8 +89,8 @@ AgentArmy uses Scaled Agile Framework (SAFe) for predictable delivery:
 
 Single source of truth for all work:
 
-- **Type** field: Epic, Feature, Story, Enabler, Bug, Spike
-- **Status** workflow: Todo → In progress → Done (plus Awaiting Decision for HITL holds)
+- **Type** field: Epic, Feature, Story, Enabler, Bug, Spike, Decision
+- **Status** workflow: Todo → Ready → In Progress → In Review → Done (plus Awaiting Decision for HITL holds)
 - **PI** field: Links issues to Program Increments
 - **Size** & **Estimate**: T-shirt size + story points
 
