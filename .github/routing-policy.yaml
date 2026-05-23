@@ -1,0 +1,1275 @@
+routing_policy:
+  version: "1.0"
+  description: >
+    Machine-readable routing decision tree for AgentArmy. Converts the prose
+    routing table in CLAUDE.md into an executable, testable policy. Rules are
+    evaluated in ascending priority order; the first matching rule wins.
+    Ties at the same priority are flagged as ambiguous by the validator.
+
+  armies:
+    copilot:
+      description: >
+        GitHub-native, fast, lightweight army. Best for bounded, well-defined
+        tasks (XS/S size), first-pass PR review, and board queries via
+        @board-manager. Routes via the 'copilot-task' label.
+      triggers:
+        - label: copilot-task
+        - label: "@board-manager"
+        - event: pull_request  # automatic first-pass review on all PRs
+
+    claude_code:
+      description: >
+        Local, deep, strategic army. Handles architecture, complex features,
+        SAFE planning, security audits, and all M/L/XL-sized work. Routes via
+        'agent-army-task' label or direct Claude Code session.
+      triggers:
+        - label: agent-army-task
+        - size: [M, L, XL]
+
+  rules:
+
+    # =========================================================================
+    # TIER 0: Copilot Army — label-triggered and automatic
+    # =========================================================================
+
+    - id: copilot-board-query
+      priority: 10
+      army: copilot
+      agent: null
+      conditions:
+        keywords: ["@board-manager"]
+        concern: "GitHub Projects board queries (status, sprint state, burndown)"
+      rationale: "@board-manager invocations are exclusively Copilot Chat territory."
+      example: "@board-manager what is the status of PI-1?"
+
+    - id: copilot-pr-review-auto
+      priority: 11
+      army: copilot
+      agent: null
+      conditions:
+        issue_types: [pull_request]
+        concern: "First-pass inline PR review on all pull requests"
+      rationale: "Copilot auto-reviews every PR; no label required."
+      example: "Any PR opened against the repo triggers Copilot review."
+
+    - id: copilot-task-label
+      priority: 12
+      army: copilot
+      agent: null
+      conditions:
+        labels: [copilot-task]
+        concern: "Explicitly delegated to Copilot via label"
+      rationale: "copilot-task label is the canonical routing signal to Copilot."
+      example: "Bug or Story labelled 'copilot-task' by a human or agent."
+
+    - id: copilot-xs-bug
+      priority: 20
+      army: copilot
+      agent: null
+      conditions:
+        issue_types: [bug]
+        size: [XS]
+        concern: "XS-sized bug fixes — bounded, clear acceptance criteria"
+      rationale: "XS bugs are prime Copilot territory; fast turnaround, low risk."
+      example: "Typo fix, single-line null-check, missing import."
+
+    - id: copilot-xs-story
+      priority: 21
+      army: copilot
+      agent: null
+      conditions:
+        issue_types: [story]
+        size: [XS]
+        concern: "XS-sized user stories with clear acceptance criteria"
+      rationale: "XS stories are well-scoped for Copilot's bounded implementation mode."
+      example: "Add a new field to an existing form with validation."
+
+    - id: copilot-s-bug
+      priority: 30
+      army: copilot
+      agent: null
+      conditions:
+        issue_types: [bug]
+        size: [S]
+        concern: "Small bug fixes (≤1 day) with clear root cause"
+      rationale: "S bugs can go to Copilot when acceptance criteria are unambiguous."
+      example: "Fix off-by-one error in pagination logic."
+
+    - id: copilot-s-story
+      priority: 31
+      army: copilot
+      agent: null
+      conditions:
+        issue_types: [story]
+        size: [S]
+        concern: "Small stories (≤1 day) with clear implementation path"
+      rationale: "S stories go to Copilot when requirements are fully defined."
+      example: "Add sorting to an existing data table."
+
+    - id: copilot-deep-pr-review
+      priority: 35
+      army: claude_code
+      agent: null
+      skill: review-pr
+      conditions:
+        labels: [needs-deep-review]
+        concern: "Large PRs requiring deep multi-file review beyond Copilot's scope"
+      rationale: "PRs >200 LOC auto-labelled needs-deep-review; Claude Code /review-pr skill takes over."
+      example: "PR touching 15 files and 600 lines triggers needs-deep-review."
+
+    # =========================================================================
+    # TIER 1: HITL Escalation — highest-priority Claude Code rules
+    # =========================================================================
+
+    - id: hitl-decision-artifact
+      priority: 40
+      army: claude_code
+      agent: hitl-coordinator
+      conditions:
+        labels: [hitl-decision]
+        issue_types: [decision]
+        concern: "HITL decision artifact — blocked issue awaiting human or AI-app judgment"
+      rationale: "Decision type issues are exclusively managed by hitl-coordinator."
+      example: "Architectural choice between two valid approaches that requires human sign-off."
+
+    - id: hitl-awaiting-human
+      priority: 41
+      army: claude_code
+      agent: hitl-coordinator
+      conditions:
+        labels: [awaiting-human]
+        concern: "Issue blocked pending a HITL decision"
+      rationale: "awaiting-human label means no agent should pick up the work until the decision closes."
+      example: "Story blocked on a security architecture decision."
+
+    - id: hitl-creative-divergence
+      priority: 42
+      army: claude_code
+      agent: hitl-coordinator
+      conditions:
+        keywords: [divergence, "design path", "architectural fork", "scope change", "priority conflict"]
+        concern: "Creative or architectural divergence needing human judgment"
+      rationale: "Agents escalate to hitl-coordinator when they hit judgment calls exceeding their authority."
+      example: "Agent finds two equally valid DB schema designs with different trade-offs."
+
+    # =========================================================================
+    # TIER 2: Agent Governance & Meta-Orchestration
+    # =========================================================================
+
+    - id: agent-governance-mece
+      priority: 50
+      army: claude_code
+      agent: agent-distinctiveness-advocate
+      conditions:
+        labels: [agent-onboarding, mece-validation]
+        concern: "Pre-merge agent onboarding validation and routing ambiguity diagnosis"
+      rationale: "New agents must pass AGENT_ONBOARDING_RUBRIC.md before merge."
+      example: "PR adding a new agent definition triggers MECE validation."
+
+    - id: error-escalation
+      priority: 51
+      army: claude_code
+      agent: error-coordinator
+      conditions:
+        labels: [agent-error, escalation]
+        concern: "Agent runtime errors and failure escalations"
+      rationale: "ARMY_PRINCIPLES#1: Every agent escalates failures to error-coordinator."
+      example: "An agent crashes mid-task and raises an error escalation issue."
+
+    - id: knowledge-synthesis
+      priority: 52
+      army: claude_code
+      agent: knowledge-synthesizer
+      conditions:
+        labels: [knowledge-feedback, retrospective]
+        concern: "Post-sprint knowledge capture and insight aggregation"
+      rationale: "ARMY_PRINCIPLES#2: Agents feed insights to knowledge-synthesizer."
+      example: "End-of-sprint retrospective triggers knowledge synthesis."
+
+    # =========================================================================
+    # TIER 3: Planning & Requirements
+    # =========================================================================
+
+    - id: requirements-user-stories
+      priority: 100
+      army: claude_code
+      agent: business-analyst
+      conditions:
+        labels: [requirements, user-story, story-refinement]
+        issue_types: [story, feature]
+        keywords: [requirements, "user story", "acceptance criteria", "refinement", "backlog grooming"]
+        concern: "Requirements analysis, user story writing, and backlog refinement"
+      rationale: "business-analyst owns the requirements and story decomposition lifecycle."
+      example: "Refine ambiguous Epic into Stories with acceptance criteria."
+
+    - id: sprint-pi-planning
+      priority: 101
+      army: claude_code
+      agent: scrum-master
+      conditions:
+        labels: [sprint-planning, pi-planning, iteration]
+        issue_types: [enabler]
+        keywords: ["sprint planning", "PI planning", "iteration", "ceremony", "velocity", "burndown"]
+        concern: "Sprint and PI planning ceremonies, story pointing, capacity planning"
+      rationale: "scrum-master owns SAFE sprint/PI ceremonies and board management."
+      example: "Set up PI-2 sprint schedule and capacity plan."
+
+    - id: epic-breakdown
+      priority: 102
+      army: claude_code
+      agent: architect-reviewer
+      conditions:
+        issue_types: [epic]
+        concern: "Epic decomposition into Features and Enablers"
+      rationale: "Epics require architectural analysis before breaking into Stories; architect-reviewer leads."
+      example: "Epic: Implement multi-tenant data isolation — architect breaks into Features."
+
+    # =========================================================================
+    # TIER 4: Architecture & Design
+    # =========================================================================
+
+    - id: architecture-decisions
+      priority: 110
+      army: claude_code
+      agent: architect-reviewer
+      conditions:
+        labels: [architecture, adr]
+        keywords: ["architectural decision", "architecture decision", ADR, "design decision", "system design", "architecture review"]
+        concern: "Architecture decisions, ADRs, system-level design reviews"
+      rationale: "architect-reviewer owns architecture decisions and design review for individual systems."
+      example: "Choose between event-sourcing and CQRS for the order service."
+
+    - id: security-audit
+      priority: 111
+      army: claude_code
+      agent: security-auditor
+      conditions:
+        labels: [security-audit, security]
+        keywords: ["security audit", "vulnerability", "pen test", "threat model"]
+        concern: "Security audits, vulnerability assessments, threat modelling"
+      rationale: "security-auditor runs security-review skill and deep audits."
+      example: "Audit authentication flow before production launch."
+
+    - id: api-design
+      priority: 112
+      army: claude_code
+      agent: api-designer
+      conditions:
+        keywords: ["API design", "OpenAPI", "REST contract", "GraphQL schema", "AsyncAPI"]
+        concern: "API contract design — REST, GraphQL, AsyncAPI schemas"
+      rationale: "api-designer leads the contract cluster: design → contract-test-engineer → schema-migration-engineer."
+      example: "Design the OpenAPI spec for a new payments service."
+
+    # =========================================================================
+    # TIER 5: Frontend Development
+    # =========================================================================
+
+    - id: frontend-greenfield
+      priority: 120
+      army: claude_code
+      agent: frontend-developer
+      conditions:
+        labels: [frontend, ui]
+        keywords: [greenfield, "new frontend", "multi-framework", "from scratch", "new UI"]
+        concern: "Greenfield frontend builds and multi-framework frontend work"
+      rationale: "frontend-developer handles new builds and cross-framework work; react-specialist optimizes existing React."
+      example: "Build a new dashboard from scratch using React and Tailwind."
+
+    - id: frontend-react-optimize
+      priority: 119
+      army: claude_code
+      agent: react-specialist
+      conditions:
+        labels: [react, frontend]
+        keywords: ["existing React", "React optimization", "React component performance", "React hooks", "memoize React", "React memoize", "React refactor"]
+        concern: "Optimizing and refactoring existing React applications"
+      rationale: "react-specialist handles perf tuning and idiomatic React patterns in existing codebases. Priority is higher than frontend-greenfield because 'react' label + optimization keywords are a more specific signal."
+      example: "Reduce bundle size and memoize expensive React component tree."
+
+    - id: frontend-nextjs
+      priority: 122
+      army: claude_code
+      agent: nextjs-developer
+      conditions:
+        keywords: ["Next.js", "nextjs", "SSR", "server-side rendering", "app router"]
+        concern: "Next.js app development, SSR, App Router, and RSC"
+      rationale: "nextjs-developer owns Next.js conventions, data fetching patterns, and deployment."
+      example: "Implement App Router with streaming for the docs site."
+
+    - id: frontend-vue
+      priority: 123
+      army: claude_code
+      agent: vue-expert
+      conditions:
+        keywords: ["Vue", "Vue 3", "Vuex", "Pinia", "Composition API"]
+        concern: "Vue 3 application development"
+      rationale: "vue-expert owns Vue 3 conventions, Pinia, and the Composition API."
+      example: "Migrate Vue 2 Options API component to Vue 3 Composition API."
+
+    - id: frontend-angular
+      priority: 124
+      army: claude_code
+      agent: angular-architect
+      conditions:
+        keywords: ["Angular", "NgRx", "RxJS", "Angular Material"]
+        concern: "Angular application architecture and development"
+      rationale: "angular-architect owns Angular module design, NgRx state, and RxJS pipelines."
+      example: "Design NgRx store for a complex Angular enterprise app."
+
+    - id: frontend-javascript-language
+      priority: 125
+      army: claude_code
+      agent: javascript-pro
+      conditions:
+        keywords: ["async/await", "JavaScript", "ES2024", "closure", "prototype", "event loop"]
+        concern: "JavaScript language-level issues: runtime semantics, async patterns, type coercion"
+      rationale: "javascript-pro handles language idioms; for framework work use the framework specialist."
+      example: "Debug an async/await race condition in vanilla JS."
+
+    - id: frontend-typescript-language
+      priority: 126
+      army: claude_code
+      agent: typescript-pro
+      conditions:
+        keywords: ["TypeScript", "type system", "generics", "type narrowing", "declaration merging"]
+        concern: "TypeScript type system, compiler config, and TS-specific patterns"
+      rationale: "typescript-pro handles TS type system and compiler; framework specialist handles framework conventions."
+      example: "Design a type-safe API client using conditional types and infer."
+
+    - id: frontend-mobile-web
+      priority: 127
+      army: claude_code
+      agent: mobile-web-specialist
+      conditions:
+        keywords: ["responsive", "mobile web", "PWA", "touch", "viewport", "media query"]
+        concern: "Responsive design, mobile web, and PWA"
+      rationale: "mobile-web-specialist owns responsive design and PWA; mobile-developer owns native cross-platform."
+      example: "Optimize checkout flow for mobile with touch-friendly interactions."
+
+    # =========================================================================
+    # TIER 6: Backend Development
+    # =========================================================================
+
+    - id: backend-rest-graphql
+      priority: 130
+      army: claude_code
+      agent: backend-developer
+      conditions:
+        labels: [backend, api]
+        keywords: ["REST API", "GraphQL", "backend developer", "microservice", "CRUD endpoint", "REST endpoint"]
+        concern: "Generic REST/GraphQL API and backend service implementation"
+      rationale: "backend-developer is the general backend specialist; delegate to language specialists for idioms."
+      example: "Implement CRUD endpoints for the user resource."
+
+    - id: backend-fastapi
+      priority: 131
+      army: claude_code
+      agent: fastapi-developer
+      conditions:
+        keywords: ["FastAPI", "Pydantic", "async Python", "starlette"]
+        concern: "FastAPI application development — routes, models, dependency injection"
+      rationale: "fastapi-developer owns FastAPI conventions and async Python web patterns."
+      example: "Add OAuth2 password flow to an existing FastAPI app."
+
+    - id: backend-django
+      priority: 132
+      army: claude_code
+      agent: django-developer
+      conditions:
+        keywords: ["Django", "Django REST", "DRF", "Django ORM", "models.py", "Django migrations"]
+        concern: "Django application development — ORM, DRF, admin, signals"
+      rationale: "django-developer owns Django conventions from models to DRF serializers."
+      example: "Implement a Django model with custom manager and DRF ViewSet."
+
+    - id: backend-spring-boot
+      priority: 133
+      army: claude_code
+      agent: spring-boot-engineer
+      conditions:
+        keywords: ["Spring Boot", "Spring", "JPA", "Hibernate", "Spring Security"]
+        concern: "Spring Boot application development"
+      rationale: "spring-boot-engineer owns Spring Boot conventions, JPA, and Spring Security."
+      example: "Add JWT authentication to a Spring Boot REST API."
+
+    - id: backend-node
+      priority: 134
+      army: claude_code
+      agent: node-specialist
+      conditions:
+        keywords: ["Node.js", "Express", "Koa", "Fastify", "npm", "CommonJS", "ESM server"]
+        concern: "Node.js server-side development"
+      rationale: "node-specialist owns Node.js runtime, Express/Fastify, and server-side JS patterns."
+      example: "Build a webhook receiver in Node.js with Express."
+
+    - id: backend-rails
+      priority: 135
+      army: claude_code
+      agent: rails-expert
+      conditions:
+        keywords: ["Rails", "Ruby on Rails", "ActiveRecord", "Devise", "Turbo"]
+        concern: "Ruby on Rails application development"
+      rationale: "rails-expert owns Rails conventions, ActiveRecord, and the asset pipeline."
+      example: "Add Devise authentication to a Rails 7 app."
+
+    - id: backend-microservices
+      priority: 136
+      army: claude_code
+      agent: microservices-architect
+      conditions:
+        keywords: ["microservices", "service mesh", "saga", "distributed", "service decomposition"]
+        concern: "Microservices architecture design and decomposition"
+      rationale: "microservices-architect designs service boundaries, saga patterns, and service mesh topology."
+      example: "Decompose a monolith into microservices using domain-driven design."
+
+    # =========================================================================
+    # TIER 7: Language Specialists (pure language, no framework)
+    # =========================================================================
+
+    - id: lang-python
+      priority: 140
+      army: claude_code
+      agent: python-pro
+      conditions:
+        keywords: ["Python", "asyncio", "GIL", "typing", "dataclass", "Pythonic", "PEP"]
+        concern: "Python language idioms, type hints, asyncio, and runtime semantics"
+      rationale: "python-pro handles language-level Python; fastapi-developer/django-developer handle framework work."
+      example: "Design a type-safe async generator pattern in Python 3.12."
+
+    - id: lang-golang
+      priority: 141
+      army: claude_code
+      agent: golang-pro
+      conditions:
+        keywords: ["Go", "Golang", "goroutine", "channel", "interface", "Go module"]
+        concern: "Go language idioms, concurrency patterns, and module system"
+      rationale: "golang-pro handles Go runtime semantics and concurrency patterns."
+      example: "Design a context-aware worker pool with bounded concurrency in Go."
+
+    - id: lang-rust
+      priority: 142
+      army: claude_code
+      agent: rust-engineer
+      conditions:
+        keywords: ["Rust", "borrow checker", "lifetime", "ownership", "Cargo", "unsafe"]
+        concern: "Rust systems programming, ownership model, and performance"
+      rationale: "rust-engineer handles Rust's ownership model, lifetimes, and unsafe code."
+      example: "Implement a zero-copy parser using Rust lifetimes."
+
+    - id: lang-java
+      priority: 143
+      army: claude_code
+      agent: java-architect
+      conditions:
+        keywords: ["Java", "JVM", "Maven", "Gradle", "bytecode", "generics", "Java 21"]
+        concern: "Java language architecture, JVM tuning, and enterprise Java patterns"
+      rationale: "java-architect handles Java language design; spring-boot-engineer handles framework work."
+      example: "Design a Java 21 virtual-thread-based request handling pattern."
+
+    - id: lang-csharp
+      priority: 144
+      army: claude_code
+      agent: csharp-developer
+      conditions:
+        keywords: ["C#", "LINQ", "async Task", ".NET", "Blazor", "Entity Framework"]
+        concern: "C# language idioms, LINQ, and .NET BCL patterns"
+      rationale: "csharp-developer handles C# language; dotnet-core-expert handles .NET platform concerns."
+      example: "Implement a C# source generator for DTO mapping."
+
+    - id: lang-kotlin
+      priority: 145
+      army: claude_code
+      agent: kotlin-specialist
+      conditions:
+        keywords: ["Kotlin", "Kotlin coroutines", "Kotlin Flow", "sealed class", "Kotlin data class"]
+        concern: "Kotlin language features and coroutine-based concurrency"
+      rationale: "kotlin-specialist handles Kotlin idioms and coroutines."
+      example: "Migrate Java callbacks to Kotlin coroutines with Flow."
+
+    - id: lang-swift
+      priority: 146
+      army: claude_code
+      agent: swift-expert
+      conditions:
+        keywords: ["Swift", "SwiftUI", "Combine", "Actor", "async/await Swift"]
+        concern: "Swift language and SwiftUI application development"
+      rationale: "swift-expert handles Swift concurrency model, SwiftUI, and Combine."
+      example: "Implement a SwiftUI view with async/await data loading."
+
+    - id: lang-php
+      priority: 147
+      army: claude_code
+      agent: php-pro
+      conditions:
+        keywords: ["PHP", "Composer", "PSR", "PHP 8", "Symfony", "Laravel"]
+        concern: "PHP language idioms and modern PHP patterns"
+      rationale: "php-pro handles PHP language; laravel-specialist/symfony-specialist handle framework work."
+      example: "Implement PHP 8.3 readonly properties with validation."
+
+    - id: lang-sql
+      priority: 148
+      army: claude_code
+      agent: sql-pro
+      conditions:
+        keywords: ["SQL", "query optimization", "CTE", "window function", "index", "query plan"]
+        concern: "SQL query writing, optimization, and database design"
+      rationale: "sql-pro handles SQL language; postgres-pro handles PostgreSQL-specific extensions."
+      example: "Optimize a slow multi-join report query using CTEs and partial indexes."
+
+    - id: lang-cpp
+      priority: 149
+      army: claude_code
+      agent: cpp-pro
+      conditions:
+        keywords: ["C++", "STL", "RAII", "move semantics", "template", "CMake"]
+        concern: "C++ systems programming and modern C++ patterns"
+      rationale: "cpp-pro handles C++ language semantics, STL, and build systems."
+      example: "Implement a C++20 coroutine-based async IO handler."
+
+    - id: lang-elixir
+      priority: 150
+      army: claude_code
+      agent: elixir-expert
+      conditions:
+        keywords: ["Elixir", "Phoenix", "GenServer", "OTP", "BEAM", "LiveView"]
+        concern: "Elixir/OTP language and Phoenix framework development"
+      rationale: "elixir-expert handles Elixir/OTP concurrency model and Phoenix LiveView."
+      example: "Design a fault-tolerant GenServer supervision tree in Elixir."
+
+    # =========================================================================
+    # TIER 8: Platform Specialists
+    # =========================================================================
+
+    - id: platform-dotnet-core
+      priority: 160
+      army: claude_code
+      agent: dotnet-core-expert
+      conditions:
+        keywords: [".NET Core", ".NET 6", ".NET 7", ".NET 8", ".NET 9", "ASP.NET Core", "Minimal API"]
+        concern: "Modern .NET (Core/5+) platform — runtime, Minimal APIs, dependency injection"
+      rationale: "dotnet-core-expert owns modern .NET; for .NET Framework legacy use dotnet-framework-4.8-expert."
+      example: "Migrate an ASP.NET Core app to .NET 8 Minimal APIs."
+
+    - id: platform-dotnet-framework
+      priority: 161
+      army: claude_code
+      agent: dotnet-framework-4.8-expert
+      conditions:
+        keywords: [".NET Framework", ".NET 4.8", ".NET 4.7", "WebForms", "WCF", "legacy .NET"]
+        concern: "Legacy .NET Framework 4.x — WebForms, WCF, Windows-bound dependencies"
+      rationale: "dotnet-framework-4.8-expert handles legacy .NET; for migration path, pair with dotnet-core-expert."
+      example: "Add a WCF service to an existing .NET Framework 4.8 solution."
+
+    - id: platform-powershell-7
+      priority: 162
+      army: claude_code
+      agent: powershell-7-expert
+      conditions:
+        keywords: ["PowerShell 7", "pwsh", "PowerShell Core", "cross-platform PowerShell"]
+        concern: "PowerShell 7 / PowerShell Core scripting"
+      rationale: "powershell-7-expert handles cross-platform pwsh; for Windows-only use powershell-5.1-expert."
+      example: "Write a PowerShell 7 module for cross-platform secret rotation."
+
+    - id: platform-powershell-5
+      priority: 163
+      army: claude_code
+      agent: powershell-5.1-expert
+      conditions:
+        keywords: ["PowerShell 5", "Windows PowerShell", "ISE", "COM automation"]
+        concern: "Windows PowerShell 5.1 — Windows-only automation and COM interop"
+      rationale: "powershell-5.1-expert handles legacy Windows PowerShell and COM automation."
+      example: "Automate SharePoint via COM with Windows PowerShell 5.1."
+
+    # =========================================================================
+    # TIER 9: Mobile Development
+    # =========================================================================
+
+    - id: mobile-react-native
+      priority: 170
+      army: claude_code
+      agent: expo-react-native-expert
+      conditions:
+        keywords: ["React Native", "Expo", "Metro bundler", "native module"]
+        concern: "React Native / Expo mobile app development"
+      rationale: "expo-react-native-expert handles React Native and Expo SDK conventions."
+      example: "Add Expo Camera with permissions to a React Native app."
+
+    - id: mobile-flutter
+      priority: 171
+      army: claude_code
+      agent: flutter-expert
+      conditions:
+        keywords: ["Flutter", "Dart", "Widget", "BLoC", "Riverpod"]
+        concern: "Flutter cross-platform mobile application development"
+      rationale: "flutter-expert handles Flutter widget tree, state management, and Dart."
+      example: "Implement a Flutter BLoC pattern for async data loading."
+
+    - id: mobile-native
+      priority: 172
+      army: claude_code
+      agent: mobile-app-developer
+      conditions:
+        keywords: ["iOS native", "Android native", "Swift native", "Kotlin Android", "Xcode", "Jetpack Compose"]
+        concern: "Native iOS and Android application development"
+      rationale: "mobile-app-developer handles native iOS/Android; expo-react-native-expert handles React Native."
+      example: "Implement native iOS push notifications using APNs."
+
+    - id: mobile-developer-cross-platform
+      priority: 173
+      army: claude_code
+      agent: mobile-developer
+      conditions:
+        keywords: ["cross-platform mobile", "Capacitor", "Cordova", "Ionic"]
+        concern: "Cross-platform mobile development beyond React Native and Flutter"
+      rationale: "mobile-developer covers broader cross-platform (Ionic/Capacitor/Cordova) patterns."
+      example: "Port a web app to Ionic with Capacitor for iOS and Android."
+
+    # =========================================================================
+    # TIER 10: Infrastructure & DevOps
+    # =========================================================================
+
+    - id: infra-cicd
+      priority: 180
+      army: claude_code
+      agent: devops-engineer
+      conditions:
+        labels: [devops, infra, ci-cd]
+        keywords: ["CI/CD", "GitHub Actions", "pipeline", "containerization", "Docker build", "infra automation"]
+        concern: "CI/CD pipelines, containerization, and infrastructure automation"
+      rationale: "devops-engineer builds and operates the delivery pipeline; deployment-engineer handles rollout strategy."
+      example: "Add a multi-stage Docker build to the GitHub Actions pipeline."
+
+    - id: infra-deployment-strategy
+      priority: 181
+      army: claude_code
+      agent: deployment-engineer
+      conditions:
+        keywords: ["canary", "blue-green", "rollback", "artifact promotion", "GitOps", "progressive delivery", "rollout strategy"]
+        concern: "Release and rollout strategy for a single service"
+      rationale: "deployment-engineer owns single-service rollout; release-manager coordinates cross-spoke trains."
+      example: "Set up a canary release with automated rollback for the payments service."
+
+    - id: infra-release-trains
+      priority: 182
+      army: claude_code
+      agent: release-manager
+      conditions:
+        labels: [release-train]
+        keywords: ["release train", "cross-spoke", "dependency order", "cross-repo changelog", "multi-repo release"]
+        concern: "Cross-spoke release trains — dependency ordering and multi-repo coordination"
+      rationale: "release-manager coordinates releases across Hub and Spoke repos; deployment-engineer handles single services."
+      example: "Coordinate RT2 release across UI, API, and worker spokes."
+
+    - id: infra-kubernetes
+      priority: 183
+      army: claude_code
+      agent: kubernetes-specialist
+      conditions:
+        keywords: ["Kubernetes", "k8s", "Helm", "Operator", "Pod", "Deployment", "Service mesh"]
+        concern: "Kubernetes cluster management, Helm charts, and Operators"
+      rationale: "kubernetes-specialist owns k8s workloads, Helm, and CRDs."
+      example: "Design a Kubernetes Operator for automatic certificate rotation."
+
+    - id: infra-terraform
+      priority: 184
+      army: claude_code
+      agent: terraform-engineer
+      conditions:
+        keywords: ["Terraform", "IaC", "Pulumi", "OpenTofu", "HCL", "Terraform module"]
+        concern: "Infrastructure as Code — Terraform, OpenTofu, Pulumi"
+      rationale: "terraform-engineer owns IaC authoring, module design, and state management."
+      example: "Write a Terraform module for a multi-AZ RDS cluster."
+
+    - id: infra-cloud-architect
+      priority: 185
+      army: claude_code
+      agent: cloud-architect
+      conditions:
+        keywords: ["AWS", "Azure", "GCP", "cloud architecture", "Well-Architected", "landing zone"]
+        concern: "Cloud platform architecture — AWS/Azure/GCP design and Well-Architected review"
+      rationale: "cloud-architect designs cloud-native solutions; terraform-engineer implements them."
+      example: "Design an AWS landing zone with multi-account strategy."
+
+    - id: infra-sre
+      priority: 186
+      army: claude_code
+      agent: sre-engineer
+      conditions:
+        keywords: ["SLO", "SLA", "error budget", "toil", "reliability", "on-call", "incident"]
+        concern: "Reliability engineering — SLOs, error budgets, toil reduction"
+      rationale: "sre-engineer consumes telemetry for SLOs; observability-engineer produces the telemetry pipeline."
+      example: "Define SLOs and error budget policy for the payments service."
+
+    - id: infra-observability
+      priority: 187
+      army: claude_code
+      agent: observability-engineer
+      conditions:
+        keywords: ["OpenTelemetry", "tracing", "metrics pipeline", "Grafana", "Prometheus", "logs pipeline", "instrumentation"]
+        concern: "Telemetry and instrumentation — OpenTelemetry, Grafana, Prometheus"
+      rationale: "observability-engineer instruments systems; sre-engineer uses the data for SLOs."
+      example: "Instrument a FastAPI service with OpenTelemetry and push to Grafana Cloud."
+
+    - id: infra-finops
+      priority: 188
+      army: claude_code
+      agent: finops-engineer
+      conditions:
+        keywords: ["FinOps", "cloud cost", "unit economics", "rightsizing", "reserved instances", "cost allocation"]
+        concern: "Cloud cost visibility, unit economics, and commitment-based savings"
+      rationale: "finops-engineer governs cloud spend; part of the delivery/ops cluster."
+      example: "Analyse EC2 rightsizing opportunities and recommend reserved instance commitments."
+
+    - id: infra-api-gateway
+      priority: 189
+      army: claude_code
+      agent: api-gateway-engineer
+      conditions:
+        keywords: ["API gateway", "rate limiting", "edge auth", "Kong", "AWS API Gateway", "edge routing"]
+        concern: "API gateway configuration — rate limiting, edge authN/Z, routing policy"
+      rationale: "api-gateway-engineer owns edge policy; api-designer owns the contract itself."
+      example: "Configure rate limiting and JWT validation on Kong for all spoke APIs."
+
+    - id: infra-docker
+      priority: 190
+      army: claude_code
+      agent: docker-expert
+      conditions:
+        keywords: ["Dockerfile", "Docker Compose", "container image", "multi-stage build", "OCI"]
+        concern: "Docker image authoring and container build optimisation"
+      rationale: "docker-expert focuses on image authoring; devops-engineer handles pipeline integration."
+      example: "Optimise a Dockerfile for a Python service to reduce image size by 60%."
+
+    # =========================================================================
+    # TIER 11: Quality & Security
+    # =========================================================================
+
+    - id: quality-performance
+      priority: 200
+      army: claude_code
+      agent: performance-engineer
+      conditions:
+        labels: [performance]
+        keywords: ["performance", "bottleneck", "profiling", "latency", "throughput", "benchmark"]
+        concern: "Performance diagnosis and optimisation across any layer"
+      rationale: "performance-engineer is cross-layer; identifies and fixes bottlenecks wherever they are."
+      example: "Identify why a database query takes 8s under load."
+
+    - id: quality-contract-testing
+      priority: 201
+      army: claude_code
+      agent: contract-test-engineer
+      conditions:
+        keywords: ["Pact", "contract testing", "provider verification", "schema drift", "consumer-driven"]
+        concern: "Contract testing across spokes — Pact, provider verification, schema drift"
+      rationale: "contract-test-engineer enforces API contracts at runtime/CI; api-designer creates them."
+      example: "Add Pact consumer tests for the payments → orders service contract."
+
+    - id: quality-schema-migration
+      priority: 202
+      army: claude_code
+      agent: schema-migration-engineer
+      conditions:
+        keywords: ["schema migration", "Flyway", "Liquibase", "Alembic", "zero-downtime", "DB migration", "Prisma migrate"]
+        concern: "Database schema migrations — zero-downtime evolution"
+      rationale: "schema-migration-engineer owns DB schema evolution; sql-pro/postgres-pro handle query work."
+      example: "Write a zero-downtime Flyway migration to rename a high-traffic column."
+
+    - id: quality-feature-flags
+      priority: 203
+      army: claude_code
+      agent: feature-flag-engineer
+      conditions:
+        keywords: ["feature flag", "LaunchDarkly", "Unleash", "kill switch", "flag lifecycle", "targeting rule"]
+        concern: "Feature flags, progressive delivery, and flag debt management"
+      rationale: "feature-flag-engineer manages flag lifecycle from creation to cleanup."
+      example: "Set up a LaunchDarkly kill switch for the new checkout flow."
+
+    - id: quality-async-messaging
+      priority: 204
+      army: claude_code
+      agent: async-messaging-engineer
+      conditions:
+        keywords: ["Kafka", "RabbitMQ", "SQS", "SNS", "NATS", "message broker", "DLQ", "event-driven", "pub/sub"]
+        concern: "Event-driven messaging — Kafka/RabbitMQ/SQS/NATS, AsyncAPI schemas, DLQs"
+      rationale: "async-messaging-engineer owns message broker integration and dead-letter queue design."
+      example: "Design a Kafka consumer group with dead-letter queue for the order service."
+
+    - id: quality-code-review
+      priority: 205
+      army: claude_code
+      agent: code-reviewer
+      conditions:
+        labels: [code-review]
+        keywords: ["code review", "PR review", "review comments"]
+        concern: "General code review beyond Copilot's first-pass scope"
+      rationale: "code-reviewer handles targeted human-requested reviews; /review-pr skill for large PRs."
+      example: "Review the authentication module before merging."
+
+    - id: quality-security-engineer
+      priority: 206
+      army: claude_code
+      agent: security-engineer
+      conditions:
+        keywords: ["OWASP", "SAST", "DAST", "CVE", "dependency vulnerability", "supply chain"]
+        concern: "Application security engineering — SAST/DAST, dependency scanning, OWASP"
+      rationale: "security-engineer handles ongoing security engineering; security-auditor runs audits."
+      example: "Integrate OWASP Dependency-Check into the GitHub Actions pipeline."
+
+    - id: quality-database-optimizer
+      priority: 207
+      army: claude_code
+      agent: database-optimizer
+      conditions:
+        keywords: ["query plan", "EXPLAIN ANALYZE", "index strategy", "database performance", "N+1 query", "connection pool"]
+        concern: "Database query and index optimisation"
+      rationale: "database-optimizer focuses on query-level DB performance; schema-migration-engineer handles schema changes."
+      example: "Fix N+1 query in the user dashboard using eager loading."
+
+    - id: quality-postgres
+      priority: 208
+      army: claude_code
+      agent: postgres-pro
+      conditions:
+        keywords: ["PostgreSQL", "pg", "postgres", "JSONB", "pg_stat", "pg_trgm", "logical replication"]
+        concern: "PostgreSQL-specific features — JSONB, extensions, replication, pg_stat"
+      rationale: "postgres-pro handles PostgreSQL-specific capabilities beyond generic SQL."
+      example: "Use PostgreSQL JSONB operators for semi-structured configuration storage."
+
+    - id: quality-qa
+      priority: 209
+      army: claude_code
+      agent: qa-expert
+      conditions:
+        labels: [testing, qa]
+        keywords: ["test plan", "test strategy", "QA", "test coverage", "regression"]
+        concern: "Test planning, QA strategy, and test coverage improvement"
+      rationale: "qa-expert owns overall QA strategy; test-automator handles test implementation."
+      example: "Write a test plan for the checkout flow release."
+
+    - id: quality-test-automator
+      priority: 210
+      army: claude_code
+      agent: test-automator
+      conditions:
+        keywords: ["E2E test", "Playwright", "Cypress", "Selenium", "automated test", "test automation"]
+        concern: "Test automation implementation — E2E, integration, and regression tests"
+      rationale: "test-automator implements automation; qa-expert designs the strategy."
+      example: "Write Playwright E2E tests for the authentication flow."
+
+    # =========================================================================
+    # TIER 12: Data & AI
+    # =========================================================================
+
+    - id: data-pipeline-dlt
+      priority: 220
+      army: claude_code
+      agent: dlt-engineer
+      conditions:
+        labels: [data-pipeline]
+        keywords: ["dlt", "ELT", "data pipeline", "data source connector", "incremental loading", "data ingestion"]
+        concern: "Data pipelines using dlt — source connectors, incremental loading, schema evolution"
+      rationale: "dlt-engineer specialises in dlt framework for ELT pipelines to data warehouses."
+      example: "Build a dlt pipeline from Stripe to BigQuery with incremental loading."
+
+    - id: data-engineering
+      priority: 221
+      army: claude_code
+      agent: data-engineer
+      conditions:
+        keywords: ["data warehouse", "Snowflake", "BigQuery", "Redshift", "dbt", "Airflow", "data lake"]
+        concern: "Data platform engineering — warehouses, orchestration, data lakes"
+      rationale: "data-engineer owns the data platform; dlt-engineer handles ingestion pipelines."
+      example: "Design a dbt project for the customer 360 data model."
+
+    - id: data-analysis
+      priority: 222
+      army: claude_code
+      agent: data-analyst
+      conditions:
+        labels: [data-analysis]
+        keywords: ["data analysis", "SQL analysis", "dashboard", "report", "insight", "exploratory analysis"]
+        concern: "Data analysis, reporting dashboards, and business insights"
+      rationale: "data-analyst produces insights; data-scientist builds predictive models."
+      example: "Analyse user retention cohorts and produce a dashboard."
+
+    - id: data-science
+      priority: 223
+      army: claude_code
+      agent: data-scientist
+      conditions:
+        keywords: ["machine learning model", "feature engineering", "notebook", "Jupyter", "sklearn", "XGBoost", "statistical model"]
+        concern: "Data science — feature engineering, model development, statistical analysis"
+      rationale: "data-scientist builds models; machine-learning-engineer productionises them."
+      example: "Build a churn prediction model with feature importance analysis."
+
+    - id: data-ml-engineer
+      priority: 224
+      army: claude_code
+      agent: machine-learning-engineer
+      conditions:
+        keywords: ["ML pipeline", "model training", "model serving", "model registry", "batch prediction", "online inference", "retraining"]
+        concern: "Production ML lifecycle — training pipelines, serving, and retraining"
+      rationale: "machine-learning-engineer productionises ML; mlops-engineer manages the ML platform."
+      example: "Build a weekly model retraining pipeline with automatic evaluation gates."
+
+    - id: data-mlops
+      priority: 225
+      army: claude_code
+      agent: mlops-engineer
+      conditions:
+        keywords: ["MLflow", "Kubeflow", "ML platform", "experiment tracking", "model CI/CD", "ML CI"]
+        concern: "MLOps platform — experiment tracking, model CI/CD, ML infrastructure"
+      rationale: "mlops-engineer owns the ML platform and tooling; machine-learning-engineer uses it."
+      example: "Set up MLflow experiment tracking integrated with GitHub Actions."
+
+    # =========================================================================
+    # TIER 13: Enterprise Architecture
+    # =========================================================================
+
+    - id: ea-enterprise-architect
+      priority: 230
+      army: claude_code
+      agent: enterprise-architect
+      conditions:
+        labels: [enterprise-architecture]
+        keywords: ["TOGAF ADM", "enterprise architecture", "architecture program", "Enterprise Architecture"]
+        concern: "Enterprise architecture program across all TOGAF ADM phases"
+      rationale: "enterprise-architect leads the full EA program; togaf-adm-advisor guides specific ADM phases."
+      example: "Conduct a TOGAF ADM Phase A Architecture Vision for the platform."
+
+    - id: ea-togaf-adm
+      priority: 231
+      army: claude_code
+      agent: togaf-adm-advisor
+      conditions:
+        keywords: ["TOGAF ADM", "ADM phase", "Architecture Building Block", "ABB", "SBB", "Architecture Repository"]
+        concern: "TOGAF ADM phase guidance and artifact production"
+      rationale: "togaf-adm-advisor guides specific ADM phases and artifact creation."
+      example: "Produce the Architecture Definition Document for ADM Phase B."
+
+    - id: ea-wardley
+      priority: 232
+      army: claude_code
+      agent: wardley-strategist
+      skill: wardley
+      conditions:
+        labels: [wardley, strategy]
+        keywords: ["Wardley", "Wardley map", "strategic positioning", "doctrine", "climate", "gameplay"]
+        concern: "Strategic positioning and Wardley mapping"
+      rationale: "wardley-strategist runs the /wardley skill pipeline; also usable via /wardley slash command."
+      example: "Map the competitive landscape for the data platform using a Wardley map."
+
+    - id: ea-business-architect
+      priority: 233
+      army: claude_code
+      agent: business-architect
+      skill: capability-map
+      conditions:
+        keywords: ["business capability", "value stream", "capability map", "VBCM", "business architecture"]
+        concern: "Business capabilities, value streams, and capability investment mapping"
+      rationale: "business-architect produces capability models; capability-planner prioritises investment."
+      example: "Build a business capability map for the customer journey domain."
+
+    - id: ea-capability-planner
+      priority: 234
+      army: claude_code
+      agent: capability-planner
+      conditions:
+        keywords: ["capability investment", "capability prioritization", "heat map", "investment portfolio"]
+        concern: "Capability investment prioritisation and heat map analysis"
+      rationale: "capability-planner prioritises which capabilities to invest in; business-architect defines them."
+      example: "Rank capabilities by strategic value for the PI-2 investment portfolio."
+
+    - id: ea-solution-architect
+      priority: 235
+      army: claude_code
+      agent: solution-architect
+      conditions:
+        keywords: ["solution architecture", "vendor selection", "build vs buy", "RFP", "solution design", "reference architecture"]
+        concern: "Solution architecture design and vendor selection"
+      rationale: "solution-architect produces solution designs; enterprise-architect ensures alignment."
+      example: "Evaluate and select a CIAM vendor for customer identity."
+
+    - id: ea-information-architect
+      priority: 236
+      army: claude_code
+      agent: information-architect
+      conditions:
+        keywords: ["information architecture", "data architecture", "master data", "data governance", "data model"]
+        concern: "Data and information architecture — data models, governance, master data"
+      rationale: "information-architect defines data structures; data-engineer implements them."
+      example: "Design the master data management strategy for customer data."
+
+    - id: ea-integration-architect
+      priority: 237
+      army: claude_code
+      agent: integration-architect
+      conditions:
+        keywords: ["integration architecture", "API strategy", "ESB", "iPaaS", "integration pattern", "middleware"]
+        concern: "API strategy, integration patterns, and middleware design"
+      rationale: "integration-architect owns integration strategy; api-designer creates specific contracts."
+      example: "Design a hub-and-spoke integration architecture using an iPaaS."
+
+    - id: ea-security-architect
+      priority: 238
+      army: claude_code
+      agent: security-architect
+      conditions:
+        keywords: ["Zero Trust", "FedRAMP", "security architecture", "identity architecture", "IAM strategy"]
+        concern: "Enterprise security architecture — Zero Trust, FedRAMP, IAM strategy"
+      rationale: "security-architect designs enterprise security; security-auditor runs audits."
+      example: "Design a Zero Trust network architecture for a cloud-native platform."
+
+    - id: ea-platform-architect
+      priority: 239
+      army: claude_code
+      agent: platform-architect
+      conditions:
+        keywords: ["IDP", "Internal Developer Platform", "Team Topologies", "platform design", "developer platform"]
+        concern: "Internal Developer Platform design, Team Topologies, and platform engineering strategy"
+      rationale: "platform-architect designs the IDP and team structure; devops-engineer builds it."
+      example: "Design an Internal Developer Platform using Team Topologies principles."
+
+    - id: ea-regulatory
+      priority: 240
+      army: claude_code
+      agent: us-regulatory-architect
+      conditions:
+        keywords: ["FISMA", "HIPAA", "CMMC", "SOX", "CCPA", "FedRAMP compliance", "regulatory compliance"]
+        concern: "US regulatory compliance — FISMA, HIPAA, CMMC, SOX, CCPA"
+      rationale: "us-regulatory-architect handles US federal and state regulatory compliance."
+      example: "Produce a HIPAA compliance gap analysis for the health data platform."
+
+    # =========================================================================
+    # TIER 14: Developer Experience & Special Domains
+    # =========================================================================
+
+    - id: dx-documentation
+      priority: 250
+      army: claude_code
+      agent: documentation-engineer
+      conditions:
+        labels: [documentation, docs]
+        keywords: ["documentation", "README", "docstring", "API docs", "MkDocs", "Docusaurus"]
+        concern: "Technical documentation writing and documentation site management"
+      rationale: "documentation-engineer writes docs; developer-advocate creates external tutorial content."
+      example: "Write API documentation for the new payments endpoints."
+
+    - id: dx-developer-advocate
+      priority: 251
+      army: claude_code
+      agent: developer-advocate
+      conditions:
+        keywords: ["developer relations", "DevRel", "sample app", "tutorial", "developer adoption", "community"]
+        concern: "Developer adoption, DevRel content, and community engagement"
+      rationale: "developer-advocate creates external-facing adoption content; documentation-engineer writes internal docs."
+      example: "Write a Getting Started tutorial for external API consumers."
+
+    - id: dx-refactoring
+      priority: 252
+      army: claude_code
+      agent: refactoring-specialist
+      conditions:
+        labels: [refactor, tech-debt]
+        keywords: ["refactor", "tech debt", "code smell", "clean up", "restructure", "legacy code"]
+        concern: "Code refactoring and technical debt reduction"
+      rationale: "refactoring-specialist handles structural code improvements without behaviour change."
+      example: "Extract the payment processing logic into a dedicated service class."
+
+    - id: dx-spike-research
+      priority: 253
+      army: claude_code
+      agent: spike-researcher
+      conditions:
+        issue_types: [spike]
+        labels: [spike]
+        keywords: ["spike", "PoC", "proof of concept", "build vs buy", "technical spike", "research spike"]
+        concern: "Time-boxed technical spikes and build-vs-buy PoC research"
+      rationale: "spike-researcher runs bounded PoCs with a recommendation; max 3 days."
+      example: "Spike: evaluate Temporal vs AWS Step Functions for workflow orchestration."
+
+    - id: dx-git-workflow
+      priority: 254
+      army: claude_code
+      agent: git-workflow-manager
+      conditions:
+        keywords: ["git", "branching strategy", "merge conflict", "rebase", "git flow", "trunk-based"]
+        concern: "Git workflow strategy and conflict resolution"
+      rationale: "git-workflow-manager owns branching strategies and merge conflict resolution."
+      example: "Set up a trunk-based development branching strategy with feature flags."
+
+    - id: dx-legacy-modernisation
+      priority: 255
+      army: claude_code
+      agent: legacy-modernizer
+      conditions:
+        keywords: ["modernisation", "modernization", "legacy modernise", "strangler fig", "migration from legacy"]
+        concern: "Legacy system modernisation strategies"
+      rationale: "legacy-modernizer applies strangler fig and other modernisation patterns."
+      example: "Define a strangler fig migration plan from a COBOL monolith."
+
+    # =========================================================================
+    # TIER 15: Business & Product
+    # =========================================================================
+
+    - id: business-product-manager
+      priority: 260
+      army: claude_code
+      agent: product-manager
+      conditions:
+        keywords: ["product roadmap", "product strategy", "OKR", "product backlog", "PRD"]
+        concern: "Product management — roadmaps, OKRs, PRDs, and product strategy"
+      rationale: "product-manager owns product strategy and roadmap; business-analyst owns story detail."
+      example: "Write a Product Requirements Document for the billing feature."
+
+    - id: business-ux-researcher
+      priority: 261
+      army: claude_code
+      agent: ux-researcher
+      conditions:
+        keywords: ["user research", "usability testing", "UX research", "user interview", "persona"]
+        concern: "User experience research and usability testing"
+      rationale: "ux-researcher conducts user research; frontend-developer implements the resulting designs."
+      example: "Plan and conduct usability testing for the onboarding flow."
+
+    - id: business-scrum-master
+      priority: 262
+      army: claude_code
+      agent: scrum-master
+      conditions:
+        keywords: ["scrum", "retrospective", "backlog grooming", "definition of done", "impediment", "kanban"]
+        concern: "Agile ceremonies and team process — beyond SAFE planning"
+      rationale: "scrum-master facilitates agile ceremonies and removes impediments."
+      example: "Facilitate a sprint retrospective and produce action items."
+
+    # =========================================================================
+    # TIER 16: Research & Analysis
+    # =========================================================================
+
+    - id: research-spike-researcher
+      priority: 270
+      army: claude_code
+      agent: spike-researcher
+      conditions:
+        issue_types: [spike]
+        concern: "All spike-type issues requiring time-boxed research"
+      rationale: "All Spike-type issues default to spike-researcher regardless of domain."
+      example: "Spike: research WASM runtimes for plugin architecture."
+
+    - id: research-competitive
+      priority: 271
+      army: claude_code
+      agent: competitive-analyst
+      conditions:
+        keywords: ["competitive analysis", "competitor", "market landscape", "benchmarking"]
+        concern: "Competitive analysis and market landscape research"
+      rationale: "competitive-analyst produces competitive intelligence reports."
+      example: "Analyse the top 5 competitors' API developer experience."
+
+    - id: research-market
+      priority: 272
+      army: claude_code
+      agent: market-researcher
+      conditions:
+        keywords: ["market research", "TAM", "SAM", "market sizing", "market trends"]
+        concern: "Market research and sizing analysis"
+      rationale: "market-researcher produces market sizing and trend analysis."
+      example: "Estimate the TAM for developer tooling in the EMEA region."
+
+    # =========================================================================
+    # TIER 17: Cross-Cutting Cluster Rules (lifecycle stage tiebreakers)
+    # =========================================================================
+
+    - id: cluster-contract-design
+      priority: 300
+      army: claude_code
+      agent: api-designer
+      conditions:
+        keywords: ["design the contract", "define the API", "API-first", "contract-first"]
+        concern: "Contract cluster — Step 1: design the API contract"
+      rationale: "Contract cluster entry point: api-designer → contract-test-engineer → schema-migration-engineer."
+      example: "Design-first: define the GraphQL schema before implementation."
+
+    - id: cluster-contract-enforce
+      priority: 301
+      army: claude_code
+      agent: contract-test-engineer
+      conditions:
+        keywords: ["enforce contract", "verify provider", "contract regression", "schema drift CI"]
+        concern: "Contract cluster — Step 2: enforce contracts in CI"
+      rationale: "contract-test-engineer runs Pact provider verification in CI pipelines."
+      example: "Add provider verification to the CI pipeline to catch schema drift."
+
+    - id: cluster-contract-evolve
+      priority: 302
+      army: claude_code
+      agent: schema-migration-engineer
+      conditions:
+        keywords: ["evolve the schema", "safe schema change", "expand-contract migration"]
+        concern: "Contract cluster — Step 3: evolve the DB schema safely"
+      rationale: "schema-migration-engineer uses expand-contract to evolve schemas without downtime."
+      example: "Apply an expand-contract migration to rename a column used by multiple services."
+
+    - id: cluster-delivery-build
+      priority: 310
+      army: claude_code
+      agent: devops-engineer
+      conditions:
+        keywords: ["build the pipeline", "operate CI/CD", "infra automation", "build system"]
+        concern: "Delivery/ops cluster — Step 1: build and operate CI/CD and infra"
+      rationale: "devops-engineer is the entry point for the delivery/ops cluster."
+      example: "Set up a GitHub Actions pipeline with Docker build and ECR push."
+
+    - id: cluster-delivery-rollout
+      priority: 311
+      army: claude_code
+      agent: deployment-engineer
+      conditions:
+        keywords: ["rollout strategy", "canary deploy", "blue-green deploy", "GitOps deploy"]
+        concern: "Delivery/ops cluster — Step 2: rollout and release strategy"
+      rationale: "deployment-engineer handles single-service release strategy."
+      example: "Implement blue-green deployment for the API service using ArgoCD."
+
+    - id: cluster-delivery-coordinate
+      priority: 312
+      army: claude_code
+      agent: release-manager
+      conditions:
+        keywords: ["coordinate release", "multi-repo release", "release changelog", "release train cut"]
+        concern: "Delivery/ops cluster — Step 3: coordinate multi-repo release trains"
+      rationale: "release-manager cuts and coordinates releases across spoke repos."
+      example: "Cut the PI-2 release across 4 spoke repos in dependency order."
+
+    # =========================================================================
+    # TIER 18: Size-based fallback routing (lowest priority)
+    # =========================================================================
+
+    - id: size-m-claude-code
+      priority: 900
+      army: claude_code
+      agent: null
+      conditions:
+        size: [M]
+        concern: "M-sized work defaults to Claude Code if no more specific rule matches"
+      rationale: "M (≤3 days) is too complex for Copilot's bounded mode; Claude Code specialist required."
+      example: "Medium refactor with no clear domain label — Claude Code takes over."
+
+    - id: size-l-claude-code
+      priority: 901
+      army: claude_code
+      agent: null
+      conditions:
+        size: [L]
+        concern: "L-sized work always goes to Claude Code"
+      rationale: "L (≤1 week) requires architectural judgment; Claude Code + architecture review."
+      example: "New microservice implementation spanning multiple files."
+
+    - id: size-xl-claude-code
+      priority: 902
+      army: claude_code
+      agent: architect-reviewer
+      conditions:
+        size: [XL]
+        concern: "XL-sized work requires Epic breakdown before implementation"
+      rationale: "XL (>1 week) must be decomposed into Features/Stories by architect-reviewer first."
+      example: "Platform-wide authentication overhaul — break into Epics before delegating."

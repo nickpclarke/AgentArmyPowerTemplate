@@ -28,3 +28,6 @@ pipelines/.dlt_state/
 
 # MkDocs build output
 site/
+
+# Claude Code agent worktrees (created by isolation: "worktree" — not source files)
+.claude/worktrees/
