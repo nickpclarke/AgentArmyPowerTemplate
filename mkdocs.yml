@@ -3,60 +3,165 @@ site_description: AI-powered software development template with coordinated Clau
 site_author: nickpclarke
 repo_url: https://github.com/nickpclarke/AgentArmy
 repo_name: AgentArmy
+repo_branches:
+  - main
 edit_uri: edit/main/docs/
+docs_dir: docs
+site_dir: site
+copyright: Copyright © 2024 Nick Clarke. All rights reserved.
 
 theme:
   name: material
+  logo: null
+  favicon: null
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
   palette:
     - scheme: default
+      primary: indigo
+      accent: indigo
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
+      primary: indigo
+      accent: indigo
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
   features:
     - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
     - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.expand
+    - navigation.path
+    - navigation.indexes
     - navigation.top
+    - navigation.prune
     - content.code.copy
+    - content.code.select
+    - content.code.annotate
     - content.action.edit
+    - content.action.view
+    - content.tooltips
     - toc.follow
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - search.share
 
 plugins:
-  - search
+  - search:
+      lang: en
+      separator: '[\\s\\-,:!=\\[\\]()"/]+|(?<!\\w)(?=\\w)|(?!\\w)(?=\\w)'
+      min_search_length: 2
   - table-reader
+  - minify:
+      minify_html: true
+      minify_css: true
+      minify_js: true
+  - awesome-pages
+  - mermaid2
+  - macros
+  - with-pdf:
+      enabled_if_pages: 1
+      output_path: pdf/agentarmy-docs.pdf
+      cover_title: AgentArmy Documentation
+      cover_subtitle: AI-Powered Software Development Template
+      margin_top: 2
+      margin_bottom: 2
+      margin_left: 1
+      margin_right: 1
+      custom_template_path: NONE
 
 markdown_extensions:
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
+      slugify: !!python/object:pymdownx.slugs.slugify
+        case: lower
   - pymdownx.highlight:
       use_pygments: true
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: required
+  - pymdownx.inlinehilite
   - pymdownx.emoji:
       emoji_index: !!python/name:pymdownx.emoji.twemoji
       emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.snippets:
+      auto_append:
+        - docs/includes/abbreviations.md
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.blocks.admonition
+  - pymdownx.blocks.details
+  - pymdownx.blocks.tab
   - toc:
       permalink: true
+      toc_depth: 3
+      slugify: !!python/object:pymdownx.slugs.slugify
+        case: lower
   - tables
   - attr_list
+  - md_in_html
+  - footnotes
+  - meta
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/nickpclarke/AgentArmy
+      name: GitHub Repository
 
 nav:
   - Home: index.md
   - Getting Started:
-    - Setup: setup.md
-  - Armies & Workflow:
-    - Agent Roster: agents.md
-    - Copilot Army: copilot.md
-    - GitHub Projects: github-projects.md
+    - Installation & Setup: setup.md
+    - Quick Start: quick-start.md
+  - Armies Overview:
+    - The Three Armies: armies-overview.md
+    - Routing Matrix: routing-matrix.md
+  - Claude Code Army:
+    - Specialist Roster: agents.md
+    - Language Routing Guide: language-routing.md
+    - Using Claude Code: claude-code-guide.md
+  - GitHub Copilot Army:
+    - Copilot Setup: copilot.md
+    - Task Labeling: copilot-tasks.md
+    - Board Manager Extension: board-manager.md
+  - Coordination & Planning:
+    - GitHub Projects v2: github-projects.md
     - SAFe Framework: safe.md
-  - Resources:
-    - Memory Palace: mempalace.md
-  - Audits:
-    - MECE Audit Summary: mece-audit/MECE_AUDIT_SUMMARY.md
-    - Agent MECE Audit Scorecard: mece-audit/AGENT_MECE_AUDIT_SCORECARD.md
-    - MECE Implementation: mece-audit/MECE_IMPLEMENTATION_SUMMARY.md
+    - Issue Conventions: issue-conventions.md
+  - MECE Audit & Architecture:
+    - Audit Overview: mece-audit/MECE_AUDIT_SUMMARY.md
+    - Audit Scorecard: mece-audit/AGENT_MECE_AUDIT_SCORECARD.md
+    - Implementation Details: mece-audit/MECE_IMPLEMENTATION_SUMMARY.md
     - Routing Validation Tests: mece-audit/ROUTING_VALIDATION_TESTS.md
+  - dlt Data Pipelines:
+    - Pipeline Architecture: dlt-pipelines.md
+    - Source Connectors: dlt-sources.md
+    - Incremental Loading: dlt-incremental.md
+  - Enterprise Architecture:
+    - Wardley Mapping: wardley.md
+    - Capability Maps: capability-maps.md
+    - ADRs: architecture-decisions.md
+  - Resources:
+    - Memory Palace System: mempalace.md
+    - FAQ: faq.md
+    - Glossary: glossary.md
+    - Contributing: contributing.md

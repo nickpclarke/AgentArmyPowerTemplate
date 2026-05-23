@@ -1,0 +1,28 @@
+# MkDocs and Material Theme
+mkdocs>=1.5.3
+mkdocs-material>=9.5.0
+python-markdown-math>=0.8
+
+# Search and indexing
+mkdocs-search-better-chinese>=0.2.10
+
+# HTML generation and optimization
+mkdocs-minify-plugin>=0.7.1
+mkdocs-awesome-pages-plugin>=2.9.2
+
+# Markdown extensions
+pymdown-extensions>=10.5
+python-markdown-math>=0.8
+
+# Diagram support (Mermaid)
+mkdocs-mermaid2-plugin>=1.1.1
+mkdocs-macros-plugin>=1.0.5
+
+# PDF export (optional but included)
+mkdocs-with-pdf>=0.9.3
+
+# Code block enhancements
+Pygments>=2.16.1
+
+# Development and testing
+mkdocs-build-plantuml>=2.2.2
