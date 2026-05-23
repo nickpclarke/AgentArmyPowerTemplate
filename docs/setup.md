@@ -368,6 +368,10 @@ export GCP_OBSERVABILITY_MCP_URL="https://your-observability-mcp-server-url/mcp"
 
 * **Claude Code**: Picks up these servers automatically at the project scope using [.mcp.json](file:///C:/dev/agentarmy/.mcp.json).
 * **Codex**: Reads them via [.codex/config.toml](file:///C:/dev/agentarmy/.codex/config.toml).
+* **Antigravity CLI**: Uses a user-level configuration file (`~/.gemini/antigravity-cli/mcp_config.json`). You can automatically write your GCP settings to it by running:
+  ```bash
+  python scripts/sync_mcp_to_antigravity.py
+  ```
 
 ### 2. Codex Agent Synchronization
 The large library of specialist agents in `.claude/agents/categories/` is automatically synchronized into Codex-compatible TOML subagent definitions under `.codex/agents/` when a Codex session starts (via the `SessionStart` hook in `.codex/hooks.json`). 
@@ -376,6 +380,7 @@ You can also run the synchronization manually:
 ```bash
 python scripts/sync_agents_to_codex.py
 ```
+
 
 ## Checklist
 
