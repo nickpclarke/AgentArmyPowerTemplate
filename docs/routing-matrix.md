@@ -188,5 +188,5 @@ Copilot auto-reviews all PRs. Flag large PRs with `needs-deep-review` for `/revi
 ## Learn More
 
 - **[Languages Routing](language-routing.md)** — Python, Go, Rust, Java, TypeScript, etc.
-- **[Agent Roster](agents.md)** — Full 168+ agent definitions
+- **[Agent Roster](agents.md)** — Full roster of specialist definitions
 - **[Specialist Guide](language-routing.md)** — Deep dive into language specialists

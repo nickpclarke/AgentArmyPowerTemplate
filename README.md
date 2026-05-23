@@ -8,7 +8,7 @@ AgentArmy deploys **two coordinated AI armies** against your codebase, unified b
 
 | Layer | What it does |
 |---|---|
-| **Claude Code army** | 100+ specialist sub-agents running locally — deep work, architecture, SAFE planning, complex implementation, security |
+| **Claude Code army** | Specialist sub-agents running locally — deep work, architecture, SAFE planning, complex implementation, security |
 | **GitHub Copilot army** | GitHub-native agents — inline PR review, simple task coding, IDE suggestions, natural language board queries |
 | **GitHub Projects v2** | Shared source of truth for all tasks, stories, and features — both armies read and write here |
 | **GitHub Actions** | Automation that routes issues to the right army and keeps the board in sync |
@@ -191,7 +191,7 @@ For the same queries inside GitHub Copilot Chat (`@board-manager`), `extensions/
 
 ### Agent roster
 
-110+ specialist agents available out of the box across 11 categories, including a dedicated **Enterprise Architecture** category (11 agents) covering TOGAF ADM, Wardley Mapping, business capabilities, data architecture, platform engineering, and US regulatory compliance (FedRAMP, FISMA, HIPAA, CMMC, SOX, CCPA).
+Specialist agents available out of the box across 11 categories, including a dedicated **Enterprise Architecture** category covering TOGAF ADM, Wardley Mapping, business capabilities, data architecture, platform engineering, and US regulatory compliance (FedRAMP, FISMA, HIPAA, CMMC, SOX, CCPA).
 
 See [docs/agents.md](docs/agents.md) for the full categorised roster and agent-chaining patterns.
 

@@ -15,7 +15,7 @@ Changes to:
 
 ## Sub-Agent Specialist Knowledge
 
-This repo contains 168+ specialist agent definitions in `.claude/agents/categories/`. **Before starting work on any issue, consult the relevant specialist definition to adopt its expertise.**
+This repo contains specialist agent definitions in `.claude/agents/categories/`. **Before starting work on any issue, consult the relevant specialist definition to adopt its expertise.**
 
 ### How to Use Sub-Agents
 

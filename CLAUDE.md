@@ -26,7 +26,7 @@ When in doubt, infer intent from the issue/task context (e.g., “update the tem
 ## Repository Layout
 
 ```
-.claude/agents/categories/  → 168+ specialist agent definitions (11 categories)
+.claude/agents/categories/  → specialist agent definitions (11 categories)
 .claude/commands/           → local slash commands (/wardley, /ea-adr, /capability-map)
 .github/workflows/          → 8 Actions: auto-status, routing, board commands, stale, PR size
 docs/                       → agents.md, copilot.md, safe.md, setup.md, github-projects.md

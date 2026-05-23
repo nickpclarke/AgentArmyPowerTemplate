@@ -4,7 +4,7 @@
 
 **Army** — A specialized group of AI agents that operate together. AgentArmy has three armies: Claude Code, GitHub Copilot, and dlt.
 
-**Agent** — A single AI specialist with expertise in a specific domain (e.g., `react-specialist`, `dlt-engineer`). 168+ agents across 11 categories.
+**Agent** — A single AI specialist with expertise in a specific domain (e.g., `react-specialist`, `dlt-engineer`). See [agents.md](agents.md) for the full roster.
 
 **Agent Distinctiveness** — Property of agents that they are semantically non-overlapping (MECE). Each agent handles a specific, well-defined scope without duplication.
 

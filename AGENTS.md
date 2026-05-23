@@ -78,7 +78,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 
 ---
 
-### 01 · Core Development (13 agents)
+### 01 · Core Development
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -96,7 +96,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `ui-designer` | sonnet | Visual design systems, component libraries, accessibility |
 | `websocket-engineer` | sonnet | Real-time communication, WebSocket servers and clients |
 
-### 02 · Language Specialists (30 agents)
+### 02 · Language Specialists
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -131,7 +131,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `typescript-pro` | sonnet | TypeScript, strict typing, generics, decorators |
 | `vue-expert` | sonnet | Vue 3, Composition API, Pinia, Nuxt |
 
-### 03 · Infrastructure (19 agents)
+### 03 · Infrastructure
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -155,7 +155,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `terragrunt-expert` | sonnet | Terragrunt DRY configs, multi-account patterns |
 | `windows-infra-admin` | sonnet | Windows Server, AD, GPO, PowerShell DSC |
 
-### 04 · Quality & Security (17 agents)
+### 04 · Quality & Security
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -177,7 +177,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `test-automator` | sonnet | Test automation frameworks, CI integration, coverage |
 | `ui-ux-tester` | sonnet | UX testing, usability heuristics, user flow validation |
 
-### 05 · Data & AI (14 agents)
+### 05 · Data & AI
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -196,7 +196,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `reinforcement-learning-engineer` | sonnet | RL algorithms, reward shaping, policy optimization |
 | `schema-migration-engineer` | sonnet | DB schema versioning & migration orchestration (Flyway/Liquibase/Alembic), zero-downtime evolution |
 
-### 06 · Developer Experience (15 agents)
+### 06 · Developer Experience
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -216,7 +216,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `slack-expert` | sonnet | Slack bot development, Bolt framework, block kit |
 | `tooling-engineer` | sonnet | Developer tooling, scripts, automation, linters |
 
-### 07 · Specialized Domains (14 agents)
+### 07 · Specialized Domains
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -235,7 +235,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `risk-manager` | sonnet | Risk identification, impact assessment, mitigation plans |
 | `seo-specialist` | sonnet | SEO audits, structured data, Core Web Vitals |
 
-### 08 · Business & Product (13 agents)
+### 08 · Business & Product
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -253,7 +253,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `ux-researcher` | sonnet | User research, usability studies, personas, journey maps |
 | `wordpress-master` | sonnet | WordPress theme/plugin development, WooCommerce |
 
-### 09 · Meta & Orchestration (13 agents)
+### 09 · Meta & Orchestration
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -271,7 +271,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `task-distributor` | sonnet | Break work into tasks and assign to appropriate agents |
 | `workflow-orchestrator` | opus | Business process workflows, state machines, saga patterns |
 
-### 10 · Research & Analysis (9 agents)
+### 10 · Research & Analysis
 
 | Agent | Model | Purpose |
 |---|---|---|
@@ -285,7 +285,7 @@ cp -r .claude/tools/subagent-catalog ~/.claude/commands/
 | `spike-researcher` | sonnet | Time-boxed technical spikes: library eval, runnable PoC code, build-vs-buy recommendation |
 | `trend-analyst` | sonnet | Technology and market trend analysis |
 
-### 11 · Enterprise Architecture (11 agents)
+### 11 · Enterprise Architecture
 
 TOGAF ADM-aligned EA agents for US commercial and federal contexts. See `.claude/agents/categories/11-enterprise-architecture/README.md` for engagement flows.
 

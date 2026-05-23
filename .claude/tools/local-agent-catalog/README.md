@@ -164,7 +164,7 @@ IFS='|' read name desc cat tier tools model < <(local_agent_catalog_get_metadata
 
 ## Performance Notes
 
-- Functions use `find` + `grep` (fast for 170 agents)
+- Functions use `find` + `grep` (fast for hundreds of agents)
 - No external API calls or caching needed
 - Runs locally, no network dependency
 

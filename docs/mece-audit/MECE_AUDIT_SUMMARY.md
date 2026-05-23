@@ -2,7 +2,7 @@
 
 **Overall Score**: 72/100 (Fair — actionable improvements exist)  
 **Date**: 2026-05-22  
-**Agents**: 169 across 11 categories  
+**Agents**: See [AGENT_COUNTS.md](../AGENT_COUNTS.md) — organized across 11 categories  
 **Routing ambiguity**: 50% (target: <5%)
 
 ---

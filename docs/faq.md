@@ -254,6 +254,6 @@ Check:
 - **[Quick Start](quick-start.md)** — 5-minute setup
 - **[Armies Overview](armies-overview.md)** — Three armies model
 - **[Routing Matrix](routing-matrix.md)** — Decision tree
-- **[Agent Roster](agents.md)** — 168+ specialists
+- **[Agent Roster](agents.md)** — Specialist agents
 - **[GitHub Projects](github-projects.md)** — Coordination plane
 - **[SAFe Framework](safe.md)** — PI planning

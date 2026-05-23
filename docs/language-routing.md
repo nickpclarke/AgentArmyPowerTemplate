@@ -160,4 +160,4 @@ Example: Python backend + React frontend + Flutter mobile
 
 ## Full Agent Roster
 
-See [agents.md](agents.md) for 168+ specialist definitions across all categories.
+See [agents.md](agents.md) for the full roster of specialist definitions across all categories.

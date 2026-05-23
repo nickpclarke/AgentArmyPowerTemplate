@@ -243,5 +243,5 @@ Create an issue with:
 
 - **[Setup Guide](setup.md)** — Environment setup
 - **[Routing Matrix](routing-matrix.md)** — How to find the right specialist
-- **[Agent Roster](agents.md)** — 168+ agent definitions
+- **[Agent Roster](agents.md)** — specialist agent definitions
 - **[FAQ](faq.md)** — Common questions

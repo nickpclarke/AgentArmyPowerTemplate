@@ -21,7 +21,7 @@ Your agent army achieves **reasonable** MECE separation by *category* (architect
 
 ## Category-by-Category Scorecard
 
-### 01 · Core Development (11 agents)
+### 01 · Core Development
 
 **MECE Score**: 65/100
 
@@ -49,7 +49,7 @@ Your agent army achieves **reasonable** MECE separation by *category* (architect
 
 ---
 
-### 02 · Language Specialists (30 agents)
+### 02 · Language Specialists
 
 **MECE Score**: 78/100
 
@@ -78,7 +78,7 @@ Your agent army achieves **reasonable** MECE separation by *category* (architect
 
 ---
 
-### 03 · Infrastructure (16 agents)
+### 03 · Infrastructure
 
 **MECE Score**: 81/100
 
@@ -109,7 +109,7 @@ Your agent army achieves **reasonable** MECE separation by *category* (architect
 
 ---
 
-### 04 · Quality & Security (16 agents)
+### 04 · Quality & Security
 
 **MECE Score**: 79/100
 
@@ -137,7 +137,7 @@ Your agent army achieves **reasonable** MECE separation by *category* (architect
 
 ---
 
-### 05 · Data & AI (13 agents)
+### 05 · Data & AI
 
 **MECE Score**: 74/100
 
@@ -169,7 +169,7 @@ Your agent army achieves **reasonable** MECE separation by *category* (architect
 
 ---
 
-### 06 · Developer Experience (14 agents)
+### 06 · Developer Experience
 
 **MECE Score**: 76/100
 
@@ -193,7 +193,7 @@ Your agent army achieves **reasonable** MECE separation by *category* (architect
 
 ---
 
-### 07 · Specialized Domains (14 agents)
+### 07 · Specialized Domains
 
 **MECE Score**: 85/100
 
@@ -207,7 +207,7 @@ Your agent army achieves **reasonable** MECE separation by *category* (architect
 
 ---
 
-### 08 · Business & Product (12 agents)
+### 08 · Business & Product
 
 **MECE Score**: 82/100
 
@@ -230,7 +230,7 @@ Your agent army achieves **reasonable** MECE separation by *category* (architect
 
 ---
 
-### 09 · Meta & Orchestration (11 agents)
+### 09 · Meta & Orchestration
 
 **MECE Score**: 87/100
 
@@ -251,7 +251,7 @@ Your agent army achieves **reasonable** MECE separation by *category* (architect
 
 ---
 
-### 10 · Research & Analysis (8 agents)
+### 10 · Research & Analysis
 
 **MECE Score**: 88/100
 
@@ -274,7 +274,7 @@ search-specialist (find) → market-researcher (size) → competitive-analyst (s
 
 ---
 
-### 11 · Enterprise Architecture (11 agents)
+### 11 · Enterprise Architecture
 
 **MECE Score**: 91/100
 

@@ -135,6 +135,6 @@ Armies don't overlap. Copilot handles GitHub-native work. Claude Code handles de
 
 ## 📚 Learn More
 
-- **[Specialist Roster](agents.md)** — 168+ agents across 11 categories
+- **[Specialist Roster](agents.md)** — specialist agents across 11 categories
 - **[Routing Matrix](routing-matrix.md)** — Detailed decision tree
 - **[GitHub Projects](github-projects.md)** — Shared coordination plane

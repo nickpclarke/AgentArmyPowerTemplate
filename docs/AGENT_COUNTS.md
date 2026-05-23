@@ -1,0 +1,27 @@
+# Agent Counts by Category
+
+Auto-generated agent inventory. Last updated: 2026-05-23 04:13:41 UTC
+
+| # | Category | Count |
+|---|----------|-------|
+| 1 | Core Development               | 13 |
+| 2 | Language Specialists           | 30 |
+| 3 | Infrastructure                 | 19 |
+| 4 | Quality Security               | 17 |
+| 5 | Data Ai                        | 14 |
+| 6 | Developer Experience           | 15 |
+| 7 | Specialized Domains            | 14 |
+| 8 | Business Product               | 13 |
+| 9 | Meta Orchestration             | 13 |
+| 10 | Research Analysis              | 9 |
+| 11 | Enterprise Architecture        | 11 |
+|  | **TOTAL** | **168** |
+
+---
+
+## How This Works
+
+- Counts are updated automatically daily and whenever agents are added/removed
+- Workflow: [update-agent-counts.yml](.github/workflows/update-agent-counts.yml)
+- Each count includes all agent definition files (.md) in the category folder and subfolders
+- Excludes README.md and TAXONOMY.md reference files
