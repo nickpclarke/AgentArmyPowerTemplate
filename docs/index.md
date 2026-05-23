@@ -2,11 +2,10 @@
 
 **AI-powered software development template** with coordinated armies of specialized AI agents.
 
-AgentArmy deploys three coordinated armies through a shared GitHub Projects v2 board:
+AgentArmy deploys two coordinated armies through a shared GitHub Projects v2 board:
 
-- **Claude Code army** — local, deep, strategic: architecture, complex features, SAFE planning, security audits
+- **Claude Code army** — local, deep, strategic: architecture, complex features, SAFE planning, security audits, data pipelines (via `dlt-engineer` specialist)
 - **GitHub Copilot army** — GitHub-native, fast, lightweight: PR review, simple task coding, board queries via `@board-manager`
-- **dlt army** — data pipeline specialists: source connectors, ELT pipelines, incremental loading, schema evolution, destination wiring
 
 All significant work is tracked as GitHub issues on the project board. Agents operate as specialists — delegate to the right agent, in the right army, rather than doing everything generalist.
 
@@ -66,15 +65,14 @@ All significant work is tracked as GitHub issues on the project board. Agents op
 
 ## Key Concepts
 
-### Three Armies
+### Two Armies
 
 Each army has distinct strengths:
 
 | Army | Strength | Use For |
 |------|----------|---------|
-| **Claude Code** | Deep thinking, complex architecture, multi-file refactors | Requirements analysis, system design, large features, security audits |
+| **Claude Code** | Deep thinking, complex architecture, multi-file refactors | Requirements analysis, system design, large features, security audits, data pipelines |
 | **GitHub Copilot** | Fast turnaround, PR-native review, lightweight automation | Bug fixes, simple features (XS/S), inline PR feedback |
-| **dlt** | Data pipeline specialists, incremental loading, schema evolution | Source connectors, ETL/ELT, analytics wiring |
 
 ### SAFE Planning
 

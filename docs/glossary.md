@@ -60,7 +60,7 @@
 
 **GitHub Copilot Army** — Fast, GitHub-native, lightweight. Handles PR review, simple tasks (XS/S), board queries. Response time: minutes to hours.
 
-**dlt Army** — Data pipeline specialists. Handles ETL/ELT, incremental loading, schema evolution. Response time: hours to days.
+**dlt-engineer** — Claude Code specialist agent for data pipelines. Handles ETL/ELT, incremental loading, schema evolution, source connector development, and destination wiring. Part of the Claude Code army.
 
 **Copilot Coding Agent** — GitHub Copilot automation that takes `copilot-task` labeled issues and auto-implements them.
 

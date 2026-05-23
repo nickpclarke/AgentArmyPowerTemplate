@@ -64,38 +64,6 @@ Fast — typically minutes to hours. Perfect for iteration velocity.
 
 ---
 
-## 📊 dlt Army
-
-**Data pipelines, ETL/ELT, and incremental loading.**
-
-### Strengths
-- Source connector development
-- Incremental loading with full/incremental strategy
-- Schema evolution and type inference
-- Destination wiring (DuckDB, BigQuery, Snowflake, Postgres)
-- SEC EDGAR and complex API extraction
-
-### How to Delegate
-1. Create an issue with detailed source specification
-2. Assign `dlt-engineer` specialist
-3. Include:
-   - Source API/file specification
-   - Destination target
-   - Incremental loading requirements
-   - Schema requirements
-4. dlt-engineer implements pipeline with incremental loading baked in
-
-### Best For
-- API → database pipelines
-- SEC EDGAR and financial data extraction
-- Real-time data syncing with incremental loading
-- Analytics data warehouse wiring
-- Complex schema evolution
-
-### Response Time
-Medium — typically 1-3 days depending on source complexity.
-
----
 
 ## 🗺️ Routing Matrix
 
@@ -105,8 +73,8 @@ Medium — typically 1-3 days depending on source complexity.
 | Simple feature (S, clear spec) | Copilot | Speed and velocity |
 | Large feature (L/XL) | Claude Code | Depth and architecture |
 | Architect a system | Claude Code | Strategic thinking |
-| API → database pipeline | dlt | Pipeline specialists |
-| Data warehouse prep | dlt | ETL/ELT expertise |
+| API → database pipeline | Claude Code (`dlt-engineer`) | Pipeline specialists |
+| Data warehouse prep | Claude Code (`dlt-engineer`) | ETL/ELT expertise |
 | Security audit | Claude Code | Deep analysis |
 | PR review (any size) | Copilot | Automatic + Copilot |
 | Refactor monolith | Claude Code | Complex, multi-file |
