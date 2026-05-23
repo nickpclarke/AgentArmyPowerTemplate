@@ -1,0 +1,15 @@
+# Code ownership for AgentArmy.
+# Listed owners are requested for review automatically. Update for forks.
+
+# Default owner for everything in the repo.
+*                               @nickpclarke
+
+# Automation and CI — review carefully; these run with PROJECT_TOKEN.
+/.github/                       @nickpclarke
+/scripts/                       @nickpclarke
+
+# Agent definitions — keep MECE and frontmatter valid.
+/.claude/agents/                @nickpclarke
+
+# Copilot Chat extension.
+/extensions/board-manager/      @nickpclarke

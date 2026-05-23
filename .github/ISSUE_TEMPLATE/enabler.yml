@@ -1,0 +1,34 @@
+name: "Enabler"
+description: "Technical infrastructure, architecture, or exploration that supports future value."
+title: "[Enabler]: "
+labels: ["Enabler"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Enablers are technical work (infrastructure, architecture, refactors,
+        compliance) at the same level as a Story. After creating, set **Type**,
+        **PI**, **Size**, and **Estimate** on the project board.
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What technical capability does this enable, and why now?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope of work
+      description: The concrete changes involved.
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of done
+      value: |
+        - [ ]
+        - [ ]
+    validations:
+      required: true

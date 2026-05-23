@@ -1,0 +1,41 @@
+name: Validate agents & docs
+
+on:
+  pull_request:
+    paths:
+      - ".claude/agents/**"
+      - "scripts/**"
+      - ".github/workflows/validate.yml"
+  push:
+    branches: [main]
+    paths:
+      - ".claude/agents/**"
+      - "scripts/**"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Validate agent definitions
+        run: python scripts/validate_agents.py
+
+      - name: Agent docs generator runs cleanly
+        run: python scripts/generate_agent_docs.py
+
+      - name: Fail if generated glossary is out of date
+        run: |
+          if ! git diff --quiet -- docs/agents-glossary/index.md; then
+            echo "::error::docs/agents-glossary/index.md is stale. Run 'python scripts/generate_agent_docs.py' and commit the result."
+            git diff -- docs/agents-glossary/index.md
+            exit 1
+          fi
