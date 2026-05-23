@@ -347,9 +347,9 @@ npm install -g @azure/static-web-apps-cli
 swa deploy --deployment-token YOUR_SWA_TOKEN
 ```
 
-## Step 10 — Configure Google Cloud MCP & Codex Agent Sync
+## Step 10 — Configure Cloud MCP (GCP + Azure) & Codex Agent Sync
 
-This repository supports official Google Cloud MCP servers (BigQuery, Storage, Observability, and Vertex AI Agent Registry) via HTTP/Streamable transport, and features automated synchronization of Claude agent definitions for Codex.
+This repository supports official Google Cloud MCP servers (BigQuery, Storage, Observability, and Vertex AI Agent Registry) via HTTP/Streamable transport, the official Azure MCP Server (local stdio via `npx`), and automated synchronization of Claude agent definitions for Codex.
 
 ### 1. Google Cloud MCP Setup
 To enable remote Google Cloud MCP servers for Claude Code or Codex, export the following environment variables in your local shell session:
@@ -373,7 +373,31 @@ export GCP_OBSERVABILITY_MCP_URL="https://your-observability-mcp-server-url/mcp"
   python scripts/sync_mcp_to_antigravity.py
   ```
 
-### 2. Codex Agent Synchronization
+### 2. Azure MCP Setup
+
+This repository also wires in the official [Azure MCP Server](https://github.com/microsoft/mcp/tree/main/servers/Azure.Mcp.Server) (`@azure/mcp`), which exposes 100+ Azure tools (Storage, Cosmos DB, Key Vault, App Service, Monitor, AKS, Bicep/Terraform generation, and more). Unlike the GCP servers, it runs **locally over stdio via `npx`** — no hosted endpoint or bearer token required.
+
+Authentication uses the standard Azure credential chain (`DefaultAzureCredential`). The simplest option is an interactive login:
+
+```bash
+az login
+```
+
+For headless/CI use, export a service principal instead (these are read from the shell environment automatically):
+
+```bash
+export AZURE_TENANT_ID="your-tenant-id"
+export AZURE_CLIENT_ID="your-sp-app-id"
+export AZURE_CLIENT_SECRET="your-sp-secret"
+export AZURE_SUBSCRIPTION_ID="your-subscription-id"
+```
+
+* **Claude Code**: Picks up the `azure` server automatically at the project scope from [.mcp.json](file:///C:/dev/agentarmy/.mcp.json). `npx` fetches `@azure/mcp@latest` on first run (Node.js required).
+* **Codex**: Reads it via [.codex/config.toml](file:///C:/dev/agentarmy/.codex/config.toml).
+
+> Pair this live tooling with the `azure-infra-engineer` agent: the agent provides Azure design/Bicep/PowerShell expertise, while the MCP server gives it a connected path to inspect and manage real resources.
+
+### 3. Codex Agent Synchronization
 The large library of specialist agents in `.claude/agents/categories/` is automatically synchronized into Codex-compatible TOML subagent definitions under `.codex/agents/` when a Codex session starts (via the `SessionStart` hook in `.codex/hooks.json`). 
 
 You can also run the synchronization manually:
@@ -381,7 +405,7 @@ You can also run the synchronization manually:
 python scripts/sync_agents_to_codex.py
 ```
 
-### 3. Antigravity Agent Synchronization
+### 4. Antigravity Agent Synchronization
 You can sync the repository's 160+ specialist agents to your local Antigravity CLI installation (as native plugins under `~/.gemini/antigravity-cli/plugins/`) by running:
 ```bash
 python scripts/sync_agents_to_antigravity.py
@@ -404,6 +428,7 @@ After running, restart or reload your active Antigravity CLI session to pick up 
 - [ ] `.claude/settings.local.json` configured and gitignored
 - [ ] Optional Codex local config kept outside committed `.codex/config.toml`
 - [ ] GCP MCP environment variables configured (optional)
+- [ ] Azure MCP authenticated via `az login` or service-principal env vars (optional)
 - [ ] Codex custom agents synced via hook or manual script run
 - [ ] Local onboarding sanity check passes
 - [ ] Template sanity check workflow passes
