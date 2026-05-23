@@ -11,6 +11,15 @@ Complete step-by-step instructions for setting up AgentArmy from scratch.
 | Git | Version control | [git-scm.com](https://git-scm.com) |
 | Python 3 | Used by some Actions scripts | system or [python.org](https://python.org) |
 
+## Optional — Install local docs tooling
+
+If you want to build or preview docs locally, install the existing MkDocs toolchain:
+
+```bash
+python3 -m pip install -r requirements-docs.txt
+python3 -m mkdocs build
+```
+
 ## Step 1 — Fork and clone
 
 ```bash
@@ -234,6 +243,7 @@ swa deploy --deployment-token YOUR_SWA_TOKEN
 - [ ] Workflow files updated with your username and project IDs
 - [ ] `PROJECT_TOKEN` secret set
 - [ ] MemPalace installed (`pip install mempalace && mempalace init`)
+- [ ] Docs tooling installed (`python3 -m pip install -r requirements-docs.txt`)
 - [ ] Claude Code plugins installed (`/plugin` + `/reload-plugins`)
 - [ ] `.claude/settings.local.json` configured and gitignored
 - [ ] Test issue auto-added to board

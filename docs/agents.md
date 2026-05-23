@@ -1,6 +1,6 @@
 # Agent Roster
 
-AgentArmy runs two agent armies. This document covers the **Claude Code army** — 100+ specialist sub-agents invoked from the local CLI. For the **GitHub Copilot army** (PR review, coding agent, `@board-manager` extension), see [docs/copilot.md](docs/copilot.md).
+AgentArmy runs two agent armies. This document covers the **Claude Code army** — 100+ specialist sub-agents invoked from the local CLI. For the **GitHub Copilot army** (PR review, coding agent, `@board-manager` extension), see [copilot.md](copilot.md).
 
 ## When to use Claude Code vs Copilot
 

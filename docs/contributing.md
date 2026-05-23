@@ -8,14 +8,21 @@ AgentArmy is a collaborative template for AI-powered software development. Contr
 
 - Git and GitHub CLI (`gh`)
 - Python 3.11+ (for local testing)
+- MkDocs tooling (`python3 -m pip install -r requirements-docs.txt`)
 - A fork of the repository
+
+Install docs dependencies once:
+
+```bash
+python3 -m pip install -r requirements-docs.txt
+```
 
 ### Development Workflow
 
 1. **Create an issue** on GitHub Projects describing your contribution
 2. **Create a feature branch** from `main`
 3. **Make your changes** — see guidelines below
-4. **Test locally** — run mkdocs build, check formatting
+4. **Test locally** — run `python3 -m mkdocs build`, check formatting
 5. **Open a PR** with `Closes #N` in the body
 6. **Address review feedback**
 7. **Merge and celebrate!**
@@ -153,7 +160,10 @@ flake8 pipelines/
 mypy pipelines/
 
 # Build docs locally
-mkdocs serve
+python3 -m mkdocs build
+
+# Serve docs locally
+python3 -m mkdocs serve
 ```
 
 ## Review Process
