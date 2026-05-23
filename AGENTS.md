@@ -63,10 +63,12 @@ Codex should use this `AGENTS.md` file as its repository-specific source of trut
 
 When adapting Claude Code helpers for Codex:
 
-1. Keep changes in template artifacts, not application code.
-2. Treat `.claude/agents/categories/` as the specialist taxonomy for routing and review lenses.
-3. Use `.codex/hooks.json` for Codex lifecycle hooks.
-4. Keep personal provider keys out of committed `.codex/config.toml`; use local user config, environment variables, or untracked `.codex/config.local.toml`.
+1. **Agent Synchronization**: The large library of specialist agents in `.claude/agents/categories/` is automatically synchronized into Codex-compatible TOML subagent definitions under `.codex/agents/` when a Codex session starts (via the `SessionStart` hook). You can also run this manually: `python scripts/sync_agents_to_codex.py`.
+2. **Remote GCP MCP Servers**: Configure remote HTTP Google Cloud MCP servers (BigQuery, Storage, Observability, and Vertex AI Agent Registry) by defining the necessary environment variables (e.g., `GCP_BEARER_TOKEN`, `GCP_PROJECT_ID`, and the service URLs). Codex maps these automatically via `.codex/config.toml`.
+3. Keep changes in template artifacts, not application code.
+4. Treat `.claude/agents/categories/` as the specialist taxonomy for routing and review lenses.
+5. Use `.codex/hooks.json` for Codex lifecycle hooks.
+6. Keep personal provider keys out of committed `.codex/config.toml`; use local user config, environment variables, or untracked `.codex/config.local.toml`.
 
 ---
 

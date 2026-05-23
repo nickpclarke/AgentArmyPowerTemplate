@@ -6,3 +6,21 @@
 
 [shell_environment_policy]
 inherit = "core"
+
+# Remote Google Cloud MCP Servers (HTTP/Streamable transport)
+[mcp_servers.gcp-bigquery]
+url = "${GCP_BIGQUERY_MCP_URL}"
+bearer_token_env_var = "GCP_BEARER_TOKEN"
+
+[mcp_servers.gcp-storage]
+url = "${GCP_STORAGE_MCP_URL}"
+bearer_token_env_var = "GCP_BEARER_TOKEN"
+
+[mcp_servers.gcp-observability]
+url = "${GCP_OBSERVABILITY_MCP_URL}"
+bearer_token_env_var = "GCP_BEARER_TOKEN"
+
+[mcp_servers.gcp-vertex-agents]
+url = "https://${GCP_REGION}-aiplatform.googleapis.com/v1/projects/${GCP_PROJECT_ID}/locations/${GCP_REGION}/agents/gcp-mcp-server:callMcp"
+bearer_token_env_var = "GCP_BEARER_TOKEN"
+

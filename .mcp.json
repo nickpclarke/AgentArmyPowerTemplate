@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "gcp-bigquery": {
+      "type": "http",
+      "url": "${GCP_BIGQUERY_MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${GCP_BEARER_TOKEN}"
+      }
+    },
+    "gcp-storage": {
+      "type": "http",
+      "url": "${GCP_STORAGE_MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${GCP_BEARER_TOKEN}"
+      }
+    },
+    "gcp-observability": {
+      "type": "http",
+      "url": "${GCP_OBSERVABILITY_MCP_URL}",
+      "headers": {
+        "Authorization": "Bearer ${GCP_BEARER_TOKEN}"
+      }
+    },
+    "gcp-vertex-agents": {
+      "type": "http",
+      "url": "https://${GCP_REGION}-aiplatform.googleapis.com/v1/projects/${GCP_PROJECT_ID}/locations/${GCP_REGION}/agents/gcp-mcp-server:callMcp",
+      "headers": {
+        "Authorization": "Bearer ${GCP_BEARER_TOKEN}"
+      }
+    }
+  }
+}
