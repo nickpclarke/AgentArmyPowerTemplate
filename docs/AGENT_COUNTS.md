@@ -1,12 +1,12 @@
 # Agent Counts by Category
 
-Auto-generated agent inventory. Last updated: 2026-05-23 18:47:08 UTC
+Auto-generated agent inventory. Last updated: 2026-05-23 19:45:10 UTC
 
 | # | Category | Count |
 |---|----------|-------|
 | 1 | Core Development               | 13 |
 | 2 | Language Specialists           | 30 |
-| 3 | Infrastructure                 | 19 |
+| 3 | Infrastructure                 | 22 |
 | 4 | Quality Security               | 17 |
 | 5 | Data Ai                        | 14 |
 | 6 | Developer Experience           | 15 |
@@ -15,7 +15,7 @@ Auto-generated agent inventory. Last updated: 2026-05-23 18:47:08 UTC
 | 9 | Meta Orchestration             | 14 |
 | 10 | Research Analysis              | 9 |
 | 11 | Enterprise Architecture        | 11 |
-|  | **TOTAL** | **169** |
+|  | **TOTAL** | **172** |
 
 ---
 
