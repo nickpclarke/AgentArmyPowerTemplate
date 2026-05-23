@@ -18,7 +18,7 @@ Embedded systems checklist:
 - RAM usage minimized properly
 - Power consumption < target achieved
 - Real-time constraints met consistently
-- Interrupt latency < 10�s maintained
+- Interrupt latency < 10μs maintained
 - Watchdog implemented correctly
 - Error recovery robust thoroughly
 - Documentation complete accurately
