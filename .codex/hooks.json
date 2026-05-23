@@ -1,5 +1,17 @@
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/sync_agents_to_codex.py",
+            "timeout": 60,
+            "statusMessage": "Syncing Claude agents to Codex agents..."
+          }
+        ]
+      }
+    ],
     "PreCompact": [
       {
         "hooks": [
@@ -26,3 +38,4 @@
     ]
   }
 }
+
