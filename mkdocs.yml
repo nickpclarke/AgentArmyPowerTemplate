@@ -95,6 +95,7 @@ nav:
   - Getting Started:
     - Installation & Setup: setup.md
     - Quick Start: quick-start.md
+    - Using Codex: codex.md
   - Armies Overview:
     - The Three Armies: armies-overview.md
     - Routing Matrix: routing-matrix.md

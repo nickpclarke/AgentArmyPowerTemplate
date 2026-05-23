@@ -7,6 +7,7 @@ Complete step-by-step instructions for setting up AgentArmy from scratch.
 | Tool | Purpose | Install |
 |---|---|---|
 | Claude Code | AI agent runtime | [claude.ai/code](https://claude.ai/code) |
+| Codex | Optional local AI agent runtime | Install from your Codex distribution |
 | GitHub CLI | Project board, secrets, issues | [cli.github.com](https://cli.github.com) |
 | Git | Version control | [git-scm.com](https://git-scm.com) |
 | Python 3 | Used by some Actions scripts | system or [python.org](https://python.org) |
@@ -117,14 +118,14 @@ gh secret set PROJECT_TOKEN --repo YOUR_USERNAME/AgentArmy
 
 ## Step 6 — Install and configure MemPalace
 
-MemPalace provides cross-session memory for Claude Code. Install it once:
+MemPalace provides cross-session memory for Claude Code and Codex. Install it once:
 
 ```bash
 pip install mempalace
 mempalace init
 ```
 
-The hooks are already wired in `.claude/settings.json`. Verify they work:
+The hooks are already wired in `.claude/settings.json` for Claude Code and `.codex/hooks.json` for Codex. Verify MemPalace itself works:
 
 ```bash
 mempalace --version
@@ -201,8 +202,15 @@ Add to `.gitignore`:
 
 ```
 .claude/settings.local.json
+.codex/config.local.toml
 .env
 ```
+
+## Optional - Configure Codex
+
+Codex should read `AGENTS.md` first, then use `CLAUDE.md` and `.claude/agents/categories/` as shared AgentArmy routing context. The committed `.codex/config.toml` intentionally contains no provider API keys.
+
+Keep machine-specific Codex settings in your user-level Codex config, environment variables, or an untracked `.codex/config.local.toml` file. See [Using Codex](codex.md) for the Codex-specific workflow and hook guidance.
 
 ## Step 8 — Verify everything works
 
@@ -246,4 +254,5 @@ swa deploy --deployment-token YOUR_SWA_TOKEN
 - [ ] Docs tooling installed (`python3 -m pip install -r requirements-docs.txt`)
 - [ ] Claude Code plugins installed (`/plugin` + `/reload-plugins`)
 - [ ] `.claude/settings.local.json` configured and gitignored
+- [ ] Optional Codex local config kept outside committed `.codex/config.toml`
 - [ ] Test issue auto-added to board

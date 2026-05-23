@@ -1,6 +1,6 @@
 # AgentArmy
 
-A GitHub repository template for AI-powered software development using a coordinated fleet of Claude Code agents, with GitHub Projects v2 as the shared project management backbone.
+A GitHub repository template for AI-powered software development using a coordinated fleet of Claude Code agents, Codex support, and GitHub Projects v2 as the shared project management backbone.
 
 ## What Is This?
 
@@ -150,6 +150,12 @@ Full reference: [docs/github-projects.md](docs/github-projects.md)
 | `label-pr-size` | PR opened / synced | Labels PRs XS→XL by line count |
 | `pi-report` | Fridays 08:00 UTC | Posts a Todo/In Progress/Done summary to Actions |
 
+### Codex support
+
+Codex uses `AGENTS.md` as its repository instruction file, `.codex/hooks.json` for MemPalace lifecycle hooks, and `.codex/config.toml` for committed project-safe defaults. Keep personal API keys in local user config, environment variables, or an untracked `.codex/config.local.toml`.
+
+See [docs/codex.md](docs/codex.md) for the Codex workflow, including how to reuse Claude Code agent definitions as routing and review lenses.
+
 ### Claude Code plugins (9 installed via `/plugin`)
 
 | Plugin | Key skills |
@@ -220,6 +226,8 @@ Full guide including workarounds: [docs/safe.md](docs/safe.md)
 ---
 
 ## Security Notes
+
+- Keep personal Codex provider settings in user config, environment variables, or untracked `.codex/config.local.toml`.
 
 - `.claude/settings.local.json` contains personal permissions — **gitignore this in your fork**
 - `.env` contains API keys — also gitignore

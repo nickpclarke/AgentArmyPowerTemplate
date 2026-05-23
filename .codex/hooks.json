@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/mempalace_hook.py --hook precompact",
+            "timeout": 60,
+            "statusMessage": "Emergency save to MemPalace before compaction..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/mempalace_hook.py --hook stop",
+            "timeout": 60,
+            "statusMessage": "Saving memories to MemPalace..."
+          }
+        ]
+      }
+    ]
+  }
+}

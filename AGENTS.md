@@ -8,6 +8,7 @@ AgentArmy is a starter template — not an application. There is no source code 
 
 - GitHub Actions in `.github/workflows/`
 - Claude Code agent definitions in `.claude/agents/categories/`
+- Codex configuration and hooks in `.codex/`
 - Docs in `docs/`
 - Configuration files at the repo root
 
@@ -53,6 +54,19 @@ PR bodies must include `Closes #ISSUE_NUMBER` to trigger auto-status workflow.
 | Security review | `/security-review` | Security-focused review |
 | CLAUDE.md audit | `/revise-claude-md` | Improve AI guidance quality |
 | Skill builder | `/skill-creator` | Build and benchmark new skills |
+
+---
+
+## Codex Usage
+
+Codex should use this `AGENTS.md` file as its repository-specific source of truth. `CLAUDE.md`, `.claude/commands/`, and `.claude/agents/categories/` remain useful as shared AgentArmy operating context, but Claude Code slash commands are not Codex commands.
+
+When adapting Claude Code helpers for Codex:
+
+1. Keep changes in template artifacts, not application code.
+2. Treat `.claude/agents/categories/` as the specialist taxonomy for routing and review lenses.
+3. Use `.codex/hooks.json` for Codex lifecycle hooks.
+4. Keep personal provider keys out of committed `.codex/config.toml`; use local user config, environment variables, or untracked `.codex/config.local.toml`.
 
 ---
 
