@@ -14,6 +14,15 @@ AgentArmy is a starter template for AI-powered software development. It coordina
 
 All significant work is tracked as GitHub issues on the project board. Agents operate as specialists — delegate to the right agent, in the right army, rather than doing everything generalist.
 
+## Hub vs Spoke Mode (N-Layer)
+
+AgentArmy is intended to be used as a **Hub template** that generates many **Spoke repos** (one per layer: UI, API, worker, mobile, infra, etc.).
+
+- **If you are in the Hub repo** (the AgentArmy template itself): treat deliverables as template artifacts (workflows in `.github/workflows/`, agent definitions in `.claude/agents/`, docs in `docs/`, and root config). Do not assume an application exists.
+- **If you are in a Spoke repo** (a layer repo created from this template): treat the repository as the *actual layer implementation*. Prefer contract-first changes (OpenAPI/GraphQL/AsyncAPI/shared types), use mocks/stubs for parallel work, and integrate “late” via environment variables instead of tight repo-to-repo coupling.
+
+When in doubt, infer intent from the issue/task context (e.g., “update the template” vs “implement the API/UI/worker”), and ask for clarification if the repo’s role is ambiguous.
+
 ## Repository Layout
 
 ```

@@ -18,6 +18,10 @@ The two armies divide work by complexity and context: Copilot handles fast, boun
 
 ## Concept
 
+AgentArmy scales beyond a single repo using a universal **N-Layer Hub & Spoke model**: keep this template as the **Hub**, then stamp out a separate **Spoke repo per layer** (UI, API, worker, mobile, infra, etc.). Spokes run in isolated AI sandboxes and stay decoupled through **contract-driven development** (OpenAPI/GraphQL/AsyncAPI/shared types).
+
+See [docs/n-layer-architecture.md](docs/n-layer-architecture.md) for the end-to-end contract-first workflow.
+
 ```
 You / Team
     │

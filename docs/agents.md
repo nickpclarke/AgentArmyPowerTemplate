@@ -38,6 +38,7 @@ Use these during PI planning, sprint planning, and feature refinement.
 | `product-manager` | Feature prioritisation, roadmap decisions, OKR alignment |
 | `business-analyst` | Writing user stories, acceptance criteria, process mapping |
 | `architect-reviewer` | Architecture decisions, tech stack evaluation, ADRs |
+| `agent-distinctiveness-advocate` | MECE audit governance: validate new agents for routing clarity, resolve overlap disputes, maintain roster distinctiveness |
 | `scrum-master` | Sprint ceremonies, retrospectives, impediment removal, velocity |
 | `ui-designer` | Component design, design systems, visual hierarchy, accessibility |
 | `ux-researcher` | Usability analysis, persona development, user journey mapping |

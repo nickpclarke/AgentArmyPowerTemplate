@@ -112,6 +112,7 @@ nav:
     - SAFe Framework: safe.md
     - Issue Conventions: issue-conventions.md
   - MECE Audit & Architecture:
+    - N-Layer Architecture: n-layer-architecture.md
     - Audit Overview: mece-audit/MECE_AUDIT_SUMMARY.md
     - Audit Scorecard: mece-audit/AGENT_MECE_AUDIT_SCORECARD.md
     - Implementation Details: mece-audit/MECE_IMPLEMENTATION_SUMMARY.md

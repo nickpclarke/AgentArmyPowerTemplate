@@ -23,6 +23,18 @@ How GitHub Copilot agents work alongside Claude Code — the two-army architectu
                 (shared coordination plane)
 ```
 
+## N-Layer Hub & Spoke Coordination
+
+AgentArmy is designed to scale to **N parallel layer repos** (“spokes”) created from the template. A single **GitHub Projects v2** board can coordinate work across all spokes at once because project items can span multiple repositories.
+
+Practical implications:
+
+- Keep contracts (OpenAPI/GraphQL/AsyncAPI/shared types) as the synchronization mechanism between spokes.
+- Configure each spoke’s GitHub Actions to point at the same Project board so routing and `auto-status` stay consistent.
+- Use Copilot for small, well-scoped issues inside a single spoke; use Claude Code when changes are cross-layer or contract-level.
+
+See [docs/n-layer-architecture.md](n-layer-architecture.md) for the contract-first parallel execution workflow.
+
 ## Division of Duties
 
 ### By issue type
