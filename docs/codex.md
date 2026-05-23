@@ -28,13 +28,24 @@ Codex should read files in this order:
 
 If instructions conflict, prefer `AGENTS.md` and the active task artifact over Claude-specific convenience commands.
 
+## Agent Synchronization
+
+Claude agents (`.claude/agents/categories/`) are **automatically synchronized** to Codex at session start via the `SessionStart` hook. Codex reads the converted agents from `.codex/agents/*.toml`.
+
+For full details on agent sync across platforms (Codex, Antigravity CLI, MCP servers), see **[Agent Synchronization](agent-sync.md)**.
+
+**Quick audit:**
+```bash
+python scripts/orchestrate_agent_sync.py --audit
+```
+
 ## Reusing Claude Code Helpers
 
 Most Claude Code assets are useful to Codex as reference material:
 
 | Claude Code asset | How Codex should use it |
 |---|---|
-| `.claude/agents/categories/` | Domain taxonomy and specialist-role descriptions |
+| `.claude/agents/categories/` | Source of truth for all agent definitions (auto-synced to `.codex/agents/`) |
 | `.claude/commands/` | Prompt templates and workflow patterns to translate into Codex steps |
 | `.claude/tools/` | Helper docs and scripts to inspect or adapt when useful |
 | `CLAUDE.md` | Shared routing, SAFE, and board operating model |

@@ -64,6 +64,50 @@ Fast — typically minutes to hours. Perfect for iteration velocity.
 
 ---
 
+## 🚀 Antigravity CLI / Gemini Army
+
+**Autonomous execution with lightweight agentic control.**
+
+### Strengths
+- Gemini's autonomous reasoning and planning
+- Lightweight agent execution (no heavy sessions)
+- CLI-native workflows and scripting
+- Quick research and knowledge synthesis
+- Multi-round problem solving with less overhead
+
+### How to Delegate
+1. Create an issue with specialized domain tags
+2. Trigger via Antigravity CLI: agents automatically synced from Claude definitions
+3. Or run ad-hoc: `antigravity chat --agent security-architect`
+
+### Best For
+- Quick research and exploration
+- CLI automation and scripting
+- Lightweight agents for exploratory work
+- Parallel multi-agent coordination
+- Autonomous problem decomposition
+
+### Response Time
+Fast to very fast — optimized for lightweight execution and quick turnaround.
+
+---
+
+## 🔄 Shared Agent Definitions
+
+All three armies read from **the same agent definitions** (`.claude/agents/categories/`):
+
+- **Claude Code** uses agents directly via `Agent()` tool
+- **Codex** receives auto-synced agents in `.codex/agents/` (172 agents)
+- **Antigravity CLI** receives agents organized as plugins in `.agents/plugins/` (11 groups, 167 agents)
+
+**Synchronization is automatic:**
+- Codex: Syncs on `SessionStart` hook
+- Antigravity: Manual sync via `python scripts/orchestrate_agent_sync.py --antigravity`
+- Edit once, deploy everywhere
+
+See **[Agent Synchronization](agent-sync.md)** for full details and orchestration commands.
+
+---
 
 ## 🗺️ Routing Matrix
 
@@ -79,6 +123,10 @@ Fast — typically minutes to hours. Perfect for iteration velocity.
 | PR review (any size) | Copilot | Automatic + Copilot |
 | Refactor monolith | Claude Code | Complex, multi-file |
 | Simple code generation | Copilot | Speed |
+| Quick research / exploration | Antigravity CLI | Lightweight, autonomous |
+| Multi-agent exploration | Antigravity CLI | Parallel agent spawning |
+| Ad-hoc scripting | Antigravity CLI | CLI-native workflows |
+| Autonomous problem decomposition | Antigravity CLI | Gemini reasoning + lightweight execution |
 
 ---
 
@@ -104,5 +152,8 @@ Armies don't overlap. Copilot handles GitHub-native work. Claude Code handles de
 ## 📚 Learn More
 
 - **[Specialist Roster](agents.md)** — specialist agents across 11 categories
+- **[Agent Synchronization](agent-sync.md)** — How agents sync across platforms (Codex, Antigravity, MCP servers)
 - **[Routing Matrix](routing-matrix.md)** — Detailed decision tree
 - **[GitHub Projects](github-projects.md)** — Shared coordination plane
+- **[Codex Integration](codex.md)** — Codex-specific workflows and hooks
+- **[Copilot Setup](copilot.md)** — GitHub Copilot configuration and best practices
