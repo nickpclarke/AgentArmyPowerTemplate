@@ -127,7 +127,7 @@ Key fields for SAFE:
 
 | Field | Type | Purpose |
 |---|---|---|
-| Status | Single Select | Todo / In Progress / Done — auto-managed |
+| Status | Single Select | Todo / In progress / Done — auto-managed |
 | **Type** | Single Select | Epic / Feature / Story / Enabler / Bug / Spike |
 | **PI** | Text | Program Increment (e.g. `PI-1`) |
 | Priority | Single Select | P0 / P1 / P2 |
@@ -144,12 +144,12 @@ Full reference: [docs/github-projects.md](docs/github-projects.md)
 | Workflow | Trigger | What it does |
 |---|---|---|
 | `auto-add-to-project` | Issue / PR opened | Adds every new item to the board automatically |
-| `auto-status` | PR opened / merged | Moves linked issues to *In Progress* or *Done* |
+| `auto-status` | PR opened / merged | Moves linked issues to *In progress* or *Done* |
 | `copilot-review` | PR opened | Requests Copilot first-pass review; flags large PRs for deep review |
 | `copilot-coding-agent` | Issue labelled | Routes `copilot-task` to Copilot, `agent-army-task` to Claude Code |
 | `stale` | Mondays 09:00 UTC | Warns at 14 days idle, closes at 21 (P0/Epic exempt) |
 | `label-pr-size` | PR opened / synced | Labels PRs XS→XL by line count |
-| `pi-report` | Fridays 08:00 UTC | Posts a Todo/In Progress/Done summary to Actions |
+| `pi-report` | Fridays 08:00 UTC | Posts a Todo/In progress/Done summary to Actions |
 | `template-sanity-check` | Manual dispatch | Verifies runner-side `PROJECT_TOKEN`, `PROJECT_NUMBER`, and optional end-to-end issue auto-add |
 
 ### Codex support
@@ -189,7 +189,7 @@ Plus built-in Claude Code skills: `update-config`, `simplify`, `fewer-permission
 Comment on any issue or PR to query the board — no server, no registration needed:
 
 ```
-/board-status       → Todo / In Progress / Done + % complete
+/board-status       → Todo / In progress / Done + % complete
 /sprint             → items in the current iteration
 /blocked            → open issues with blocked-by label
 /p0                 → open P0 priority items
