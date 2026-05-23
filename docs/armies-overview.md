@@ -97,13 +97,15 @@ Fast to very fast — optimized for lightweight execution and quick turnaround.
 All three armies read from **the same agent definitions** (`.claude/agents/categories/`):
 
 - **Claude Code** uses agents directly via `Agent()` tool
-- **Codex** receives auto-synced agents in `.codex/agents/` (172 agents)
-- **Antigravity CLI** receives agents organized as plugins in `.agents/plugins/` (11 groups, 167 agents)
+- **Codex** receives synced agents in `.codex/agents/` via `SessionStart` hook
+- **Antigravity CLI** receives agents organized as plugins in `.agents/plugins/` (workspace) or `~/.gemini/antigravity-cli/plugins/` (global)
 
-**Synchronization is automatic:**
-- Codex: Syncs on `SessionStart` hook
-- Antigravity: Manual sync via `python scripts/orchestrate_agent_sync.py --antigravity`
-- Edit once, deploy everywhere
+**Synchronization mechanisms:**
+- **Codex**: Automatic on `SessionStart` hook via `.codex/hooks.json`
+- **Antigravity**: Manual sync via orchestrator — `python scripts/orchestrate_agent_sync.py --antigravity [--global]`
+- **GitHub apps**: Receive routing definitions from source of truth
+
+Edit agent definitions once in `.claude/agents/categories/`, then orchestrate synchronization across platforms.
 
 See **[Agent Synchronization](agent-sync.md)** for full details and orchestration commands.
 

@@ -1,18 +1,18 @@
 # Agent Synchronization
 
-AgentArmy maintains a **single source of truth** for AI agent definitions (`.claude/agents/categories/`) and automatically synchronizes them across multiple platforms: **Codex**, **Antigravity CLI**, and **GitHub apps** (Copilot, Gemini).
+AgentArmy maintains a **single source of truth** for AI agent definitions (`.claude/agents/categories/`) and synchronizes them across multiple platforms: **Codex**, **Antigravity CLI**, and **GitHub apps** (Copilot, Gemini).
 
 ## Overview
 
 ```
-.claude/agents/categories/ (172 agents — source of truth)
+.claude/agents/categories/ (source of truth)
     ↓
-    ├─→ Codex (.codex/agents/ — 169 TOML files)
-    ├─→ Antigravity CLI (.agents/plugins/ — 11 plugin groups, 167 agents)
+    ├─→ Codex (.codex/agents/ — TOML files, auto-synced on SessionStart)
+    ├─→ Antigravity CLI (.agents/plugins/ — plugin groups, manual sync)
     └─→ GitHub automation workflows (Copilot + Gemini routing)
 ```
 
-**Key principle:** Edit once in `.claude/agents/categories/*.md`, and the other platforms automatically stay in sync.
+**Key principle:** Edit once in `.claude/agents/categories/*.md`, and the orchestrator keeps other platforms synchronized.
 
 ---
 
@@ -24,23 +24,28 @@ AgentArmy maintains a **single source of truth** for AI agent definitions (`.cla
 python scripts/orchestrate_agent_sync.py --audit
 ```
 
-Output shows sync ratios, MCP server count, hook status, and script availability:
+Output shows source count, sync status, MCP server count, hook validation, and script availability. All counts refer to the official `.claude/agents/categories/` source:
 
 ```
 📌 SOURCE OF TRUTH
-   Agents: 172  Status: ✅ OK
+   Location: .claude/agents/categories/
+   Agents: [read from source]  Status: ✅ OK
 
 📌 CODEX SYNC
-   Agents: 169  Sync ratio: 98.3%  Status: ✅ OK
+   Location: .codex/agents/
+   Agents: [synced count]  Sync ratio: [percentage]%  Status: ✅ OK
 
 📌 ANTIGRAVITY SYNC
-   Plugins: 11  Agents: 167  Sync ratio: 97.1%  Status: ✅ OK
+   Location: .agents/plugins/ or ~/.gemini/antigravity-cli/plugins/ (--global)
+   Agents: [synced count]  Sync ratio: [percentage]%  Status: ✅ OK
 
 📌 MCP SERVERS
-   Configured: 4  Status: ✅ Configured
+   Location: .codex/config.toml
+   Configured: [count]  Status: ✅ Configured
 
 📌 CODEX HOOKS
-   SessionStart hook: ✅ Yes  Status: ✅ Active
+   Location: .codex/hooks.json
+   SessionStart hook: [verified in file]  Status: ✅ Active
 ```
 
 ### Full Synchronization
@@ -108,10 +113,10 @@ You are a senior security architect with expertise...
 **When:** Manual (or integrate into CI/CD)
 
 **What it does:**
-- Reads Claude agent definitions and plugin metadata (`.claude-plugin/plugin.json`)
+- Reads Claude agent definitions and plugin metadata (`.claude/agents/categories/<category>/.claude-plugin/plugin.json`)
 - Copies agent `.md` files into Antigravity plugin structure
 - Supports workspace-local (default) and global (`--global`) destinations
-- Organizes agents into 11 plugin groups (language specialists, infrastructure, data/AI, etc.)
+- Organizes agents by category into plugin groups
 
 **Workspace-local sync:**
 ```bash
@@ -347,14 +352,15 @@ grep -r "^---$" .claude/agents/categories/
 ### Agents not syncing to Antigravity
 
 ```bash
-# Check plugin.json files exist
-find .claude/agents/categories -name "plugin.json"
+# Check plugin.json files exist in each category
+find .claude/agents/categories -path "*/.claude-plugin/plugin.json"
 
-# Check for directory structure
+# Check for output directory structure
 ls -la .agents/plugins/
 
-# Re-run sync
+# Re-run sync (or use --global for user-level sync)
 python scripts/sync_agents_to_antigravity.py
+python scripts/sync_agents_to_antigravity.py --global  # Sync to ~/.gemini/antigravity-cli/plugins/
 ```
 
 ### MCP servers not loading

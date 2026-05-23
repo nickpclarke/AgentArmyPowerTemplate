@@ -17,7 +17,6 @@ Usage:
 
 import sys
 import subprocess
-import json
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -27,6 +26,18 @@ class AgentSyncOrchestrator:
         self.codex_agents_dir = self.repo_root / '.codex' / 'agents'
         self.antigravity_plugins_dir = self.repo_root / '.agents' / 'plugins'
         self.claude_agents_dir = self.repo_root / '.claude' / 'agents' / 'categories'
+
+    def _check_session_start_hook(self, hooks_file: Path) -> bool:
+        """Check if SessionStart hook is present in hooks.json."""
+        if not hooks_file.exists():
+            return False
+        try:
+            import json
+            with open(hooks_file) as f:
+                data = json.load(f)
+                return 'SessionStart' in data.get('hooks', {})
+        except Exception:
+            return False
 
     def count_agents(self, directory: Path) -> int:
         """Count agent files in a directory."""
@@ -111,20 +122,26 @@ class AgentSyncOrchestrator:
 
         return success, result
 
-    def generate_audit(self) -> Dict:
+    def generate_audit(self, use_global: bool = False) -> Dict:
         """Generate comprehensive audit report."""
         print("\n📊 AUDIT REPORT")
         print("=" * 60)
 
+        # Determine Antigravity destination
+        if use_global:
+            antigravity_plugins_dir = Path.home() / '.gemini' / 'antigravity-cli' / 'plugins'
+        else:
+            antigravity_plugins_dir = self.antigravity_plugins_dir
+
         # Count sources
         claude_count = self.count_agents(self.claude_agents_dir)
         codex_count = self.count_agents(self.codex_agents_dir) if self.codex_agents_dir.exists() else 0
-        antigravity_count = self.count_agents(self.antigravity_plugins_dir) if self.antigravity_plugins_dir.exists() else 0
-        plugin_groups = len(list(self.antigravity_plugins_dir.iterdir())) if self.antigravity_plugins_dir.exists() else 0
+        antigravity_count = self.count_agents(antigravity_plugins_dir) if antigravity_plugins_dir.exists() else 0
+        plugin_groups = len(list(antigravity_plugins_dir.iterdir())) if antigravity_plugins_dir.exists() else 0
 
         # Check hooks
         hooks_file = self.repo_root / '.codex' / 'hooks.json'
-        hooks_configured = hooks_file.exists()
+        hooks_configured = self._check_session_start_hook(hooks_file)
 
         # Check MCP config
         mcp_file = self.repo_root / '.codex' / 'config.toml'
@@ -140,22 +157,23 @@ class AgentSyncOrchestrator:
         }
 
         # Build report
+        antigravity_location = '~/.gemini/antigravity-cli/plugins/' if use_global else '.agents/plugins/'
         audit = {
             'source_of_truth': {
                 'location': '.claude/agents/categories/',
                 'count': claude_count,
-                'status': '✅ OK' if claude_count > 100 else '⚠️ Low count'
+                'status': '✅ OK' if claude_count > 0 else '⚠️ Empty'
             },
             'codex_sync': {
                 'location': '.codex/agents/',
                 'count': codex_count,
-                'status': '✅ OK' if codex_count >= claude_count * 0.9 else '❌ Out of sync'
+                'status': '✅ OK' if claude_count > 0 and codex_count >= claude_count * 0.9 else '⚠️ Review sync status'
             },
             'antigravity_sync': {
-                'location': '.agents/plugins/',
+                'location': antigravity_location,
                 'plugins': plugin_groups,
                 'agents': antigravity_count,
-                'status': '✅ OK' if antigravity_count >= claude_count * 0.8 else '⚠️ Partial'
+                'status': '✅ OK' if claude_count > 0 and antigravity_count >= claude_count * 0.8 else '⚠️ Review sync status'
             },
             'mcp_servers': {
                 'location': '.codex/config.toml',
@@ -223,7 +241,7 @@ class AgentSyncOrchestrator:
         success_antigravity, _ = self.sync_antigravity(use_global=use_global)
 
         # Generate audit
-        audit = self.generate_audit()
+        self.generate_audit(use_global=use_global)
 
         # Summary
         print("\n" + "=" * 60)
@@ -234,11 +252,11 @@ class AgentSyncOrchestrator:
             print("❌ SOME SYNCS FAILED - See details above")
             return False
 
-    def audit_only(self) -> bool:
+    def audit_only(self, use_global: bool = False) -> bool:
         """Run audit without making changes."""
         print("🔍 AUDIT MODE (Read-only)")
         print("=" * 60)
-        self.generate_audit()
+        self.generate_audit(use_global=use_global)
         return True
 
 
@@ -270,16 +288,16 @@ Examples:
     # Determine what to run
     if args.audit:
         # Audit only
-        return orchestrator.audit_only()
+        return orchestrator.audit_only(use_global=args.use_global)
     elif args.codex:
         # Codex only
         success, _ = orchestrator.sync_codex()
-        orchestrator.generate_audit()
+        orchestrator.generate_audit(use_global=args.use_global)
         return success
     elif args.antigravity:
         # Antigravity only
         success, _ = orchestrator.sync_antigravity(use_global=args.use_global)
-        orchestrator.generate_audit()
+        orchestrator.generate_audit(use_global=args.use_global)
         return success
     else:
         # Full sync (default)
