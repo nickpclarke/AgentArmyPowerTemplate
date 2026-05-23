@@ -381,6 +381,14 @@ You can also run the synchronization manually:
 python scripts/sync_agents_to_codex.py
 ```
 
+### 3. Antigravity Agent Synchronization
+You can sync the repository's 160+ specialist agents to your local Antigravity CLI installation (as native plugins under `~/.gemini/antigravity-cli/plugins/`) by running:
+```bash
+python scripts/sync_agents_to_antigravity.py
+```
+After running, restart or reload your active Antigravity CLI session to pick up the new specialist agent plugins.
+
+
 
 ## Checklist
 

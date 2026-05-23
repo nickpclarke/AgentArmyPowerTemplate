@@ -63,7 +63,7 @@ Codex should use this `AGENTS.md` file as its repository-specific source of trut
 
 When adapting Claude Code helpers for Codex:
 
-1. **Agent Synchronization**: The large library of specialist agents in `.claude/agents/categories/` is automatically synchronized into Codex-compatible TOML subagent definitions under `.codex/agents/` when a Codex session starts (via the `SessionStart` hook). You can also run this manually: `python scripts/sync_agents_to_codex.py`.
+1. **Agent Synchronization**: The large library of specialist agents in `.claude/agents/categories/` is automatically synchronized into Codex-compatible TOML subagent definitions under `.codex/agents/` when a Codex session starts (via the `SessionStart` hook). You can also run this manually: `python scripts/sync_agents_to_codex.py`. For Antigravity CLI, you can sync these agents as native plugins by running `python scripts/sync_agents_to_antigravity.py`.
 2. **Remote GCP MCP Servers**: Configure remote HTTP Google Cloud MCP servers (BigQuery, Storage, Observability, and Vertex AI Agent Registry) by defining the necessary environment variables (e.g., `GCP_BEARER_TOKEN`, `GCP_PROJECT_ID`, and the service URLs). Codex maps these automatically via `.codex/config.toml`, and Antigravity CLI maps them via `python scripts/sync_mcp_to_antigravity.py`.
 3. Keep changes in template artifacts, not application code.
 4. Treat `.claude/agents/categories/` as the specialist taxonomy for routing and review lenses.
