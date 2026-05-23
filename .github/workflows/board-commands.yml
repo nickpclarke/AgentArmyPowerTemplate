@@ -7,6 +7,16 @@ on:
   issue_comment:
     types: [created]
 
+# Least-privilege scopes for the built-in GITHUB_TOKEN (the "Acknowledge with
+# reaction" step). issue_comment fires on both issues and PRs, and the reactions
+# endpoint needs issues:write for issue comments and pull-requests:write for PR
+# comments. The board query/post steps use PROJECT_TOKEN, which is unaffected by
+# this block.
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   board-command:
     runs-on: ubuntu-latest
@@ -151,6 +161,8 @@ jobs:
 
           # ── Command handlers ──────────────────────────────────────
 
+          # NOTE: status strings below must match the board's Status option names
+          # exactly (case-sensitive).
           def cmd_status():
               items = get_items()
               counts = {}
@@ -161,12 +173,13 @@ jobs:
               done  = counts.get('Done', 0)
               pct   = round(done * 100 / total) if total else 0
               rows  = [
-                  ['🔵 Todo',        counts.get('Todo', 0)],
-                  ['⚪ Ready',       counts.get('Ready', 0)],
-                  ['🟡 In Progress', counts.get('In Progress', 0)],
-                  ['🟠 In Review',   counts.get('In Review', 0)],
-                  ['🟢 Done',        done],
-                  ['**Total**',      f'**{total}**'],
+                  ['🔵 Todo',              counts.get('Todo', 0)],
+                  ['⚪ Ready',             counts.get('Ready', 0)],
+                  ['🟡 In Progress',       counts.get('In Progress', 0)],
+                  ['🟠 In Review',         counts.get('In Review', 0)],
+                  ['🟢 Done',              done],
+                  ['🟣 Awaiting Decision', counts.get('Awaiting Decision', 0)],
+                  ['**Total**',            f'**{total}**'],
               ]
               return md_table('## 📋 Board Status', ['Status', 'Count'], rows) \
                      + f'\n\n**{pct}% complete**'
@@ -179,7 +192,7 @@ jobs:
               sprint = active[0]['iteration']
               lines  = [f'## 🏃 Sprint: {sprint}', '']
               for i in active:
-                  icon = {'In Progress': '🟡', 'In Review': '🟠'}.get(i['status'], '🔵')
+                  icon = {'Ready': '⚪', 'In Progress': '🟡', 'In Review': '🟠', 'Awaiting Decision': '🟣'}.get(i['status'], '🔵')
                   lines.append(f"{icon} #{i['number']}: {i['title']} _({i.get('size','?')})_")
               return '\n'.join(lines)
 
@@ -215,11 +228,12 @@ jobs:
               done  = counts.get('Done', 0)
               pct   = round(done * 100 / total) if total else 0
               rows  = [
-                  ['Todo',         counts.get('Todo', 0)],
-                  ['Ready',        counts.get('Ready', 0)],
-                  ['In Progress',  counts.get('In Progress', 0)],
-                  ['In Review',    counts.get('In Review', 0)],
-                  ['Done',         done],
+                  ['Todo',              counts.get('Todo', 0)],
+                  ['Ready',             counts.get('Ready', 0)],
+                  ['In Progress',       counts.get('In Progress', 0)],
+                  ['In Review',         counts.get('In Review', 0)],
+                  ['Done',              done],
+                  ['Awaiting Decision', counts.get('Awaiting Decision', 0)],
               ]
               return md_table(f'## 🗓 {pi_name or "PI"} Progress', ['Status', 'Count'], rows) \
                      + f'\n\n**{pct}% of {total} items complete**'
@@ -261,7 +275,7 @@ jobs:
                   '',
                   '| Command | Description |',
                   '|---------|-------------|',
-                  '| `/board-status` | Board overview — Todo / In Progress / Done |',
+                  '| `/board-status` | Board overview — status breakdown + % complete |',
                   '| `/sprint` | Items in the current iteration |',
                   '| `/blocked` | Issues with `blocked-by` label |',
                   '| `/decisions` | Open HITL Decision Artifacts grouped by assignee type |',

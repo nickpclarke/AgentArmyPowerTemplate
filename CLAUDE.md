@@ -82,6 +82,12 @@ Set the `Type` and `PI` fields on items so they're properly categorised.
 | Creative/architectural divergence needs human input | `hitl-coordinator` |
 | Surfacing decision artifacts to GitHub Projects board | `hitl-coordinator` |
 | Agent governance / MECE validation | `agent-distinctiveness-advocate` (pre-merge agent onboarding, routing ambiguity diagnosis) |
+| GCP infrastructure (Cloud Run, Cloud SQL, GKE, Vertex AI, IAM, Cloud Build) | `gcp-infra-engineer` |
+| AWS infrastructure (Fargate, RDS, Bedrock, EKS, CDK/CloudFormation, IAM/SCP) | `aws-infra-engineer` |
+| Azure infrastructure (Container Apps, Bicep, Entra ID, Azure OpenAI) | `azure-infra-engineer` |
+| Vercel platform (Functions, Postgres/KV/Blob, edge middleware, monorepo, AI SDK) | `vercel-engineer` |
+| Multi-cloud strategy, provider selection, landing zone design | `cloud-architect` |
+| Cloud provider / stack choice guide | See [docs/cloud-serving.md](docs/cloud-serving.md) |
 | CI/CD system & infra automation | `devops-engineer` (builds/operates pipelines, containerization, infra automation) |
 | Release & rollout strategy (single service) | `deployment-engineer` (canary/blue-green/rollback, artifact promotion, GitOps) |
 | Cross-spoke release trains | `release-manager` (dependency-order cut & tagging, cross-repo changelog aggregation) |
@@ -188,6 +194,8 @@ Label every issue with its SAFE type:
 
 PR body must contain `Closes #N`, `Fixes #N`, or `Resolves #N` to trigger the `auto-status` workflow. This is what moves issues from *In Progress* to *Done* automatically.
 
+**Autonomous review loop:** add the `review-loop` label to a PR to have Claude auto-address Gemini/Copilot/Codex review comments until the PR is clean (or it escalates to HITL at the round cap). See [docs/pr-review-loop.md](docs/pr-review-loop.md).
+
 ## HITL Decision Pattern
 
 When an agent hits a creative fork, architectural divergence, or judgment call exceeding its authority, it escalates to `hitl-coordinator` which creates a **Decision Artifact** issue on the board.
@@ -214,7 +222,7 @@ When an agent hits a creative fork, architectural divergence, or judgment call e
 
 | Field | When to set |
 |---|---|
-| `Status` | Auto-managed by Actions; only override manually if needed. Values: Todo, In Progress, In Review, Done, **Awaiting Decision** |
+| `Status` | Auto-managed by Actions; only override manually if needed. Flow: Todo → Ready → In Progress → In Review → Done, plus **Awaiting Decision** (HITL hold). `auto-status` sets In Progress on PR open and Done on merge; Ready and In Review are set manually. |
 | `Type` | Set on creation |
 | `PI` | Set to current Program Increment (e.g. `PI-1`) |
 | `Priority` | P0 = must ship this sprint; P1 = should ship this PI; P2 = backlog |
@@ -255,6 +263,8 @@ Run these with `/skill-name` in the Claude Code prompt:
 | `auto-status` | Runs on PR open/merge — don't manually change Status unless correcting |
 | `copilot-review` | Adds Copilot as reviewer and flags large PRs — don't remove `needs-deep-review` label |
 | `copilot-coding-agent` | Routes labelled issues — trust the routing, don't reassign manually |
+| `claude` | Responds to `@claude` mentions on issues/PRs — edits, commits, pushes |
+| `review-loop` | Autonomous review-fix loop (opt-in via `review-loop` label) — don't remove the label mid-loop |
 
 ## Copilot Handoff Conventions
 
@@ -266,6 +276,7 @@ Run these with `/skill-name` in the Claude Code prompt:
 
 - **This is a template repo.** When forked into a real project, owner/project references in `.github/workflows/*.yml` are hardcoded (e.g. `nickpclarke`, project number `1`) and must be edited by hand — see [docs/setup.md](docs/setup.md).
 - **`PROJECT_TOKEN`** must be a **classic** PAT with the `project` scope checked — the default `GITHUB_TOKEN` cannot write to Projects v2 boards. Used by every workflow that updates the board.
-- **`GITHUB_TOKEN`** (built-in) is only enough for `stale` and `label-pr-size`.
+- **`GITHUB_TOKEN`** (built-in) drives the PR/issue automation (`label-pr-size`, `copilot-review`, `copilot-coding-agent`, `stale`, `board-commands`). It is **read-only by default on forks** — those workflows declare `permissions:` blocks and set `GH_REPO`, but the catch-all is **Settings → Actions → General → Workflow permissions → Read and write**. Symptoms when missing: `Resource not accessible by integration` (perms) or `fatal: not a git repository` (no `GH_REPO`/checkout). See [docs/setup.md](docs/setup.md).
 - `.claude/settings.local.json` contains personal permissions — gitignore in forks.
+- **`@claude` and the review loop** need the Claude GitHub App + `CLAUDE_CODE_OAUTH_TOKEN` secret (see [docs/setup.md](docs/setup.md)); Claude pushes with `PROJECT_TOKEN` so its commits re-trigger the review bots.
 - `auto-status` only fires when a PR body contains `Closes #N` / `Fixes #N` / `Resolves #N`. Without it, the linked issue stays in *In Progress*.

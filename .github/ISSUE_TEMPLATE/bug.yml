@@ -1,0 +1,52 @@
+name: "Bug"
+description: "A defect — something that doesn't work as intended."
+title: "[Bug]: "
+labels: ["Bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Defects are completable within a sprint. After creating, set the
+        **Type**, **PI**, **Priority**, and **Size** fields on the project board.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and the impact.
+      placeholder: When I ..., the system ...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Run ...
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Environment / context
+      description: Versions, OS, branch, relevant config.
+    validations:
+      required: false
+  - type: dropdown
+    id: routing
+    attributes:
+      label: Suggested army
+      description: Small, well-bounded bugs can go to the Copilot army via the `copilot-task` label.
+      options:
+        - "Copilot (small / clear fix)"
+        - "Claude Code (complex / needs investigation)"
+        - "Unsure"
+    validations:
+      required: false

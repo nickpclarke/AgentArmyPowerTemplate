@@ -8,6 +8,11 @@ on:
   issues:
     types: [labeled, closed]
 
+# Both jobs authenticate with PROJECT_TOKEN (Projects v2 + issue writes); the ambient
+# GITHUB_TOKEN needs nothing, so lock it to a read-only floor.
+permissions:
+  contents: read
+
 env:
   PROJECT_ID: PVT_kwHOAK2BFM4BYEPx
   PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER || '1' }}

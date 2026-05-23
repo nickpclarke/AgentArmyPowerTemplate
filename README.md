@@ -82,7 +82,7 @@ gh project create --owner YOUR_USERNAME --title "AgentArmy"
 
 gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
   --name "Type" --data-type "SINGLE_SELECT" \
-  --single-select-options "Epic,Feature,Story,Enabler,Bug,Spike"
+  --single-select-options "Epic,Feature,Story,Enabler,Bug,Spike,Decision"
 
 gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
   --name "PI" --data-type "TEXT"
@@ -127,8 +127,8 @@ Key fields for SAFE:
 
 | Field | Type | Purpose |
 |---|---|---|
-| Status | Single Select | Todo / In Progress / Done — auto-managed |
-| **Type** | Single Select | Epic / Feature / Story / Enabler / Bug / Spike |
+| Status | Single Select | Todo → Ready → In Progress → In Review → Done (+ Awaiting Decision) — auto-managed |
+| **Type** | Single Select | Epic / Feature / Story / Enabler / Bug / Spike / Decision |
 | **PI** | Text | Program Increment (e.g. `PI-1`) |
 | Priority | Single Select | P0 / P1 / P2 |
 | Size | Single Select | XS / S / M / L / XL |
@@ -149,7 +149,7 @@ Full reference: [docs/github-projects.md](docs/github-projects.md)
 | `copilot-coding-agent` | Issue labelled | Routes `copilot-task` to Copilot, `agent-army-task` to Claude Code |
 | `stale` | Mondays 09:00 UTC | Warns at 14 days idle, closes at 21 (P0/Epic exempt) |
 | `label-pr-size` | PR opened / synced | Labels PRs XS→XL by line count |
-| `pi-report` | Fridays 08:00 UTC | Posts a Todo/In Progress/Done summary to Actions |
+| `pi-report` | Fridays 08:00 UTC | Posts a per-Status progress summary to Actions |
 | `template-sanity-check` | Manual dispatch | Verifies runner-side `PROJECT_TOKEN`, `PROJECT_NUMBER`, and optional end-to-end issue auto-add |
 
 ### Codex support
@@ -189,7 +189,7 @@ Plus built-in Claude Code skills: `update-config`, `simplify`, `fewer-permission
 Comment on any issue or PR to query the board — no server, no registration needed:
 
 ```
-/board-status       → Todo / In Progress / Done + % complete
+/board-status       → status breakdown + % complete
 /sprint             → items in the current iteration
 /blocked            → open issues with blocked-by label
 /p0                 → open P0 priority items

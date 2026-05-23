@@ -15,7 +15,7 @@ cd AgentArmy
 1. Go to your repository's **Projects** tab
 2. Create a new **Project (beta)** called "AgentArmy"
 3. Set up these custom fields:
-   - **Type** (single select): Epic, Feature, Story, Enabler, Bug, Spike
+   - **Type** (single select): Epic, Feature, Story, Enabler, Bug, Spike, Decision
    - **PI** (single select): PI-1, PI-2, etc.
    - **Size** (single select): XS, S, M, L, XL
    - **Estimate** (number): Story points

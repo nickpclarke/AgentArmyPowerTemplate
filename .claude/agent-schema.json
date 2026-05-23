@@ -1,0 +1,168 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/nickpclarke/AgentArmy/blob/main/.claude/agent-schema.json",
+  "title": "AgentArmy Agent Frontmatter Schema",
+  "description": "JSON Schema for validating the YAML frontmatter of AgentArmy agent definition files (.claude/agents/categories/**/*.md). Compatible with AJV and any draft-07 JSON Schema validator.",
+  "type": "object",
+  "required": ["name", "description", "tools", "model"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique kebab-case agent identifier. Convention: <role>-<specialty> or <domain>-<function>.",
+      "pattern": "^[a-z][a-z0-9-]+[a-z0-9]$",
+      "minLength": 3,
+      "maxLength": 64,
+      "examples": ["api-designer", "python-pro", "hitl-coordinator"]
+    },
+    "description": {
+      "type": "string",
+      "description": "Single-sentence routing trigger. Must start with 'Use this agent when' or 'Use when'. This is what Claude Code matches to auto-route tasks.",
+      "minLength": 40,
+      "maxLength": 800,
+      "examples": [
+        "Use this agent when designing new APIs, creating API specifications, or refactoring existing API architecture."
+      ]
+    },
+    "tools": {
+      "type": "string",
+      "description": "Comma-separated list of tools the agent is permitted to use. Only request what the agent actually needs.",
+      "minLength": 3,
+      "examples": ["Read, Write, Edit, Bash, Glob, Grep", "Read, Glob, Grep, WebFetch, WebSearch"]
+    },
+    "model": {
+      "type": "string",
+      "description": "Claude model tier. sonnet=implementation/design, opus=complex reasoning/architecture, haiku=lightweight/routing.",
+      "enum": ["sonnet", "opus", "haiku"]
+    },
+    "category": {
+      "type": "string",
+      "description": "The category directory this agent is filed under. Must match one of the 11 canonical category IDs.",
+      "enum": [
+        "01-core-development",
+        "02-language-specialists",
+        "03-infrastructure",
+        "04-quality-security",
+        "05-data-ai",
+        "06-developer-experience",
+        "07-specialized-domains",
+        "08-business-product",
+        "09-meta-orchestration",
+        "10-research-analysis",
+        "11-enterprise-architecture"
+      ]
+    },
+    "primary_skills": {
+      "type": "array",
+      "description": "3-5 concise capability labels for this agent. Used by the capability matrix and audit tooling to detect MECE gaps and overlaps.",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "string",
+        "minLength": 5,
+        "maxLength": 120
+      },
+      "examples": [
+        ["REST and GraphQL API design", "OpenAPI 3.1 specification authoring", "API versioning strategy"]
+      ]
+    },
+    "routing_conditions": {
+      "type": "array",
+      "description": "Human-readable list of specific task triggers for when to invoke this agent. More granular than the top-level description field.",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "minLength": 10,
+        "maxLength": 200
+      }
+    },
+    "routing_anti_patterns": {
+      "type": "array",
+      "description": "Explicit list of tasks this agent does NOT handle, each with the alternative agent to route to. Supports MECE boundary rules.",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "minLength": 10,
+        "maxLength": 300
+      }
+    },
+    "prerequisites": {
+      "type": "array",
+      "description": "Agents or context that should be available before invoking this agent. Use agent names when a prior agent output is expected.",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "string",
+        "minLength": 5,
+        "maxLength": 200
+      }
+    },
+    "escalates_to": {
+      "type": "array",
+      "description": "Agent(s) this agent escalates edge cases to. Should always include error-coordinator unless this agent IS error-coordinator.",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "string",
+        "minLength": 5,
+        "maxLength": 200
+      }
+    },
+    "known_limits": {
+      "type": "array",
+      "description": "Explicit failure modes and capability boundaries. Surfaced in the capability matrix to help users pick the right agent.",
+      "minItems": 1,
+      "maxItems": 15,
+      "items": {
+        "type": "string",
+        "minLength": 10,
+        "maxLength": 300
+      }
+    },
+    "example_prompts": {
+      "type": "array",
+      "description": "2-3 concrete, copy-paste-ready invocation examples for this agent.",
+      "minItems": 1,
+      "maxItems": 5,
+      "items": {
+        "type": "string",
+        "minLength": 20,
+        "maxLength": 400
+      }
+    }
+  },
+  "definitions": {
+    "known_tools": {
+      "description": "Reference list of known tool identifiers (not enforced by schema - used by audit tooling).",
+      "enum": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Glob",
+        "Grep",
+        "WebFetch",
+        "WebSearch",
+        "computer-use",
+        "Task"
+      ]
+    },
+    "model_tiers": {
+      "description": "Model tier guidance (normative, not enforced by schema - enforced by audit tooling heuristics).",
+      "type": "object",
+      "properties": {
+        "opus": {
+          "description": "Complex reasoning: architecture, security audits, strategy, cross-service orchestration."
+        },
+        "sonnet": {
+          "description": "Implementation, design, multi-step problem-solving. Default for most specialist agents."
+        },
+        "haiku": {
+          "description": "Lightweight tasks, simple routing, fast responses. Use when the task is narrowly scoped."
+        }
+      }
+    }
+  }
+}

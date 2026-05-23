@@ -80,8 +80,11 @@ async function boardStatus(octokit) {
   return mdTable('📋 Board Overview', [
     ['Status', 'Count'],
     ['🔵 Todo', c.Todo || 0],
-    ['🟡 In Progress', c['In progress'] || 0],
+    ['⚪ Ready', c.Ready || 0],
+    ['🟡 In Progress', c['In Progress'] || 0],
+    ['🟠 In Review', c['In Review'] || 0],
     ['🟢 Done', c.Done || 0],
+    ['🟣 Awaiting Decision', c['Awaiting Decision'] || 0],
     ['**Total**', `**${total}**`],
   ]) + `\n\n**${pct}% complete**`
 }
@@ -93,7 +96,8 @@ async function sprintStatus(octokit) {
 
   const lines = [`**🏃 Current Sprint — ${active[0].iteration}**`, '']
   for (const i of active) {
-    const tag = i.status === 'In progress' ? '🟡' : '🔵'
+    const icons = { Ready: '⚪', 'In Progress': '🟡', 'In Review': '🟠', 'Awaiting Decision': '🟣' }
+    const tag = icons[i.status] || '🔵'
     lines.push(`${tag} #${i.number}: ${i.title} _(${i.size || '?'}, ${i.type || '?'})_`)
   }
   return lines.join('\n')
@@ -129,8 +133,11 @@ async function piProgress(msg, octokit) {
   return mdTable(`🗓 ${piName || 'PI'} Progress`, [
     ['Status', 'Count'],
     ['Todo', c.Todo || 0],
-    ['In Progress', c['In progress'] || 0],
+    ['Ready', c.Ready || 0],
+    ['In Progress', c['In Progress'] || 0],
+    ['In Review', c['In Review'] || 0],
     ['Done', c.Done || 0],
+    ['Awaiting Decision', c['Awaiting Decision'] || 0],
   ]) + `\n\n**${pct}% of ${total} items complete**`
 }
 

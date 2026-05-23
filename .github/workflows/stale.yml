@@ -5,6 +5,13 @@ on:
     - cron: '0 9 * * 1'  # Mondays at 09:00 UTC
   workflow_dispatch:
 
+# Least-privilege scopes for the built-in GITHUB_TOKEN, so this workflow does
+# not depend on the repo-wide "Read and write" Actions setting.
+permissions:
+  contents: read
+  issues: write          # actions/stale labels & closes stale issues
+  pull-requests: write   # actions/stale labels & closes stale PRs
+
 jobs:
   stale:
     runs-on: ubuntu-latest

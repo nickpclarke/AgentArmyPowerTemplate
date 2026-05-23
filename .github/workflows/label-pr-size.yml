@@ -4,6 +4,18 @@ on:
   pull_request:
     types: [opened, synchronize]
 
+# Least-privilege GITHUB_TOKEN scopes, so this workflow does not depend on the
+# repo-wide "Read and write" Actions setting.
+permissions:
+  contents: read
+  issues: write          # gh label create (repo labels live under the issues API)
+  pull-requests: write   # gh pr edit --add-label / --remove-label
+
+# This workflow has no checkout, so gh resolves the target repo from GH_REPO
+# rather than a local git remote.
+env:
+  GH_REPO: ${{ github.repository }}
+
 jobs:
   label-size:
     runs-on: ubuntu-latest
@@ -11,6 +23,7 @@ jobs:
       - name: Apply size label
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
           PR_NUM: ${{ github.event.pull_request.number }}
           ADDITIONS: ${{ github.event.pull_request.additions }}
           DELETIONS: ${{ github.event.pull_request.deletions }}
@@ -26,12 +39,15 @@ jobs:
 
           echo "PR #$PR_NUM has $CHANGES changed lines -> $SIZE"
 
-          # Ensure all size labels exist with consistent colours
-          gh label create "XS" --color "0e8a16" --description "PR size: XS (≤10 lines)"  --force
-          gh label create "S"  --color "94d82d" --description "PR size: S (≤50 lines)"   --force
-          gh label create "M"  --color "f9c74f" --description "PR size: M (≤200 lines)"  --force
-          gh label create "L"  --color "f3722c" --description "PR size: L (≤500 lines)"  --force
-          gh label create "XL" --color "d62828" --description "PR size: XL (>500 lines)" --force
+          # Ensure all size labels exist with consistent colours.
+          # || true: gh label create intermittently returns HTTP 401 from GitHub's
+          # label API (a transient auth quirk distinct from the issues/PR API).
+          # Labels are idempotent bootstrapping; the critical step is gh pr edit below.
+          gh label create "XS" --color "0e8a16" --description "PR size: XS (≤10 lines)"  --force || true
+          gh label create "S"  --color "94d82d" --description "PR size: S (≤50 lines)"   --force || true
+          gh label create "M"  --color "f9c74f" --description "PR size: M (≤200 lines)"  --force || true
+          gh label create "L"  --color "f3722c" --description "PR size: L (≤500 lines)"  --force || true
+          gh label create "XL" --color "d62828" --description "PR size: XL (>500 lines)" --force || true
 
           # Remove stale size labels before applying the new one
           for label in XS S M L XL; do

@@ -96,6 +96,7 @@ nav:
     - Installation & Setup: setup.md
     - Onboarding Sanity Check: onboarding.md
     - Quick Start: quick-start.md
+    - Cloud Serving Landscape: cloud-serving.md
     - Using Codex: codex.md
   - Armies Overview:
     - The Three Armies: armies-overview.md
@@ -114,6 +115,7 @@ nav:
     - SAFe Framework: safe.md
     - Issue Conventions: issue-conventions.md
     - Human-in-the-Loop: hitl.md
+    - Autonomous Review Loop: pr-review-loop.md
   - MECE Audit & Architecture:
     - N-Layer Architecture: n-layer-architecture.md
     - Audit Overview: mece-audit/MECE_AUDIT_SUMMARY.md

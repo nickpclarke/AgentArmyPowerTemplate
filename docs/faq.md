@@ -45,16 +45,20 @@ Closes #42
 The `auto-status` workflow only fires when this link exists.
 
 ### Can I manually update Status?
-Generally no. Let `auto-status` manage it:
-- Issue created → Backlog
-- Moved to Ready field → Ready
+`auto-status` manages the key transitions automatically:
+- Issue created → Todo
 - PR opened → In Progress
 - PR merged with `Closes #N` → Done
+- Blocked on a HITL decision → Awaiting Decision
 
-**Exception**: If workflow fails, manually correct Status. Don't override routine updates.
+The two intermediate columns are yours to set by hand as work moves:
+- Refined and ready to start → **Ready**
+- PR open and under review → **In Review**
+
+**Exception**: If a workflow fails, manually correct the auto-managed Status. Otherwise don't override routine updates.
 
 ### What's the difference between Type and Size?
-- **Type** (Epic/Feature/Story/Enabler/Bug/Spike) = what kind of work
+- **Type** (Epic/Feature/Story/Enabler/Bug/Spike/Decision) = what kind of work
 - **Size** (XS/S/M/L/XL) = how much effort
 
 Both are required. Type tells you the hierarchy; Size tells you the routing.

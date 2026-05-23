@@ -6,6 +6,11 @@ on:
   pull_request:
     types: [opened, reopened]
 
+# This workflow authenticates with PROJECT_TOKEN (Projects v2 writes); the ambient
+# GITHUB_TOKEN needs nothing, so lock it to a read-only floor.
+permissions:
+  contents: read
+
 jobs:
   add-to-project:
     runs-on: ubuntu-latest

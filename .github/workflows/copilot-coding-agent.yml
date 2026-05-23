@@ -4,6 +4,17 @@ on:
   issues:
     types: [labeled]
 
+# Least-privilege GITHUB_TOKEN scopes, so this workflow does not depend on the
+# repo-wide "Read and write" Actions setting. Issues-only trigger; no PR scope.
+permissions:
+  contents: read
+  issues: write   # gh label create, gh issue edit (assignee/labels), gh issue comment
+
+# This workflow has no checkout, so gh resolves the target repo from GH_REPO
+# rather than a local git remote.
+env:
+  GH_REPO: ${{ github.repository }}
+
 jobs:
   route-to-copilot:
     runs-on: ubuntu-latest

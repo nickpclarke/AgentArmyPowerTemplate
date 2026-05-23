@@ -24,8 +24,10 @@ The AgentArmy project board has 21 fields. This document covers what each field 
 
 | Field | Type | Values | When to set |
 |---|---|---|---|
-| **Type** | Single Select | Epic, Feature, Story, Enabler, Bug, Spike | On creation |
+| **Type** | Single Select | Epic, Feature, Story, Enabler, Bug, Spike, **Decision** | On creation |
 | **PI** | Text | e.g. `PI-1`, `PI-2` | On creation or during PI Planning |
+
+> **`Decision`** is the HITL Decision-Artifact type. It is set by the `hitl-coordinator` agent, not during normal backlog creation — see [HITL Decision Pattern](hitl.md).
 | **Priority** | Single Select | P0, P1, P2 | During backlog refinement |
 | **Size** | Single Select | XS, S, M, L, XL | During estimation |
 | **Estimate** | Number | Story points (Fibonacci) | During sprint planning |
@@ -37,11 +39,16 @@ The AgentArmy project board has 21 fields. This document covers what each field 
 
 ## Status Values
 
+These six values are the complete set of Status options on the board. Workflow code that filters by status must match these names **exactly** (case-sensitive). Verify the live set with `gh project field-list <number> --owner <owner> --format json`.
+
 | Value | Meaning | How it's set |
 |---|---|---|
 | Todo | In backlog, not started | Default when added to board |
-| In Progress | Work has started | Auto-set when a PR referencing this issue is opened |
-| Done | Work is complete | Auto-set when that PR is merged |
+| Ready | Refined and ready to start — Definition of Ready met | Set manually during grooming / sprint planning |
+| In Progress | Work has started | Auto-set by `auto-status` when a PR referencing this issue is opened |
+| In Review | PR is open and under review | Set manually when review begins |
+| Done | Work is complete | Auto-set by `auto-status` when that PR is merged |
+| Awaiting Decision | Blocked on a HITL decision artifact | Set via the HITL flow (`hitl-coordinator` / `hitl-decision`); `auto-status` skips the In Progress transition for `awaiting-human` items |
 
 To manually override status:
 
@@ -51,6 +58,31 @@ gh project item-edit --id ITEM_ID \
   --field-id STATUS_FIELD_ID \
   --single-select-option-id OPTION_ID
 ```
+
+---
+
+## Board Views
+
+Views are how the board's fields turn into a usable workspace. GitHub Projects v2 **views cannot be created via the API or `gh` CLI** — create each one in the web UI (**+ New view**), then set its layout, grouping, filter, and sort. The set below makes each SAFE construct and the HITL workflow first-class.
+
+| View | Layout | Group by | Filter | Sort | Purpose |
+|---|---|---|---|---|---|
+| **Backlog** | Table | `PI` | `-status:Done` | Priority ↓ | Refinement — every SAFE field as a column |
+| **Sprint Board** | Board | `Status` | `iteration:@current` | Priority ↓ | Active sprint kanban (Todo → Ready → In Progress → In Review → Done) |
+| **Roadmap** | Roadmap | `PI` | `is:open` | Start date ↑ | Timeline using Start date → Target date |
+| **Release Trains** | Table | `Parent issue` | `type:Epic,Feature` | — | Epic → Feature rollup with Sub-issues progress |
+| **By Type** | Board | `Type` | `is:open` | — | Distribution across Epic/Feature/Story/Enabler/Decision |
+| **🟠 Decisions (HITL)** | Board | `Assignees` | `status:"Awaiting Decision"` | Target date ↑ | All open Decision Artifacts awaiting a human/AI-app call |
+
+Filter syntax notes (Projects v2 query language):
+
+- Single-select fields filter by token: `status:Todo`, `type:Epic`, `priority:P0`, `size:L`
+- Values with spaces need quotes: `status:"Awaiting Decision"`, `status:"In Progress"`, `status:"In Review"`
+- The text `PI` field filters by value: `PI:PI-1`
+- Iteration shortcuts: `iteration:@current`, `iteration:@next`
+- HITL slices also work off labels: `label:hitl-decision`, `label:"assignee:human"` (quote label values that contain a colon)
+
+The **Decisions (HITL)** view is the board face of the [HITL Decision Pattern](hitl.md) — it surfaces every `Awaiting Decision` item so nothing blocks silently. See that guide for the full lifecycle (comment → close → auto-unblock).
 
 ---
 

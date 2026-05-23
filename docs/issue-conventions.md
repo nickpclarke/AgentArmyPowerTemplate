@@ -8,12 +8,12 @@ Every issue must have:
 
 | Field | When | Options |
 |-------|------|---------|
-| **Type** | At creation | Epic, Feature, Story, Enabler, Bug, Spike |
+| **Type** | At creation | Epic, Feature, Story, Enabler, Bug, Spike, Decision |
 | **PI** | At creation | PI-1, PI-2, etc. |
 | **Size** | At creation | XS, S, M, L, XL |
 | **Estimate** | During planning | Story points (1,2,3,5,8,13) |
 | **Priority** | At creation | P0, P1, P2 |
-| **Status** | Auto-managed | Backlog→Ready→In Progress→In Review→Done |
+| **Status** | Auto-managed | Todo→Ready→In Progress→In Review→Done (+ Awaiting Decision for HITL) |
 
 ## Issue Types
 

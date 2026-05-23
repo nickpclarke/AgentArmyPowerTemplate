@@ -11,6 +11,10 @@ on:
       - '.agents/plugins/**/plugin.json'
       - 'scripts/sync_agents_to_antigravity.py'
 
+# Only needs to check out and diff the repo via the built-in GITHUB_TOKEN.
+permissions:
+  contents: read
+
 jobs:
   validate-agent-mece:
     runs-on: ubuntu-latest

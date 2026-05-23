@@ -16,6 +16,11 @@ Use these subagents when you need to:
 
 ## Available Subagents
 
+### [**aws-infra-engineer**](aws-infra-engineer.md) - AWS cloud infrastructure and automation specialist
+Expert in AWS resource design, multi-account Organizations, IAM/SCP, ECS Fargate, RDS Aurora, Bedrock, CDK, and IaC patterns via CloudFormation, CDK, and Terraform.
+
+**Use when:** Deploying containers to ECS Fargate or App Runner, writing CDK constructs, configuring AWS Bedrock model access, setting up OIDC keyless GitHub Actions → AWS auth, or provisioning RDS/DynamoDB/ElastiCache.
+
 ### [**api-gateway-engineer**](api-gateway-engineer.md) - API gateway configuration and policy specialist
 Edge gateway expert who owns gateway runtime configuration and policy. Masters rate limiting, edge authentication/authorization, request routing across spoke APIs, and developer portal setup. Ensures policy enforcement, runtime resilience, and safe progressive delivery at the edge.
 
@@ -55,6 +60,11 @@ DevOps practitioner bridging development and operations. Expert in CI/CD pipelin
 Incident response specialist for DevOps environments. Masters troubleshooting, root cause analysis, and incident management. Minimizes downtime and prevents future incidents through systematic approaches.
 
 **Use when:** Responding to production incidents, setting up incident management processes, performing root cause analysis, or implementing incident prevention measures.
+
+### [**gcp-infra-engineer**](gcp-infra-engineer.md) - GCP cloud infrastructure and automation specialist
+Expert in GCP resource design, org/folder/project hierarchy, IAM, Cloud Run, GKE, Cloud SQL, Vertex AI, and IaC via Terraform google provider, Cloud Build, and Cloud Deploy.
+
+**Use when:** Deploying containers to Cloud Run, writing Terraform for GCP resources, configuring Workload Identity Federation for keyless GitHub Actions → GCP auth, or provisioning Cloud SQL / Firestore / Vertex AI endpoints.
 
 ### [**finops-engineer**](finops-engineer.md) - Cloud cost engineering specialist
 FinOps expert who owns cost as the primary deliverable. Masters cost visibility, unit economics, rightsizing, Reserved Instance/Savings Plan commitments, and showback/chargeback across spokes. Drives down spend per unit of value while preserving reliability and engineering velocity.
@@ -106,6 +116,11 @@ Senior Terragrunt expert orchestrating OpenTofu/Terraform infrastructure at scal
 
 **Use when:** Orchestrating Terraform modules with Terragrunt, implementing DRY configurations across environments, managing complex dependency graphs, designing multi-account/multi-region infrastructure, or migrating from monolithic Terraform to modular Terragrunt stacks.
 
+### [**vercel-engineer**](vercel-engineer.md) - Vercel full-stack platform specialist
+Expert in Vercel platform configuration for full-stack applications: serverless and edge Functions, Vercel Postgres (Neon), KV (Upstash Redis), Blob, preview environments, monorepo (turborepo), and Vercel AI SDK integration for streaming LLM responses.
+
+**Use when:** Configuring `vercel.json`, setting up Vercel storage (Postgres/KV/Blob), adding edge middleware for auth or geolocation, managing environment variables across preview/production, or wiring the Vercel AI SDK for Claude/OpenAI streaming.
+
 ### [**windows-infra-admin**](windows-infra-admin.md) - Windows infrastructure and Active Directory automation expert  
 Deep expertise in automating AD, DNS, DHCP, GPO, server configuration, and domain services using PowerShell. Focuses on safe change workflows, idempotent operations, and enterprise-grade operational patterns.
 
@@ -115,6 +130,9 @@ Deep expertise in automating AD, DNS, DHCP, GPO, server configuration, and domai
 
 | If you need to... | Use this subagent |
 |-------------------|-------------------|
+| Deploy to AWS (ECS/Fargate, RDS, Bedrock, CDK) | **aws-infra-engineer** |
+| Deploy to GCP (Cloud Run, Cloud SQL, Vertex AI) | **gcp-infra-engineer** |
+| Deploy to Vercel (Functions, Postgres, KV, edge) | **vercel-engineer** |
 | Configure an API gateway | **api-gateway-engineer** |
 | Engineer cloud cost / FinOps | **finops-engineer** |
 | Instrument telemetry / observability | **observability-engineer** |
@@ -134,6 +152,11 @@ Deep expertise in automating AD, DNS, DHCP, GPO, server configuration, and domai
 | Orchestrate Terraform/OpenTofu modules | **terragrunt-expert** |
 
 ## Common Infrastructure Patterns
+
+**Zero-Ops PaaS Starter (Vercel + Neon + Claude API):**
+- **vercel-engineer** for hosting, storage, and edge functions
+- **llm-architect** for LLM integration pattern and provider abstraction
+- **finops-engineer** for spend alerts and cost attribution per spoke
 
 **Cloud-Native Application:**
 - **cloud-architect** for architecture design
