@@ -17,7 +17,8 @@ jobs:
         startsWith(github.event.comment.body, '/sprint') ||
         startsWith(github.event.comment.body, '/blocked') ||
         startsWith(github.event.comment.body, '/p0') ||
-        startsWith(github.event.comment.body, '/pi ')
+        startsWith(github.event.comment.body, '/pi ') ||
+        startsWith(github.event.comment.body, '/decisions')
       )
 
     steps:
@@ -223,6 +224,37 @@ jobs:
               return md_table(f'## 🗓 {pi_name or "PI"} Progress', ['Status', 'Count'], rows) \
                      + f'\n\n**{pct}% of {total} items complete**'
 
+          def cmd_decisions():
+              from datetime import datetime, timezone
+              r = subprocess.run(
+                  ['gh', 'issue', 'list', '--repo', FULL_REPO,
+                   '--label', 'hitl-decision', '--state', 'open',
+                   '--json', 'number,title,assignees,labels,createdAt'],
+                  capture_output=True, text=True)
+              issues = json.loads(r.stdout) if r.returncode == 0 else []
+              if not issues:
+                  return '✅ No open decision artifacts.'
+              now = datetime.now(timezone.utc)
+              groups = {}
+              for issue in issues:
+                  atype = 'human'
+                  for label in issue.get('labels', []):
+                      if label['name'].startswith('assignee:'):
+                          atype = label['name'].replace('assignee:', '')
+                          break
+                  groups.setdefault(atype, []).append(issue)
+              lines = ['## 🧭 Open Decision Artifacts', '']
+              for atype, items in sorted(groups.items()):
+                  lines.append(f'### Assignee: `{atype}`')
+                  lines.append('')
+                  for i in items:
+                      created = datetime.fromisoformat(i['createdAt'].replace('Z', '+00:00'))
+                      age = (now - created).days
+                      names = ', '.join(f"@{a['login']}" for a in i.get('assignees', [])) or '_(unassigned)_'
+                      lines.append(f"- #{i['number']}: **{i['title']}** — {names} — open **{age}d**")
+                  lines.append('')
+              return '\n'.join(lines).strip()
+
           def cmd_help():
               return '\n'.join([
                   '## 🪖 Board Commands',
@@ -232,6 +264,7 @@ jobs:
                   '| `/board-status` | Board overview — Todo / In Progress / Done |',
                   '| `/sprint` | Items in the current iteration |',
                   '| `/blocked` | Issues with `blocked-by` label |',
+                  '| `/decisions` | Open HITL Decision Artifacts grouped by assignee type |',
                   '| `/p0` | Open P0 priority items |',
                   '| `/pi PI-1` | Progress for a specific Program Increment |',
                   '| `/board-help` | This help message |',
@@ -244,6 +277,7 @@ jobs:
           if   '/board-status' in cmd: out = cmd_status()
           elif '/sprint'       in cmd: out = cmd_sprint()
           elif '/blocked'      in cmd: out = cmd_blocked()
+          elif '/decisions'    in cmd: out = cmd_decisions()
           elif '/p0'           in cmd: out = cmd_p0()
           elif '/pi '          in cmd:
               m       = re.search(r'/pi\s+(pi-?\s*\d+)', cmd, re.IGNORECASE)

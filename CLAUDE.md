@@ -78,6 +78,9 @@ Set the `Type` and `PI` fields on items so they're properly categorised.
 | Backend: Language-level | `python-pro`, `golang-pro`, `rust-engineer`, `java-architect`, etc. (see category 02) |
 | Deep code review (large PRs, `needs-deep-review` label) | `/review-pr` skill |
 | Security audit | `security-auditor` or `/security-review` skill |
+| Agent hits decision point requiring human judgment | `hitl-coordinator` |
+| Creative/architectural divergence needs human input | `hitl-coordinator` |
+| Surfacing decision artifacts to GitHub Projects board | `hitl-coordinator` |
 | Agent governance / MECE validation | `agent-distinctiveness-advocate` (pre-merge agent onboarding, routing ambiguity diagnosis) |
 | CI/CD system & infra automation | `devops-engineer` (builds/operates pipelines, containerization, infra automation) |
 | Release & rollout strategy (single service) | `deployment-engineer` (canary/blue-green/rollback, artifact promotion, GitOps) |
@@ -179,16 +182,39 @@ Label every issue with its SAFE type:
 | `Enabler` | Technical infrastructure or exploration | Same level as Story |
 | `Bug` | Defect | Same level as Story |
 | `Spike` | Time-boxed research | Same level as Story |
+| `Decision` | HITL decision artifact — requires human or AI-app judgment | Created by `hitl-coordinator`; blocks linked issues |
 
 ### PR conventions
 
 PR body must contain `Closes #N`, `Fixes #N`, or `Resolves #N` to trigger the `auto-status` workflow. This is what moves issues from *In Progress* to *Done* automatically.
 
+## HITL Decision Pattern
+
+When an agent hits a creative fork, architectural divergence, or judgment call exceeding its authority, it escalates to `hitl-coordinator` which creates a **Decision Artifact** issue on the board.
+
+**Decision Artifact lifecycle:**
+1. Agent calls `hitl-coordinator` → Decision issue created with `hitl-decision` label, `Decision` Type, Status = "Awaiting Decision"
+2. Blocked issues get `awaiting-human` label and a comment linking the decision
+3. Assignee (human or AI app) reviews, comments with choice, closes the issue
+4. Automation unblocks linked issues, posts decision context, resets Status to "Todo"
+
+**Board commands for decisions:**
+- `/decisions` — list all open Decision Artifacts grouped by assignee type (human / copilot / claude-app / gemini-app)
+- Filter board by Status = "Awaiting Decision" or Label = `hitl-decision` to find items needing attention
+
+**Assignee labels** (for board filtering):
+- `assignee:human` (soft purple) — specific human
+- `assignee:copilot` (Copilot blue) — GitHub Copilot
+- `assignee:claude-app` (Claude amber) — Claude GitHub App
+- `assignee:gemini-app` (Gemini blue) — Gemini GitHub App
+
+**When agents should escalate:** multiple valid design paths with strategic/values implications, architectural divergence, risk acceptance, scope changes, priority conflicts. See `hitl-coordinator` agent and [docs/hitl.md](docs/hitl.md) for the full pattern.
+
 ## GitHub Projects Field Reference
 
 | Field | When to set |
 |---|---|
-| `Status` | Auto-managed by Actions; only override manually if needed |
+| `Status` | Auto-managed by Actions; only override manually if needed. Values: Todo, In Progress, In Review, Done, **Awaiting Decision** |
 | `Type` | Set on creation |
 | `PI` | Set to current Program Increment (e.g. `PI-1`) |
 | `Priority` | P0 = must ship this sprint; P1 = should ship this PI; P2 = backlog |

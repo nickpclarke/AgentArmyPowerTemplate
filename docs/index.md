@@ -56,6 +56,12 @@ All significant work is tracked as GitHub issues on the project board. Agents op
   
   [Learn More →](mempalace.md)
 
+- :busts_in_silhouette: **Human-in-the-Loop**
+
+  Decision Artifacts surface creative and architectural forks to humans (or AI apps) via the board, without blocking parallel work.
+
+  [HITL Guide →](hitl.md)
+
 </div>
 
 ## Key Concepts

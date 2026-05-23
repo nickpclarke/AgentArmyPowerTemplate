@@ -46,6 +46,31 @@ jobs:
           for ISSUE_NUM in $ISSUES; do
             echo "Processing issue #$ISSUE_NUM"
 
+            # Skip status transition if issue is awaiting a HITL decision
+            if [[ "$ACTION" == "opened" ]]; then
+              HAS_AWAITING=$(gh api "repos/$REPO_OWNER/$REPO_NAME/issues/$ISSUE_NUM/labels" \
+                --jq '.[].name | select(. == "awaiting-human")' 2>/dev/null || true)
+              if [[ -n "$HAS_AWAITING" ]]; then
+                # Find the decision issue blocking this one
+                DECISION_ISSUES=$(gh issue list \
+                  --repo "$REPO_OWNER/$REPO_NAME" \
+                  --label "hitl-decision" --state open \
+                  --json number,body \
+                  --jq ".[] | select(.body | test(\"#$ISSUE_NUM\")) | .number" 2>/dev/null || true)
+                DECISION_REF=""
+                if [[ -n "$DECISION_ISSUES" ]]; then
+                  FIRST=$(echo "$DECISION_ISSUES" | head -1)
+                  DECISION_REF=" See decision artifact #$FIRST for details."
+                fi
+                gh issue comment "$ISSUE_NUM" \
+                  --repo "$REPO_OWNER/$REPO_NAME" \
+                  --body "> [!NOTE]
+> PR opened but status not advanced to **In Progress** — this issue is awaiting a HITL decision (\`awaiting-human\` label).$DECISION_REF Once the decision is closed, remove the \`awaiting-human\` label and apply \`copilot-task\` or \`agent-army-task\` to resume."
+                echo "Issue #$ISSUE_NUM is awaiting human decision — skipping In Progress transition"
+                continue
+              fi
+            fi
+
             ITEM_ID=$(gh api graphql \
               -f query='
                 query($owner: String!, $repo: String!, $issue: Int!) {

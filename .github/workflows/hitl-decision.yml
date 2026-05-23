@@ -1,0 +1,255 @@
+name: HITL Decision Lifecycle
+
+# Manages the lifecycle of Decision Artifact issues:
+#   - When labeled `hitl-decision`: sets Status to "Awaiting Decision", notifies blocked issues
+#   - When closed (with `hitl-decision` label): unblocks linked issues, posts decision context
+
+on:
+  issues:
+    types: [labeled, closed]
+
+env:
+  PROJECT_ID: PVT_kwHOAK2BFM4BYEPx
+  PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER || '1' }}
+  STATUS_FIELD_ID: PVTSSF_lAHOAK2BFM4BYEPxzhTMpA8
+
+jobs:
+  # ── Triggered when hitl-decision label is applied ──────────────────────────
+  decision-opened:
+    runs-on: ubuntu-latest
+    if: github.event.action == 'labeled' && github.event.label.name == 'hitl-decision'
+    steps:
+      - name: Set Status to Awaiting Decision and notify blocked issues
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+          ISSUE_NUM: ${{ github.event.issue.number }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+        run: |
+          PROJECT_NUMBER="${{ vars.PROJECT_NUMBER || '1' }}"
+
+          # ── 1. Move decision issue to "Awaiting Decision" status ──────────
+          ITEM_ID=$(gh api graphql \
+            -f query='
+              query($owner: String!, $repo: String!, $issue: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  issue(number: $issue) {
+                    projectItems(first: 10) {
+                      nodes { id project { number } }
+                    }
+                  }
+                }
+              }' \
+            -f owner="$OWNER" \
+            -f repo="${REPO#*/}" \
+            -F issue="$ISSUE_NUM" \
+            --jq ".data.repository.issue.projectItems.nodes[] | select(.project.number == ($PROJECT_NUMBER | tonumber)) | .id" \
+            2>/dev/null || true)
+
+          if [[ -n "$ITEM_ID" ]]; then
+            # Look up "Awaiting Decision" option ID by name (resilient to ID changes)
+            AWAITING_OPT=$(gh api graphql \
+              -f query='
+                query($owner: String!, $number: Int!) {
+                  user(login: $owner) {
+                    projectV2(number: $number) {
+                      field(name: "Status") {
+                        ... on ProjectV2SingleSelectField { options { id name } }
+                      }
+                    }
+                  }
+                  organization(login: $owner) {
+                    projectV2(number: $number) {
+                      field(name: "Status") {
+                        ... on ProjectV2SingleSelectField { options { id name } }
+                      }
+                    }
+                  }
+                }' \
+              -f owner="$OWNER" \
+              -F number="$PROJECT_NUMBER" \
+              --jq '
+                (.data.user.projectV2 // .data.organization.projectV2)
+                .field.options[]
+                | select(.name == "Awaiting Decision")
+                | .id' \
+              2>/dev/null || true)
+
+            if [[ -n "$AWAITING_OPT" ]]; then
+              gh api graphql \
+                -f query='
+                  mutation($project: ID!, $item: ID!, $field: ID!, $option: String!) {
+                    updateProjectV2ItemFieldValue(input: {
+                      projectId: $project
+                      itemId: $item
+                      fieldId: $field
+                      value: { singleSelectOptionId: $option }
+                    }) { projectV2Item { id } }
+                  }' \
+                -f project="${{ env.PROJECT_ID }}" \
+                -f item="$ITEM_ID" \
+                -f field="${{ env.STATUS_FIELD_ID }}" \
+                -f option="$AWAITING_OPT"
+              echo "Set issue #$ISSUE_NUM to Awaiting Decision"
+            else
+              echo "Warning: 'Awaiting Decision' status option not found on board — add it in GitHub Projects Settings"
+            fi
+          fi
+
+          # ── 2. Parse ## Blocks section for linked issue numbers ───────────
+          BLOCKED_ISSUES=$(printf '%s' "$ISSUE_BODY" | \
+            awk '/^## Blocks/{p=1; next} /^## /{p=0} p' | \
+            grep -oE '#[0-9]+' | grep -oE '[0-9]+' || true)
+
+          if [[ -z "$BLOCKED_ISSUES" ]]; then
+            echo "No blocked issues listed in ## Blocks section"
+          fi
+
+          # ── 3. Label and comment on each blocked issue ────────────────────
+          for BLOCKED_NUM in $BLOCKED_ISSUES; do
+            echo "Notifying blocked issue #$BLOCKED_NUM"
+            gh issue edit "$BLOCKED_NUM" --add-label "awaiting-human" --repo "$REPO" 2>/dev/null || true
+            gh issue comment "$BLOCKED_NUM" --repo "$REPO" \
+              --body "$(printf '> [!WARNING]\n> **Blocked pending decision in #%s**\n\nThis issue cannot proceed until the decision above is made. Once the decision is closed, this issue will be automatically unblocked and the decision context will be posted here.' "$ISSUE_NUM")" \
+              2>/dev/null || true
+          done
+
+          # ── 4. Post reminder comment on the decision issue itself ─────────
+          gh issue comment "$ISSUE_NUM" --repo "$REPO" \
+            --body "$(printf '## How to Decide\n\nReview the options above, then **comment with your choice** (and any conditions or caveats). Closing this issue will automatically:\n\n- Remove the `awaiting-human` block from: %s\n- Post your decision as context on each blocked issue\n- Transition blocked issues back to **Todo** so work can resume\n\nAny GitHub actor can decide — human, GitHub Copilot, or an AI app.' \
+              "$(echo "$BLOCKED_ISSUES" | sed 's/^/#/' | tr '\n' ' ')")" \
+            2>/dev/null || true
+
+  # ── Triggered when a hitl-decision issue is closed ─────────────────────────
+  decision-closed:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.action == 'closed' &&
+      contains(toJson(github.event.issue.labels), '"hitl-decision"')
+    steps:
+      - name: Unblock linked issues and distribute decision context
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+          ISSUE_NUM: ${{ github.event.issue.number }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+        run: |
+          PROJECT_NUMBER="${{ vars.PROJECT_NUMBER || '1' }}"
+
+          # ── 1. Swap labels on decision issue ─────────────────────────────
+          gh issue edit "$ISSUE_NUM" \
+            --add-label "decision-made" \
+            --remove-label "hitl-decision" \
+            --repo "$REPO" 2>/dev/null || true
+
+          # ── 2. Fetch last comment as decision context ─────────────────────
+          LAST_COMMENT=$(gh api "repos/$REPO/issues/$ISSUE_NUM/comments" \
+            --jq 'last | {author: .user.login, body: .body, date: (.created_at | split("T")[0])}' \
+            2>/dev/null || echo '{"author":"unknown","body":"(no comment found)","date":""}')
+
+          DECISION_AUTHOR=$(echo "$LAST_COMMENT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['author'])")
+          DECISION_DATE=$(echo "$LAST_COMMENT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['date'])")
+          DECISION_BODY=$(echo "$LAST_COMMENT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['body'])")
+
+          CONTEXT_BLOCK="## Decision Made (from #${ISSUE_NUM})
+
+**Decision:** ${ISSUE_TITLE}
+**Decided by:** @${DECISION_AUTHOR} on ${DECISION_DATE}
+
+### Decision content
+${DECISION_BODY}
+
+---
+_This issue is now unblocked. Apply \`copilot-task\` (XS/S) or \`agent-army-task\` (M+) to resume work._"
+
+          # ── 3. Parse ## Blocks section ────────────────────────────────────
+          BLOCKED_ISSUES=$(printf '%s' "$ISSUE_BODY" | \
+            awk '/^## Blocks/{p=1; next} /^## /{p=0} p' | \
+            grep -oE '#[0-9]+' | grep -oE '[0-9]+' || true)
+
+          if [[ -z "$BLOCKED_ISSUES" ]]; then
+            echo "No blocked issues found in ## Blocks section"
+            exit 0
+          fi
+
+          # ── 4. Look up "Todo" option ID ───────────────────────────────────
+          TODO_OPT=$(gh api graphql \
+            -f query='
+              query($owner: String!, $number: Int!) {
+                user(login: $owner) {
+                  projectV2(number: $number) {
+                    field(name: "Status") {
+                      ... on ProjectV2SingleSelectField { options { id name } }
+                    }
+                  }
+                }
+                organization(login: $owner) {
+                  projectV2(number: $number) {
+                    field(name: "Status") {
+                      ... on ProjectV2SingleSelectField { options { id name } }
+                    }
+                  }
+                }
+              }' \
+            -f owner="$OWNER" \
+            -F number="$PROJECT_NUMBER" \
+            --jq '
+              (.data.user.projectV2 // .data.organization.projectV2)
+              .field.options[]
+              | select(.name == "Todo")
+              | .id' \
+            2>/dev/null || true)
+
+          # ── 5. For each blocked issue: post context, remove label, reset status ──
+          for BLOCKED_NUM in $BLOCKED_ISSUES; do
+            echo "Unblocking issue #$BLOCKED_NUM"
+
+            # Post decision context
+            gh issue comment "$BLOCKED_NUM" --repo "$REPO" \
+              --body "$CONTEXT_BLOCK" 2>/dev/null || true
+
+            # Remove awaiting-human label
+            gh issue edit "$BLOCKED_NUM" --remove-label "awaiting-human" --repo "$REPO" 2>/dev/null || true
+
+            # Transition Status back to Todo if it was Awaiting Decision
+            ITEM_ID=$(gh api graphql \
+              -f query='
+                query($owner: String!, $repo: String!, $issue: Int!) {
+                  repository(owner: $owner, name: $repo) {
+                    issue(number: $issue) {
+                      projectItems(first: 10) {
+                        nodes { id project { number } }
+                      }
+                    }
+                  }
+                }' \
+              -f owner="$OWNER" \
+              -f repo="${REPO#*/}" \
+              -F issue="$BLOCKED_NUM" \
+              --jq ".data.repository.issue.projectItems.nodes[] | select(.project.number == ($PROJECT_NUMBER | tonumber)) | .id" \
+              2>/dev/null || true)
+
+            if [[ -n "$ITEM_ID" && -n "$TODO_OPT" ]]; then
+              gh api graphql \
+                -f query='
+                  mutation($project: ID!, $item: ID!, $field: ID!, $option: String!) {
+                    updateProjectV2ItemFieldValue(input: {
+                      projectId: $project
+                      itemId: $item
+                      fieldId: $field
+                      value: { singleSelectOptionId: $option }
+                    }) { projectV2Item { id } }
+                  }' \
+                -f project="${{ env.PROJECT_ID }}" \
+                -f item="$ITEM_ID" \
+                -f field="${{ env.STATUS_FIELD_ID }}" \
+                -f option="$TODO_OPT" 2>/dev/null || true
+              echo "Reset issue #$BLOCKED_NUM to Todo"
+            fi
+          done
+
+          echo "Decision #$ISSUE_NUM processed — unblocked $BLOCKED_ISSUES"

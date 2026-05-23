@@ -113,6 +113,7 @@ nav:
     - GitHub Projects v2: github-projects.md
     - SAFe Framework: safe.md
     - Issue Conventions: issue-conventions.md
+    - Human-in-the-Loop: hitl.md
   - MECE Audit & Architecture:
     - N-Layer Architecture: n-layer-architecture.md
     - Audit Overview: mece-audit/MECE_AUDIT_SUMMARY.md
@@ -127,7 +128,9 @@ nav:
     - Wardley Maps: wardley-maps-examples.md
     - Wardley Mapping Guide: wardley.md
     - Capability Maps: capability-maps.md
-    - ADRs: architecture-decisions.md
+    - ADR Guide: architecture-decisions.md
+    - Architecture Decisions:
+      - ARC-ADR-001 HITL Pattern: decisions/ARC-ADR-001-hitl-decision-point-pattern.md
   - Resources:
     - Memory Palace System: mempalace.md
     - FAQ: faq.md
