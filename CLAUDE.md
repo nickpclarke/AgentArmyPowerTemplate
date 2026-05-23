@@ -186,7 +186,7 @@ Label every issue with its SAFE type:
 
 ### PR conventions
 
-PR body must contain `Closes #N`, `Fixes #N`, or `Resolves #N` to trigger the `auto-status` workflow. This is what moves issues from *In Progress* to *Done* automatically.
+PR body must contain `Closes #N`, `Fixes #N`, or `Resolves #N` to trigger the `auto-status` workflow. This is what moves issues from *In progress* to *Done* automatically.
 
 ## HITL Decision Pattern
 
@@ -214,7 +214,7 @@ When an agent hits a creative fork, architectural divergence, or judgment call e
 
 | Field | When to set |
 |---|---|
-| `Status` | Auto-managed by Actions; only override manually if needed. Values: Todo, In Progress, In Review, Done, **Awaiting Decision** |
+| `Status` | Auto-managed by Actions; only override manually if needed. Values: Todo, In progress, **Awaiting Decision**, Done (the board option is literally `In progress` — lowercase "p"; workflow code and docs must match that casing) |
 | `Type` | Set on creation |
 | `PI` | Set to current Program Increment (e.g. `PI-1`) |
 | `Priority` | P0 = must ship this sprint; P1 = should ship this PI; P2 = backlog |
@@ -268,4 +268,4 @@ Run these with `/skill-name` in the Claude Code prompt:
 - **`PROJECT_TOKEN`** must be a **classic** PAT with the `project` scope checked — the default `GITHUB_TOKEN` cannot write to Projects v2 boards. Used by every workflow that updates the board.
 - **`GITHUB_TOKEN`** (built-in) is only enough for `stale` and `label-pr-size`.
 - `.claude/settings.local.json` contains personal permissions — gitignore in forks.
-- `auto-status` only fires when a PR body contains `Closes #N` / `Fixes #N` / `Resolves #N`. Without it, the linked issue stays in *In Progress*.
+- `auto-status` only fires when a PR body contains `Closes #N` / `Fixes #N` / `Resolves #N`. Without it, the linked issue stays in *In progress*.

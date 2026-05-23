@@ -30,7 +30,7 @@
 
 **PI (Program Increment)** — ~10-week planning horizon with a goal, multiple sprints, and quarterly business review. Tracked as GitHub Milestone.
 
-**Status** — Auto-managed field: Backlog → Ready → In Progress → In Review → Done. Auto-updated by `auto-status` workflow when PR merges with `Closes #N`.
+**Status** — Auto-managed field: Todo → In progress → Done, with **Awaiting Decision** as a hold state when a HITL decision is required. Updated by the `auto-status` workflow (In progress on PR open, Done on PR merge with `Closes #N`).
 
 **Iteration** — 2-week sprint. Assigned to issues during sprint planning.
 

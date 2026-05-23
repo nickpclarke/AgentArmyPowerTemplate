@@ -37,11 +37,14 @@ The AgentArmy project board has 21 fields. This document covers what each field 
 
 ## Status Values
 
+These four values are the complete set of Status options on the board. Workflow code that filters by status must match these names **exactly** (case-sensitive) — note that the board stores **`In progress`** with a lowercase "p". Verify the live set with `gh project field-list <number> --owner <owner> --format json`.
+
 | Value | Meaning | How it's set |
 |---|---|---|
 | Todo | In backlog, not started | Default when added to board |
-| In Progress | Work has started | Auto-set when a PR referencing this issue is opened |
-| Done | Work is complete | Auto-set when that PR is merged |
+| In progress | Work has started | Auto-set by `auto-status` when a PR referencing this issue is opened |
+| Awaiting Decision | Blocked on a HITL decision artifact | Set via the HITL flow (`hitl-coordinator` / `hitl-decision`); `auto-status` skips the In progress transition for `awaiting-human` items |
+| Done | Work is complete | Auto-set by `auto-status` when that PR is merged |
 
 To manually override status:
 

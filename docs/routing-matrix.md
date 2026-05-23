@@ -149,7 +149,7 @@ Every issue must have these fields set **before** delegating:
 | **Size** | XS, S, M, L, XL | At creation |
 | **Estimate** | Story points (1,2,3,5,8,13) | During planning |
 | **Priority** | P0, P1, P2 | At creation or during grooming |
-| **Status** | Backlog→Ready→In Progress→In Review→Done | Auto-managed, don't override |
+| **Status** | Todo→In progress→Done (+ Awaiting Decision for HITL) | Auto-managed, don't override |
 
 ---
 

@@ -13,7 +13,7 @@ Every issue must have:
 | **Size** | At creation | XS, S, M, L, XL |
 | **Estimate** | During planning | Story points (1,2,3,5,8,13) |
 | **Priority** | At creation | P0, P1, P2 |
-| **Status** | Auto-managed | Backlog→Ready→In Progress→In Review→Done |
+| **Status** | Auto-managed | Todo→In progress→Done (+ Awaiting Decision for HITL) |
 
 ## Issue Types
 

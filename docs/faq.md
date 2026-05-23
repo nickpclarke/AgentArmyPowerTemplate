@@ -46,10 +46,10 @@ The `auto-status` workflow only fires when this link exists.
 
 ### Can I manually update Status?
 Generally no. Let `auto-status` manage it:
-- Issue created → Backlog
-- Moved to Ready field → Ready
-- PR opened → In Progress
+- Issue created → Todo
+- PR opened → In progress
 - PR merged with `Closes #N` → Done
+- Blocked on a HITL decision → Awaiting Decision
 
 **Exception**: If workflow fails, manually correct Status. Don't override routine updates.
 

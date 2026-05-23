@@ -161,6 +161,8 @@ jobs:
 
           # ── Command handlers ──────────────────────────────────────
 
+          # NOTE: status strings below must match the board's Status option names
+          # exactly (case-sensitive) — the board stores "In progress" (lowercase p).
           def cmd_status():
               items = get_items()
               counts = {}
@@ -171,12 +173,11 @@ jobs:
               done  = counts.get('Done', 0)
               pct   = round(done * 100 / total) if total else 0
               rows  = [
-                  ['🔵 Todo',        counts.get('Todo', 0)],
-                  ['⚪ Ready',       counts.get('Ready', 0)],
-                  ['🟡 In Progress', counts.get('In Progress', 0)],
-                  ['🟠 In Review',   counts.get('In Review', 0)],
-                  ['🟢 Done',        done],
-                  ['**Total**',      f'**{total}**'],
+                  ['🔵 Todo',              counts.get('Todo', 0)],
+                  ['🟡 In progress',       counts.get('In progress', 0)],
+                  ['🟠 Awaiting Decision', counts.get('Awaiting Decision', 0)],
+                  ['🟢 Done',              done],
+                  ['**Total**',            f'**{total}**'],
               ]
               return md_table('## 📋 Board Status', ['Status', 'Count'], rows) \
                      + f'\n\n**{pct}% complete**'
@@ -189,7 +190,7 @@ jobs:
               sprint = active[0]['iteration']
               lines  = [f'## 🏃 Sprint: {sprint}', '']
               for i in active:
-                  icon = {'In Progress': '🟡', 'In Review': '🟠'}.get(i['status'], '🔵')
+                  icon = {'In progress': '🟡', 'Awaiting Decision': '🟠'}.get(i['status'], '🔵')
                   lines.append(f"{icon} #{i['number']}: {i['title']} _({i.get('size','?')})_")
               return '\n'.join(lines)
 
@@ -225,11 +226,10 @@ jobs:
               done  = counts.get('Done', 0)
               pct   = round(done * 100 / total) if total else 0
               rows  = [
-                  ['Todo',         counts.get('Todo', 0)],
-                  ['Ready',        counts.get('Ready', 0)],
-                  ['In Progress',  counts.get('In Progress', 0)],
-                  ['In Review',    counts.get('In Review', 0)],
-                  ['Done',         done],
+                  ['Todo',              counts.get('Todo', 0)],
+                  ['In progress',       counts.get('In progress', 0)],
+                  ['Awaiting Decision', counts.get('Awaiting Decision', 0)],
+                  ['Done',              done],
               ]
               return md_table(f'## 🗓 {pi_name or "PI"} Progress', ['Status', 'Count'], rows) \
                      + f'\n\n**{pct}% of {total} items complete**'
@@ -271,7 +271,7 @@ jobs:
                   '',
                   '| Command | Description |',
                   '|---------|-------------|',
-                  '| `/board-status` | Board overview — Todo / In Progress / Done |',
+                  '| `/board-status` | Board overview — Todo / In progress / Awaiting Decision / Done |',
                   '| `/sprint` | Items in the current iteration |',
                   '| `/blocked` | Issues with `blocked-by` label |',
                   '| `/decisions` | Open HITL Decision Artifacts grouped by assignee type |',
