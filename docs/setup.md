@@ -334,9 +334,66 @@ After pushing your fork, also run **Actions -> Template sanity check -> Run work
 
 See [AgentArmy Onboarding Sanity Check](onboarding.md) for the full checklist and troubleshooting table.
 
-## Optional: Azure Static Web Apps
+## Optional — Azure infrastructure deploy pipeline
 
-This repo includes `swa-cli.config.json` for Azure SWA deployment. To enable:
+`.github/workflows/azure-deploy-pipeline.yml` validates and deploys the Azure side of a spoke (Bicep infrastructure, Container Registry, Key Vault, Container Apps). It runs **validation on every PR to `main`** and the **full deploy on push to `main`**. If you do not use Azure you can delete this workflow — but note that until its secrets are set, the **Validate Azure Infrastructure** check fails red on every PR.
+
+> Set all of the following under **Settings → Secrets and variables → Actions** (same place as `PROJECT_TOKEN`).
+
+### Secrets used by the pipeline
+
+| Secret | Required for | How to obtain |
+|---|---|---|
+| `AZURE_CREDENTIALS` | **PR validation + every deploy job** (`azure/login`) | service-principal JSON — see below |
+| `AZURE_REGISTRY_LOGIN_SERVER` | build/push to ACR (push to `main` only) | `az acr show -n <acr> --query loginServer -o tsv` |
+| `AZURE_REGISTRY_USERNAME` | push to ACR | `az acr credential show -n <acr> --query username -o tsv` |
+| `AZURE_REGISTRY_PASSWORD` | push to ACR | `az acr credential show -n <acr> --query "passwords[0].value" -o tsv` |
+| `CEREBRAS_API_KEY` | Key Vault injection (push to `main`) | Cerebras console |
+| `TAVILY_API_KEY` | Key Vault injection (push to `main`) | Tavily console |
+| `FOUNDRY_API_KEY` | Key Vault injection + `foundry-status-check.yml` | Azure AI Foundry resource → **Keys** |
+
+Only `AZURE_CREDENTIALS` (plus a correct subscription, below) is needed to turn the **PR** check green; the ACR and API-key secrets are only exercised on push to `main`.
+
+### Create the service principal → `AZURE_CREDENTIALS`
+
+The workflow uses `azure/login@v1` with a JSON credential blob:
+
+```bash
+az login
+az account set --subscription "<YOUR_SUBSCRIPTION_ID>"
+
+az ad sp create-for-rbac \
+  --name "agentarmy-gh-actions" \
+  --role Contributor \
+  --scopes "/subscriptions/<YOUR_SUBSCRIPTION_ID>" \
+  --sdk-auth
+```
+
+Copy the entire JSON output (`clientId`, `clientSecret`, `subscriptionId`, `tenantId`) and store it:
+
+```bash
+gh secret set AZURE_CREDENTIALS --repo YOUR_USERNAME/AgentArmy < creds.json
+# or paste interactively:
+gh secret set AZURE_CREDENTIALS --repo YOUR_USERNAME/AgentArmy
+```
+
+See Microsoft's [Sign in with a service principal and secret](https://learn.microsoft.com/azure/developer/github/connect-from-azure-secret) for details.
+
+### Replace the hardcoded subscription and resource group
+
+`azure-deploy-pipeline.yml` ships with template placeholders:
+
+```yaml
+env:
+  RESOURCE_GROUP: rg-01
+  SUBSCRIPTION: AASub1
+```
+
+The validation job runs `--subscription AASub1`, which will not resolve under your account — replace both with your real subscription ID and resource group (or wire them to repo **variables** such as `vars.AZURE_SUBSCRIPTION` / `vars.AZURE_RESOURCE_GROUP`).
+
+### Recommended: keyless OIDC instead of a stored secret
+
+`AZURE_CREDENTIALS` is a long-lived secret you must rotate. This template already uses keyless OIDC for GCP (`WORKLOAD_IDENTITY_PROVIDER`); you can do the same on Azure by switching to `azure/login@v2` with a federated identity credential (`client-id` / `tenant-id` / `subscription-id` + `permissions: id-token: write`) and dropping `AZURE_CREDENTIALS` entirely. See [Use GitHub Actions to connect to Azure](https://learn.microsoft.com/azure/developer/github/connect-from-azure) and [Authenticate by OpenID Connect](https://learn.microsoft.com/azure/developer/github/connect-from-azure-openid-connect).
 
 ## Optional: Azure Static Web Apps
 
@@ -403,6 +460,7 @@ After running, restart or reload your active Antigravity CLI session to pick up 
 - [ ] Claude Code plugins installed (`/plugin` + `/reload-plugins`)
 - [ ] `.claude/settings.local.json` configured and gitignored
 - [ ] Optional Codex local config kept outside committed `.codex/config.toml`
+- [ ] (Optional) Azure deploy pipeline: `AZURE_CREDENTIALS` set + `RESOURCE_GROUP`/`SUBSCRIPTION` placeholders replaced; ACR + API-key secrets set if deploying from `main`
 - [ ] GCP MCP environment variables configured (optional)
 - [ ] Codex custom agents synced via hook or manual script run
 - [ ] Local onboarding sanity check passes

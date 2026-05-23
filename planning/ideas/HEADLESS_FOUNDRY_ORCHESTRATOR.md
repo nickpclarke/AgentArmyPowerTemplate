@@ -1,6 +1,6 @@
 # Headless Foundry Orchestrator
 
-**Status:** Innovation Proposal  
+**Status:** Innovation Proposal (governance-aligned revision)  
 **Date:** 2026-05-23  
 **Proposed by:** Claude Code  
 **Category:** Infrastructure Automation / AI-Driven DevOps  
@@ -9,9 +9,25 @@
 
 ## Executive Summary
 
-Transform AgentArmy's infrastructure deployment from manual/workflow-driven to **fully autonomous AI-orchestrated**. A headless microVM running in Azure Container Apps continuously monitors infrastructure health, analyzes desired vs. current state, and makes intelligent decisions to trigger deployments, scale resources, and optimize costs—all without human intervention or console access.
+Transform AgentArmy's infrastructure deployment from manual/workflow-driven to **fully autonomous AI-orchestrated**. A headless microVM running in Azure Container Apps continuously monitors infrastructure health, analyzes desired vs. current state, and makes intelligent decisions to trigger deployments, scale resources, and optimize costs—autonomously for low-risk dev/staging changes, and by surfacing production changes as Decision Artifacts for human sign-off (no standing console access required).
 
-**Vision:** Infrastructure that manages itself through AI decision-making.
+**Vision:** Infrastructure that manages itself through AI decision-making — *within the army's existing governance, not around it.*
+
+---
+
+## Scope (v1)
+
+**In scope:**
+- Read-only health + drift detection across dev/staging/prod (via `api-validator.py` + Azure resource state)
+- Autonomous, reversible actions in **dev/staging only**, behind guardrails (dry-run default, max 1 deploy/hr)
+- Prod handled by **recommendation → Decision Artifact** via `hitl-coordinator` (no self-approval)
+- Structured decision logging to Log Analytics (ARMY_PRINCIPLES #7)
+
+**Out of scope for v1** (revisit once a track record exists, gated by an ADR):
+- Autonomous prod deploys
+- Foundry/LLM-driven decisions (Phase 4) — rule-based engine only in v1
+- Cost-driven auto-scale-down
+- Multi-region / cross-landscape orchestration, predictive scaling, federated decision-making
 
 ---
 
@@ -80,6 +96,48 @@ Foundry Orchestrator Loop (runs hourly or event-driven):
    - Full decision reasoning captured
    - GitHub Actions workflow visible as execution record
    - Infrastructure changes tracked in git history
+
+---
+
+## Governance Alignment (ARMY_PRINCIPLES + HITL)
+
+The orchestrator is an autonomous actor in the army, so it inherits the army's governance model. It is **not** a license to bypass human judgment — it is a faster, always-on path *to* the existing decision surface.
+
+### Autonomy boundary: act vs. escalate
+
+| Environment | Action class | Behavior |
+|---|---|---|
+| dev / staging | Reversible, low-cost (drift correction, scale within budget, dry-run) | **Act autonomously** within guardrails, then log + feed back |
+| prod | Any deploy, spend-increasing scale-up, rollback | **Emit a Decision Artifact** via `hitl-coordinator` — do not self-approve |
+| any | A failure it cannot resolve | **Escalate to `error-coordinator`** (no unbounded retries) |
+
+This replaces "deploy to prod if confidence > 95%". In v1 the orchestrator never self-approves a prod change; high confidence shortens the human's review, it does not remove the human. Production autonomy is *earned* incrementally (see Roadmap), unlocked by an explicit ADR — not flipped on by a threshold.
+
+### Mapping to the 7 principles
+
+| Principle | How the orchestrator complies |
+|---|---|
+| **1. Error Escalation** | On deploy failure, API-unreachable, auth error, or unknown Azure state, it calls `error-coordinator` instead of retrying blindly. Directly mitigates the "runaway deployments" risk. |
+| **2. Knowledge Feedback** | After each run it feeds outcomes (decision → result, false-positive rate, cost delta) to `knowledge-synthesizer` so decision rules improve over time. |
+| **3. Skill Scaffolding** | Exposes `health-check`, `analyze-state`, and `propose-deployment` as composable, structured-output skills other agents/workflows can call. |
+| **4. Hook Integration** | Event-driven runs are triggered by infra/CI lifecycle events, not only a polling timer. |
+| **5. Delegation Direction** | Delegates DOWN/ACROSS only — to `error-coordinator` (escalation) and `hitl-coordinator` (decision surfacing). It never self-approves a prod action. |
+| **6. MECE** | Owns *infrastructure deploy/scale decisioning*. It does **not** author HITL issues itself — it hands context to `hitl-coordinator`, which owns Decision Artifacts; and it does **not** implement Bicep changes — it triggers the existing pipeline. |
+| **7. Observable Decisions** | Every decision is logged in the army's structured format (`timestamp, agent, decision_type, decision, reasoning, confidence`) to Log Analytics — the JSON in Phase 3 already matches this. |
+
+### Decision Artifacts instead of self-approval (prod)
+
+When the orchestrator concludes prod needs a change, it does **not** call the GitHub Actions API directly. It hands context to `hitl-coordinator`, which creates a Decision Artifact (`Type: Decision`, `hitl-decision` label, `Status: Awaiting Decision`) on the GitHub Projects board. The orchestrator's analysis JSON maps cleanly onto the artifact template:
+
+| Orchestrator field | Decision Artifact section |
+|---|---|
+| `analysis` | Context |
+| candidate strategies | Options |
+| `recommended_action` + `decision_confidence` | Agent Recommendation |
+| `decision_reasoning` | Impact of Each Option |
+| affected resources | Blocks |
+
+The orchestrator's calls map onto the HITL decision-type taxonomy: a prod deploy is **Risk Acceptance**, a spend-increasing scale-up is **Budget/Capacity**, and a change needing explicit authorization is a **Security Gate**. A human (or AI app) comments + closes the artifact, the existing HITL automation unblocks the work, and the orchestrator executes the approved action.
 
 ---
 
@@ -195,6 +253,8 @@ class DeploymentDecisionEngine:
 ```json
 {
   "timestamp": "2026-05-23T10:30:00Z",
+  "agent": "foundry-orchestrator",
+  "decision_type": "Budget/Capacity",
   "orchestrator_run_id": "orch-20260523-103000",
   "phase": "decision",
   "analysis": {
@@ -296,15 +356,13 @@ infra/
 
 ### Critical Decisions Needed
 
-1. **Autonomous vs. Approval-Gated**
-   - Should orchestrator deploy to prod without human approval?
-   - Or should it recommend (create HITL decision artifact)?
-   - **Recommendation:** Start with recommendations → gradual autonomy
+1. **Autonomous vs. Approval-Gated** — *resolved (see [Governance Alignment](#governance-alignment-army_principles--hitl))*
+   - **Decided:** prod changes emit a Decision Artifact via `hitl-coordinator`; dev/staging act autonomously within guardrails. No threshold self-approves prod in v1.
+   - Increasing prod autonomy is a separate, ADR-gated decision once a track record exists.
 
 2. **Decision Confidence Threshold**
-   - Deploy only if decision confidence > 80%?
-   - Or more conservative (> 90%)?
-   - **Recommendation:** 85% for staging, 95% for prod
+   - In dev/staging, act autonomously only if confidence > 85%; below that, emit a Decision Artifact instead.
+   - In prod, confidence never authorizes action on its own — it only informs the human's review on the Decision Artifact.
 
 3. **Deployment Frequency**
    - Check infrastructure every hour? Every 5 minutes?
@@ -370,8 +428,8 @@ infra/
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|-----------|
-| Runaway deployments | Medium | High | Deploy only if confidence > 95%, max 1 deploy/hour |
-| Cost explosion (unintended scaling) | Medium | High | Scale-down only during office hours, manual approval for prod |
+| Runaway deployments | Medium | High | Prod gated behind a Decision Artifact (no self-approval); dev/staging capped at 1 deploy/hr; failures escalate to `error-coordinator` (Principle 1) |
+| Cost explosion (unintended scaling) | Medium | High | Prod spend changes routed through a Decision Artifact (Budget/Capacity type); dev/staging scale-down disabled in v1 (out of scope) |
 | Orchestrator itself crashes | Low | High | Use Managed Identity (built-in recovery), Container Apps auto-restart |
 | GitHub API rate limit exceeded | Low | Medium | Check GitHub rate limits before deploy, implement backoff |
 | Infrastructure drift undetected | Low | Medium | Run health checks every 5 min, automated tests |
@@ -407,12 +465,15 @@ infra/
 
 ## Roadmap & Future Enhancements
 
-### Near-term (Next 2 months)
-- [ ] Phase 1-3: Core orchestrator with observability
-- [ ] GitHub Projects integration (log decisions as items)
+> The items below are the **earned-autonomy path**. Everything past v1 (see [Scope](#scope-v1)) ships only after a track record exists, and the step from "recommend prod" to "act on prod" is gated by an explicit ADR — not a roadmap checkbox.
+
+### Near-term (Next 2 months) — v1
+- [ ] Phase 1-3: Core orchestrator with observability (dev/staging autonomous, prod recommend-only)
+- [ ] HITL integration: prod recommendations land as Decision Artifacts via `hitl-coordinator`
 - [ ] Slack notifications of major decisions
 
 ### Mid-term (Months 2-4)
+- [ ] **ADR: graduate selected prod actions to autonomous** (precondition for everything below)
 - [ ] Phase 4: Foundry integration for intelligent decisions
 - [ ] Multi-region orchestration (orchestrate across multiple Azure regions)
 - [ ] Cost attribution (show which orchestrator decisions saved money)
@@ -431,15 +492,15 @@ infra/
 The headless orchestrator means:
 - **No console access needed** — runs entirely in the cloud
 - **Check status from anywhere** — Azure Portal, Log Analytics, GitHub
-- **Make decisions from iPhone** — Foundry models reason about infrastructure
-- **Autonomous execution** — AI makes decisions you approve async
+- **Approve from your phone** — prod changes arrive as Decision Artifacts on the GitHub Projects board; comment + close to approve, exactly like any HITL decision. The board *is* the mobile approval surface — no bespoke app needed.
+- **Autonomous execution where safe** — dev/staging changes apply themselves within guardrails; prod waits for your call
 - **Audit trail** — Everything logged and queryable
 
 **Example workflow from iPhone:**
-1. Notification: "Orchestrator detected API latency spike"
-2. Review in Azure Portal/Log Analytics
-3. Approve/reject proposed deployment (or let it auto-approve if confidence > threshold)
-4. Monitor deployment progress in GitHub Actions
+1. GitHub notification: a Decision Artifact was assigned to you ("Orchestrator detected API latency spike → recommend scale Cosmos DB")
+2. Open the issue — Context, Options, and the orchestrator's recommendation are self-contained
+3. Approve or reject by commenting + closing (the same HITL flow humans already use)
+4. HITL automation unblocks the work; orchestrator triggers the deploy and monitors GitHub Actions
 5. Get notification when complete
 
 ---
@@ -456,10 +517,11 @@ The headless orchestrator means:
 
 ## References & Related Documents
 
-- [azure-deploy-pipeline.yml](.github/workflows/azure-deploy-pipeline.yml) — Current CI/CD pipeline
-- [api-validator.py](api-validator.py) — Infrastructure health checking
-- [main.bicep](infra/main.bicep) — Infrastructure-as-Code definition
-- [HITL Decision Pattern](../meta/hitl_system.md) — Human-in-the-loop decisions
+- [azure-deploy-pipeline.yml](../../.github/workflows/azure-deploy-pipeline.yml) — Current CI/CD pipeline
+- [api-validator.py](../../api-validator.py) — Infrastructure health checking
+- [main.bicep](../../infra/main.bicep) — Infrastructure-as-Code definition
+- [HITL Decision Pattern](../../docs/hitl.md) — Human-in-the-loop decisions
+- [hitl-coordinator agent](../../.claude/agents/categories/09-meta-orchestration/hitl-coordinator.md) — Creates Decision Artifacts on the board
 - [ARMY_PRINCIPLES](../meta/principles/ARMY_PRINCIPLES.md) — Governance principles
 
 ---
@@ -487,4 +549,4 @@ The headless orchestrator means:
 
 **Status:** Ready for discussion / technical spike  
 **Owner:** TBD  
-**Stakeholder Input Needed:** Yes (autonomy level, approval requirements)
+**Stakeholder Input Needed:** Yes — v1 autonomy model is resolved (dev/staging autonomous, prod via Decision Artifact); open question is the *earned-autonomy ADR* for graduating prod actions later.
