@@ -372,6 +372,72 @@ After pushing your fork, also run **Actions -> Template sanity check -> Run work
 
 See [AgentArmy Onboarding Sanity Check](onboarding.md) for the full checklist and troubleshooting table.
 
+## What can be automated vs. what requires manual steps
+
+Some setup steps require a human with browser access; others can run inside an agent session. Know which is which before delegating setup to Claude Code or Copilot.
+
+| Step | Human required? | Can agent automate? | Notes |
+|---|---|---|---|
+| Fork + clone the repo | Yes (first time) | No | Needs GitHub account + browser for fork |
+| `gh auth login` | Yes | No | Requires device-flow browser interaction |
+| Create the Project board | Yes | Partially | `gh project create` works in an authed shell, but the board fields and views must be created in the web UI |
+| Create `PROJECT_TOKEN` PAT | Yes | No | Token generation requires browser + 2FA |
+| Set `PROJECT_TOKEN` / `PROJECT_NUMBER` | Yes | Yes (after auth) | `gh secret set` + `gh variable set` work in an authed shell |
+| Update workflow files with username | No | Yes | `sed -i 's/nickpclarke/YOUR_USERNAME/g' .github/workflows/*.yml` |
+| Create required labels | No | Yes | `gh label create` with appropriate colors + descriptions |
+| Run onboarding sanity check | No | Yes | `.\scripts\onboarding-check.ps1 ...` or bash equivalent |
+| Install MemPalace | No | Yes | `pip install mempalace && mempalace init` |
+| Enable Workflow permissions (read/write) | Yes | No | Settings → Actions → General — browser only |
+| Enable Copilot features | Yes | No | Settings → Copilot — browser only |
+| Install Claude GitHub App | Yes | No | Browser install at github.com/apps/claude |
+
+**Agent session checklist (what Claude Code or Copilot can do autonomously):**
+
+```bash
+# 1. Verify repo is a fork and has required files
+git remote -v
+ls .github/workflows/ CLAUDE.md
+
+# 2. Update hardcoded owner references if the fork owner differs
+grep -r "nickpclarke" .github/workflows/ --include="*.yml" -l
+
+# 3. Verify secrets/variables are configured (will 401/404 if missing)
+gh secret list --repo YOUR_USERNAME/AgentArmy
+gh variable list --repo YOUR_USERNAME/AgentArmy
+
+# 4. Create routing labels if missing
+gh label create "agent-army-task" --description "Task routed to the Claude Code agent army" --color "7B61FF" --repo YOUR_USERNAME/AgentArmy
+gh label create "copilot-task" --description "Task routed to the Copilot coding agent" --color "0075ca" --repo YOUR_USERNAME/AgentArmy
+gh label create "hitl-decision" --description "Decision artifact requiring human or AI-app judgment" --color "e4e669" --repo YOUR_USERNAME/AgentArmy
+
+# 5. Run the sanity check
+.\scripts\onboarding-check.ps1 -Owner YOUR_USERNAME -Repo AgentArmy -ProjectNumber PROJECT_NUM
+```
+
+## Agent-runtime onboarding path
+
+When Claude Code (or another AI agent runtime) starts fresh in a forked AgentArmy repo — for example, during a remote cloud session or a CI-triggered agent run — it should self-verify before doing real work. The `SessionStart` hook in `.claude/settings.json` is the right place to wire this, but you can also run it manually:
+
+```bash
+# Quick sanity: is this a properly configured AgentArmy fork?
+OWNER=$(gh repo view --json owner -q .owner.login 2>/dev/null || echo "UNKNOWN")
+PROJECT_NUM=$(gh variable list --json name,value 2>/dev/null | \
+  python3 -c "import json,sys; v=[x for x in json.load(sys.stdin) if x['name']=='PROJECT_NUMBER']; print(v[0]['value'] if v else 'NOT SET')")
+
+echo "Owner:          $OWNER"
+echo "Project number: $PROJECT_NUM"
+echo "Branch:         $(git branch --show-current)"
+echo "Workflows:      $(ls .github/workflows/*.yml 2>/dev/null | wc -l) files"
+echo "Open RT1 items: $(gh issue list --label rt-1 --state open --json number -q length 2>/dev/null || echo '??')"
+```
+
+**What to check before delegating work in an agent session:**
+
+1. `PROJECT_TOKEN` secret is set — if `gh project list` returns a 401, the board commands will fail silently. Escalate to a human to refresh the PAT.
+2. The `agent-army-task` label exists — if it's missing, the routing workflow will not fire for Claude Code tasks. Create it with `gh label create` (see above).
+3. The branch has not diverged unexpectedly — run `git status` and `git log --oneline -3` to confirm the working state.
+4. Required workflow files are present — the `auto-status`, `auto-add-to-project`, and `claude` workflows must exist for the board automation to function.
+
 ## Optional: Azure Static Web Apps
 
 This repo includes `swa-cli.config.json` for Azure SWA deployment. To enable:
