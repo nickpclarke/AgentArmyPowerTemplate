@@ -70,13 +70,13 @@ def edgar_source(identity: str = dlt.secrets.value, tickers: list = None):
 
 @dlt.resource(write_disposition="replace", name="director_bios")
 def director_bios(tickers: list):
-    big4_pat = re.compile(r'\b(KPMG|Deloitte|Ernst\s*&\s*Young|EY\b|PricewaterhouseCoopers|PwC)\b')
+    big4_pat = re.compile(r'\\b(KPMG|Deloitte|Ernst\\s*&\\s*Young|EY\\b|PricewaterhouseCoopers|PwC)\\b')
     for ticker in tickers:
         try:
             c = Company(ticker)
             filing = c.get_filings(form="DEF 14A").latest()
             text = filing.document.text()
-            for chunk in re.split(r'\n{2,}', text):
+            for chunk in re.split(r'\\n{2,}', text):
                 m = big4_pat.search(chunk)
                 if m and len(chunk) > 120:
                     yield {"ticker": ticker, "big4_mention": m.group(1), "text": chunk[:800]}

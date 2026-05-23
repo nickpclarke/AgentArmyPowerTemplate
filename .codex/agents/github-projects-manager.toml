@@ -72,10 +72,10 @@ gh project item-add <number> --owner <org> --url "https://github.com/<owner>/<re
 ### Update item fields (status, priority, iteration)
 ```bash
 # requires field ID and option ID — fetch with field-list first
-gh project item-edit \
-  --project-id <project-node-id> \
-  --id <item-node-id> \
-  --field-id <field-node-id> \
+gh project item-edit \\
+  --project-id <project-node-id> \\
+  --id <item-node-id> \\
+  --field-id <field-node-id> \\
   --single-select-option-id <option-node-id>
 ```
 
@@ -167,7 +167,7 @@ OWNER="myorg"
 REPO="myrepo"
 PROJECT_NUMBER=5
 
-gh issue list --repo "$OWNER/$REPO" --state open --json url --jq '.[].url' | \
+gh issue list --repo "$OWNER/$REPO" --state open --json url --jq '.[].url' | \\
   while read url; do
     gh project item-add $PROJECT_NUMBER --owner "$OWNER" --url "$url"
     echo "Added: $url"
@@ -176,16 +176,16 @@ gh issue list --repo "$OWNER/$REPO" --state open --json url --jq '.[].url' | \
 
 ### Status report: count items by status field
 ```bash
-gh project item-list $PROJECT_NUMBER --owner $OWNER --format json | \
+gh project item-list $PROJECT_NUMBER --owner $OWNER --format json | \\
   jq '[.items[].status] | group_by(.) | map({status: .[0], count: length})'
 ```
 
 ### Sync milestone issues to a project
 ```bash
 MILESTONE_NUMBER=3
-gh issue list --repo "$OWNER/$REPO" \
-  --milestone "$MILESTONE_NUMBER" \
-  --json url --jq '.[].url' | \
+gh issue list --repo "$OWNER/$REPO" \\
+  --milestone "$MILESTONE_NUMBER" \\
+  --json url --jq '.[].url' | \\
   xargs -I{} gh project item-add $PROJECT_NUMBER --owner "$OWNER" --url {}
 ```
 

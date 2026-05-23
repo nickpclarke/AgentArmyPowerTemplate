@@ -65,7 +65,7 @@ def main():
 
         # Construct the TOML representation
         # Escape triple quotes inside the instructions to prevent syntax errors
-        escaped_instructions = instructions.replace('"""', '\\"\\"\\"')
+        escaped_instructions = instructions.replace('\\', '\\\\').replace('"""', '\\"\\"\\"')
         
         toml_content = f"""# Auto-generated from {md_file.relative_to(repo_root).as_posix()}
 # DO NOT EDIT DIRECTLY. Run scripts/sync_agents_to_codex.py to update.

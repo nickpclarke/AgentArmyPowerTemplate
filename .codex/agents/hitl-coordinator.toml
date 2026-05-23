@@ -97,11 +97,11 @@ unblocks dependent work (#N, #N above) and posts your decision as context on tho
 
 ```bash
 # Create the issue
-gh issue create \
-  --title "Decision: [topic] (blocks #N)" \
-  --body "$(cat /path/to/decision-body.md)" \
-  --label "hitl-decision,assignee:human,Decision" \
-  --assignee "USERNAME_OR_COPILOT" \
+gh issue create \\
+  --title "Decision: [topic] (blocks #N)" \\
+  --body "$(cat /path/to/decision-body.md)" \\
+  --label "hitl-decision,assignee:human,Decision" \\
+  --assignee "USERNAME_OR_COPILOT" \\
   --repo OWNER/REPO
 
 # Add awaiting-human to each blocked issue
