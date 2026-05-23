@@ -24,3 +24,6 @@ swa-cli.config.json
 # Generated DuckDB databases and dlt pipeline state
 *.duckdb
 pipelines/.dlt_state/
+
+# MkDocs build output
+site/

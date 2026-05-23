@@ -99,7 +99,8 @@ nav:
     - The Three Armies: armies-overview.md
     - Routing Matrix: routing-matrix.md
   - Claude Code Army:
-    - Specialist Roster: agents.md
+    - All 159 Agents: agents-glossary/index.md
+    - Original Roster: agents.md
     - Language Routing Guide: language-routing.md
     - Using Claude Code: claude-code-guide.md
   - GitHub Copilot Army:
