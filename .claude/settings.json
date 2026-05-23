@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "PYTHONUTF8=1 mempalace hook run --hook session-start --harness claude-code",
+            "command": "python scripts/mempalace_hook.py --hook session-start --harness claude-code",
             "timeout": 30,
             "statusMessage": "Loading memories from MemPalace..."
           }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "PYTHONUTF8=1 mempalace hook run --hook user-prompt-submit --harness claude-code",
+            "command": "python scripts/mempalace_hook.py --hook user-prompt-submit --harness claude-code",
             "timeout": 10,
             "statusMessage": "Enriching prompt with MemPalace context..."
           }
@@ -29,7 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "PYTHONUTF8=1 mempalace hook run --hook pre-tool-use --harness claude-code",
+            "command": "python scripts/mempalace_hook.py --hook pre-tool-use --harness claude-code",
             "timeout": 10,
             "statusMessage": "Pre-tool MemPalace check..."
           }

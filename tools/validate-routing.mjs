@@ -207,40 +207,24 @@ function findMatchingRule(input, sortedRules) {
     const cond = rule.conditions;
     if (!cond) continue;
 
-    const checks = [];
-
     if (Array.isArray(cond.issue_types)) {
-      if (!input.issue_type || !cond.issue_types.includes(input.issue_type)) {
-        continue;
-      }
-      checks.push(true);
+      if (!input.issue_type || !cond.issue_types.includes(input.issue_type)) continue;
     }
 
     if (Array.isArray(cond.size)) {
-      if (!input.size || !cond.size.includes(input.size)) {
-        continue;
-      }
-      checks.push(true);
+      if (!input.size || !cond.size.includes(input.size)) continue;
     }
-
-    const hasLabel = Array.isArray(cond.labels) && Array.isArray(input.labels) &&
-                     cond.labels.some(l => input.labels.includes(l));
-    const hasKeyword = textContainsKeyword(input, cond.keywords);
 
     if (Array.isArray(cond.labels) || Array.isArray(cond.keywords)) {
-      if (!hasLabel && !hasKeyword) {
-        if (!Array.isArray(cond.issue_types) && !Array.isArray(cond.size)) {
-          continue;
-        }
-        if (!checks.length) continue;
-      } else {
-        checks.push(true);
-      }
+      const hasLabel = Array.isArray(cond.labels) && Array.isArray(input.labels) &&
+                       cond.labels.some(l => input.labels.includes(l));
+      const hasKeyword = textContainsKeyword(input, cond.keywords);
+      if (!hasLabel && !hasKeyword) continue;
     }
 
-    if (checks.length > 0) {
-      return rule;
-    }
+    // cond.concern is documentation metadata — not matched against input
+
+    return rule;
   }
   return null;
 }

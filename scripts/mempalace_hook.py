@@ -11,7 +11,7 @@ import sys
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run a MemPalace lifecycle hook.")
-    parser.add_argument("--hook", choices=("stop", "precompact"), required=True)
+    parser.add_argument("--hook", choices=("session-start", "user-prompt-submit", "pre-tool-use", "post-tool-use", "stop", "precompact"), required=True)
     parser.add_argument("--harness", default="claude-code")
     args = parser.parse_args()
 

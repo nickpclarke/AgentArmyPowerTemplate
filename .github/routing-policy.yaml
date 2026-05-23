@@ -490,7 +490,7 @@ routing_policy:
       army: claude_code
       agent: swift-expert
       conditions:
-        keywords: ["Swift", "SwiftUI", "Combine", "Actor", "async/await Swift"]
+        keywords: ["Swift", "SwiftUI", "Combine", "Swift Actor", "async/await Swift"]
         concern: "Swift language and SwiftUI application development"
       rationale: "swift-expert handles Swift concurrency model, SwiftUI, and Combine."
       example: "Implement a SwiftUI view with async/await data loading."
@@ -633,7 +633,7 @@ routing_policy:
       agent: devops-engineer
       conditions:
         labels: [devops, infra, ci-cd]
-        keywords: ["CI/CD", "GitHub Actions", "pipeline", "containerization", "Docker build", "infra automation"]
+        keywords: ["CI/CD", "GitHub Actions", "CI/CD pipeline", "containerization", "Docker build", "infra automation"]
         concern: "CI/CD pipelines, containerization, and infrastructure automation"
       rationale: "devops-engineer builds and operates the delivery pipeline; deployment-engineer handles rollout strategy."
       example: "Add a multi-stage Docker build to the GitHub Actions pipeline."

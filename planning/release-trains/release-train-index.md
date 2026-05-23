@@ -17,6 +17,54 @@ Strategic index of Release Trains RT1–RT4 for the AgentArmy template platform 
 
 ---
 
+## Velocity & Sprint Calibration
+
+> **Living baseline** — updated after each session. Future sessions should compare against these numbers and annotate divergence.
+
+### Session 1 Actuals (2026-05-23)
+
+| Metric | Value |
+|---|---|
+| Session duration | ~3 hours |
+| Parallel agents | 4 |
+| Features completed | 4 Size:M (draft PRs open) |
+| Throughput | **4 Size:M features / session** |
+
+**Issues completed in Session 1:**
+- #18 Agent Spec Template + Capability Matrix → PR #57
+- #19 Executable Routing Decision Tree → PR #58
+- #20 Claude Code Hook System → PR #55
+- #44 Docs: token setup + agent onboarding path → PR #56 (pre-kickoff)
+
+**Session 1 character:** Foundation/template/YAML-heavy work. Agent spec schemas, routing policy YAML (1275 lines), hook shell scripts, and docs additions are structurally lightweight compared to runtime choreography code. This inflated throughput vs. RT2+.
+
+### Velocity Units
+
+These agents work in **sessions**, not calendar weeks. The relevant planning unit is:
+
+> **Features per session** (not story points per week)
+
+A session = one parallel-agent invocation, typically 2–4 hours wall-clock time.
+
+### Projected Session Count by Release Train
+
+| RT | Features | Session estimate | Compression factor vs. Session 1 | Notes |
+|---|---|---|---|---|
+| **RT1** | 6 features (#18–23) | **2 sessions** | 1× | Session 1 = done (#18, #19, #20, #44); Session 2 = #21, #22, #23 |
+| **RT2** | 6 features (#25–30) | **2–3 sessions** | 2–3× slower | Real choreography code, saga state machines, learning loop runtime |
+| **RT3** | 5 features (#32–36) | **2 sessions** | 2–3× slower | Spoke init automation, dashboards, prompt adaptation |
+| **RT4** | 4 features (#38–41) | **1–2 sessions** | 2× slower | KB, tracing, feedback, competency — smaller feature set |
+| **Total** | 21 remaining features | **7–9 sessions** | — | Full roadmap estimate from Session 1 baseline |
+
+### Caveats & Calibration Notes
+
+- **RT2+ features are implementation-heavy.** Choreography patterns, learning loop runtime, and cost-visibility integrations involve real executable code (not YAML policy or shell scripts). Expect 2–3 features/session, not 4.
+- **Parallelism ceiling.** Session 1 ran 4 agents in true parallel on independent features. RT2+ features have tighter dependencies (see Cross-RT Dependency Graph below) — some will serialize, reducing throughput.
+- **Revision rounds.** Draft PRs from Session 1 will require review and revision passes. Count those as fractional sessions if significant rework is needed.
+- **This baseline replaces FTE-week estimates for agent-driven work.** Calendar durations in the Milestone Calendar remain as reference anchors for stakeholder communication, but session counts are the operational planning unit.
+
+---
+
 ## Critical Success Factors
 
 **RT1 — Foundation & Routing**
@@ -76,25 +124,49 @@ RT4 (Learning)
 
 ## Milestone Calendar
 
+> **Two views:** Calendar dates (original estimates, kept for stakeholder reference) and session-based milestones (the operational planning unit for agent-driven work). Use the session column to plan the next session; use the calendar column for reporting to humans.
+
 ### Q2 (Jun–Aug): RT1 + RT2 ramp-up
-- **Jun 1–12:** RT1 Sprint 1 — Agent Specs, Routing Tree kickoff
-- **Jun 12–26:** RT1 Sprint 2 — Hooks, Context Graph, routing cont.
-- **Jun 26–Jul 10:** RT1 Sprint 3 — Telemetry, Prompt Library, wrap
-- **Jul 10–24:** RT2 Sprint 1 — Choreography, Eval Gates
-- **Jul 24–Aug 7:** RT2 Sprint 2 — Skills, Learning Loop, Artifacts
-- **Aug 7–21:** RT2 Sprint 3 — Cost Visibility, wrap
+
+| Calendar window (~Jun–Aug 2026) | Session | Issues | Status |
+|---|---|---|---|
+| Jun 1–12: RT1 Sprint 1 — Agent Specs, Routing Tree kickoff | **Session 1** | #18, #19, #20, #44 | **DONE** — draft PRs #55, #56, #57, #58 open |
+| Jun 12–26: RT1 Sprint 2 — Hooks, Context Graph, routing cont. | **Session 2** | #21, #22, #23 | Not started |
+| Jun 26–Jul 10: RT1 Sprint 3 — Telemetry, Prompt Library, wrap | _(absorbed into Session 2 or earlier)_ | — | Dependent on Session 2 scope |
+| Jul 10–24: RT2 Sprint 1 — Choreography, Eval Gates | **Session 3** | #25, #26 | Not started |
+| Jul 24–Aug 7: RT2 Sprint 2 — Skills, Learning Loop, Artifacts | **Session 4** | #27, #28, #29 | Not started |
+| Aug 7–21: RT2 Sprint 3 — Cost Visibility, wrap | _(Session 4 or Session 5 if slippage)_ | #30 | Not started |
 
 ### Q3 (Aug–Oct): RT2 completion + RT3 ramp-up
-- **Aug 21–Sep 4:** RT3 Sprint 1 — Onboarding, Manifest
-- **Sep 4–18:** RT3 Sprint 2 — Capacity Model, Dashboard
-- **Sep 18–Oct 2:** RT3 Sprint 3 — Prompt Adaptation, first real spoke
+
+| Calendar window (~Aug–Oct 2026) | Session | Issues | Status |
+|---|---|---|---|
+| Aug 21–Sep 4: RT3 Sprint 1 — Onboarding, Manifest | **Session 5** | #32, #34 | Not started |
+| Sep 4–18: RT3 Sprint 2 — Capacity Model, Dashboard | **Session 5 (cont.) or Session 6** | #33, #35 | Not started |
+| Sep 18–Oct 2: RT3 Sprint 3 — Prompt Adaptation, first real spoke | _(Session 5–6 tail)_ | #36 | Not started |
 
 ### Q4 (Oct–Nov): RT3 wrap + RT4 execution
-- **Oct 2–16:** RT4 Sprint 1 — KB, Tracing
-- **Oct 16–30:** RT4 Sprint 2 — Feedback Integration, Competency
-- **Oct 30–Nov 15:** RT4 Sprint 3 — wrap, learning synthesis
 
-> Sprints map to the board's `Iteration` field. They aren't created yet — add them at PI Planning per the [board-population-checklist](../backlog/board-population-checklist.md).
+| Calendar window (~Oct–Nov 2026) | Session | Issues | Status |
+|---|---|---|---|
+| Oct 2–16: RT4 Sprint 1 — KB, Tracing | **Session 6** | #38, #39 | Not started |
+| Oct 16–30: RT4 Sprint 2 — Feedback Integration, Competency | **Session 7** | #40, #41 | Not started |
+| Oct 30–Nov 15: RT4 Sprint 3 — wrap, learning synthesis | _(Session 7 tail or Session 8 if needed)_ | — | Not started |
+
+### Session Summary (operational view)
+
+| Session | Target issues | RT | Expected throughput | Notes |
+|---|---|---|---|---|
+| **Session 1** ✅ | #18, #19, #20, #44 | RT1 | 4 features | **DONE** 2026-05-23 |
+| **Session 2** | #21, #22, #23 | RT1 | 3 features | Remaining RT1; foundation-class work |
+| **Session 3** | #25, #26 | RT2 | 2 features | Choreography + Eval Gates; implementation-heavy |
+| **Session 4** | #27, #28, #29 | RT2 | 2–3 features | Skills + Learning Loop + Artifacts |
+| **Session 5** | #30, #32, #33, #34 | RT2/RT3 | 2–3 features | Cost Visibility wrap + RT3 ramp |
+| **Session 6** | #35, #36, #38, #39 | RT3/RT4 | 2–3 features | Dashboard + Prompt Adapt + RT4 start |
+| **Session 7** | #40, #41 | RT4 | 2 features | Feedback + Competency; final sprint |
+| **Session 8** _(buffer)_ | Spillover / revision passes | — | — | Hold in reserve; use if RT2+ slips |
+
+> Sprints map to the board's `Iteration` field. They aren't created yet — add them at PI Planning per the [board-population-checklist](../backlog/board-population-checklist.md). Calendar sprint dates are the original human-team estimates and remain valid for milestone reporting; session numbers are the agent-army execution cadence.
 
 ---
 

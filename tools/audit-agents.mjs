@@ -19,7 +19,7 @@
  *   1  One or more agents are missing required fields
  */
 
-import { readFileSync, readdirSync, statSync } from 'fs';
+import { readFileSync, readdirSync, statSync, existsSync } from 'fs';
 import { join, dirname, basename, relative } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -39,7 +39,13 @@ const JSON_OUTPUT = args.includes('--json');
 const SUMMARY_ONLY = args.includes('--summary-only');
 const CATEGORY_FILTER = (() => {
   const idx = args.indexOf('--category');
-  return idx !== -1 ? args[idx + 1] : null;
+  if (idx === -1) return null;
+  const val = args[idx + 1];
+  if (!val || val.startsWith('--')) {
+    console.error('ERROR: --category requires a value');
+    process.exit(1);
+  }
+  return val;
 })();
 
 // ── Schema loading ────────────────────────────────────────────────────────────
@@ -104,8 +110,8 @@ function parseFrontmatter(content) {
         result[currentKey] = inner.split(',').map((s) => s.trim().replace(/^["']|["']$/g, ''));
         inBlockArray = false;
       } else {
-        // Scalar (strip surrounding quotes)
-        result[currentKey] = rawVal.replace(/^["']|["']$/g, '');
+        // Scalar (strip surrounding quotes and trailing inline comments)
+        result[currentKey] = rawVal.replace(/^["']|["']$/g, '').replace(/\s+#.*$/, '');
         inBlockArray = false;
       }
     } else {
@@ -140,7 +146,7 @@ function walk(dir) {
 
 // ── Validation logic ──────────────────────────────────────────────────────────
 
-const KNOWN_TOOLS = [
+const KNOWN_TOOLS = schema.definitions?.known_tools?.enum ?? [
   'Read', 'Write', 'Edit', 'Bash', 'Glob', 'Grep',
   'WebFetch', 'WebSearch', 'computer-use', 'Task',
 ];
@@ -224,6 +230,11 @@ function inferCategory(filePath) {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
+
+if (!existsSync(AGENTS_DIR)) {
+  console.error(`ERROR: Agents directory not found: ${AGENTS_DIR}`);
+  process.exit(2);
+}
 
 const agentFiles = walk(AGENTS_DIR).filter((f) => {
   if (!CATEGORY_FILTER) return true;
