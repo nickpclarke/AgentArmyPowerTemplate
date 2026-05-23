@@ -21,6 +21,23 @@ python3 -m pip install -r requirements-docs.txt
 python3 -m mkdocs build
 ```
 
+On Windows, `python3` may not exist even when Python is installed. Try these in order:
+
+```powershell
+python -m pip install -r requirements-docs.txt
+python -m mkdocs build
+
+py -m pip install -r requirements-docs.txt
+py -m mkdocs build
+```
+
+In Codex desktop sessions, a bundled Python may be available even when system Python is not on PATH. Use the dependency loader or this typical runtime shape:
+
+```powershell
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" -m pip install -r requirements-docs.txt
+& "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" -m mkdocs build
+```
+
 ## Step 1 — Fork and clone
 
 ```bash
