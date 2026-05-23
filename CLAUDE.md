@@ -4,12 +4,11 @@ AI assistant guidance for the AgentArmy template repository.
 
 ## What This Repo Is
 
-AgentArmy is a starter template for AI-powered software development. It deploys three coordinated AI armies through a shared GitHub Projects v2 board:
+AgentArmy is a starter template for AI-powered software development. It coordinates two autonomous AI armies and a shared planning surface:
 
 - **Claude Code army** — local, deep, strategic: architecture, complex features, SAFE planning, security audits
 - **GitHub Copilot army** — GitHub-native, fast, lightweight: PR review, simple task coding, board queries via `@board-manager`
-- **dlt army** — data pipeline specialists: source connectors, ELT pipelines, incremental loading, schema evolution, destination wiring
-- **GitHub Projects v2** — shared coordination plane all armies read and write
+- **GitHub Projects v2** — shared coordination plane both armies read and write
 - **GitHub Actions** — routes issues to the right army, syncs board state, automates ceremonies
 - **SAFE** — the planning model at team and program level
 
@@ -68,20 +67,10 @@ Set the `Type` and `PI` fields on items so they're properly categorised.
 | CI/CD releases & rollbacks | `deployment-engineer` (release strategy, deployment automation) |
 | Reliability & SLOs | `sre-engineer` (error budgets, toil reduction, reliability culture) |
 | Performance | `performance-engineer` (diagnose bottlenecks across any layer) |
+| Data pipeline work (dlt, ELT, connectors) | `dlt-engineer` (source → destination, incremental loading, schema evolution) |
+| Data analysis & modeling | `data-analyst`, `data-scientist`, `data-engineer` |
 
-**dlt army** — data pipeline work (agent: `.claude/agents/categories/05-data-ai/dlt-engineer.md`):
-
-| Concern | Agent |
-|---|---|
-| Source → destination pipelines (any API, DB, file) | `dlt-engineer` |
-| SEC EDGAR / proxy filing extraction | `dlt-engineer` |
-| Incremental loading, schema evolution | `dlt-engineer` |
-| DuckDB / BigQuery / Snowflake wiring | `dlt-engineer` |
-| Pipeline orchestration (Actions, Airflow, Prefect) | `dlt-engineer` + `devops-engineer` |
-| Data quality, freshness SLAs | `dlt-engineer` + `data-engineer` |
-| Analytics on top of loaded data | `data-analyst`, `data-scientist` |
-
-**Enterprise Architecture army** — TOGAF ADM-aligned specialists:
+**Enterprise Architecture specialists** — TOGAF ADM-aligned:
 
 | Concern | Agent |
 |---|---|

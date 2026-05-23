@@ -37,28 +37,42 @@ jobs:
             --add-assignee "Copilot"
         continue-on-error: true
 
-      - name: Post routing comment
+      - name: Post routing comment with context
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           SIZE_LABEL=$(gh issue view ${{ github.event.issue.number }} \
             --json labels --jq '[.labels[].name] | map(select(test("^(XS|S|M|L|XL)$"))) | first // "unknown"')
 
+          TYPE_LABEL=$(gh issue view ${{ github.event.issue.number }} \
+            --json labels --jq '[.labels[].name] | map(select(test("^(bug|feature|docs|spike|enabler)$"))) | first // "story"')
+
+          ISSUE_BODY=$(gh issue view ${{ github.event.issue.number }} --json body -q '.body')
+
           gh issue comment ${{ github.event.issue.number }} --body "$(cat <<EOF
           **🤖 Routed to GitHub Copilot Coding Agent**
 
-          This issue (size: \`$SIZE_LABEL\`) has been assigned to Copilot for implementation.
+          **Scope:** Size \`$SIZE_LABEL\` | Type \`$TYPE_LABEL\`
 
-          **Copilot will:**
+          **Important constraints:**
+          - This is a *template repo* — changes are to docs, workflows, or config only (no app code)
+          - Max ~50 lines per file
+          - Single file or tightly related files
+          - If this touches multiple systems → remove \`copilot-task\`, add \`agent-army-task\`
+
+          **What Copilot will do:**
           1. Create a branch from \`main\`
           2. Implement the changes
-          3. Open a PR referencing this issue
+          3. Open a PR referencing this issue with \`Closes #${{ github.event.issue.number }}\`
 
           **When the PR opens:**
-          - Copilot will auto-review it (first-pass)
-          - Run \`/review-pr\` in Claude Code for a deep review on PRs labelled \`needs-deep-review\`
+          - Gemini will auto-review
+          - Security scan will run
+          - If >200 lines: \`needs-deep-review\` label auto-applied → run \`/review-pr\` in Claude Code
 
-          _To handle this with Claude Code agents instead, remove the \`copilot-task\` label and add \`agent-army-task\`._
+          **See also:** [AI Coordination Guide](.github/AI-COORDINATION.md)
+
+          _To escalate to Claude Code agents, remove \`copilot-task\` and add \`agent-army-task\`._
           EOF
           )"
 
