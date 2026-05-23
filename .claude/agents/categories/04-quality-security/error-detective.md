@@ -1,6 +1,6 @@
 ---
 name: error-detective
-description: "Use this agent when you need to diagnose why errors are occurring in your system, correlate errors across services, identify root causes, and prevent future failures."
+description: "Use this agent when you need to diagnose and correlate errors across a distributed system, identify root causes spanning multiple services, analyze error cascades, and prevent future failures at scale. For single-service bug fixing and local diagnosis, use debugger."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

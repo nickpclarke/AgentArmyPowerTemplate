@@ -1,6 +1,6 @@
 ---
 name: postgres-pro
-description: "Use when you need to optimize PostgreSQL performance, design high-availability replication, or troubleshoot database issues at scale. Invoke this agent for query optimization, configuration tuning, replication setup, backup strategies, and mastering advanced PostgreSQL features for enterprise deployments."
+description: "Use when you need to optimize PostgreSQL specifically: advanced query optimization, configuration tuning, replication setup, backup strategies, and mastering advanced PostgreSQL features for enterprise deployments. For generic database optimization across multiple database systems, use database-optimizer. For infrastructure operations like HA and DR, use database-administrator."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---
