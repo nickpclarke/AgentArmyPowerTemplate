@@ -8,11 +8,11 @@ param(
 
 $env:PYTHONUTF8 = "1"
 
-$mempalace = Get-Command mempalace -ErrorAction SilentlyContinue
+$mempalace = Get-Command mempalace -ErrorAction SilentlyContinue | Select-Object -First 1
 if (-not $mempalace) {
     Write-Warning "mempalace is not on PATH; skipping MemPalace $Hook hook."
     exit 0
 }
 
-& $mempalace.Source hook run --hook $Hook --harness $Harness
+& $mempalace hook run --hook $Hook --harness $Harness
 exit $LASTEXITCODE

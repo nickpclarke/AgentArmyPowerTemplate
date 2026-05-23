@@ -62,7 +62,7 @@ The Claude Code hooks are already in `.claude/settings.json`:
 }
 ```
 
-Codex uses the same lifecycle hooks from `.codex/hooks.json`, routed through `scripts/mempalace-hook.ps1` so Windows shells do not have to understand POSIX-style environment assignment:
+Codex uses the same lifecycle hooks from `.codex/hooks.json`, routed through the cross-platform `scripts/mempalace_hook.py` helper:
 
 ```json
 {
@@ -70,14 +70,14 @@ Codex uses the same lifecycle hooks from `.codex/hooks.json`, routed through `sc
     "Stop": [{
       "hooks": [{
         "type": "command",
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/mempalace-hook.ps1 -Hook stop",
+        "command": "python scripts/mempalace_hook.py --hook stop",
         "timeout": 60
       }]
     }],
     "PreCompact": [{
       "hooks": [{
         "type": "command",
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/mempalace-hook.ps1 -Hook precompact",
+        "command": "python scripts/mempalace_hook.py --hook precompact",
         "timeout": 60
       }]
     }]

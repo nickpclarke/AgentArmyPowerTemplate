@@ -61,11 +61,11 @@ This repo includes `.codex/hooks.json` so Codex can run the same MemPalace lifec
 | `Stop` | Save a context snapshot after a response |
 | `PreCompact` | Save key facts before context compaction |
 
-The hook commands currently call the Windows-safe helper:
+The hook commands currently call the cross-platform Python helper:
 
 ```bash
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/mempalace-hook.ps1 -Hook stop
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/mempalace-hook.ps1 -Hook precompact
+python scripts/mempalace_hook.py --hook stop
+python scripts/mempalace_hook.py --hook precompact
 ```
 
 The helper sets `PYTHONUTF8=1`, skips cleanly when `mempalace` is not installed, and uses the `claude-code` harness name for compatibility with the current MemPalace configuration. If MemPalace adds a Codex-specific harness in your environment, update `.codex/hooks.json` and this document intentionally.
