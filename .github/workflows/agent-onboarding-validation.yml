@@ -5,6 +5,8 @@ on:
     paths:
       - '.claude/agents/**/*.md'
       - '.claude/agents/**/plugin.json'
+      - '.codex/agents/**/*.toml'
+      - 'scripts/sync_agents_to_codex.py'
 
 jobs:
   validate-agent-mece:
@@ -113,6 +115,31 @@ jobs:
             fi
           done
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - name: Validate Codex Agent Synchronization (No Drift)
+        run: |
+          echo "Running synchronization script..."
+          python scripts/sync_agents_to_codex.py
+
+          # Check for changes in the workspace
+          if [ -n "$(git status --porcelain .codex/agents/)" ]; then
+            echo "❌ ERROR: Codex agents are out of sync with Claude agent definitions!"
+            echo "Please run 'python scripts/sync_agents_to_codex.py' locally and commit the updated TOML files in '.codex/agents/'."
+            git diff .codex/agents/
+            exit 1
+          else
+            echo "✅ Codex agents are in sync"
+          fi
+
       - name: Summary
         if: always()
         run: |
@@ -124,6 +151,7 @@ jobs:
           echo "✅ Checks passed:"
           echo "  - Plugin.json integrity (no phantoms, no invisible agents)"
           echo "  - Model tier assignment sanity"
+          echo "  - Codex agent synchronization check"
           echo ""
           echo "⚠️  Review recommended:"
           echo "  - Check boundary rules for overlapping agents"
@@ -131,3 +159,4 @@ jobs:
           echo ""
           echo "See /planning/meta/decisions/AGENT_ONBOARDING_RUBRIC.md for full validation criteria"
           echo ""
+
