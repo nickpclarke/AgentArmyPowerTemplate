@@ -12,20 +12,26 @@ jobs:
       - name: Generate PI progress report
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER || '1' }}
         run: |
-          ITEMS_JSON=$(gh project item-list 1 --owner nickpclarke --format json --limit 200)
+          ITEMS_JSON=$(gh project item-list "$PROJECT_NUMBER" --owner "$OWNER" --format json --limit 500)
 
           TODO=$(echo "$ITEMS_JSON"        | jq '[.items[] | select(.status == "Todo")]        | length')
-          IN_PROGRESS=$(echo "$ITEMS_JSON" | jq '[.items[] | select(.status == "In progress")] | length')
+          READY=$(echo "$ITEMS_JSON"       | jq '[.items[] | select(.status == "Ready")]       | length')
+          IN_PROGRESS=$(echo "$ITEMS_JSON" | jq '[.items[] | select(.status == "In Progress")] | length')
+          IN_REVIEW=$(echo "$ITEMS_JSON"   | jq '[.items[] | select(.status == "In Review")]   | length')
           DONE=$(echo "$ITEMS_JSON"        | jq '[.items[] | select(.status == "Done")]        | length')
-          TOTAL=$(echo "$ITEMS_JSON"       | jq '.totalCount')
+          TOTAL=$(echo "$ITEMS_JSON"       | jq '.totalCount // (.items | length)')
 
           if [[ "$TOTAL" -gt 0 ]]; then
             TODO_PCT=$(( TODO        * 100 / TOTAL ))
+            READY_PCT=$(( READY      * 100 / TOTAL ))
             IP_PCT=$(( IN_PROGRESS   * 100 / TOTAL ))
+            REVIEW_PCT=$(( IN_REVIEW * 100 / TOTAL ))
             DONE_PCT=$(( DONE        * 100 / TOTAL ))
           else
-            TODO_PCT=0; IP_PCT=0; DONE_PCT=0
+            TODO_PCT=0; READY_PCT=0; IP_PCT=0; REVIEW_PCT=0; DONE_PCT=0
           fi
 
           {
@@ -34,7 +40,9 @@ jobs:
             echo "| Status | Count | % |"
             echo "|--------|------:|--:|"
             echo "| Todo | $TODO | ${TODO_PCT}% |"
+            echo "| Ready | $READY | ${READY_PCT}% |"
             echo "| In Progress | $IN_PROGRESS | ${IP_PCT}% |"
+            echo "| In Review | $IN_REVIEW | ${REVIEW_PCT}% |"
             echo "| Done | $DONE | ${DONE_PCT}% |"
             echo "| **Total** | **$TOTAL** | |"
             echo ""

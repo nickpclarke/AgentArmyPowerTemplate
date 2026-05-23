@@ -34,8 +34,8 @@ jobs:
           CMD: ${{ github.event.comment.body }}
           ISSUE_NUM: ${{ github.event.issue.number }}
           FULL_REPO: ${{ github.repository }}
-          OWNER: nickpclarke
-          PROJECT_NUMBER: "1"
+          OWNER: ${{ github.repository_owner }}
+          PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER || '1' }}
         run: |
           cat > /tmp/board.py << 'PYEOF'
           import os, json, subprocess, re
@@ -53,17 +53,46 @@ jobs:
               for k, v in vars.items():
                   args += ['-F' if isinstance(v, int) else '-f', f'{k}={v}']
               r = subprocess.run(args, capture_output=True, text=True)
-              return json.loads(r.stdout).get('data', {}) if r.returncode == 0 else {}
+              if r.returncode != 0:
+                  return {}
+              data = json.loads(r.stdout).get('data')
+              return {} if data is None else data
 
           def post(body):
-              subprocess.run(['gh', 'issue', 'comment', ISSUE_NUM,
-                              '--repo', FULL_REPO, '--body', body])
+              r = subprocess.run(
+                  ['gh', 'issue', 'comment', ISSUE_NUM, '--repo', FULL_REPO, '--body', body],
+                  capture_output=True, text=True
+              )
+              if r.returncode != 0:
+                  raise RuntimeError(f"Failed to post comment: {r.stderr.strip()}")
 
           def get_items():
               q = '''query($owner: String!, $number: Int!) {
                 user(login: $owner) {
                   projectV2(number: $number) {
-                    items(first: 100) {
+                    items(first: 500) {
+                      nodes {
+                        content { ... on Issue { title number } }
+                        fieldValues(first: 15) {
+                          nodes {
+                            ... on ProjectV2ItemFieldSingleSelectValue {
+                              name field { ... on ProjectV2SingleSelectField { name } }
+                            }
+                            ... on ProjectV2ItemFieldTextValue {
+                              text field { ... on ProjectV2Field { name } }
+                            }
+                            ... on ProjectV2ItemFieldIterationValue {
+                              title field { ... on ProjectV2IterationField { name } }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                organization(login: $owner) {
+                  projectV2(number: $number) {
+                    items(first: 500) {
                       nodes {
                         content { ... on Issue { title number } }
                         fieldValues(first: 15) {
@@ -84,9 +113,11 @@ jobs:
                   }
                 }
               }'''
-              nodes = graphql(q, owner=OWNER, number=PROJECT_NUMBER) \
-                        .get('user', {}).get('projectV2', {}) \
-                        .get('items', {}).get('nodes', [])
+              data = graphql(q, owner=OWNER, number=PROJECT_NUMBER)
+              user_project = data.get('user', {}).get('projectV2')
+              org_project = data.get('organization', {}).get('projectV2')
+              project = user_project if user_project is not None else org_project if org_project is not None else {}
+              nodes = project.get('items', {}).get('nodes', [])
               items = []
               for node in nodes:
                   if not node.get('content'):
@@ -130,7 +161,9 @@ jobs:
               pct   = round(done * 100 / total) if total else 0
               rows  = [
                   ['🔵 Todo',        counts.get('Todo', 0)],
-                  ['🟡 In Progress', counts.get('In progress', 0)],
+                  ['⚪ Ready',       counts.get('Ready', 0)],
+                  ['🟡 In Progress', counts.get('In Progress', 0)],
+                  ['🟠 In Review',   counts.get('In Review', 0)],
                   ['🟢 Done',        done],
                   ['**Total**',      f'**{total}**'],
               ]
@@ -145,7 +178,7 @@ jobs:
               sprint = active[0]['iteration']
               lines  = [f'## 🏃 Sprint: {sprint}', '']
               for i in active:
-                  icon = '🟡' if i['status'] == 'In progress' else '🔵'
+                  icon = {'In Progress': '🟡', 'In Review': '🟠'}.get(i['status'], '🔵')
                   lines.append(f"{icon} #{i['number']}: {i['title']} _({i.get('size','?')})_")
               return '\n'.join(lines)
 
@@ -182,7 +215,9 @@ jobs:
               pct   = round(done * 100 / total) if total else 0
               rows  = [
                   ['Todo',         counts.get('Todo', 0)],
-                  ['In Progress',  counts.get('In progress', 0)],
+                  ['Ready',        counts.get('Ready', 0)],
+                  ['In Progress',  counts.get('In Progress', 0)],
+                  ['In Review',    counts.get('In Review', 0)],
                   ['Done',         done],
               ]
               return md_table(f'## 🗓 {pi_name or "PI"} Progress', ['Status', 'Count'], rows) \
