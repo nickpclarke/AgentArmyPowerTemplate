@@ -1,19 +1,19 @@
 # MemPalace Setup
 
-MemPalace gives Claude Code persistent, cross-session memory. Instead of starting every conversation cold, Claude can recall context from previous sessions: what you've worked on, decisions made, patterns discovered.
+MemPalace gives local AI assistants persistent, cross-session memory. Instead of starting every conversation cold, Claude Code and Codex can recall context from previous sessions: what you've worked on, decisions made, patterns discovered.
 
-This repo ships with `mempalace.yaml` already configured and `.claude/settings.json` already wired with Stop and PreCompact hooks. You just need to install MemPalace itself.
+This repo ships with `mempalace.yaml` already configured, `.claude/settings.json` wired for Claude Code, and `.codex/hooks.json` wired for Codex. You just need to install MemPalace itself.
 
 ## How It Works
 
-MemPalace intercepts two Claude Code lifecycle events:
+MemPalace intercepts two lifecycle events in both local assistants:
 
 | Hook | When it fires | What it does |
 |---|---|---|
 | `Stop` | After every response | Saves context snapshot to the palace |
 | `PreCompact` | Before context window compression | Writes a diary entry preserving key facts |
 
-Context is organized into "rooms" defined in `mempalace.yaml`. When Claude starts a new session, it can search its palace for relevant context from past work.
+Context is organized into "rooms" defined in `mempalace.yaml`. When Claude Code or Codex starts a new session, it can search its palace for relevant context from past work.
 
 ## Install
 
@@ -39,7 +39,7 @@ This creates the local palace storage directory (`.mempalace/` by default, outsi
 
 ## Verify Hooks Are Wired
 
-The hooks are already in `.claude/settings.json`:
+The Claude Code hooks are already in `.claude/settings.json`:
 
 ```json
 {
@@ -61,6 +61,31 @@ The hooks are already in `.claude/settings.json`:
   }
 }
 ```
+
+Codex uses the same lifecycle hooks from `.codex/hooks.json`, routed through `scripts/mempalace-hook.ps1` so Windows shells do not have to understand POSIX-style environment assignment:
+
+```json
+{
+  "hooks": {
+    "Stop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/mempalace-hook.ps1 -Hook stop",
+        "timeout": 60
+      }]
+    }],
+    "PreCompact": [{
+      "hooks": [{
+        "type": "command",
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/mempalace-hook.ps1 -Hook precompact",
+        "timeout": 60
+      }]
+    }]
+  }
+}
+```
+
+The helper currently uses the `claude-code` harness name for compatibility with MemPalace. If your installed MemPalace version exposes a Codex-specific harness, update `.codex/hooks.json` deliberately and keep this document in sync.
 
 If you see hook errors in Claude Code, confirm `mempalace` is on your PATH:
 
@@ -84,7 +109,7 @@ MemPalace also ships an MCP server that exposes palace tools directly inside Cla
 }
 ```
 
-Then restart Claude Code. You'll see `mempalace_*` tools become available.
+Then restart Claude Code. You'll see `mempalace_*` tools become available. For Codex, use the Codex MCP configuration mechanism available in your install and point it at the same `mempalace mcp` command.
 
 ### MCP tools exposed
 

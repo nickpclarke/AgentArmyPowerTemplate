@@ -1,5 +1,6 @@
 # Personal Claude Code settings — contains API keys and permissions
 .claude/settings.local.json
+.codex/config.local.toml
 
 # Environment variables — contains Azure/API credentials
 .env

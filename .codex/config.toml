@@ -1,0 +1,8 @@
+# Project-level Codex defaults for the AgentArmy template.
+#
+# Keep provider API keys and machine-specific model settings out of this
+# committed file. Put local overrides in your user Codex config or an
+# untracked `.codex/config.local.toml` file if your Codex install supports it.
+
+[shell_environment_policy]
+inherit = "core"

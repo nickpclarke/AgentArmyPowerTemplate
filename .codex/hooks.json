@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/mempalace-hook.ps1 -Hook precompact",
+            "timeout": 60,
+            "statusMessage": "Emergency save to MemPalace before compaction..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/mempalace-hook.ps1 -Hook stop",
+            "timeout": 60,
+            "statusMessage": "Saving memories to MemPalace..."
+          }
+        ]
+      }
+    ]
+  }
+}
