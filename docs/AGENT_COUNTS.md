@@ -1,6 +1,6 @@
 # Agent Counts by Category
 
-Auto-generated agent inventory. Last updated: 2026-05-23 14:20:23 UTC
+Auto-generated agent inventory. Last updated: 2026-05-23 17:40:18 UTC
 
 | # | Category | Count |
 |---|----------|-------|
