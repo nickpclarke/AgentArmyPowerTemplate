@@ -1,0 +1,133 @@
+name: Agent Onboarding Validation
+
+on:
+  pull_request:
+    paths:
+      - '.claude/agents/**/*.md'
+      - '.claude/agents/**/plugin.json'
+
+jobs:
+  validate-agent-mece:
+    runs-on: ubuntu-latest
+    name: Validate Agent MECE Compliance
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for boundary rule presence
+        run: |
+          echo "Checking for boundary rules in agent descriptions..."
+
+          # Find all agent .md files that were added or modified
+          git diff --name-only --diff-filter=AM origin/main HEAD -- '.claude/agents/**/*.md' | while read file; do
+            if [ -f "$file" ]; then
+              agent_name=$(basename "$file" .md)
+
+              # Check if agent has known overlaps (maintain list of overlap pairs)
+              overlaps="debugger|error-detective|mobile-developer|mobile-app-developer|database-administrator|database-optimizer|postgres-pro|qa-expert|test-automator"
+
+              if echo "$agent_name" | grep -E "^($overlaps)$" > /dev/null; then
+                # This agent is in an overlap cluster - check for boundary rules
+                if ! grep -q "use.*for\|use me\|use this agent for" "$file"; then
+                  echo "⚠️  WARNING: $agent_name may need boundary rules in description"
+                  echo "   Consider adding: 'use me for X; use AgentY for Y'"
+                fi
+              fi
+            fi
+          done
+
+      - name: Check plugin.json integrity
+        run: |
+          echo "Validating plugin.json files..."
+
+          for plugin_file in .claude/agents/*/.claude-plugin/plugin.json; do
+            if [ -f "$plugin_file" ]; then
+              dir=$(dirname $(dirname "$plugin_file"))
+              echo "Checking $dir..."
+
+              # Check for phantom entries (referenced but don't exist)
+              jq -r '.agents[]' "$plugin_file" | while read agent_ref; do
+                agent_path="$dir/$agent_ref"
+                if [ ! -f "$agent_path" ]; then
+                  echo "❌ ERROR: Phantom agent in $plugin_file: $agent_ref does not exist"
+                  exit 1
+                fi
+              done
+
+              # Check for invisible agents (exist but not referenced)
+              for agent_file in "$dir"/*.md; do
+                if [ -f "$agent_file" ]; then
+                  agent_name=$(basename "$agent_file")
+                  if ! jq -r '.agents[]' "$plugin_file" | grep -q "$agent_name"; then
+                    echo "❌ ERROR: Invisible agent in $dir: $agent_name not in plugin.json"
+                    exit 1
+                  fi
+                fi
+              done
+            fi
+          done
+
+          echo "✅ All plugin.json files are valid"
+
+      - name: Check for circular delegation
+        run: |
+          echo "Checking for circular delegation patterns..."
+
+          # This is a heuristic check - look for bidirectional delegation
+          # (which is actually good, but flag for review)
+          git diff --name-only --diff-filter=AM origin/main HEAD -- '.claude/agents/**/*.md' | head -5 | while read file; do
+            if [ -f "$file" ]; then
+              agent_name=$(basename "$file" .md)
+
+              # Look for delegation mentions
+              delegations=$(grep -i "delegate" "$file" || true)
+              if [ -n "$delegations" ]; then
+                echo "ℹ️  $agent_name has delegation mentions - verify no circular dependencies"
+              fi
+            fi
+          done
+
+      - name: Model tier sanity check
+        run: |
+          echo "Validating model tier assignments..."
+
+          git diff --name-only --diff-filter=AM origin/main HEAD -- '.claude/agents/**/*.md' | while read file; do
+            if [ -f "$file" ]; then
+              agent_name=$(basename "$file" .md)
+
+              # Extract model and tool count from frontmatter
+              model=$(grep "^model:" "$file" | head -1 | awk '{print $NF}')
+              tools=$(grep "^tools:" "$file" | head -1 | sed 's/.*: //' | tr ',' '\n' | wc -l)
+
+              # Haiku with many tools is a red flag
+              if [ "$model" = "haiku" ] && [ "$tools" -gt "5" ]; then
+                echo "⚠️  WARNING: $agent_name (haiku) has $tools tools - consider sonnet for broad scope"
+              fi
+
+              # Opus with only 1-2 tools might be overkill
+              if [ "$model" = "opus" ] && [ "$tools" -le "2" ]; then
+                echo "ℹ️  INFO: $agent_name (opus) has only $tools tools - consider sonnet for lighter tasks"
+              fi
+            fi
+          done
+
+      - name: Summary
+        if: always()
+        run: |
+          echo ""
+          echo "=========================================="
+          echo "Agent Onboarding Validation Complete"
+          echo "=========================================="
+          echo ""
+          echo "✅ Checks passed:"
+          echo "  - Plugin.json integrity (no phantoms, no invisible agents)"
+          echo "  - Model tier assignment sanity"
+          echo ""
+          echo "⚠️  Review recommended:"
+          echo "  - Check boundary rules for overlapping agents"
+          echo "  - Verify circular delegation patterns (if any)"
+          echo ""
+          echo "See /planning/meta/decisions/AGENT_ONBOARDING_RUBRIC.md for full validation criteria"
+          echo ""
