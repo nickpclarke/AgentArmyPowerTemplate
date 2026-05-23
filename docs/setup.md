@@ -180,6 +180,29 @@ env:
 
 The built-in `GITHUB_TOKEN` can handle many repository operations, but it cannot access GitHub Projects v2 reliably. Use `PROJECT_TOKEN` for board automation.
 
+### Two-token model — which workflows use what
+
+AgentArmy's Actions use **two** token paths. Keep them straight:
+
+| Token | Workflows | Why |
+|---|---|---|
+| `PROJECT_TOKEN` (classic PAT) | `auto-add-to-project`, `auto-status`, `board-commands`, `hitl-decision`, `pi-report`, `template-sanity-check` | GitHub **Projects v2** reads/writes — the built-in token can't do these reliably |
+| `GITHUB_TOKEN` (built-in) | `label-pr-size`, `copilot-review`, `copilot-coding-agent`, `stale`, `board-commands` | Create/apply issue & PR labels, request reviewers, comment, close stale items |
+
+### Let the built-in token write (Workflow permissions)
+
+A fork's `GITHUB_TOKEN` defaults to **read-only**, which makes the label/PR workflows fail with `Resource not accessible by integration`. Fix it once:
+
+**Settings → Actions → General → Workflow permissions → select _Read and write permissions_** (and tick *Allow GitHub Actions to create and approve pull requests* if you use PR-creating automation).
+
+The PR-automation workflows (`label-pr-size`, `copilot-review`, `copilot-coding-agent`) also declare explicit least-privilege `permissions:` blocks, so they work even on a read-only default — but enabling read-write is the simplest catch-all and also covers `stale` and `board-commands`.
+
+> Two failure signatures tell you this layer is misconfigured:
+> - `Resource not accessible by integration` → token lacks label/issue/PR write → raise **Workflow permissions** above.
+> - `fatal: not a git repository` → a `gh` step has no repo context → the template sets `GH_REPO: ${{ github.repository }}` to avoid this (no action needed).
+
+If you use the Copilot workflows, also enable the matching features under **Settings → Copilot** (code review and/or coding agent). See [docs/copilot.md](copilot.md).
+
 ## Step 6 — Install and configure MemPalace
 
 MemPalace provides cross-session memory for Claude Code and Codex. Install it once:
@@ -351,6 +374,7 @@ swa deploy --deployment-token YOUR_SWA_TOKEN
 - [ ] Workflow files updated with your username and project IDs
 - [ ] `PROJECT_TOKEN` secret set
 - [ ] `PROJECT_NUMBER` variable set
+- [ ] Actions **Workflow permissions** set to read & write (lets the built-in `GITHUB_TOKEN` manage labels)
 - [ ] MemPalace installed (`pip install mempalace && mempalace init`)
 - [ ] Docs tooling installed (`python3 -m pip install -r requirements-docs.txt`)
 - [ ] Claude Code plugins installed (`/plugin` + `/reload-plugins`)

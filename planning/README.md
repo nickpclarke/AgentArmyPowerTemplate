@@ -18,12 +18,16 @@ This folder contains **working hypotheses, release train plans, and synthesis wo
 
 ## Key Principle
 
-Documents here are **working hypotheses and planning artifacts**. They may evolve, be revised, or move to `/docs/` once stable and user-relevant. The **GitHub Projects board** is the source of truth for work status.
+**Work items live on the [GitHub Projects board](https://github.com/users/nickpclarke/projects/1), not in this folder.** Status, SAFE fields (Type, PI, Size, Estimate, Priority, dates), and Epic→Feature hierarchy are stored and tracked on the board. Files here must not duplicate that — they hold the *durable strategy* (themes, dependencies, rationale) and point to the board for live state.
+
+Documents here are **working hypotheses and planning artifacts**. They may evolve, be revised, or move to `/docs/` once stable and user-relevant.
 
 ## Quick Navigation
 
+- **The live work backlog?** → [GitHub Projects board](https://github.com/users/nickpclarke/projects/1)
+- **Board fields, SAFE mapping & views?** → [`/docs/github-projects.md`](../docs/github-projects.md)
 - **Starting a release train?** → `release-trains/release-train-index.md`
-- **Setting up the GitHub Projects board?** → `backlog/board-population-checklist.md`
+- **Populating the board (forks)?** → `backlog/board-population-checklist.md`
 - **Creating new planning documents?** → `governance/FILE_ORGANIZATION.md`
 - **Strategic 6-month vision?** → `roadmap/PLATFORM_ROADMAP.md`
 - **ArcKit patterns integration?** → `synthesis/ARCKIT_SYNTHESIS.md`

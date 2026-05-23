@@ -116,4 +116,4 @@ pipelines/                    → dlt data pipeline toolkit
 ## Links
 
 - [GitHub Repository](https://github.com/nickpclarke/AgentArmy)
-- [GitHub Projects v2 Board](https://github.com/nickpclarke/AgentArmy/projects/1)
+- [GitHub Projects v2 Board](https://github.com/users/nickpclarke/projects/1)

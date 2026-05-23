@@ -1,287 +1,101 @@
 # Release Train Master Index
 
-Complete index of all Release Trains (RT1–RT4) for AgentArmy template platform evolution. 6-month roadmap (Jun 2026 – Nov 2026).
+Strategic index of Release Trains RT1–RT4 for the AgentArmy template platform evolution. 6-month roadmap (Jun 2026 – Nov 2026).
+
+> **The [GitHub Projects board](https://github.com/users/nickpclarke/projects/1) holds live status, fields, and per-issue details — not this page.** This page holds the durable strategy: themes, success factors, cross-RT dependencies, and the milestone calendar. For the issue index see [backlog/BACKLOG_ISSUES_INDEX.md](../backlog/BACKLOG_ISSUES_INDEX.md); for the strategic rationale see [roadmap/PLATFORM_ROADMAP.md](../roadmap/PLATFORM_ROADMAP.md).
 
 ## Summary
 
-| RT | Name | Duration | Team | Issues | Status |
-|---|---|---|---|---|---|
-| **RT1** | Foundation & Routing | Jun 1 – Jul 12 | 3.0 FTE | 7 (#17–23) | Planning |
-| **RT2** | Operations & Quality | Jul 12 – Aug 23 | 3.5 FTE | 7 (#24–30) | Waiting for RT1 |
-| **RT3** | Spoke Readiness | Aug 23 – Oct 4 | 2.5 FTE | 6 (#31–36) | Waiting for RT2 |
-| **RT4** | Learning & Intelligence | Oct 4 – Nov 15 | 2.0 FTE | 5 (#37–41) | Waiting for RT3 |
+| RT | Name | Theme | Duration | Team | Epic / Features | PI |
+|---|---|---|---|---|---|---|
+| **RT1** | Foundation & Routing | Make capabilities explicit; routing deterministic | Jun 1 – Jul 12 | 3.0 FTE | [#17](https://github.com/nickpclarke/AgentArmy/issues/17) / #18–23 | PI-1 |
+| **RT2** | Operations & Quality | Formalize workflows; close the learning loop | Jul 12 – Aug 23 | 3.5 FTE | [#24](https://github.com/nickpclarke/AgentArmy/issues/24) / #25–30 | PI-2 |
+| **RT3** | Spoke Readiness | Spoke teams self-serve; context travels | Aug 23 – Oct 4 | 2.5 FTE | [#31](https://github.com/nickpclarke/AgentArmy/issues/31) / #32–36 | PI-2 |
+| **RT4** | Learning & Intelligence | Accumulate & share lessons; iterate routing | Oct 4 – Nov 15 | 2.0 FTE | [#37](https://github.com/nickpclarke/AgentArmy/issues/37) / #38–41 | PI-3 |
 
-**Total:** 25 issues across 4 epics  
-**Total Effort:** ~11 FTE-weeks (2.75 FTE average × 4 RTs)  
-**Timeline:** 24 weeks (6 months)
+**Total:** 25 issues across 4 epics · ~11 FTE-weeks · 24 weeks (6 months).
 
 ---
 
-## Release Train 1: Foundation & Routing
+## Critical Success Factors
 
-**Epic:** #17  
-**Duration:** Jun 1 – Jul 12 (6 weeks)  
-**Team:** 3.0 FTE  
-**Status:** Ready to kick off
+**RT1 — Foundation & Routing**
+- Routing determinism > 90%; telemetry > 500 delegations; context injection > 95% success; hook system stable (< 5ms overhead, zero timeouts).
 
-### Features
+**RT2 — Operations & Quality**
+- Learning loop closes (failures → KB entry); rework reduced ≥ 20%; ≥ 10 incident records in KB; multi-rendering adopted for all strategic artifacts.
 
-| # | Title | Size | Est. | Status |
-|---|---|---|---|---|
-| 18 | Agent Spec Template + Capability Matrix | M | 5 | Backlog |
-| 19 | Executable Routing Decision Tree (YAML) | L | 8 | Backlog |
-| 20 | Claude Code Hook System (5 types) | L | 13 | Backlog |
-| 21 | Project Context Graph Injection | L | 8 | Backlog |
-| 22 | Telemetry Instrumentation (OTel spans) | M | 5 | Backlog |
-| 23 | Few-Shot Prompt Library (Phase 1) | M | 3 | Backlog |
+**RT3 — Spoke Readiness**
+- ≥ 1 real spoke instantiated; spoke init < 2 hours (automated); full context transferred via `manifest.json`.
 
-### Critical Success Factors
-
-- Routing determinism >90%
-- Telemetry >500 delegations  
-- Context injection >95% success
-- Hook system stable (<5ms overhead, zero timeouts)
-- All 6 features merged
-
-### Direct Links
-
-- [#17 Epic](https://github.com/nickpclarke/AgentArmy/issues/17)
-- [#18 Agent Specs](https://github.com/nickpclarke/AgentArmy/issues/18)
-- [#19 Routing Tree](https://github.com/nickpclarke/AgentArmy/issues/19) ← Keystone
-- [#20 Hook System](https://github.com/nickpclarke/AgentArmy/issues/20) ← Critical
-- [#21 Context Graph](https://github.com/nickpclarke/AgentArmy/issues/21)
-- [#22 Telemetry](https://github.com/nickpclarke/AgentArmy/issues/22)
-- [#23 Prompt Library](https://github.com/nickpclarke/AgentArmy/issues/23)
+**RT4 — Learning & Intelligence**
+- KB ≥ 50 incident records; anti-patterns library ≥ 15 patterns; competency trends improving on ≥ 3 task types; feedback loop closed (comments → updates).
 
 ---
 
-## Release Train 2: Operations & Quality
+## Cross-RT Dependency Graph
 
-**Epic:** #24  
-**Duration:** Jul 12 – Aug 23 (6 weeks)  
-**Team:** 3.5 FTE  
-**Status:** Waiting for RT1 completion
-
-### Features
-
-| # | Title | Size | Est. | Status |
-|---|---|---|---|---|
-| 25 | Multi-Agent Choreography (Saga patterns) | L | 8 | Backlog |
-| 26 | Agent Evaluation Gates (SLI/SLO framework) | M | 5 | Backlog |
-| 27 | Skill Scaffolding & Composition (Recipes) | M | 5 | Backlog |
-| 28 | Learning Loop Runtime (error + synthesizer) | L | 8 | Backlog |
-| 29 | Artifact Lifecycle & Multi-Rendering | M | 5 | Backlog |
-| 30 | Cost Visibility & Provider Abstraction | M | 5 | Backlog |
-
-### Critical Success Factors
-
-- Learning loop closes: failures → KB entry
-- Rework reduced ≥20%
-- ≥10 incident records in KB
-- Multi-rendering adopted for all strategic artifacts
-- All 6 features merged
-
-### Dependencies (Block Chart)
-
-```
-RT1 Completion
-  ├─ #25: Choreography (blocks #26, #28, #29)
-  ├─ #26: Evaluation Gates (depends on #22 Telemetry)
-  ├─ #27: Skill Scaffolding (depends on #18 Agent Specs)
-  ├─ #28: Learning Loop (depends on #22, #20, critical)
-  ├─ #29: Artifact Lifecycle (depends on #20, #21)
-  └─ #30: Cost Visibility (depends on #22 Telemetry)
-```
-
-### Direct Links
-
-- [#24 Epic](https://github.com/nickpclarke/AgentArmy/issues/24)
-- [#25 Choreography](https://github.com/nickpclarke/AgentArmy/issues/25)
-- [#26 Evaluation Gates](https://github.com/nickpclarke/AgentArmy/issues/26)
-- [#27 Skill Scaffolding](https://github.com/nickpclarke/AgentArmy/issues/27)
-- [#28 Learning Loop](https://github.com/nickpclarke/AgentArmy/issues/28) ← Critical
-- [#29 Artifact Lifecycle](https://github.com/nickpclarke/AgentArmy/issues/29)
-- [#30 Cost Visibility](https://github.com/nickpclarke/AgentArmy/issues/30)
-
----
-
-## Release Train 3: Spoke Readiness
-
-**Epic:** #31  
-**Duration:** Aug 23 – Oct 4 (6 weeks)  
-**Team:** 2.5 FTE  
-**Status:** Waiting for RT2 completion
-
-### Features
-
-| # | Title | Size | Est. | Status |
-|---|---|---|---|---|
-| 32 | Hub→Spoke Onboarding Playbook | M | 5 | Backlog |
-| 33 | Cost & Capacity Model (unit economics) | M | 5 | Backlog |
-| 34 | Artifact Manifest Export (spoke init) | S | 2 | Backlog |
-| 35 | Observability Dashboard (MTTR, cost) | M | 5 | Backlog |
-| 36 | Spoke-Specific Prompt Adaptation | S | 3 | Backlog |
-
-### Critical Success Factors
-
-- ≥1 real spoke instantiated
-- Spoke init <2 hours (automated)
-- Full context transferred via manifest.json
-- All 5 features merged
-
-### Dependencies (Block Chart)
-
-```
-RT2 Completion
-  ├─ #32: Onboarding (depends on #19 Routing, #29 Manifest)
-  ├─ #33: Capacity Model (depends on #30 Cost Tracking)
-  ├─ #34: Manifest Export (depends on #29 Artifact Lifecycle)
-  ├─ #35: Dashboard (depends on #22 Telemetry, #26 SLIs)
-  └─ #36: Prompt Adapt (depends on #23 Prompt Library)
-```
-
-### Direct Links
-
-- [#31 Epic](https://github.com/nickpclarke/AgentArmy/issues/31)
-- [#32 Onboarding Playbook](https://github.com/nickpclarke/AgentArmy/issues/32)
-- [#33 Cost & Capacity Model](https://github.com/nickpclarke/AgentArmy/issues/33)
-- [#34 Artifact Manifest Export](https://github.com/nickpclarke/AgentArmy/issues/34)
-- [#35 Observability Dashboard](https://github.com/nickpclarke/AgentArmy/issues/35)
-- [#36 Spoke-Specific Prompt Adaptation](https://github.com/nickpclarke/AgentArmy/issues/36)
-
----
-
-## Release Train 4: Learning & Intelligence
-
-**Epic:** #37  
-**Duration:** Oct 4 – Nov 15 (6 weeks)  
-**Team:** 2.0 FTE  
-**Status:** Waiting for RT3 completion
-
-### Features
-
-| # | Title | Size | Est. | Status |
-|---|---|---|---|---|
-| 38 | Agent Lesson-Learned KB (incident log) | M | 5 | Backlog |
-| 39 | Request Tracing & Decision Audit Log | M | 5 | Backlog |
-| 40 | Feedback Integration (PR → routing) | M | 5 | Backlog |
-| 41 | Competency Evolution Tracking | M | 5 | Backlog |
-
-### Critical Success Factors
-
-- KB has ≥50 incident records
-- Anti-patterns library ≥15 patterns
-- Agent competency trends show improvement ≥3 task types
-- Feedback loop closed (comments → updates)
-- All 4 features merged
-
-### Dependencies (Block Chart)
-
-```
-RT3 Completion
-  ├─ #38: KB (depends on #28 Learning Loop Runtime)
-  ├─ #39: Tracing (depends on #22 Telemetry, #21 Context Graph)
-  ├─ #40: Feedback (depends on #39 Tracing)
-  └─ #41: Competency (depends on #26 SLIs, #38 KB)
-```
-
-### Direct Links
-
-- [#37 Epic](https://github.com/nickpclarke/AgentArmy/issues/37)
-- [#38 Agent KB](https://github.com/nickpclarke/AgentArmy/issues/38)
-- [#39 Request Tracing](https://github.com/nickpclarke/AgentArmy/issues/39)
-- [#40 Feedback Integration](https://github.com/nickpclarke/AgentArmy/issues/40)
-- [#41 Competency Evolution](https://github.com/nickpclarke/AgentArmy/issues/41)
-
----
-
-## Cross-RT Dependencies (Full Graph)
+This is the durable planning artifact the board doesn't capture well — the keystone chain that drives cut order.
 
 ```
 RT1 (Foundation)
-  ├─ #18 Agent Specs
-  ├─ #19 Routing Tree ────┐
-  ├─ #20 Hooks ────┐      │
-  ├─ #21 Graph     │      │
-  ├─ #22 Telemetry ├─────┬┼──────────┐
-  └─ #23 Prompts   │      │          │
-                   │      │          │
-                   v      v          v
+  ├─ #18 Agent Specs ───────────┐
+  ├─ #19 Routing Tree ──────────┼───────────────┐   ← keystone
+  ├─ #20 Hooks ─────────┐       │               │
+  ├─ #21 Context Graph  │       │               │
+  ├─ #22 Telemetry ─────┼───────┼───────┐       │
+  └─ #23 Prompt Library │       │       │       │
+                        v       v       v       v
 RT2 (Operations)
-  ├─ #25 Choreography  (depends on #19)
-  ├─ #26 Eval Gates    (depends on #22)
-  ├─ #27 Skills        (depends on #18)
-  ├─ #28 Learning Loop (depends on #22, #20) ← CRITICAL
-  ├─ #29 Artifacts     (depends on #20, #21)
-  └─ #30 Cost          (depends on #22)
-       │   │    │       │        │       │
-       │   │    │       │        │       └──────┐
-       v   v    v       v        v              v
+  ├─ #25 Choreography      (← #19)
+  ├─ #26 Eval Gates        (← #22)
+  ├─ #27 Skill Scaffolding (← #18)
+  ├─ #28 Learning Loop     (← #22, #20)   ← critical
+  ├─ #29 Artifact Lifecycle(← #20, #21)
+  └─ #30 Cost Visibility   (← #22)
+                        │       │       │
+                        v       v       v
 RT3 (Spokes)
-  ├─ #32 Onboarding   (depends on #19, #29)
-  ├─ #33 Capacity     (depends on #30)
-  ├─ #34 Manifest     (depends on #29)
-  ├─ #35 Dashboard    (depends on #22, #26)
-  └─ #36 Prompts      (depends on #23)
-       │   │     │    │    │
-       └───┼─────┼────┼────┘
-           v     v    v
+  ├─ #32 Onboarding   (← #19, #29)
+  ├─ #33 Capacity     (← #30)
+  ├─ #34 Manifest     (← #29)
+  ├─ #35 Dashboard    (← #22, #26)
+  └─ #36 Prompt Adapt (← #23)
+                        │       │
+                        v       v
 RT4 (Learning)
-  ├─ #38 KB           (depends on #28)
-  ├─ #39 Tracing      (depends on #22, #21)
-  ├─ #40 Feedback     (depends on #39)
-  └─ #41 Competency   (depends on #26, #38)
+  ├─ #38 KB           (← #28)
+  ├─ #39 Tracing      (← #22, #21)
+  ├─ #40 Feedback     (← #39)
+  └─ #41 Competency   (← #26, #38)
 ```
 
----
-
-## Quarterly Milestone Breakdown
-
-### Q2 (Jun–Aug): RT1 + RT2 Ramp-Up
-- **Jun 1–12:** RT1 Sprint 1 (Agent Specs, Routing Tree kickoff)
-- **Jun 12–26:** RT1 Sprint 2 (Hooks, Graph, continued routing)
-- **Jun 26–Jul 10:** RT1 Sprint 3 (Telemetry, Prompt Library, wrap)
-- **Jul 10–24:** RT2 Sprint 1 (RT1 wrap, RT2 kickoff: Choreography, Gates)
-- **Jul 24–Aug 7:** RT2 Sprint 2 (Skills, Learning Loop, Artifacts)
-- **Aug 7–21:** RT2 Sprint 3 (Cost Visibility, wrap)
-
-### Q3 (Aug–Oct): RT2 Completion + RT3 Ramp-Up
-- **Aug 21–Sep 4:** RT3 Sprint 1 (RT2 wrap, RT3 kickoff: Onboarding, Manifest)
-- **Sep 4–18:** RT3 Sprint 2 (Capacity Model, Dashboard)
-- **Sep 18–Oct 2:** RT3 Sprint 3 (Prompt Adaptation, real spoke instantiation)
-
-### Q4 (Oct–Nov): RT3 Wrap + RT4 Execution
-- **Oct 2–16:** RT4 Sprint 1 (RT3 wrap, RT4 kickoff: KB, Tracing)
-- **Oct 16–30:** RT4 Sprint 2 (Feedback Integration, Competency)
-- **Oct 30–Nov 15:** RT4 Sprint 3 (wrap, learning synthesis)
+**Keystone:** #19 Executable Routing Decision Tree unblocks choreography, spoke onboarding, and the learning loop. **Critical:** #28 Learning Loop Runtime is the durable moat (see [PLATFORM_ROADMAP.md](../roadmap/PLATFORM_ROADMAP.md)).
 
 ---
 
-## Status Board
+## Milestone Calendar
 
-| Release Train | Current Status | Blocker | Next Step | ETA |
-|---|---|---|---|---|
-| **RT1** | Planning | None | Kick off Jun 1 | On track |
-| **RT2** | Waiting | RT1 completion | Start Jul 12 | On track |
-| **RT3** | Waiting | RT2 completion | Start Aug 23 | On track |
-| **RT4** | Waiting | RT3 completion | Start Oct 4 | On track |
+### Q2 (Jun–Aug): RT1 + RT2 ramp-up
+- **Jun 1–12:** RT1 Sprint 1 — Agent Specs, Routing Tree kickoff
+- **Jun 12–26:** RT1 Sprint 2 — Hooks, Context Graph, routing cont.
+- **Jun 26–Jul 10:** RT1 Sprint 3 — Telemetry, Prompt Library, wrap
+- **Jul 10–24:** RT2 Sprint 1 — Choreography, Eval Gates
+- **Jul 24–Aug 7:** RT2 Sprint 2 — Skills, Learning Loop, Artifacts
+- **Aug 7–21:** RT2 Sprint 3 — Cost Visibility, wrap
+
+### Q3 (Aug–Oct): RT2 completion + RT3 ramp-up
+- **Aug 21–Sep 4:** RT3 Sprint 1 — Onboarding, Manifest
+- **Sep 4–18:** RT3 Sprint 2 — Capacity Model, Dashboard
+- **Sep 18–Oct 2:** RT3 Sprint 3 — Prompt Adaptation, first real spoke
+
+### Q4 (Oct–Nov): RT3 wrap + RT4 execution
+- **Oct 2–16:** RT4 Sprint 1 — KB, Tracing
+- **Oct 16–30:** RT4 Sprint 2 — Feedback Integration, Competency
+- **Oct 30–Nov 15:** RT4 Sprint 3 — wrap, learning synthesis
+
+> Sprints map to the board's `Iteration` field. They aren't created yet — add them at PI Planning per the [board-population-checklist](../backlog/board-population-checklist.md).
 
 ---
 
-## Board Population Status
-
-- [ ] GitHub Projects TOKEN configured
-- [ ] All 25 issues added to project board
-- [ ] Custom fields set (Type, PI, Size, Estimate, Parent)
-- [ ] Iterations created (Sprint 1–12)
-- [ ] Start/Target dates set
-
-**See:** `/planning/backlog/board-population-checklist.md` for detailed setup steps.
-
----
-
-**Last Updated:** 2026-05-23  
-**Board Status:** All 25 issues created, awaiting board setup  
-**Next Review:** When board TOKEN is configured  
-
-https://claude.ai/code/session_01FpTQSAUHfYEkRh9ziy5cDK
+**Sequencing:** RT1 → RT2 → RT3 → RT4, strict by the dependency chain above. Track live progress, blockers, and status on the [board](https://github.com/users/nickpclarke/projects/1).

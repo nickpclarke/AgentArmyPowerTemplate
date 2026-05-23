@@ -266,6 +266,6 @@ Run these with `/skill-name` in the Claude Code prompt:
 
 - **This is a template repo.** When forked into a real project, owner/project references in `.github/workflows/*.yml` are hardcoded (e.g. `nickpclarke`, project number `1`) and must be edited by hand — see [docs/setup.md](docs/setup.md).
 - **`PROJECT_TOKEN`** must be a **classic** PAT with the `project` scope checked — the default `GITHUB_TOKEN` cannot write to Projects v2 boards. Used by every workflow that updates the board.
-- **`GITHUB_TOKEN`** (built-in) is only enough for `stale` and `label-pr-size`.
+- **`GITHUB_TOKEN`** (built-in) drives the PR/issue automation (`label-pr-size`, `copilot-review`, `copilot-coding-agent`, `stale`, `board-commands`). It is **read-only by default on forks** — those workflows declare `permissions:` blocks and set `GH_REPO`, but the catch-all is **Settings → Actions → General → Workflow permissions → Read and write**. Symptoms when missing: `Resource not accessible by integration` (perms) or `fatal: not a git repository` (no `GH_REPO`/checkout). See [docs/setup.md](docs/setup.md).
 - `.claude/settings.local.json` contains personal permissions — gitignore in forks.
 - `auto-status` only fires when a PR body contains `Closes #N` / `Fixes #N` / `Resolves #N`. Without it, the linked issue stays in *In progress*.
