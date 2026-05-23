@@ -24,10 +24,3 @@ bearer_token_env_var = "GCP_BEARER_TOKEN"
 url = "https://${GCP_REGION}-aiplatform.googleapis.com/v1/projects/${GCP_PROJECT_ID}/locations/${GCP_REGION}/agents/gcp-mcp-server:callMcp"
 bearer_token_env_var = "GCP_BEARER_TOKEN"
 
-# Official Azure MCP Server (local stdio via npx). Authenticates with the Azure
-# credential chain (DefaultAzureCredential): `az login`, service-principal env
-# vars (AZURE_TENANT_ID/AZURE_CLIENT_ID/AZURE_CLIENT_SECRET), or managed identity.
-[mcp_servers.azure]
-command = "npx"
-args = ["-y", "@azure/mcp@latest", "server", "start"]
-

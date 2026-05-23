@@ -27,11 +27,6 @@
       "headers": {
         "Authorization": "Bearer ${GCP_BEARER_TOKEN}"
       }
-    },
-    "azure": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@azure/mcp@latest", "server", "start"]
     }
   }
 }
