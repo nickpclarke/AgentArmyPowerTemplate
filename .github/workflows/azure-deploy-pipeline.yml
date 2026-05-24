@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 
 env:
+  AZURE_CREDENTIALS_PRESENT: ${{ secrets.AZURE_CREDENTIALS != '' }}
   REGISTRY_LOGIN_SERVER: ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}
   REGISTRY_USERNAME: ${{ secrets.AZURE_REGISTRY_USERNAME }}
   REGISTRY_PASSWORD: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
@@ -26,17 +27,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Skip Azure validation when credentials are unavailable
+        if: env.AZURE_CREDENTIALS_PRESENT != 'true'
+        run: echo "AZURE_CREDENTIALS is not configured; skipping live Azure validation for this run."
+
       - name: Azure CLI - Login
+        if: env.AZURE_CREDENTIALS_PRESENT == 'true'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Set up Python
+        if: env.AZURE_CREDENTIALS_PRESENT == 'true'
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
       - name: Validate Azure Infrastructure
+        if: env.AZURE_CREDENTIALS_PRESENT == 'true'
         id: validate
         run: |
           python azure-infra-validator.py \
@@ -47,14 +55,14 @@ jobs:
           echo "inventory=$(cat infrastructure-report.json | base64 -w 0)" >> $GITHUB_OUTPUT
 
       - name: Upload Infrastructure Report
-        if: always()
+        if: always() && env.AZURE_CREDENTIALS_PRESENT == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: infrastructure-report
           path: infrastructure-report.json
 
       - name: Comment PR with Infrastructure Status
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && env.AZURE_CREDENTIALS_PRESENT == 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -466,24 +474,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Skip post-deployment validation when credentials are unavailable
+        if: env.AZURE_CREDENTIALS_PRESENT != 'true'
+        run: echo "AZURE_CREDENTIALS is not configured; skipping live Azure post-deployment validation for this run."
+
       - name: Azure CLI - Login
+        if: env.AZURE_CREDENTIALS_PRESENT == 'true'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Set up Python
+        if: env.AZURE_CREDENTIALS_PRESENT == 'true'
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
       - name: Run post-deployment validation
+        if: env.AZURE_CREDENTIALS_PRESENT == 'true'
         run: |
           python azure-infra-validator.py \
             --subscription ${{ env.SUBSCRIPTION }} \
             --output post-deploy-report.json
 
       - name: Upload post-deployment report
-        if: always()
+        if: always() && env.AZURE_CREDENTIALS_PRESENT == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: post-deploy-report
