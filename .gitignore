@@ -2,6 +2,11 @@
 .claude/settings.local.json
 .codex/config.local.toml
 
+# Obsidian vault (in-repo Labs surface): track the note content, not per-user
+# app state or the deleted-notes trash (the latter can recurse and blow MAX_PATH).
+obsidian/**/.obsidian/
+obsidian/**/.trash/
+
 # Environment variables — contains Azure/API credentials
 .env
 extensions/board-manager/.env

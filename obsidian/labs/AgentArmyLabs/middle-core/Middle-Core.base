@@ -1,0 +1,27 @@
+filters:
+  and:
+    - file.hasTag("middle-core")
+properties:
+  layer:
+    displayName: Service layer
+  file.links:
+    displayName: Relates to
+  file.backlinks:
+    displayName: Used by
+views:
+  - type: table
+    name: Business objects by layer
+    groupBy:
+      property: layer
+      direction: ASC
+    order:
+      - file.name
+      - layer
+      - file.links
+      - file.backlinks
+  - type: cards
+    name: Cards
+    order:
+      - file.name
+      - layer
+      - file.links

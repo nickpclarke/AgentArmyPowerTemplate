@@ -1,19 +1,27 @@
 # Labs & the Idea Pipeline
 
-AgentArmy designs flow through **four surfaces**, from raw idea to published doc. Each has a distinct job; commitment and visibility rise left → right.
+AgentArmy designs flow through **three surfaces**, from raw idea to published doc. Each has a distinct job; commitment and visibility rise top → bottom.
 
 | Stage | Surface | Holds | Where |
 |---|---|---|---|
-| 1 · Skunkworks | **Obsidian** (graph) | research, ideation, ontology / entity-relationship modeling | https://publish.obsidian.md/xlabs |
-| 2 · Labs (WIP) | **GitHub Wiki** | shared design-in-progress, decisions | [Wiki](https://github.com/nickpclarke/AgentArmy/wiki) |
-| 3 · Work | **Project board** | committed tasks, status, who's-doing-what | [Project #1](https://github.com/users/nickpclarke/projects/1) |
-| 4 · Docs | **this site** | completed, stable documentation | you're here |
+| 1 · Skunkworks & Labs (WIP) | **Obsidian vault (in-repo)** | research, ideation, shared design-in-progress, ontology / entity-relationship modeling | `obsidian/labs/AgentArmyLabs/` (committed) · humans also at https://publish.obsidian.md/xlabs |
+| 2 · Work | **Project board** | committed tasks, status, who's-doing-what | [Project #1](https://github.com/users/nickpclarke/projects/1) |
+| 3 · Docs | **this site** | completed, stable documentation | you're here |
+
+## Why the vault is in the repo
+
+The WIP design surface lives **in the repository** at `obsidian/labs/AgentArmyLabs/`, not the GitHub Wiki. A wiki is a *separate* git repo that cloud coding agents (Codex, Copilot) never receive in their microVM sandbox — so it cannot be a shared agent surface. The vault is part of the normal checkout, so **every agent (Claude, Codex, Copilot) can read and edit it**, and it is version-controlled and reviewable like any other code.
+
+Only the note content is tracked. Per-user app state (`.obsidian/`) and the deleted-notes folder (`.trash/`) are gitignored.
 
 ## How a design matures
-- **Skunkworks — Obsidian.** Where ideas are born; the graph view is the thinking tool, ideal for ontology and entity-relationship work. Human + local, and intentionally *not* cross-agent — that's the pre-shared stage. Published for humans at **https://publish.obsidian.md/xlabs**.
-- **Labs — Wiki.** When an idea is worth shared agent collaboration it crosses to the [wiki](https://github.com/nickpclarke/AgentArmy/wiki): edited directly, no PR, readable by every agent (Claude, Codex, Copilot).
+
+- **Skunkworks & Labs — Obsidian vault.** Ideas are born and shared here; the graph view is the thinking tool, ideal for ontology and entity-relationship work. Agents write to it using the Obsidian skills (markdown, wikilinks, bases, canvas) and collaborate via PRs to `obsidian/labs/`. Humans use the Obsidian app and the published mirror at **https://publish.obsidian.md/xlabs**.
 - **Work — Board.** Once committed as a task on [Project #1](https://github.com/users/nickpclarke/projects/1), with intent and status.
-- **Docs — Pages.** Once done and stable, a summary graduates here.
+- **Docs — this site.** Once a design is stable, a summary graduates here (MkDocs).
 
 ## Ontology has a destination
-Entities and relations are modeled in **Obsidian** (the graph) → and graduate into **ArcadeDB** vertex/edge schema and the **OpenAPI contract** (the universal data adapter's common data model). Obsidian is where the graph is *designed*; ArcadeDB is where it *runs*; the wiki/contract is where it's *agreed*.
+
+Entities and relations are modeled in the **Obsidian vault** (the graph) → and graduate into **ArcadeDB** vertex/edge schema and the **OpenAPI contract** (the universal data adapter's common data model). The vault is where the graph is *designed* and *agreed*; ArcadeDB is where it *runs*; `docs/` is where the stable summary is *published*.
+
+> **Retired:** the GitHub Wiki is no longer the Labs surface — microVM agents can't reach it. Its pages were migrated into the in-repo vault (see [Ontology Pipeline](https://github.com/nickpclarke/AgentArmy/blob/main/obsidian/labs/AgentArmyLabs/Ontology-Pipeline.md)).
