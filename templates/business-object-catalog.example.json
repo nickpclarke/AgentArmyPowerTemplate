@@ -1,0 +1,344 @@
+{
+  "schema_version": "business-object-catalog.v1",
+  "catalog_id": "agentarmy-backend-core-business-objects",
+  "service_layers": [
+    {
+      "id": "arcadedb-capability-services",
+      "display_name": "ArcadeDB Capability Services",
+      "purpose": "Expose ArcadeDB ingest, object, graph, schema, vector, and guarded query features as inspectable platform capabilities."
+    },
+    {
+      "id": "platform-operational-services",
+      "display_name": "Platform Operational Services",
+      "purpose": "Run the control plane for work, routing, diagnostics, environments, integrations, evidence, and audit."
+    },
+    {
+      "id": "meta-services",
+      "display_name": "Meta-services",
+      "purpose": "Compose capabilities into reusable scenarios, learning loops, cockpit views, and future MCP tool offerings."
+    }
+  ],
+  "object_types": [
+    {
+      "id": "knowledge-source",
+      "display_name": "Knowledge Source",
+      "description": "A landed file, image, document, mailbox export, report, or dataset that can be indexed, searched, cited, and reprocessed.",
+      "owned_by_layer": "arcadedb-capability-services",
+      "states": ["landed", "ingesting", "indexed", "searchable", "archived", "failed"],
+      "provider_mappings": [
+        {
+          "provider": "arcadedb",
+          "records": ["RawObject", "StoredFile", "IngestJob"],
+          "capabilities": ["arcadedb.raw-object-landing", "arcadedb.async-ingest-jobs"]
+        }
+      ],
+      "relationships": [
+        { "type": "contains", "target": "knowledge-chunk" },
+        { "type": "proves", "target": "capability-exercise" }
+      ],
+      "scenario_mappings": ["knowledge-drop", "semantic-constellation"],
+      "mcp_eligibility": "read-only",
+      "redaction_policy": ["Hide raw bytes by default", "Expose hashes and safe summaries", "Redact source paths that reveal local secrets"]
+    },
+    {
+      "id": "knowledge-chunk",
+      "display_name": "Knowledge Chunk",
+      "description": "A searchable semantic fragment derived from a knowledge source, including text snippets, image-derived captions, embeddings, and citations.",
+      "owned_by_layer": "arcadedb-capability-services",
+      "states": ["created", "embedded", "searchable", "stale", "failed"],
+      "provider_mappings": [
+        {
+          "provider": "arcadedb",
+          "records": ["Chunk", "ImageObject", "Embedding"],
+          "capabilities": ["arcadedb.cross-modal-vector-search", "arcadedb.vector-neighbors"]
+        }
+      ],
+      "relationships": [
+        { "type": "derived-from", "target": "knowledge-source" },
+        { "type": "included-in", "target": "knowledge-graph-snapshot" }
+      ],
+      "scenario_mappings": ["semantic-constellation", "evidence-pack"],
+      "mcp_eligibility": "read-only",
+      "redaction_policy": ["Return bounded excerpts", "Do not expose embedding vectors unless explicitly requested by an operator"]
+    },
+    {
+      "id": "knowledge-graph-snapshot",
+      "display_name": "Knowledge Graph Snapshot",
+      "description": "A safe graph projection of sources, chunks, jobs, schema types, indexes, and provider relationships for cockpit inspection.",
+      "owned_by_layer": "arcadedb-capability-services",
+      "states": ["requested", "materialized", "published", "expired", "failed"],
+      "provider_mappings": [
+        {
+          "provider": "arcadedb",
+          "records": ["TypeInventory", "GraphNode", "GraphEdge", "IndexSummary"],
+          "capabilities": ["arcadedb.schema-inventory", "arcadedb.graph-snapshot", "arcadedb.read-only-query"]
+        }
+      ],
+      "relationships": [
+        { "type": "summarizes", "target": "knowledge-source" },
+        { "type": "summarizes", "target": "knowledge-chunk" }
+      ],
+      "scenario_mappings": ["schema-scout", "semantic-constellation", "read-only-query-lab"],
+      "mcp_eligibility": "read-only",
+      "redaction_policy": ["Show schema and counts, not credentials", "Bound sampled values", "Block raw provider connection details"]
+    },
+    {
+      "id": "capability-exercise",
+      "display_name": "Capability Exercise",
+      "description": "A reusable proof that a platform capability works through a concrete scenario, with inputs, outputs, diagnostics, and observations.",
+      "owned_by_layer": "meta-services",
+      "states": ["draft", "ready", "running", "passed", "failed", "deprecated"],
+      "provider_mappings": [
+        {
+          "provider": "agentarmy",
+          "records": ["Scenario", "ScenarioRun", "DiagnosticRun"],
+          "capabilities": ["meta.scenario-runner", "platform.diagnostics"]
+        }
+      ],
+      "relationships": [
+        { "type": "produces", "target": "evidence-pack" },
+        { "type": "exercises", "target": "tool-offering" }
+      ],
+      "scenario_mappings": ["knowledge-drop", "schema-scout", "read-only-query-lab", "agent-route-and-prove"],
+      "mcp_eligibility": "read-only",
+      "redaction_policy": ["Expose scenario status and metrics", "Link redacted artifacts only"]
+    },
+    {
+      "id": "evidence-pack",
+      "display_name": "Evidence Pack",
+      "description": "A bundle of diagnostic runs, scenario outputs, screenshots, contract checks, and notes proving a work item or capability outcome.",
+      "owned_by_layer": "platform-operational-services",
+      "states": ["collecting", "complete", "waived", "rejected", "expired"],
+      "provider_mappings": [
+        {
+          "provider": "agentarmy",
+          "records": ["DoctorArtifact", "ContractCheck", "ScenarioRun", "ScreenshotRef"],
+          "capabilities": ["platform.diagnostics", "platform.evidence-gates"]
+        }
+      ],
+      "relationships": [
+        { "type": "supports", "target": "work-packet" },
+        { "type": "proves", "target": "capability-exercise" },
+        { "type": "records", "target": "decision-record" }
+      ],
+      "scenario_mappings": ["evidence-pack", "agent-route-and-prove"],
+      "mcp_eligibility": "read-only",
+      "redaction_policy": ["Require artifact redaction status", "Expose hashes and paths only after allowlist checks"]
+    },
+    {
+      "id": "work-packet",
+      "display_name": "Work Packet",
+      "description": "A work item plus route decision, agent pod assignment, linked pull requests, readiness gates, evidence requirements, and blockers.",
+      "owned_by_layer": "platform-operational-services",
+      "states": ["todo", "ready", "in-progress", "in-review", "done", "blocked", "awaiting-decision"],
+      "provider_mappings": [
+        {
+          "provider": "github",
+          "records": ["Issue", "ProjectItem", "PullRequest", "ReviewThread"],
+          "capabilities": ["platform.work-coordination", "platform.routing"]
+        }
+      ],
+      "relationships": [
+        { "type": "requires", "target": "evidence-pack" },
+        { "type": "decided-by", "target": "decision-record" }
+      ],
+      "scenario_mappings": ["agent-route-and-prove", "evidence-pack"],
+      "mcp_eligibility": "guarded-mutation",
+      "redaction_policy": ["Do not expose private repository metadata outside tenant scope", "Summarize review context unless caller has repo access"]
+    },
+    {
+      "id": "decision-record",
+      "display_name": "Decision Record",
+      "description": "A human, agent, policy, or architecture decision with context, options, outcome, owner, and downstream effects.",
+      "owned_by_layer": "platform-operational-services",
+      "states": ["proposed", "accepted", "rejected", "superseded"],
+      "provider_mappings": [
+        {
+          "provider": "agentarmy",
+          "records": ["AuditEvent", "HitlDecision", "ArchitectureDecision"],
+          "capabilities": ["platform.audit", "platform.hitl"]
+        }
+      ],
+      "relationships": [
+        { "type": "unblocks", "target": "work-packet" },
+        { "type": "justifies", "target": "tool-offering" }
+      ],
+      "scenario_mappings": ["agent-route-and-prove"],
+      "mcp_eligibility": "read-only",
+      "redaction_policy": ["Record policy result, not hidden secrets", "Hide security-sensitive rationale unless authorized"]
+    },
+    {
+      "id": "tool-offering",
+      "display_name": "Tool Offering",
+      "description": "A safe, documented backend action or scenario that can be exposed to agents through MCP after schema, auth, rate, and redaction checks.",
+      "owned_by_layer": "meta-services",
+      "states": ["candidate", "schema-ready", "enabled", "disabled", "deprecated"],
+      "provider_mappings": [
+        {
+          "provider": "mcp",
+          "records": ["ToolBinding", "InputSchema", "OutputSchema"],
+          "capabilities": ["meta.mcp-tool-binding", "meta.tool-policy"]
+        }
+      ],
+      "relationships": [
+        { "type": "wraps", "target": "scenario-template" },
+        { "type": "proven-by", "target": "capability-exercise" }
+      ],
+      "scenario_mappings": ["schema-scout", "read-only-query-lab", "agent-route-and-prove"],
+      "mcp_eligibility": "read-only",
+      "redaction_policy": ["Prefer scenario outputs over raw provider responses", "Require input and output schemas before enablement"]
+    },
+    {
+      "id": "scenario-template",
+      "display_name": "Scenario Template",
+      "description": "A reusable recipe for exercising one or more capabilities through typed inputs, policy-bounded steps, and evidence-producing outputs.",
+      "owned_by_layer": "meta-services",
+      "states": ["draft", "validated", "published", "retired"],
+      "provider_mappings": [
+        {
+          "provider": "agentarmy",
+          "records": ["ScenarioDefinition", "ScenarioContract"],
+          "capabilities": ["meta.scenario-runner", "meta.composition"]
+        }
+      ],
+      "relationships": [
+        { "type": "produces", "target": "capability-exercise" },
+        { "type": "wrapped-by", "target": "tool-offering" }
+      ],
+      "scenario_mappings": ["knowledge-drop", "semantic-constellation", "schema-scout", "read-only-query-lab", "evidence-pack", "agent-route-and-prove"],
+      "mcp_eligibility": "read-only",
+      "redaction_policy": ["Do not include credentials in scenario defaults", "Keep environment references symbolic"]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "knowledge-drop",
+      "display_name": "Knowledge Drop",
+      "description": "Land mixed files or images into ArcadeDB, create ingest jobs, index derived chunks, and emit evidence that the ingestion path works.",
+      "service_layers": ["arcadedb-capability-services", "meta-services"],
+      "inputs": ["knowledge-source", "scenario-template"],
+      "outputs": ["knowledge-source", "knowledge-chunk", "capability-exercise", "evidence-pack"],
+      "capabilities": ["arcadedb.raw-object-landing", "arcadedb.async-ingest-jobs", "meta.scenario-runner", "platform.diagnostics"],
+      "safety_policy": ["Size-limit uploads", "Block executable secret-bearing artifacts by default", "Store secret references only"],
+      "mcp_eligible": false
+    },
+    {
+      "id": "semantic-constellation",
+      "display_name": "Semantic Constellation",
+      "description": "Search text and image chunks, then project related sources and neighbors as a graph snapshot for cockpit exploration.",
+      "service_layers": ["arcadedb-capability-services", "meta-services"],
+      "inputs": ["knowledge-source", "knowledge-chunk"],
+      "outputs": ["knowledge-chunk", "knowledge-graph-snapshot", "capability-exercise"],
+      "capabilities": ["arcadedb.cross-modal-vector-search", "arcadedb.vector-neighbors", "arcadedb.graph-snapshot"],
+      "safety_policy": ["Return bounded excerpts", "Do not return raw embeddings by default", "Require tenant-scoped source filters"],
+      "mcp_eligible": true,
+      "input_schema": {
+        "type": "object",
+        "required": ["query"],
+        "properties": {
+          "query": { "type": "string", "minLength": 1 },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 25 }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "required": ["chunks", "graph_snapshot"],
+        "properties": {
+          "chunks": { "type": "array" },
+          "graph_snapshot": { "type": "object" }
+        }
+      }
+    },
+    {
+      "id": "schema-scout",
+      "display_name": "Schema Scout",
+      "description": "Inspect ArcadeDB types, fields, indexes, counts, and safe samples so operators can understand the current graph/data shape.",
+      "service_layers": ["arcadedb-capability-services", "platform-operational-services", "meta-services"],
+      "inputs": ["scenario-template"],
+      "outputs": ["knowledge-graph-snapshot", "capability-exercise", "evidence-pack"],
+      "capabilities": ["arcadedb.schema-inventory", "arcadedb.graph-snapshot", "platform.diagnostics"],
+      "safety_policy": ["Sample values must be bounded", "Connection details stay server-side", "Mark sensitive types as summarized-only"],
+      "mcp_eligible": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "include_samples": { "type": "boolean" }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "required": ["types", "indexes", "snapshot"],
+        "properties": {
+          "types": { "type": "array" },
+          "indexes": { "type": "array" },
+          "snapshot": { "type": "object" }
+        }
+      }
+    },
+    {
+      "id": "read-only-query-lab",
+      "display_name": "Read-only Query Lab",
+      "description": "Run a policy-checked read-only ArcadeDB query, record metrics, and return a redacted result envelope for exploration and diagnostics.",
+      "service_layers": ["arcadedb-capability-services", "platform-operational-services", "meta-services"],
+      "inputs": ["scenario-template", "knowledge-graph-snapshot"],
+      "outputs": ["knowledge-graph-snapshot", "capability-exercise", "evidence-pack"],
+      "capabilities": ["arcadedb.read-only-query", "platform.diagnostics", "meta.mcp-tool-binding"],
+      "safety_policy": ["Allowlist read-only verbs", "Apply timeout and row limits", "Reject mutation keywords and unbounded scans"],
+      "mcp_eligible": true,
+      "input_schema": {
+        "type": "object",
+        "required": ["query"],
+        "properties": {
+          "query": { "type": "string", "minLength": 1 },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 100 }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "required": ["columns", "rows", "metrics"],
+        "properties": {
+          "columns": { "type": "array" },
+          "rows": { "type": "array" },
+          "metrics": { "type": "object" }
+        }
+      }
+    },
+    {
+      "id": "evidence-pack",
+      "display_name": "Evidence Pack",
+      "description": "Collect diagnostics, scenario results, contract checks, and notes into a proof bundle for work completion or capability promotion.",
+      "service_layers": ["platform-operational-services", "meta-services"],
+      "inputs": ["work-packet", "capability-exercise"],
+      "outputs": ["evidence-pack", "decision-record"],
+      "capabilities": ["platform.diagnostics", "platform.evidence-gates", "platform.audit"],
+      "safety_policy": ["Require redaction status", "Hash artifacts", "Link only allowlisted artifact locations"],
+      "mcp_eligible": true,
+      "input_schema": {
+        "type": "object",
+        "required": ["work_packet_id"],
+        "properties": {
+          "work_packet_id": { "type": "string", "minLength": 1 }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "required": ["evidence_pack_id", "status"],
+        "properties": {
+          "evidence_pack_id": { "type": "string" },
+          "status": { "type": "string" }
+        }
+      }
+    },
+    {
+      "id": "agent-route-and-prove",
+      "display_name": "Agent Route And Prove",
+      "description": "Route a work packet to an agent pod, require evidence gates, import diagnostics, and capture learning signals from misses or failures.",
+      "service_layers": ["platform-operational-services", "meta-services"],
+      "inputs": ["work-packet", "scenario-template"],
+      "outputs": ["work-packet", "decision-record", "evidence-pack", "capability-exercise"],
+      "capabilities": ["platform.routing", "platform.work-coordination", "platform.evidence-gates", "platform.audit", "meta.scenario-runner"],
+      "safety_policy": ["Reject unscoped agents", "Record policy version", "Require privileged reviewers for security-sensitive work"],
+      "mcp_eligible": false
+    }
+  ]
+}
