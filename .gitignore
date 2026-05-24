@@ -36,6 +36,8 @@ site/
 # Generated diagnostics artifacts
 tests/artifacts/doctor/*.json
 tests/artifacts/doctor/*.md
+tests/artifacts/business-objects/*.json
+tests/artifacts/business-objects/*.md
 
 # MemPalace machine-specific generated file (detected people/projects). Do not commit.
 # Note: mempalace.yaml is intentionally NOT ignored — it's a curated template artifact

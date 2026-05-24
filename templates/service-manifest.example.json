@@ -18,6 +18,16 @@
       "health_url": "http://127.0.0.1:8000/health",
       "openapi": "openapi.json",
       "required": false
+    },
+    {
+      "name": "middle-core",
+      "kind": "backend",
+      "path": "services/middle-core",
+      "build": "docker build -t middle-core:local .",
+      "test": "dotnet test --no-restore",
+      "health_url": "http://127.0.0.1:8001/health",
+      "openapi": "openapi.json",
+      "required": false
     }
   ]
 }
