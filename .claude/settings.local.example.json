@@ -1,0 +1,14 @@
+{
+  "env": {
+    "CEREBRAS_MODEL": "zai-glm-4.7"
+  },
+  "permissions": {
+    "allow": [
+      "Skill(mempalace:mempalace)",
+      "Bash(mempalace init *)",
+      "Bash(PYTHONUTF8=1 mempalace init *)",
+      "Bash(python -m mempalace --version)",
+      "Bash(claude mcp *)"
+    ]
+  }
+}

@@ -39,7 +39,7 @@ This creates the local palace storage directory (`.mempalace/` by default, outsi
 
 ## Verify Hooks Are Wired
 
-The Claude Code hooks are already in `.claude/settings.json`:
+The Claude Code hooks are already in `.claude/settings.json` and run through the cross-platform `scripts/mempalace_hook.py` helper:
 
 ```json
 {
@@ -47,14 +47,14 @@ The Claude Code hooks are already in `.claude/settings.json`:
     "Stop": [{
       "hooks": [{
         "type": "command",
-        "command": "PYTHONUTF8=1 mempalace hook run --hook stop --harness claude-code",
+        "command": "python scripts/mempalace_hook.py --hook stop --harness claude-code",
         "timeout": 60
       }]
     }],
     "PreCompact": [{
       "hooks": [{
         "type": "command",
-        "command": "PYTHONUTF8=1 mempalace hook run --hook precompact --harness claude-code",
+        "command": "python scripts/mempalace_hook.py --hook precompact --harness claude-code",
         "timeout": 60
       }]
     }]
@@ -85,7 +85,7 @@ Codex uses the same lifecycle hooks from `.codex/hooks.json`, routed through the
 }
 ```
 
-The helper currently uses the `claude-code` harness name for compatibility with MemPalace. If your installed MemPalace version exposes a Codex-specific harness, update `.codex/hooks.json` deliberately and keep this document in sync.
+The helper sets `PYTHONUTF8=1`, skips cleanly when `mempalace` is not installed, and no-ops Claude Code lifecycle events that the installed MemPalace CLI does not accept, such as `UserPromptSubmit`, `PreToolUse`, and `PostToolUse`. It currently uses the `claude-code` harness name for compatibility with MemPalace. If your installed MemPalace version exposes a Codex-specific harness, update `.codex/hooks.json` deliberately and keep this document in sync.
 
 If you see hook errors in Claude Code, confirm `mempalace` is on your PATH:
 
