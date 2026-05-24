@@ -5,6 +5,7 @@
 # Environment variables — contains Azure/API credentials
 .env
 extensions/board-manager/.env
+extensions/arcadedb-cockpit/.env
 
 # Dependencies
 node_modules/
