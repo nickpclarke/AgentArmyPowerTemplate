@@ -55,7 +55,7 @@ jobs:
         if: always()
         shell: powershell
         run: |
-          docker compose -f "${{ inputs.compose_file }}" logs --no-color *> docker-compose-smoke.log
+          cmd /c "docker compose -f ""${{ inputs.compose_file }}"" logs --no-color > docker-compose-smoke.log 2>&1"
           docker compose -f "${{ inputs.compose_file }}" ps | Out-File -Encoding utf8 docker-compose-ps.txt
         continue-on-error: true
 
