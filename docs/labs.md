@@ -1,16 +1,19 @@
-# Labs
+# Labs & the Idea Pipeline
 
-**Labs is where work-in-progress design lives — in the project [Wiki](https://github.com/nickpclarke/AgentArmy/wiki), not here.** This docs site holds **completed, stable** material; the wiki holds the fast-moving design that any agent (Claude, Codex, Copilot) or human edits **directly, without a pull request**.
+AgentArmy designs flow through **four surfaces**, from raw idea to published doc. Each has a distinct job; commitment and visibility rise left → right.
 
-| | Labs (Wiki) | Docs (this site) |
-|---|---|---|
-| Holds | WIP design, ADR drafts, exploration | completed, stable docs |
-| Edited via | direct commit — no PR | PR into `docs/` |
-| Role | where ideas start | where they graduate |
+| Stage | Surface | Holds | Where |
+|---|---|---|---|
+| 1 · Skunkworks | **Obsidian** (graph) | research, ideation, ontology / entity-relationship modeling | https://publish.obsidian.md/xlabs |
+| 2 · Labs (WIP) | **GitHub Wiki** | shared design-in-progress, decisions | [Wiki](https://github.com/nickpclarke/AgentArmy/wiki) |
+| 3 · Work | **Project board** | committed tasks, status, who's-doing-what | [Project #1](https://github.com/users/nickpclarke/projects/1) |
+| 4 · Docs | **this site** | completed, stable documentation | you're here |
 
-## Start here
-- **[Labs home](https://github.com/nickpclarke/AgentArmy/wiki)** — index of active design pages
-- **[Coordination Protocol](https://github.com/nickpclarke/AgentArmy/wiki/Coordination-Protocol)** — how concurrent agents stay aware of each other (board + wiki + draft PRs + HITL)
-- **[Universal Data Adapter](https://github.com/nickpclarke/AgentArmy/wiki/Universal-Data-Adapter)** — current design thread
+## How a design matures
+- **Skunkworks — Obsidian.** Where ideas are born; the graph view is the thinking tool, ideal for ontology and entity-relationship work. Human + local, and intentionally *not* cross-agent — that's the pre-shared stage. Published for humans at **https://publish.obsidian.md/xlabs**.
+- **Labs — Wiki.** When an idea is worth shared agent collaboration it crosses to the [wiki](https://github.com/nickpclarke/AgentArmy/wiki): edited directly, no PR, readable by every agent (Claude, Codex, Copilot).
+- **Work — Board.** Once committed as a task on [Project #1](https://github.com/users/nickpclarke/projects/1), with intent and status.
+- **Docs — Pages.** Once done and stable, a summary graduates here.
 
-When a Labs design settles, a summary graduates here into the docs.
+## Ontology has a destination
+Entities and relations are modeled in **Obsidian** (the graph) → and graduate into **ArcadeDB** vertex/edge schema and the **OpenAPI contract** (the universal data adapter's common data model). Obsidian is where the graph is *designed*; ArcadeDB is where it *runs*; the wiki/contract is where it's *agreed*.
