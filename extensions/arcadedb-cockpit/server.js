@@ -8,13 +8,20 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 loadEnv(path.join(__dirname, '.env'))
 
 const PORT = Number(process.env.PORT || 8787)
+const HOST = process.env.HOST || '127.0.0.1'
 const ARCADEDB_URL = (process.env.ARCADEDB_URL || 'http://localhost:2480').replace(/\/+$/, '')
 const ARCADEDB_USER = process.env.ARCADEDB_USER || 'root'
-const ARCADEDB_PASSWORD = process.env.ARCADEDB_PASSWORD || 'PlayWithData2026!'
+const ARCADEDB_PASSWORD = process.env.ARCADEDB_PASSWORD || ''
 const DEFAULT_DB = process.env.ARCADEDB_DATABASE || process.env.DB_NAME || 'knowledge'
 const ALLOW_MUTATION = String(process.env.ARCADEDB_ALLOW_MUTATION || 'false').toLowerCase() === 'true'
+const MAX_JSON_BODY_BYTES = Number(process.env.COCKPIT_MAX_JSON_BODY_BYTES || 1_000_000)
 const PUBLIC_DIR = path.join(__dirname, 'public')
 const RECENT_LIMIT = 18
+
+if (!ARCADEDB_PASSWORD) {
+  console.error('ARCADEDB_PASSWORD is required. Copy .env.example to .env and set your local ArcadeDB password.')
+  process.exit(1)
+}
 
 const telemetry = {
   startedAt: new Date().toISOString(),
@@ -39,12 +46,13 @@ const server = createServer(async (req, res) => {
     }
     await serveStatic(res, url.pathname)
   } catch (error) {
-    sendJson(res, 500, problem('Cockpit server error', error))
+    const status = Number(error.statusCode || 500)
+    sendJson(res, status, problem(status === 413 ? 'Payload too large' : 'Cockpit server error', error))
   }
 })
 
-server.listen(PORT, () => {
-  console.log(`Arcade Cockpit listening at http://127.0.0.1:${PORT}`)
+server.listen(PORT, HOST, () => {
+  console.log(`Arcade Cockpit listening at http://${HOST}:${PORT}`)
   console.log(`ArcadeDB target: ${ARCADEDB_URL} db=${DEFAULT_DB}`)
 })
 
@@ -362,7 +370,16 @@ function readFilePromise(filePath) {
 
 async function readJson(req) {
   const chunks = []
-  for await (const chunk of req) chunks.push(chunk)
+  let size = 0
+  for await (const chunk of req) {
+    size += chunk.length
+    if (size > MAX_JSON_BODY_BYTES) {
+      const error = new Error(`JSON body exceeds ${MAX_JSON_BODY_BYTES} bytes`)
+      error.statusCode = 413
+      throw error
+    }
+    chunks.push(chunk)
+  }
   const text = Buffer.concat(chunks).toString('utf8')
   return text ? JSON.parse(text) : {}
 }
@@ -383,7 +400,12 @@ function cleanDb(value) {
 }
 
 function isReadOnlySql(sql) {
-  return /^\s*(select|match|traverse|explain)\b/i.test(sql)
+  const candidate = String(sql || '').trim()
+  if (!candidate) return false
+  const normalized = candidate.replace(/'(?:''|[^'])*'|"(?:\"\"|[^"])*"/g, "''")
+  if (/;|--|\/\*|\*\/|#/.test(normalized)) return false
+  return /^(select|match|traverse|explain)\b/i.test(normalized)
+    && !/\b(insert|update|delete|create|drop|alter|truncate|upsert|move|grant|revoke|begin|commit|rollback)\b/i.test(normalized)
 }
 
 function fieldInventory(rows) {
