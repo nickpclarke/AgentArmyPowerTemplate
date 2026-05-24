@@ -184,6 +184,16 @@ Plus built-in Claude Code skills: `update-config`, `simplify`, `fewer-permission
 | `/ea-adr [decision]` | Architecture Decision Record in MADR v4.0 format |
 | `/capability-map [domain]` | Business capability model + investment heat map |
 
+**Obsidian skills** (vendored in `.claude/skills/` from [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills), MIT) — model-invoked, auto-triggered by file type/context:
+
+| Skill | Triggers on |
+|---|---|
+| `obsidian-markdown` | `.md` with wikilinks, embeds, callouts, properties |
+| `obsidian-bases` | `.base` files — views, filters, formulas, summaries |
+| `json-canvas` | `.canvas` files — nodes, edges, groups, connections |
+| `obsidian-cli` | Vault operations / plugin & theme dev via the Obsidian CLI |
+| `defuddle` | Clean-markdown web extraction (needs `npm install -g defuddle`) |
+
 ### Board slash commands (no hosting required)
 
 Comment on any issue or PR to query the board — no server, no registration needed:

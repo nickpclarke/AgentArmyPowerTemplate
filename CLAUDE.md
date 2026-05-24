@@ -28,6 +28,7 @@ When in doubt, infer intent from the issue/task context (e.g., “update the tem
 ```
 .claude/agents/categories/  → specialist agent definitions (11 categories)
 .claude/commands/           → local slash commands (/wardley, /ea-adr, /capability-map)
+.claude/skills/             → vendored Agent Skills (Obsidian: markdown/bases/canvas/cli/defuddle)
 .github/workflows/          → GitHub Actions: auto-status, routing, agent-onboarding-validation
 docs/                       → user-facing docs: agents.md, setup.md, github-projects.md, capabilities
 extensions/board-manager/   → Azure-deployable Copilot Chat extension (@board-manager)
@@ -254,6 +255,18 @@ Run these with `/skill-name` in the Claude Code prompt:
 | `/wardley [domain]` | Full Wardley analysis pipeline — value chain, map (OWM), doctrine, climate, gameplay |
 | `/ea-adr [decision topic]` | Architecture Decision Record in MADR v4.0 format |
 | `/capability-map [domain]` | Business capability model + investment heat map |
+
+### Vendored Skills (`.claude/skills/`)
+
+Model-invoked [Agent Skills](https://agentskills.io/specification) — Claude auto-triggers them by file type/context (no slash command needed). Vendored from [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) (MIT, © Steph Ango / @kepano):
+
+| Skill | Triggers on |
+|---|---|
+| `obsidian-markdown` | `.md` files with wikilinks, embeds, callouts, properties, tags |
+| `obsidian-bases` | `.base` files — views, filters, formulas, summaries |
+| `json-canvas` | `.canvas` files — nodes, edges, groups, connections |
+| `obsidian-cli` | Vault operations / plugin & theme dev via the Obsidian CLI |
+| `defuddle` | Extracting clean markdown from a web URL (needs `npm install -g defuddle`) |
 
 ## GitHub Actions in This Repo
 
