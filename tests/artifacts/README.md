@@ -23,3 +23,24 @@ See `docs/mece-audit/ROUTING_VALIDATION_TESTS.md` for Test 1.2 details and resul
 ## Other Artifacts
 
 Additional test outputs from routing validation runs will be organized here as they are generated.
+
+## doctor/
+
+Output from the AgentArmy platform diagnostics CLI:
+
+```powershell
+node tools/agentarmy-doctor.mjs --write-artifacts
+```
+
+The CLI writes:
+
+- `tests/artifacts/doctor/latest.json` — normalized `doctor.v1` artifact for pages, CI, and dashboards.
+- `tests/artifacts/doctor/latest.md` — human-readable report for GitHub step summaries and handoffs.
+
+The schema lives at `tools/doctor/doctor.v1.schema.json`.
+
+Validate an artifact with:
+
+```powershell
+node tools/doctor/validate-artifact.mjs tests/artifacts/doctor/latest.json
+```

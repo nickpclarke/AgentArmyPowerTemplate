@@ -33,6 +33,7 @@
         <button class="rail-button" data-view="graph" title="Graph">G</button>
         <button class="rail-button" data-view="query" title="Query">Q</button>
         <button class="rail-button" data-view="metrics" title="Metrics">M</button>
+        <button class="rail-button" data-view="doctor" title="Doctor">D</button>
       </nav>
 
       <main class="workspace">
@@ -106,6 +107,11 @@
         <article class="gauge">
           <span>Types</span>
           <strong id="typeGauge">0</strong>
+        </article>
+        <article class="gauge doctor-gauge">
+          <span>Doctor</span>
+          <strong id="doctorGauge">--</strong>
+          <small id="doctorDetail">No artifact</small>
         </article>
         <article class="ticker">
           <span>Recent commands</span>

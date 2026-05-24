@@ -1,0 +1,120 @@
+name: Local Docker Smoke Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Run even when LOCAL_DOCKER_SMOKE_ENABLED is not true"
+        required: false
+        default: false
+        type: boolean
+      compose_file:
+        description: "Optional compose file to smoke test, such as compose.yaml"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-docker-smoke-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  local-docker-smoke:
+    if: ${{ inputs.force == true || inputs.force == 'true' || vars.LOCAL_DOCKER_SMOKE_ENABLED == 'true' }}
+    runs-on: [self-hosted, docker-local]
+    timeout-minutes: 20
+    env:
+      COMPOSE_PROJECT_NAME: agentarmy-local-${{ github.run_id }}
+      DOCKER_SMOKE_IMAGE: agentarmy/local-smoke:${{ github.run_id }}
+      DOCKER_SMOKE_CONTAINER: agentarmy-local-smoke-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Verify Docker on local runner
+        shell: pwsh
+        run: |
+          docker version
+          docker compose version
+
+      - name: Run offline diagnostics first
+        shell: pwsh
+        run: node tools/agentarmy-doctor.mjs --write-artifacts --format markdown --output tests/artifacts/doctor/summary.md
+
+      - name: Build root Dockerfile smoke image
+        if: ${{ inputs.compose_file == '' }}
+        shell: pwsh
+        run: docker build --pull --tag "$env:DOCKER_SMOKE_IMAGE" .
+
+      - name: Run root Dockerfile smoke container
+        if: ${{ inputs.compose_file == '' }}
+        shell: pwsh
+        run: |
+          docker run --detach --name "$env:DOCKER_SMOKE_CONTAINER" --publish 127.0.0.1::8080 "$env:DOCKER_SMOKE_IMAGE"
+          Start-Sleep -Seconds 5
+          $container = docker inspect "$env:DOCKER_SMOKE_CONTAINER" | ConvertFrom-Json
+          $port = $container[0].NetworkSettings.Ports.'8080/tcp'[0].HostPort
+          $url = "http://127.0.0.1:$port/README.md"
+          Write-Host "Smoke URL: $url"
+          $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 15
+          if ($response.StatusCode -lt 200 -or $response.StatusCode -ge 400) {
+            throw "Smoke request returned HTTP $($response.StatusCode)"
+          }
+
+      - name: Run compose smoke stack
+        if: ${{ inputs.compose_file != '' }}
+        shell: pwsh
+        run: |
+          if (-not (Test-Path -LiteralPath "${{ inputs.compose_file }}")) {
+            throw "Compose file not found: ${{ inputs.compose_file }}"
+          }
+          docker compose -f "${{ inputs.compose_file }}" up --detach --build
+          docker compose -f "${{ inputs.compose_file }}" ps
+          node tools/agentarmy-doctor.mjs --strict --write-artifacts --format markdown --output tests/artifacts/doctor/summary.md
+
+      - name: Capture root smoke logs
+        if: ${{ always() && inputs.compose_file == '' }}
+        shell: pwsh
+        run: |
+          docker logs "$env:DOCKER_SMOKE_CONTAINER" *> docker-smoke.log
+          docker ps --filter "name=$env:DOCKER_SMOKE_CONTAINER" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | Out-File -Encoding utf8 docker-smoke-ps.txt
+        continue-on-error: true
+
+      - name: Capture compose smoke logs
+        if: ${{ always() && inputs.compose_file != '' }}
+        shell: pwsh
+        run: |
+          docker compose -f "${{ inputs.compose_file }}" logs --no-color *> docker-compose-smoke.log
+          docker compose -f "${{ inputs.compose_file }}" ps | Out-File -Encoding utf8 docker-compose-ps.txt
+        continue-on-error: true
+
+      - name: Upload smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: local-docker-smoke
+          path: |
+            tests/artifacts/doctor/
+            docker-smoke.log
+            docker-smoke-ps.txt
+            docker-compose-smoke.log
+            docker-compose-ps.txt
+          if-no-files-found: ignore
+
+      - name: Cleanup local Docker resources
+        if: always()
+        shell: pwsh
+        run: |
+          if ("${{ inputs.compose_file }}" -ne "") {
+            docker compose -f "${{ inputs.compose_file }}" down --remove-orphans
+          } else {
+            docker rm --force "$env:DOCKER_SMOKE_CONTAINER"
+            docker image rm "$env:DOCKER_SMOKE_IMAGE"
+          }
+        continue-on-error: true

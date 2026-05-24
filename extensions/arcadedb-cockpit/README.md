@@ -7,6 +7,7 @@ Arcade Cockpit is a local, optional dashboard for exploring and instrumenting an
 - Connects to ArcadeDB through a local Node proxy.
 - Keeps the root password out of browser JavaScript.
 - Shows database readiness, command latency, record counts, and recent query telemetry.
+- Shows the latest AgentArmy doctor artifact when `tests/artifacts/doctor/latest.json` exists.
 - Builds a playful graph map from known proof types: `StoredObject`, `Chunk`, and `IngestJob`.
 - Lets you inspect graph nodes and run read-only SQL from the browser.
 
@@ -44,6 +45,9 @@ http://127.0.0.1:8787
 
 ```powershell
 npm run check
+node ..\..\tools\agentarmy-doctor.mjs --write-artifacts
 ```
 
 The cockpit is designed to render even when ArcadeDB is offline. In that case it shows offline gauges and keeps the UI usable.
+
+The `GET /api/doctor` endpoint reads the generated doctor artifact from the repo root. It does not read ArcadeDB credentials and is safe for local dashboard display.

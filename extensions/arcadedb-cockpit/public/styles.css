@@ -349,7 +349,7 @@ h1 {
   grid-column: 1 / -1;
   grid-row: 3;
   display: grid;
-  grid-template-columns: repeat(5, minmax(120px, 1fr)) minmax(260px, 1.4fr);
+  grid-template-columns: repeat(6, minmax(112px, 1fr)) minmax(260px, 1.4fr);
   gap: 12px;
   padding: 12px 14px 14px;
   border-top: 1px solid var(--line);
@@ -371,6 +371,20 @@ h1 {
   color: var(--lime);
   font-size: 26px;
   line-height: 1;
+}
+
+.gauge strong[data-status="pass"] { color: var(--lime); }
+.gauge strong[data-status="warn"],
+.gauge strong[data-status="skip"] { color: var(--cyan); }
+.gauge strong[data-status="fail"],
+.gauge strong[data-status="error"] { color: var(--red); }
+
+.doctor-gauge small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.25;
 }
 
 .ticker { overflow: hidden; }

@@ -48,7 +48,7 @@ jobs:
 
       - name: Upload Infrastructure Report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: infrastructure-report
           path: infrastructure-report.json
@@ -169,7 +169,7 @@ jobs:
 
       - name: Upload Bicep deployment output
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bicep-deployment-output
           path: deployment-output.json
@@ -270,7 +270,7 @@ jobs:
 
       - name: Upload API validation report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: api-validation-report
           path: api-validation-report.json
@@ -339,7 +339,7 @@ jobs:
           outputs: type=docker,dest=/tmp/image.tar
 
       - name: Upload Docker image
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: docker-image
           path: /tmp/image.tar
@@ -380,7 +380,7 @@ jobs:
           echo "registry=$REGISTRY" >> $GITHUB_OUTPUT
 
       - name: Download Docker image
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: docker-image
           path: /tmp
@@ -484,7 +484,7 @@ jobs:
 
       - name: Upload post-deployment report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: post-deploy-report
           path: post-deploy-report.json

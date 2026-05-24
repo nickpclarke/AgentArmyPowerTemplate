@@ -32,3 +32,7 @@ site/
 
 # Claude Code agent worktrees (created by isolation: "worktree" — not source files)
 .claude/worktrees/
+
+# Generated diagnostics artifacts
+tests/artifacts/doctor/*.json
+tests/artifacts/doctor/*.md

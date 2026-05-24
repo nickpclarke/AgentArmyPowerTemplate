@@ -16,6 +16,8 @@ const DEFAULT_DB = process.env.ARCADEDB_DATABASE || process.env.DB_NAME || 'know
 const ALLOW_MUTATION = String(process.env.ARCADEDB_ALLOW_MUTATION || 'false').toLowerCase() === 'true'
 const MAX_JSON_BODY_BYTES = Number(process.env.COCKPIT_MAX_JSON_BODY_BYTES || 1_000_000)
 const PUBLIC_DIR = path.join(__dirname, 'public')
+const REPO_ROOT = path.resolve(__dirname, '..', '..')
+const DOCTOR_ARTIFACT = path.join(REPO_ROOT, 'tests', 'artifacts', 'doctor', 'latest.json')
 const RECENT_LIMIT = 18
 
 if (!ARCADEDB_PASSWORD) {
@@ -91,6 +93,11 @@ async function routeApi(req, res, url) {
 
   if (req.method === 'GET' && url.pathname === '/api/telemetry') {
     sendJson(res, 200, telemetrySnapshot())
+    return
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/doctor') {
+    sendJson(res, 200, doctorSnapshot())
     return
   }
 
@@ -323,6 +330,35 @@ function telemetrySnapshot() {
   }
 }
 
+function doctorSnapshot() {
+  if (!existsSync(DOCTOR_ARTIFACT)) {
+    return {
+      available: false,
+      status: 'skip',
+      message: 'No doctor artifact found. Run node tools/agentarmy-doctor.mjs --write-artifacts from the repo root.',
+      artifact: path.relative(REPO_ROOT, DOCTOR_ARTIFACT).replace(/\\/g, '/'),
+    }
+  }
+  try {
+    const artifact = JSON.parse(readFileSync(DOCTOR_ARTIFACT, 'utf8'))
+    return {
+      available: true,
+      status: artifact.status || 'warn',
+      generatedAt: artifact.generated_at || null,
+      summary: artifact.summary || {},
+      artifact: path.relative(REPO_ROOT, DOCTOR_ARTIFACT).replace(/\\/g, '/'),
+      checks: Array.isArray(artifact.checks) ? artifact.checks.slice(0, 12) : [],
+    }
+  } catch (error) {
+    return {
+      available: false,
+      status: 'error',
+      message: `Doctor artifact could not be parsed: ${error.message}`,
+      artifact: path.relative(REPO_ROOT, DOCTOR_ARTIFACT).replace(/\\/g, '/'),
+    }
+  }
+}
+
 async function serveStatic(res, pathname) {
   const cleanPath = pathname === '/' ? '/index.html' : pathname
   const filePath = path.normalize(path.join(PUBLIC_DIR, cleanPath))
@@ -355,7 +391,8 @@ async function injectBootstrap(body) {
   } catch (error) {
     health = { ok: false, ready: false, error: String(error.message || error), target: ARCADEDB_URL }
   }
-  const bootstrap = `<script>window.__ARCADE_BOOTSTRAP__ = ${JSON.stringify({ config, graph, health }).replace(/</g, '\\u003c')}</script>`
+  const doctor = doctorSnapshot()
+  const bootstrap = `<script>window.__ARCADE_BOOTSTRAP__ = ${JSON.stringify({ config, graph, health, doctor }).replace(/</g, '\\u003c')}</script>`
   return text.replace('    <script type="module" src="/app.js"></script>', `    ${bootstrap}\n    <script type="module" src="/app.js"></script>`)
 }
 

@@ -1,0 +1,45 @@
+{
+  "schema_version": "agentarmy.layer.v1",
+  "examples": [
+    {
+      "system": "career-platform",
+      "layer": "web-ui",
+      "service": "career-web",
+      "repo_role": "spoke",
+      "runtime_kind": "static",
+      "contracts": ["career-contracts@0.3.0"],
+      "owns": ["browser UI", "frontend build", "UI smoke tests"],
+      "does_not_own": ["API implementation", "API database schema", "infra state", "personal agent settings"]
+    },
+    {
+      "system": "career-platform",
+      "layer": "api",
+      "service": "career-api",
+      "repo_role": "spoke",
+      "runtime_kind": "container",
+      "contracts": ["career-contracts@0.3.0"],
+      "owns": ["REST API", "domain services", "API database schema"],
+      "does_not_own": ["web UI", "mobile app", "infra state", "personal agent settings"]
+    },
+    {
+      "system": "career-platform",
+      "layer": "worker",
+      "service": "career-worker",
+      "repo_role": "spoke",
+      "runtime_kind": "worker",
+      "contracts": ["career-contracts@0.3.0"],
+      "owns": ["async jobs", "event consumers", "worker retry policy"],
+      "does_not_own": ["browser UI", "public API contract", "API-owned tables", "personal agent settings"]
+    },
+    {
+      "system": "career-platform",
+      "layer": "infra",
+      "service": "career-infra",
+      "repo_role": "spoke",
+      "runtime_kind": "iac",
+      "contracts": ["career-contracts@0.3.0"],
+      "owns": ["Terraform modules", "environment provisioning", "deployment wiring"],
+      "does_not_own": ["application source code", "runtime business logic", "provider API keys", "personal agent settings"]
+    }
+  ]
+}

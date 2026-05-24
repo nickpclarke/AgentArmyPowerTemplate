@@ -1,0 +1,66 @@
+name: Platform Diagnostics CLI
+
+on:
+  pull_request:
+    paths:
+      - "tools/agentarmy-doctor.mjs"
+      - "tools/doctor/**"
+      - "docs/platform-diagnostics-cli.md"
+      - "extensions/arcadedb-cockpit/**"
+      - "templates/service-manifest.example.json"
+      - ".github/workflows/platform-diagnostics-cli.yml"
+  push:
+    branches: [main]
+    paths:
+      - "tools/agentarmy-doctor.mjs"
+      - "tools/doctor/**"
+      - "docs/platform-diagnostics-cli.md"
+      - "extensions/arcadedb-cockpit/**"
+      - "templates/service-manifest.example.json"
+      - ".github/workflows/platform-diagnostics-cli.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  doctor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Syntax check doctor CLI
+        run: |
+          node --check tools/agentarmy-doctor.mjs
+          node --check tools/doctor/core.mjs
+          node --check tools/doctor/renderers.mjs
+          node --check tools/doctor/validate-artifact.mjs
+          node --check tools/doctor/adapters/repo.mjs
+          node --check tools/doctor/adapters/services.mjs
+          node --check tools/doctor/adapters/arcadedb.mjs
+          node --check tools/doctor/adapters/containers.mjs
+          node --check tools/doctor/adapters/contracts.mjs
+
+      - name: Syntax check ArcadeDB cockpit bridge
+        run: |
+          node --check extensions/arcadedb-cockpit/server.js
+          node --check extensions/arcadedb-cockpit/public/app.js
+
+      - name: Run offline-safe diagnostics
+        run: node tools/agentarmy-doctor.mjs --write-artifacts --format markdown --output tests/artifacts/doctor/summary.md
+
+      - name: Validate diagnostics artifact
+        run: node tools/doctor/validate-artifact.mjs tests/artifacts/doctor/latest.json
+
+      - name: Append diagnostics summary
+        run: cat tests/artifacts/doctor/latest.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload diagnostics artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentarmy-doctor
+          path: tests/artifacts/doctor/

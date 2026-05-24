@@ -96,6 +96,9 @@ nav:
     - Installation & Setup: setup.md
     - Onboarding Sanity Check: onboarding.md
     - Quick Start: quick-start.md
+    - Platform Diagnostics CLI: platform-diagnostics-cli.md
+    - Diagnostics Standards: diagnostics-standards.md
+    - Local Docker CI: local-docker-ci.md
     - Cloud Serving Landscape: cloud-serving.md
     - GCP Container Pipeline: gcp-cloud-run-pipeline.md
     - Using Codex: codex.md
@@ -119,6 +122,7 @@ nav:
     - Autonomous Review Loop: pr-review-loop.md
   - MECE Audit & Architecture:
     - N-Layer Architecture: n-layer-architecture.md
+    - N-Layer Spoke Rules: n-layer-spoke-rules.md
     - Audit Overview: mece-audit/MECE_AUDIT_SUMMARY.md
     - Audit Scorecard: mece-audit/AGENT_MECE_AUDIT_SCORECARD.md
     - Implementation Details: mece-audit/MECE_IMPLEMENTATION_SUMMARY.md

@@ -1,6 +1,7 @@
 const state = {
   config: null,
   graph: { nodes: [], edges: [], stats: {} },
+  doctor: null,
   selectedId: null,
   db: 'knowledge',
   motion: true,
@@ -22,6 +23,8 @@ const els = {
   recordGauge: document.querySelector('#recordGauge'),
   edgeGauge: document.querySelector('#edgeGauge'),
   typeGauge: document.querySelector('#typeGauge'),
+  doctorGauge: document.querySelector('#doctorGauge'),
+  doctorDetail: document.querySelector('#doctorDetail'),
   commandTicker: document.querySelector('#commandTicker'),
   graphCanvas: document.querySelector('#graphCanvas'),
   emptyState: document.querySelector('#emptyState'),
@@ -87,6 +90,7 @@ function bindEvents() {
       button.classList.add('is-active')
       if (button.dataset.view === 'query') els.queryPanel.scrollIntoView({ behavior: 'smooth', block: 'center' })
       if (button.dataset.view === 'metrics') document.querySelector('.instrument-deck').scrollIntoView({ behavior: 'smooth' })
+      if (button.dataset.view === 'doctor') document.querySelector('.doctor-gauge').scrollIntoView({ behavior: 'smooth' })
     })
   })
   els.graphCanvas.addEventListener('pointermove', (event) => {
@@ -109,6 +113,7 @@ async function loadConfig() {
 
 function applyBootstrap() {
   if (bootstrap.health) renderHealth(bootstrap.health)
+  if (bootstrap.doctor) renderDoctor(bootstrap.doctor)
   if (bootstrap.graph) {
     state.graph = normalizeGraph(bootstrap.graph)
     state.selectedId = state.graph.nodes[0]?.id || null
@@ -123,6 +128,7 @@ async function refreshAll() {
   await Promise.allSettled([refreshHealth(), refreshDatabases()])
   await refreshGraph()
   await refreshTelemetry()
+  await refreshDoctor()
 }
 
 async function refreshHealth() {
@@ -182,6 +188,27 @@ async function refreshTelemetry() {
   } catch {
     els.commandTicker.innerHTML = '<li>No telemetry yet</li>'
   }
+}
+
+async function refreshDoctor() {
+  try {
+    renderDoctor(await api('/api/doctor'))
+  } catch {
+    renderDoctor({ available: false, status: 'error', message: 'Doctor artifact unavailable' })
+  }
+}
+
+function renderDoctor(doctor) {
+  state.doctor = doctor
+  const status = doctor.status || 'skip'
+  els.doctorGauge.textContent = status.toUpperCase()
+  els.doctorGauge.dataset.status = status
+  if (!doctor.available) {
+    els.doctorDetail.textContent = doctor.message || 'No artifact'
+    return
+  }
+  const summary = doctor.summary || {}
+  els.doctorDetail.textContent = `pass ${summary.pass || 0} / warn ${summary.warn || 0} / fail ${summary.fail || 0}`
 }
 
 function normalizeGraph(graph) {

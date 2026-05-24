@@ -41,6 +41,14 @@ From the repository root:
 .\scripts\onboarding-check.ps1 -Owner YOUR_USERNAME -Repo AgentArmy -ProjectNumber 1
 ```
 
+For a broader local platform check, also run:
+
+```powershell
+node tools/agentarmy-doctor.mjs --write-artifacts
+```
+
+This writes normalized JSON and Markdown diagnostics under `tests/artifacts/doctor/` for handoff, CI, and optional dashboard display.
+
 If Windows blocks local scripts, use:
 
 ```powershell

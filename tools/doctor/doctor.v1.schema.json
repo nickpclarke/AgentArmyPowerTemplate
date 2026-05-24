@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentarmy.local/schemas/doctor.v1.schema.json",
+  "title": "AgentArmy Doctor Artifact",
+  "type": "object",
+  "required": ["schema_version", "run_id", "generated_at", "scope", "status", "summary", "checks", "artifacts"],
+  "properties": {
+    "schema_version": {
+      "const": "doctor.v1"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "status": {
+      "enum": ["pass", "warn", "fail", "skip", "error"]
+    },
+    "summary": {
+      "type": "object",
+      "required": ["pass", "warn", "fail", "skip", "error"],
+      "properties": {
+        "pass": { "type": "integer", "minimum": 0 },
+        "warn": { "type": "integer", "minimum": 0 },
+        "fail": { "type": "integer", "minimum": 0 },
+        "skip": { "type": "integer", "minimum": 0 },
+        "error": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "component", "status", "severity", "duration_ms", "message", "evidence", "redactions"],
+        "properties": {
+          "id": { "type": "string" },
+          "component": { "type": "string" },
+          "status": { "enum": ["pass", "warn", "fail", "skip", "error"] },
+          "severity": { "enum": ["required", "recommended", "informational"] },
+          "duration_ms": { "type": "integer", "minimum": 0 },
+          "message": { "type": "string" },
+          "evidence": { "type": "object" },
+          "redactions": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "path"],
+        "properties": {
+          "kind": { "type": "string" },
+          "path": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

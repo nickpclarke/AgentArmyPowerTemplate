@@ -8,6 +8,8 @@ AgentArmy adopts a universal **N-layer Hub & Spoke** architecture so teams can b
 
 This model is designed for **Contract-Driven Development (API-first)** and **runtime isolation** (MicroVM-compatible), so each spoke can run an independent AI session without cross-contamination.
 
+For the operational rules that keep these spokes safe in daily work, see [N-Layer Spoke Rules](n-layer-spoke-rules.md). That companion standard defines layer manifests, virtual/dev environment boundaries, agent settings rules, and cross-spoke coordination expectations.
+
 ---
 
 ## The N-Layer Spoke Model
