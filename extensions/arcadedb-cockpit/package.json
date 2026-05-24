@@ -1,0 +1,14 @@
+{
+  "name": "@agent-army/arcadedb-cockpit",
+  "version": "0.1.0",
+  "description": "Local ArcadeDB graph cockpit for AgentArmy experiments.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check public/app.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
