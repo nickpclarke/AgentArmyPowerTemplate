@@ -1,0 +1,35 @@
+{
+  "schema_version": "agentarmy.generator-target.v1",
+  "id": "middle-core",
+  "status": "active",
+  "description": "Generate middle-core C# contracts and prove the model runtime through API and Playwright browser tests.",
+  "canonical_model": "model/middle-core/model.yaml",
+  "generator_tools": [
+    "tools/modelgen/validate_middle_core.py",
+    "tools/modelgen/generate_middle_core.py"
+  ],
+  "generated_outputs": [
+    "templates/middle-core/generated/BusinessObjectTypes.g.cs",
+    "templates/middle-core/generated/ScenarioIds.g.cs",
+    "templates/middle-core/generated/DataObjects.g.cs",
+    "templates/middle-core/generated/StateMachineContracts.g.cs",
+    "templates/middle-core/generated/WorkflowContracts.g.cs",
+    "templates/middle-core/generated/ProjectionContracts.g.cs",
+    "templates/middle-core/generated/GeneratedModelValidator.g.cs",
+    "templates/middle-core/generated/ModelSummary.g.md",
+    "templates/middle-core/generated/model-runtime.fixture.json"
+  ],
+  "runtime_project": "templates/middle-core/MiddleCore.csproj",
+  "localhost_pipeline": "scripts/middle-core/Test-MiddleCoreLocalPipeline.ps1",
+  "human_demo_path": "/model/demo",
+  "playwright_spec": "tests/e2e/middle-core-scenario-lab.spec.js",
+  "acceptance": {
+    "model_id": "middle-core-runtime-prototype",
+    "business_object_count": 9,
+    "state_machine_count": 9,
+    "workflow_step_count": 4,
+    "success_graph_objects": 6,
+    "success_graph_edges": 5,
+    "failure_status_code": 400
+  }
+}

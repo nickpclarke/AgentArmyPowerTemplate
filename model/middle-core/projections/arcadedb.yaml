@@ -1,0 +1,9 @@
+schema_version: middle-core-projections.v1
+projection_set_id: arcadedb-projections
+projections:
+  - id: arcadedb-knowledge-source
+    target: arcadedb
+    provider_records: [RawObject, StoredFile, IngestJob]
+  - id: arcadedb-knowledge-chunk
+    target: arcadedb
+    provider_records: [Chunk, ImageObject, Embedding]

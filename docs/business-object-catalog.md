@@ -37,6 +37,8 @@ This keeps `middle-core` modern: it is an ontology-backed semantic service for d
 
 ## Service Role
 
+Use cases come first. The catalog exists to support concrete human and machine workflows such as curating knowledge, reviewing chunks, retrieving approved context, routing work, proving work completion, exercising capabilities, promoting MCP tools, and running recovery playbooks. See [Middle-Core Use Cases](middle-core-use-cases.md) for the actor-goal view that should drive future catalog fields.
+
 | Service family | What it owns | What it should avoid |
 |---|---|---|
 | ArcadeDB capability services | Ingest, raw object storage, async jobs, schema inventory, graph snapshots, vector search, guarded read-only query. | Product workflow decisions, MCP exposure, cross-service policy. |

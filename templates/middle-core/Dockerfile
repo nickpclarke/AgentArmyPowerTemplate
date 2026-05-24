@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 COPY templates/middle-core/MiddleCore.csproj ./MiddleCore.csproj
@@ -8,7 +8,7 @@ COPY templates/middle-core/ ./
 COPY templates/business-object-catalog.example.json ./catalog.json
 RUN dotnet publish ./MiddleCore.csproj --configuration Release --output /app/publish --no-restore
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 ENV ASPNETCORE_URLS=http://0.0.0.0:8001
 ENV BUSINESS_OBJECT_CATALOG=/app/catalog.json

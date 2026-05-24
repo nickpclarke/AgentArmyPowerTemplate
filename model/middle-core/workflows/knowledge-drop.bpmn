@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             id="middle-core-workflows"
+             targetNamespace="https://agentarmy.local/middle-core/workflows">
+  <process id="knowledge-drop" name="Knowledge Drop" isExecutable="false">
+    <startEvent id="knowledge-source-submitted" name="Knowledge Source Submitted" />
+    <task id="validate-source-policy" name="Validate Source Policy" />
+    <task id="land-raw-object" name="Land Raw Object" />
+    <task id="generate-knowledge-chunks" name="Generate Knowledge Chunks" />
+    <task id="assemble-ingest-evidence" name="Assemble Ingest Evidence" />
+    <endEvent id="knowledge-source-searchable" name="Knowledge Source Searchable" />
+    <sequenceFlow id="flow-1" sourceRef="knowledge-source-submitted" targetRef="validate-source-policy" />
+    <sequenceFlow id="flow-2" sourceRef="validate-source-policy" targetRef="land-raw-object" />
+    <sequenceFlow id="flow-3" sourceRef="land-raw-object" targetRef="generate-knowledge-chunks" />
+    <sequenceFlow id="flow-4" sourceRef="generate-knowledge-chunks" targetRef="assemble-ingest-evidence" />
+    <sequenceFlow id="flow-5" sourceRef="assemble-ingest-evidence" targetRef="knowledge-source-searchable" />
+  </process>
+</definitions>

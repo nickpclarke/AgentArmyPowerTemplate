@@ -1,0 +1,14 @@
+{
+  "name": "agentarmy",
+  "version": "1.0.0",
+  "description": "A GitHub repository template for AI-powered software development using coordinated agent workflows.",
+  "type": "module",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:middle-core": "playwright test tests/e2e/middle-core-scenario-lab.spec.js --project=chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^25.9.1"
+  }
+}

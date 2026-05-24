@@ -1,0 +1,17 @@
+{
+  "schema_version": "agentarmy.generator-target.v1",
+  "id": "backend-core",
+  "status": "planned",
+  "description": "Future target for provider-facing contracts, ArcadeDB schema/projection adapters, and backend contract tests.",
+  "canonical_model": null,
+  "generator_tools": [],
+  "generated_outputs": [],
+  "acceptance": {
+    "planned_outputs": [
+      "provider DTO contracts",
+      "ArcadeDB schema helpers",
+      "projection adapter test fixtures",
+      "OpenAPI drift checks"
+    ]
+  }
+}

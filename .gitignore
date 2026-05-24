@@ -10,11 +10,19 @@ extensions/arcadedb-cockpit/.env
 # Dependencies
 node_modules/
 
+# Playwright runtime output
+playwright-report/
+test-results/
+
 # Python build artifacts
 __pycache__/
 *.py[cod]
 *.egg-info/
 *.egg
+
+# .NET build artifacts
+bin/
+obj/
 
 # Pipeline runtime output (DuckDB files, parquet, dlt state)
 pipelines/data/

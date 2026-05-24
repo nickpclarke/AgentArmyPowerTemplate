@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             id="middle-core-decisions"
+             name="Middle Core Decisions"
+             namespace="https://agentarmy.local/middle-core/decisions">
+  <decision id="source-activation-policy" name="Source Activation Policy">
+    <description>Prototype decision reference. V1 validates the reference but does not execute DMN.</description>
+  </decision>
+</definitions>

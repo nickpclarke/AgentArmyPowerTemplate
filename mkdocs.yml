@@ -3,8 +3,6 @@ site_description: AI-powered software development template with coordinated Clau
 site_author: nickpclarke
 repo_url: https://github.com/nickpclarke/AgentArmy
 repo_name: AgentArmy
-repo_branches:
-  - main
 edit_uri: edit/main/docs/
 docs_dir: docs
 site_dir: site
@@ -59,7 +57,6 @@ plugins:
   - search:
       lang: en
       separator: '[\\s\\-,:!=\\[\\]()"/]+|(?<!\\w)(?=\\w)|(?!\\w)(?=\\w)'
-      min_search_length: 2
 
 markdown_extensions:
   - admonition
@@ -100,6 +97,8 @@ nav:
     - Diagnostics Standards: diagnostics-standards.md
     - ArcadeDB Secret Hardening: arcadedb-secret-hardening.md
     - Local Docker CI: local-docker-ci.md
+    - Playwright Browser Testing: playwright.md
+    - Generator Platform Tests: generator-platform-tests.md
     - Lifecycle Promotion Management: lifecycle-promotion-management.md
     - Azure Container Apps Dev Deploy: azure-container-apps-dev.md
     - Cloud Serving Landscape: cloud-serving.md
@@ -123,6 +122,10 @@ nav:
     - Postman Workspace: postman-workspace.md
     - Backend-Core Object Model: backend-core-object-model.md
     - Business Object Catalog: business-object-catalog.md
+    - Middle-Core Use Cases: middle-core-use-cases.md
+    - Middle-Core Ontology and Data Objects: middle-core-ontology-and-data-objects.md
+    - Middle-Core Runbooks and Playbooks: middle-core-runbooks-playbooks.md
+    - Middle-Core Model Runtime: middle-core-model-runtime.md
     - SAFe Framework: safe.md
     - Issue Conventions: issue-conventions.md
     - Human-in-the-Loop: hitl.md

@@ -1,5 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using MiddleCore.Generated;
+using MiddleCore.Runtime;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -8,6 +10,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.KebabCaseLower));
 });
 builder.Services.AddSingleton<BusinessObjectCatalogStore>();
+builder.Services.AddSingleton<IProjectionPort, FakeArcadeDbProjectionPort>();
+builder.Services.AddSingleton<KnowledgeDropScenarioRunner>();
 
 var app = builder.Build();
 
@@ -30,8 +34,15 @@ app.MapGet("/health", (BusinessObjectCatalogStore store) =>
 });
 
 app.MapGet("/catalog", (BusinessObjectCatalogStore store) => Results.Ok(store.Load()));
+app.MapGet("/model", () => Results.Ok(GeneratedModelValidator.Describe()));
+app.MapGet("/model/demo", () => Results.Content(ModelRuntimeDemo.Render(), "text/html; charset=utf-8"));
 app.MapGet("/objects", (BusinessObjectCatalogStore store) => Results.Ok(store.Load().ObjectTypes));
 app.MapGet("/scenarios", (BusinessObjectCatalogStore store) => Results.Ok(store.Load().Scenarios));
+app.MapGet("/model/scenarios/knowledge-drop/run", async (bool? disableLastHandler, KnowledgeDropScenarioRunner runner, CancellationToken cancellationToken) =>
+{
+    ScenarioRunResult result = await runner.RunAsync(disableLastHandler.GetValueOrDefault(), cancellationToken);
+    return result.Status == "passed" ? Results.Ok(result) : Results.BadRequest(result);
+});
 
 app.MapGet("/objects/{id}", (string id, BusinessObjectCatalogStore store) =>
 {
@@ -463,4 +474,297 @@ public static class CatalogExplorer
     }
 
     private static string Html(string value) => System.Net.WebUtility.HtmlEncode(value);
+}
+
+public static class ModelRuntimeDemo
+{
+    public static string Render()
+    {
+        return """
+        <!doctype html>
+        <html lang="en">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>middle-core scenario lab</title>
+          <style>
+            :root {
+              color-scheme: light dark;
+              --bg: #f4f7fb;
+              --panel: #ffffff;
+              --text: #172033;
+              --muted: #5b6472;
+              --line: #d7dde8;
+              --accent: #116a6b;
+              --accent-2: #8a4b18;
+              --good: #1f7a4d;
+              --bad: #a83b3b;
+              --soft: #e7f3f3;
+              --node: #fff8e9;
+            }
+            @media (prefers-color-scheme: dark) {
+              :root {
+                --bg: #0f131a;
+                --panel: #181f2a;
+                --text: #edf2f7;
+                --muted: #a8b2c1;
+                --line: #2e3848;
+                --accent: #67d3d1;
+                --accent-2: #f1b56c;
+                --good: #77d69f;
+                --bad: #ef8d8d;
+                --soft: #183033;
+                --node: #2a2519;
+              }
+            }
+            * { box-sizing: border-box; }
+            body {
+              margin: 0;
+              background: var(--bg);
+              color: var(--text);
+              font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            }
+            header {
+              padding: 28px clamp(18px, 4vw, 56px);
+              border-bottom: 1px solid var(--line);
+              background: var(--panel);
+            }
+            main {
+              padding: 24px clamp(18px, 4vw, 56px) 48px;
+              display: grid;
+              gap: 18px;
+            }
+            h1 { margin: 0 0 8px; font-size: clamp(2rem, 4vw, 3.5rem); letter-spacing: 0; }
+            h2, h3 { letter-spacing: 0; }
+            p { color: var(--muted); line-height: 1.55; }
+            button, a.button {
+              border: 1px solid var(--line);
+              border-radius: 8px;
+              padding: 10px 12px;
+              background: var(--soft);
+              color: var(--text);
+              font-weight: 800;
+              cursor: pointer;
+              text-decoration: none;
+            }
+            button.primary { background: var(--accent); color: white; border-color: var(--accent); }
+            .topline { color: var(--accent-2); font-size: .78rem; font-weight: 900; text-transform: uppercase; }
+            .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+            .summary {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+              gap: 10px;
+            }
+            .metric, .panel {
+              background: var(--panel);
+              border: 1px solid var(--line);
+              border-radius: 8px;
+              padding: 16px;
+            }
+            .metric strong { display: block; font-size: 1.8rem; }
+            .metric span, .kicker { color: var(--muted); font-size: .82rem; }
+            .layout {
+              display: grid;
+              grid-template-columns: minmax(300px, 1.35fr) minmax(280px, .65fr);
+              gap: 18px;
+            }
+            @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+            .steps { display: grid; gap: 8px; }
+            .step {
+              display: grid;
+              grid-template-columns: 28px 1fr auto;
+              gap: 10px;
+              align-items: center;
+              border: 1px solid var(--line);
+              border-radius: 8px;
+              padding: 10px;
+            }
+            .badge {
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              display: inline-grid;
+              place-items: center;
+              font-weight: 900;
+              color: white;
+              background: var(--muted);
+            }
+            .passed .badge { background: var(--good); }
+            .failed .badge { background: var(--bad); }
+            .status.passed { color: var(--good); font-weight: 900; }
+            .status.failed { color: var(--bad); font-weight: 900; }
+            .graph {
+              min-height: 430px;
+              overflow: auto;
+              background:
+                linear-gradient(90deg, color-mix(in srgb, var(--line) 34%, transparent) 1px, transparent 1px),
+                linear-gradient(color-mix(in srgb, var(--line) 34%, transparent) 1px, transparent 1px);
+              background-size: 28px 28px;
+            }
+            svg { width: 100%; min-width: 740px; height: 420px; }
+            .node rect {
+              fill: var(--node);
+              stroke: var(--accent);
+              stroke-width: 1.5;
+              rx: 8;
+            }
+            .node text { fill: var(--text); font-size: 12px; }
+            .edge { stroke: var(--accent); stroke-width: 1.5; marker-end: url(#arrow); }
+            .edge-label { fill: var(--muted); font-size: 11px; }
+            pre {
+              margin: 0;
+              white-space: pre-wrap;
+              overflow-wrap: anywhere;
+              color: var(--muted);
+              font-size: .82rem;
+            }
+          </style>
+        </head>
+        <body>
+          <header>
+            <div class="topline">middle-core model runtime</div>
+            <h1>Knowledge Drop Scenario Lab</h1>
+            <p>Run the generated model contract through the hand-authored runtime and inspect the graph, workflow steps, state-machine counts, and evidence pack.</p>
+            <div class="actions">
+              <button class="primary" id="runSuccess" type="button">Run success path</button>
+              <button id="runFailure" type="button">Run disabled-handler path</button>
+              <a class="button" href="/model" target="_blank" rel="noreferrer">Generated model JSON</a>
+              <a class="button" href="/model/scenarios/knowledge-drop/run" target="_blank" rel="noreferrer">Scenario JSON</a>
+            </div>
+          </header>
+          <main>
+            <section class="summary" aria-label="Runtime summary">
+              <div class="metric"><span>Model</span><strong id="modelId">...</strong></div>
+              <div class="metric"><span>Business objects</span><strong id="objectCount">0</strong></div>
+              <div class="metric"><span>State machines</span><strong id="stateMachineCount">0</strong></div>
+              <div class="metric"><span>Workflow steps</span><strong id="workflowStepCount">0</strong></div>
+              <div class="metric"><span>Scenario status</span><strong id="scenarioStatus">not run</strong></div>
+              <div class="metric"><span>Evidence</span><strong id="evidenceStatus">none</strong></div>
+            </section>
+            <section class="layout">
+              <article class="panel">
+                <div class="kicker">hypergraph</div>
+                <h2>Runtime Object Graph</h2>
+                <div class="graph" id="graphCanvas" aria-label="Knowledge drop graph"></div>
+              </article>
+              <aside class="panel">
+                <div class="kicker">workflow</div>
+                <h2>Step Evidence</h2>
+                <div class="steps" id="steps"></div>
+              </aside>
+            </section>
+            <section class="layout">
+              <article class="panel">
+                <div class="kicker">evidence pack</div>
+                <h2>Evidence Output</h2>
+                <pre id="evidenceJson">Run a scenario to create evidence.</pre>
+              </article>
+              <article class="panel">
+                <div class="kicker">raw result</div>
+                <h2>Inspectable Result</h2>
+                <pre id="rawJson">No run yet.</pre>
+              </article>
+            </section>
+          </main>
+          <script>
+            const positions = {
+              "decision-record": [70, 70],
+              "knowledge-source": [290, 70],
+              "knowledge-chunk": [520, 30],
+              "capability-exercise": [80, 260],
+              "evidence-pack": [320, 260]
+            };
+
+            async function loadModel() {
+              const model = await fetch("/model").then(response => response.json());
+              document.querySelector("#modelId").textContent = model.model_id;
+              document.querySelector("#objectCount").textContent = model.business_object_count;
+              document.querySelector("#stateMachineCount").textContent = model.state_machine_count;
+              document.querySelector("#workflowStepCount").textContent = model.workflow_step_count;
+            }
+
+            async function runScenario(disableLastHandler) {
+              const url = "/model/scenarios/knowledge-drop/run" + (disableLastHandler ? "?disableLastHandler=true" : "");
+              const response = await fetch(url);
+              const result = await response.json();
+              renderResult(result, response.ok);
+            }
+
+            function renderResult(result, ok) {
+              document.querySelector("#scenarioStatus").textContent = result.status;
+              document.querySelector("#scenarioStatus").className = result.status === "passed" ? "status passed" : "status failed";
+              document.querySelector("#evidenceStatus").textContent = result.evidence ? result.evidence.status : "none";
+              document.querySelector("#rawJson").textContent = JSON.stringify(result, null, 2);
+              document.querySelector("#evidenceJson").textContent = result.evidence ? JSON.stringify(result.evidence, null, 2) : "No evidence pack was produced because the scenario failed cleanly.";
+              renderSteps(result.steps || []);
+              renderGraph(result.graph || { objects: [], edges: [] });
+            }
+
+            function renderSteps(steps) {
+              document.querySelector("#steps").innerHTML = steps.map((step, index) => `
+                <div class="step ${step.status}">
+                  <span class="badge">${index + 1}</span>
+                  <div>
+                    <strong>${escapeHtml(step.step_id)}</strong>
+                    <div class="kicker">${escapeHtml(step.message)}</div>
+                  </div>
+                  <span class="status ${step.status}">${escapeHtml(step.status)}</span>
+                </div>
+              `).join("");
+            }
+
+            function renderGraph(graph) {
+              const counters = {};
+              const nodes = (graph.objects || []).map(object => {
+                const base = positions[object.object_type] || [80, 80];
+                const ordinal = counters[object.object_type] || 0;
+                counters[object.object_type] = ordinal + 1;
+                return { ...object, x: base[0] + ordinal * 38, y: base[1] + ordinal * 86 };
+              });
+              const byId = new Map(nodes.map(node => [node.id, node]));
+              const edges = (graph.edges || []).filter(edge => byId.has(edge.from_object_id) && byId.has(edge.to_object_id));
+              document.querySelector("#graphCanvas").innerHTML = `
+                <svg role="img" aria-label="Knowledge drop scenario graph" viewBox="0 0 760 420">
+                  <defs>
+                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                      <path d="M0,0 L0,6 L9,3 z" fill="currentColor"></path>
+                    </marker>
+                  </defs>
+                  ${edges.map(edge => edgeSvg(edge, byId)).join("")}
+                  ${nodes.map(nodeSvg).join("")}
+                </svg>`;
+            }
+
+            function edgeSvg(edge, byId) {
+              const from = byId.get(edge.from_object_id);
+              const to = byId.get(edge.to_object_id);
+              const x1 = from.x + 150;
+              const y1 = from.y + 32;
+              const x2 = to.x;
+              const y2 = to.y + 32;
+              const midX = (x1 + x2) / 2;
+              const midY = (y1 + y2) / 2 - 6;
+              return `<line class="edge" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line><text class="edge-label" x="${midX}" y="${midY}">${escapeHtml(edge.relationship_type)}</text>`;
+            }
+
+            function nodeSvg(node) {
+              return `<g class="node" transform="translate(${node.x},${node.y})">
+                <rect width="160" height="64"></rect>
+                <text x="10" y="22"><tspan font-weight="800">${escapeHtml(node.object_type)}</tspan></text>
+                <text x="10" y="43">${escapeHtml(node.id.slice(0, 24))}</text>
+              </g>`;
+            }
+
+            function escapeHtml(value) {
+              return String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[char]));
+            }
+
+            document.querySelector("#runSuccess").addEventListener("click", () => runScenario(false));
+            document.querySelector("#runFailure").addEventListener("click", () => runScenario(true));
+            loadModel().then(() => runScenario(false));
+          </script>
+        </body>
+        </html>
+        """;
+    }
 }

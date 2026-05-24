@@ -1,0 +1,17 @@
+{
+  "schema_version": "agentarmy.generator-target.v1",
+  "id": "frontend-core",
+  "status": "planned",
+  "description": "Future target for typed scenario view models, object cards, graph visualizers, and browser acceptance tests.",
+  "canonical_model": null,
+  "generator_tools": [],
+  "generated_outputs": [],
+  "acceptance": {
+    "planned_outputs": [
+      "typed UI read models",
+      "scenario lab views",
+      "graph visualization fixtures",
+      "Playwright user acceptance tests"
+    ]
+  }
+}
