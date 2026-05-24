@@ -31,9 +31,9 @@ jobs:
       DOCKER_SMOKE_IMAGE: agentarmy/local-smoke:${{ github.run_id }}
       DOCKER_SMOKE_CONTAINER: agentarmy-local-smoke-${{ github.run_id }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: "20"
 
@@ -96,7 +96,7 @@ jobs:
 
       - name: Upload smoke artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: local-docker-smoke
           path: |
