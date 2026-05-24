@@ -36,13 +36,13 @@ jobs:
           node-version: "20"
 
       - name: Verify Docker on local runner
-        shell: pwsh
+        shell: powershell
         run: |
           docker version
           docker compose version
 
       - name: Run compose smoke stack
-        shell: pwsh
+        shell: powershell
         run: |
           if (-not (Test-Path -LiteralPath "${{ inputs.compose_file }}")) {
             throw "Compose file not found: ${{ inputs.compose_file }}"
@@ -53,7 +53,7 @@ jobs:
 
       - name: Capture compose smoke logs
         if: always()
-        shell: pwsh
+        shell: powershell
         run: |
           docker compose -f "${{ inputs.compose_file }}" logs --no-color *> docker-compose-smoke.log
           docker compose -f "${{ inputs.compose_file }}" ps | Out-File -Encoding utf8 docker-compose-ps.txt
@@ -72,6 +72,6 @@ jobs:
 
       - name: Cleanup local Docker resources
         if: always()
-        shell: pwsh
+        shell: powershell
         run: docker compose -f "${{ inputs.compose_file }}" down --remove-orphans
         continue-on-error: true

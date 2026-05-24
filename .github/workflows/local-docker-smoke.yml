@@ -38,23 +38,23 @@ jobs:
           node-version: "20"
 
       - name: Verify Docker on local runner
-        shell: pwsh
+        shell: powershell
         run: |
           docker version
           docker compose version
 
       - name: Run offline diagnostics first
-        shell: pwsh
+        shell: powershell
         run: node tools/agentarmy-doctor.mjs --write-artifacts --format markdown --output tests/artifacts/doctor/summary.md
 
       - name: Build root Dockerfile smoke image
         if: ${{ inputs.compose_file == '' }}
-        shell: pwsh
+        shell: powershell
         run: docker build --pull --tag "$env:DOCKER_SMOKE_IMAGE" .
 
       - name: Run root Dockerfile smoke container
         if: ${{ inputs.compose_file == '' }}
-        shell: pwsh
+        shell: powershell
         run: |
           docker run --detach --name "$env:DOCKER_SMOKE_CONTAINER" --publish 127.0.0.1::8080 "$env:DOCKER_SMOKE_IMAGE"
           Start-Sleep -Seconds 5
@@ -69,7 +69,7 @@ jobs:
 
       - name: Run compose smoke stack
         if: ${{ inputs.compose_file != '' }}
-        shell: pwsh
+        shell: powershell
         run: |
           if (-not (Test-Path -LiteralPath "${{ inputs.compose_file }}")) {
             throw "Compose file not found: ${{ inputs.compose_file }}"
@@ -80,7 +80,7 @@ jobs:
 
       - name: Capture root smoke logs
         if: ${{ always() && inputs.compose_file == '' }}
-        shell: pwsh
+        shell: powershell
         run: |
           docker logs "$env:DOCKER_SMOKE_CONTAINER" *> docker-smoke.log
           docker ps --filter "name=$env:DOCKER_SMOKE_CONTAINER" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | Out-File -Encoding utf8 docker-smoke-ps.txt
@@ -88,7 +88,7 @@ jobs:
 
       - name: Capture compose smoke logs
         if: ${{ always() && inputs.compose_file != '' }}
-        shell: pwsh
+        shell: powershell
         run: |
           docker compose -f "${{ inputs.compose_file }}" logs --no-color *> docker-compose-smoke.log
           docker compose -f "${{ inputs.compose_file }}" ps | Out-File -Encoding utf8 docker-compose-ps.txt
@@ -109,7 +109,7 @@ jobs:
 
       - name: Cleanup local Docker resources
         if: always()
-        shell: pwsh
+        shell: powershell
         run: |
           if ("${{ inputs.compose_file }}" -ne "") {
             docker compose -f "${{ inputs.compose_file }}" down --remove-orphans
