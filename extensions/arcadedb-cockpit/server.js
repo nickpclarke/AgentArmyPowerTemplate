@@ -11,7 +11,8 @@ const PORT = Number(process.env.PORT || 8787)
 const HOST = process.env.HOST || '127.0.0.1'
 const ARCADEDB_URL = (process.env.ARCADEDB_URL || 'http://localhost:2480').replace(/\/+$/, '')
 const ARCADEDB_USER = process.env.ARCADEDB_USER || 'root'
-const ARCADEDB_PASSWORD = process.env.ARCADEDB_PASSWORD || ''
+const ARCADEDB_PASSWORD_RESULT = readArcadeDbPassword(process.env)
+const ARCADEDB_PASSWORD = ARCADEDB_PASSWORD_RESULT.value
 const DEFAULT_DB = process.env.ARCADEDB_DATABASE || process.env.DB_NAME || 'knowledge'
 const ALLOW_MUTATION = String(process.env.ARCADEDB_ALLOW_MUTATION || 'false').toLowerCase() === 'true'
 const MAX_JSON_BODY_BYTES = Number(process.env.COCKPIT_MAX_JSON_BODY_BYTES || 1_000_000)
@@ -20,8 +21,13 @@ const REPO_ROOT = path.resolve(__dirname, '..', '..')
 const DOCTOR_ARTIFACT = path.join(REPO_ROOT, 'tests', 'artifacts', 'doctor', 'latest.json')
 const RECENT_LIMIT = 18
 
+if (ARCADEDB_PASSWORD_RESULT.error) {
+  console.error('ARCADEDB_PASSWORD_FILE could not be read. Check the mounted secret path and file permissions.')
+  process.exit(1)
+}
+
 if (!ARCADEDB_PASSWORD) {
-  console.error('ARCADEDB_PASSWORD is required. Copy .env.example to .env and set your local ArcadeDB password.')
+  console.error('ArcadeDB password is required. Set ARCADEDB_PASSWORD_FILE to a mounted secret file, or set ARCADEDB_PASSWORD from a runtime secret.')
   process.exit(1)
 }
 
@@ -56,6 +62,7 @@ const server = createServer(async (req, res) => {
 server.listen(PORT, HOST, () => {
   console.log(`Arcade Cockpit listening at http://${HOST}:${PORT}`)
   console.log(`ArcadeDB target: ${ARCADEDB_URL} db=${DEFAULT_DB}`)
+  console.log(`ArcadeDB credential source: ${ARCADEDB_PASSWORD_RESULT.source}`)
 })
 
 async function routeApi(req, res, url) {
@@ -474,5 +481,31 @@ function loadEnv(filePath) {
     const key = trimmed.slice(0, index).trim()
     const value = trimmed.slice(index + 1).trim().replace(/^["']|["']$/g, '')
     if (!process.env[key]) process.env[key] = value
+  }
+}
+
+function readArcadeDbPassword(env) {
+  const filePath = String(env.ARCADEDB_PASSWORD_FILE || '').trim()
+  if (filePath) {
+    try {
+      return {
+        value: readFileSync(filePath, 'utf8').trim(),
+        source: 'ARCADEDB_PASSWORD_FILE',
+        error: null,
+      }
+    } catch (error) {
+      return {
+        value: '',
+        source: 'ARCADEDB_PASSWORD_FILE',
+        error: error.message,
+      }
+    }
+  }
+
+  const value = env.ARCADEDB_PASSWORD || ''
+  return {
+    value,
+    source: value ? 'ARCADEDB_PASSWORD' : 'unset',
+    error: null,
   }
 }

@@ -112,7 +112,7 @@ Dev container platform/spoke repos should use these resource boundaries:
 | Container App | One Container App per meaningful service boundary. |
 | Container App Environment | Shared by related Dev services that need the same network and observability plane. |
 | Identity | Prefer managed identity for runtime access from Container Apps to Azure resources. |
-| Secrets | Store runtime secrets in Key Vault or Container Apps secrets, not in repo YAML. |
+| Secrets | Store runtime secrets in Key Vault or Container Apps secrets, not in repo YAML. For ArcadeDB, prefer the `ARCADEDB_PASSWORD_FILE` runtime shape when secrets can be mounted as files. |
 
 Use image tags that identify the source:
 
@@ -216,6 +216,20 @@ Use it only when branch-triggered ACR Tasks are not ready yet. It is not the pre
 | `AZURE_DEV_SOURCE_BRANCH` | `azure-dev` |
 
 Use OIDC with `azure/login` for Azure-side workflows when GitHub Actions needs Azure control-plane access. For ACR Tasks watching a private GitHub repository, use the token ACR requires for the source webhook and rotate it regularly.
+
+## ArcadeDB Secret Handling
+
+ArcadeDB passwords must not be committed into spoke repos, workflow YAML, exported Postman files, or template examples.
+
+For Azure Dev workload containers:
+
+1. Store the password in Key Vault or a Container Apps secret.
+2. Grant access through managed identity where Key Vault is used.
+3. Inject the secret into the workload as `ARCADEDB_PASSWORD_FILE` when mounted secret files are available, or as `ARCADEDB_PASSWORD` when the platform only supports secret-backed environment variables.
+4. Keep the frontend credential-free; only backend/cockpit services should connect to ArcadeDB.
+5. Run authenticated smoke tests from a trusted network path when ArcadeDB is internal.
+
+See [ArcadeDB Secret Hardening](arcadedb-secret-hardening.md) for the cross-target standard.
 
 ## Deployment Gates
 

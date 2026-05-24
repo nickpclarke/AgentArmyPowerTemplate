@@ -5,6 +5,7 @@ This contract describes the backend capabilities the cockpit should eventually c
 ## Design Principles
 
 - Keep browser clients credential-free. ArcadeDB credentials stay server-side.
+- Prefer mounted runtime secrets with `ARCADEDB_PASSWORD_FILE`; accept `ARCADEDB_PASSWORD` only from ignored local files or runtime secret injection.
 - Prefer read-only navigation endpoints and make mutation opt-in.
 - Expose graph, document, vector, and instrumentation capabilities as product concepts, not raw database plumbing.
 - Keep query-language flexibility behind backend policy: ArcadeDB supports SQL plus graph-oriented languages through the HTTP command endpoint, but the cockpit should not need to know which language each backend capability uses.
@@ -156,6 +157,7 @@ Returns recent command timings, error counts, sampled query history, and databas
 
 - Mutating SQL requires an explicit environment flag and should be logged.
 - Raw ArcadeDB credentials never appear in frontend responses.
+- Diagnostics and cockpit logs may report whether credentials came from `ARCADEDB_PASSWORD_FILE` or `ARCADEDB_PASSWORD`, but never the value.
 - Query endpoint rejects multi-statement payloads unless a trusted admin mode is enabled.
 - Traversal and graph endpoints enforce limits to avoid runaway graph expansion.
 - Vector endpoints never require the browser to send provider keys.
