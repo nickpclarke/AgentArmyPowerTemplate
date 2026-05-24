@@ -48,10 +48,40 @@ This keeps the platform playful and powerful: every new capability should have a
 
 The current template includes a C#/.NET `middle-core` container starter under `templates/middle-core/`. It exposes catalog, object, scenario, and health read endpoints over the business-object catalog while keeping the JavaScript catalog CLI as local AgentArmy tooling.
 
+## Ontology-Backed Business Objects
+
+Business objects should be derived from the supporting ontology. They are not just service DTOs, database records, or convenient nouns.
+
+The ontology is the platform's language for describing the phenomena of activity: work being routed, knowledge becoming searchable, evidence proving completion, decisions changing state, capabilities being exercised, and scenarios becoming safe tools. `middle-core` should use that ontology to connect platform behavior to the people and agents the system serves.
+
+Model business objects through this chain:
+
+```text
+persona -> goal -> use case -> activity -> phenomenon -> ontology concept -> business object -> provider projection
+```
+
+Rules:
+
+- Start with the target persona and goal before naming a business object.
+- Use cases describe why the platform needs to observe or change something.
+- Activities describe what happens in the platform.
+- Phenomena describe what becomes true, visible, measurable, or actionable.
+- Ontology concepts give those phenomena stable names and relationships.
+- Business objects are versioned projections of ontology concepts for APIs, UI, diagnostics, scenarios, and MCP tools.
+- Provider records, such as ArcadeDB vertices, GitHub issues, doctor artifacts, or Postman collections, are implementation projections behind the ontology.
+
+This principle keeps the architecture from drifting into old-school "business layer over tables." `middle-core` should be a semantic and operational alignment service: it explains platform activity in terms of personas, goals, use cases, evidence, and safe tool behavior.
+
 ## Domain Map
 
 ```mermaid
 flowchart LR
+    Persona["Persona"] --> Goal["Goal"]
+    Goal --> UseCase["Use Case"]
+    UseCase --> Activity["Activity"]
+    Activity --> Phenomenon["Phenomenon"]
+    Phenomenon --> OntologyConcept["Ontology Concept"]
+    OntologyConcept --> BusinessObject["Business Object"]
     WorkItem["Work Item"] --> RoutingDecision["Routing Decision"]
     RoutingDecision --> AgentPod["Agent Pod"]
     AgentPod --> Agent["Agent"]
@@ -74,7 +104,7 @@ flowchart LR
     ScenarioRun --> DiagnosticRun
     Scenario --> McpToolBinding["MCP Tool Binding"]
     PlatformCapability --> Integration
-    BusinessObject["Business Object"] --> Scenario
+    BusinessObject --> Scenario
     BusinessObject --> EvidenceArtifact
     BusinessObject --> McpToolBinding
 ```
@@ -239,7 +269,7 @@ Current ArcadeDB capability candidates:
 
 ### Business Object
 
-Business objects are the middle layer between provider mechanics and platform orchestration. They are the nouns a user, console, scenario, or MCP tool can understand without knowing whether the underlying implementation is ArcadeDB, GitHub Projects, Postman, a doctor artifact, or a future provider.
+Business objects are ontology-backed projections between provider mechanics and platform orchestration. They are the nouns a user, console, scenario, or MCP tool can understand without knowing whether the underlying implementation is ArcadeDB, GitHub Projects, Postman, a doctor artifact, or a future provider.
 
 Core fields:
 
@@ -255,6 +285,8 @@ Core fields:
 | `summary` | Small, safe read model for cards, search results, and tool responses. |
 | `relationships` | Links to other business objects. |
 | `evidenceRefs` | Diagnostics, artifacts, or scenario runs that prove this object is current. |
+| `ontologyConceptId` | Stable ontology concept this object projects. |
+| `personaGoalRefs` | Personas and goals whose use cases this object supports. |
 
 Rules:
 
@@ -263,6 +295,7 @@ Rules:
 - Scenarios should consume and emit business objects where possible.
 - MCP tools should prefer business-object inputs and outputs over provider-specific inputs.
 - A business object can have multiple projections: API response, graph node, UI card, diagnostic evidence, and MCP tool output.
+- A business object should trace back to at least one ontology concept, use case, persona, and goal before it becomes a shared platform contract.
 
 Initial business object candidates:
 

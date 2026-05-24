@@ -4,6 +4,37 @@ The business object catalog is the first functional slice of the `middle-core` v
 
 `middle-core` should be a deployable core container that sits between `backend-core` provider capabilities and the platform operational APIs. It is not a nostalgic three-tier entity layer. Its job is to hold semantic contracts, scenario definitions, safety policy, evidence expectations, and future MCP readiness for reusable platform workflows.
 
+## Ontology Principle
+
+Business objects should be understood through the supporting ontology, not as isolated records.
+
+The ontology gives the platform a shared language for describing the phenomena the system cares about: work being routed, knowledge being landed, evidence being assembled, decisions being made, capabilities being exercised, and tools becoming safe enough for agents to use. Those phenomena become observable through activities. Activities become useful through use cases. Use cases matter because they support target personas in achieving their goals.
+
+The modeling chain is:
+
+```text
+persona -> goal -> use case -> activity -> phenomenon -> ontology concept -> business object -> provider projection
+```
+
+This is the basic rule for `middle-core`:
+
+- a business object should name an ontology concept,
+- the concept should describe a phenomenon or state change the platform needs to observe,
+- the phenomenon should appear in one or more activities,
+- each activity should support a real use case,
+- each use case should map to a target persona and goal,
+- provider records should remain projections behind that meaning, not the meaning itself.
+
+Example:
+
+| Persona | Goal | Use case | Activity | Phenomenon | Business object |
+|---|---|---|---|---|---|
+| Platform operator | Know whether a new ArcadeDB capability is healthy and safe to expose. | Run a capability exercise and inspect proof. | Execute `schema-scout`, collect diagnostics, inspect graph/schema output. | Capability health has been observed and evidenced. | `capability-exercise`, `evidence-pack`, `knowledge-graph-snapshot` |
+| Agent orchestrator | Route work and prove the result without leaking private details. | Assign a work packet to a specialist pod and require gates. | Evaluate routing policy, assign pod, attach diagnostics. | Work moved from intent to auditable execution. | `work-packet`, `decision-record`, `evidence-pack` |
+| Agent/tool consumer | Ask for safe knowledge context without knowing ArcadeDB internals. | Run semantic search and inspect related graph context. | Query, retrieve chunks, project neighboring nodes. | Knowledge relevance has been discovered and bounded. | `knowledge-source`, `knowledge-chunk`, `knowledge-graph-snapshot` |
+
+This keeps `middle-core` modern: it is an ontology-backed semantic service for describing platform activities and their evidence, not a storage-shaped business-logic bucket.
+
 ## Service Role
 
 | Service family | What it owns | What it should avoid |

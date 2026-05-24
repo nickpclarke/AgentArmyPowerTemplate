@@ -70,6 +70,7 @@ The business-object layer can deploy as `middle-core`: a separate core container
 1. Inspect the current API contract, diagnostics docs, routing docs, roadmap, board conventions, and service manifest.
 2. Create a backend-core domain model document that covers:
    - intended platform goal,
+   - ontology-backed business-object principle,
    - aggregate model,
    - business rules,
    - workflow policies,
@@ -130,3 +131,4 @@ For this pass, validation should prove the new documentation can be rendered and
 - Treat `middle-core` as the deployable home for business-object contracts, scenario contracts, and meta-service projections. It should not own raw ArcadeDB storage; it composes `backend-core` capability services and platform operational services.
 - Use a typed service implementation for deployable `middle-core`. The repo-local catalog CLI can stay JavaScript because it follows AgentArmy's dependency-light tooling pattern, but the container starter is C#/.NET with records, enums, and nullable checks.
 - Add a local deployment script for reviewers so `middle-core` can be built, run, and smoked on localhost before promotion into a standalone repo.
+- Business objects should be derived through the supporting ontology: persona goals lead to use cases, use cases describe activities, activities reveal phenomena, phenomena are named as ontology concepts, and business objects become versioned projections of those concepts.
