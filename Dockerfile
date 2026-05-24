@@ -1,5 +1,5 @@
 # Multi-stage build for AgentArmy
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 WORKDIR /build
 
@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y \
 
 # Copy requirements if they exist
 COPY requirements.txt* ./
-RUN if [ -f requirements.txt ]; then pip install --user -r requirements.txt; fi
+RUN mkdir -p /root/.local \
+    && if [ -f requirements.txt ]; then pip install --user -r requirements.txt; fi
 
 # Runtime stage
 FROM python:3.11-slim
