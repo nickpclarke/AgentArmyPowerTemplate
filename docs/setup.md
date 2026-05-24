@@ -338,6 +338,8 @@ See [AgentArmy Onboarding Sanity Check](onboarding.md) for the full checklist an
 
 `.github/workflows/azure-deploy-pipeline.yml` validates and deploys the Azure side of a spoke (Bicep infrastructure, Container Registry, Key Vault, Container Apps). It runs **validation on every PR to `main`** and the **full deploy on push to `main`**. If you do not use Azure you can delete this workflow — but note that until its secrets are set, the **Validate Azure Infrastructure** check fails red on every PR.
 
+For lifecycle CI/CD that starts on the trusted local Docker host and promotes to cloud Dev builds, use [Lifecycle Promotion Management](lifecycle-promotion-management.md). For the Azure implementation, use [Azure Container Apps Dev Deploy](azure-container-apps-dev.md), where the local Docker gate promotes an ACR-watched Dev branch.
+
 > Set all of the following under **Settings → Secrets and variables → Actions** (same place as `PROJECT_TOKEN`).
 
 ### Secrets used by the pipeline

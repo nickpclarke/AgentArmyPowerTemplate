@@ -99,6 +99,8 @@ nav:
     - Platform Diagnostics CLI: platform-diagnostics-cli.md
     - Diagnostics Standards: diagnostics-standards.md
     - Local Docker CI: local-docker-ci.md
+    - Lifecycle Promotion Management: lifecycle-promotion-management.md
+    - Azure Container Apps Dev Deploy: azure-container-apps-dev.md
     - Cloud Serving Landscape: cloud-serving.md
     - GCP Container Pipeline: gcp-cloud-run-pipeline.md
     - Using Codex: codex.md
@@ -116,6 +118,7 @@ nav:
     - Board Manager Extension: board-manager.md
   - Coordination & Planning:
     - GitHub Projects v2: github-projects.md
+    - Postman Workspace: postman-workspace.md
     - SAFe Framework: safe.md
     - Issue Conventions: issue-conventions.md
     - Human-in-the-Loop: hitl.md

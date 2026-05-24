@@ -211,6 +211,8 @@ The AgentArmy doctor CLI should eventually read `.agent/layer.json` and include 
 
 Container spokes may copy the optional local Docker smoke workflow from `templates/local-docker-ci/`. That workflow should stay manual-only, run on a trusted `docker-local` self-hosted runner, and publish doctor artifacts plus container logs for handoff.
 
+Container spokes that participate in full CI/CD should also follow [Lifecycle Promotion Management](lifecycle-promotion-management.md). In that model, the local Docker gate is a first-class lifecycle gate: it validates the merged source, runs CLI/smoke tests, and promotes only the Dev source branch consumed by the cloud build lane.
+
 ## What Not To Do
 
 - Do not split a cohesive bounded context into many repos only because containers are available.

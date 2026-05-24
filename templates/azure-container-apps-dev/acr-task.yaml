@@ -1,0 +1,21 @@
+version: v1.1.0
+
+steps:
+  - id: build
+    build: >
+      -t {{.Run.Registry}}/{{.Values.imageRepository}}:{{.Run.Commit}}
+      -t {{.Run.Registry}}/{{.Values.imageRepository}}:dev-{{.Run.ID}}
+      -f {{.Values.dockerfile}}
+      {{.Values.context}}
+
+  - id: smoke
+    cmd: "{{.Run.Registry}}/{{.Values.imageRepository}}:{{.Run.Commit}}"
+    detach: true
+
+  - id: push-commit
+    push:
+      - "{{.Run.Registry}}/{{.Values.imageRepository}}:{{.Run.Commit}}"
+
+  - id: push-run
+    push:
+      - "{{.Run.Registry}}/{{.Values.imageRepository}}:dev-{{.Run.ID}}"

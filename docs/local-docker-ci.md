@@ -1,8 +1,8 @@
 # Local Docker CI
 
-Local Docker CI is the optional, cost-conscious path for running container smoke tests on a trusted host you control. It complements the hosted `Platform Diagnostics CLI` workflow: hosted CI proves the template and offline diagnostics, while this workflow proves that local Docker can build and run the current repository or a declared spoke stack.
+Local Docker CI is the optional, cost-conscious path for running container smoke tests on a trusted host you control. In AgentArmy, it proves the host/runner path and supplies templates. In platform and spoke workload repos, it proves real container builds and smoke tests.
 
-Use this lane for development proof, spoke readiness, and pre-production smoke checks. Do not use it for arbitrary untrusted pull request code.
+Use this lane for development proof, platform/spoke readiness, and pre-production smoke checks. Do not use it for arbitrary untrusted pull request code.
 
 ## When To Use It
 
@@ -66,14 +66,14 @@ You can also run the workflow manually with `force=true` when testing runner set
 
 ## Smoke Modes
 
-The workflow has two modes.
+The reusable workflow template has two modes for workload repos.
 
 | Mode | Trigger | Purpose |
 |---|---|---|
-| Root Dockerfile | Leave `compose_file` blank. | Build the repository `Dockerfile`, run it, and request `README.md` from the temporary container. |
+| Single Dockerfile | Leave `compose_file` blank. | Build the workload repository `Dockerfile` and run a service-specific smoke command. |
 | Compose stack | Set `compose_file`, for example `compose.yaml`. | Run a spoke's compose stack, then execute strict diagnostics against the live stack. |
 
-The root mode exists so AgentArmy can prove the local Docker path without pretending to be a product app. Spoke repositories should prefer the compose mode once they own real services.
+AgentArmy itself is not a product workload and should not be treated as a platform container. Platform/spoke repositories should copy the template and wire their own Dockerfile, compose stack, and smoke commands.
 
 ## Cost Controls
 
@@ -113,7 +113,7 @@ Rules:
 
 ## Spoke Repository Pattern
 
-Each container spoke should commit:
+Each container-producing platform/spoke repo should commit:
 
 ```text
 .agent/layer.json
@@ -165,3 +165,18 @@ Hosted CI remains the default proof path:
 ```
 
 Use hosted CI for offline-safe template checks. Use local Docker CI only when a container runtime or local dependency materially improves confidence.
+
+## Relationship To Lifecycle Promotion
+
+When a platform/spoke workload needs full lifecycle CI/CD, local Docker CI becomes the first promotion gate. It proves the merged source locally, then promotes the configured Dev source branch for the cloud build lane. AgentArmy template development uses a simpler `local -> main` track and does not build workload containers.
+
+Use:
+
+```text
+docs/lifecycle-promotion-management.md
+docs/azure-container-apps-dev.md
+templates/lifecycle-promotion/
+templates/azure-container-apps-dev/
+```
+
+Local Docker CI proves the branch on the trusted host. Azure ACR Tasks or another cloud build service builds the shared Dev image from the promoted source ref.

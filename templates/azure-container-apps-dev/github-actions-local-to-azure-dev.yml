@@ -1,0 +1,123 @@
+name: Azure Container Apps Dev Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Optional image tag. Defaults to the commit SHA."
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: azure-container-apps-dev-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-dev:
+    runs-on: [self-hosted, docker-local]
+    environment: azure-dev
+    timeout-minutes: 30
+    env:
+      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      AZURE_RESOURCE_GROUP_DEV: ${{ vars.AZURE_RESOURCE_GROUP_DEV }}
+      AZURE_ACR_NAME_DEV: ${{ vars.AZURE_ACR_NAME_DEV }}
+      AZURE_CONTAINER_APP_DEV: ${{ vars.AZURE_CONTAINER_APP_DEV }}
+      AGENTARMY_SERVICE_NAME: ${{ vars.AGENTARMY_SERVICE_NAME }}
+      IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Verify required variables
+        shell: powershell
+        run: |
+          $required = @(
+            "AZURE_SUBSCRIPTION_ID",
+            "AZURE_TENANT_ID",
+            "AZURE_CLIENT_ID",
+            "AZURE_RESOURCE_GROUP_DEV",
+            "AZURE_ACR_NAME_DEV",
+            "AZURE_CONTAINER_APP_DEV",
+            "AGENTARMY_SERVICE_NAME"
+          )
+          foreach ($name in $required) {
+            if (-not [Environment]::GetEnvironmentVariable($name)) {
+              throw "Missing required variable: $name"
+            }
+          }
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify local runner tools
+        shell: powershell
+        run: |
+          docker version
+          docker compose version
+          az version
+
+      - name: Run AgentArmy diagnostics
+        shell: powershell
+        run: node tools/agentarmy-doctor.mjs --write-artifacts --format markdown --output tests/artifacts/doctor/summary.md
+
+      - name: Build and push image
+        shell: powershell
+        run: |
+          $acr = az acr show --name "$env:AZURE_ACR_NAME_DEV" --query loginServer -o tsv
+          $image = "$acr/$env:AGENTARMY_SERVICE_NAME`:$env:IMAGE_TAG"
+          "IMAGE=$image" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+          az acr login --name "$env:AZURE_ACR_NAME_DEV"
+          docker build --pull --tag "$image" .
+          docker push "$image"
+
+      - name: Deploy image to Azure Container Apps Dev
+        shell: powershell
+        run: |
+          $suffix = ($env:IMAGE_TAG.ToLowerInvariant() -replace "[^a-z0-9-]", "-").Trim("-")
+          if ($suffix.Length -gt 43) {
+            $suffix = $suffix.Substring(0, 43).Trim("-")
+          }
+          if (-not $suffix) {
+            $suffix = "run"
+          }
+
+          az containerapp update `
+            --resource-group "$env:AZURE_RESOURCE_GROUP_DEV" `
+            --name "$env:AZURE_CONTAINER_APP_DEV" `
+            --image "$env:IMAGE" `
+            --revision-suffix "dev-$suffix-${{ github.run_id }}-${{ github.run_attempt }}"
+
+      - name: Capture Azure Dev deployment summary
+        if: always()
+        shell: powershell
+        run: |
+          az containerapp show `
+            --resource-group "$env:AZURE_RESOURCE_GROUP_DEV" `
+            --name "$env:AZURE_CONTAINER_APP_DEV" `
+            --query "{name:name,latestRevision:properties.latestRevisionName,fqdn:properties.configuration.ingress.fqdn,provisioningState:properties.provisioningState}" `
+            --output json | Out-File -Encoding utf8 azure-container-app-dev.json
+
+      - name: Upload deployment artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: azure-container-apps-dev
+          path: |
+            tests/artifacts/doctor/
+            azure-container-app-dev.json
+          if-no-files-found: ignore

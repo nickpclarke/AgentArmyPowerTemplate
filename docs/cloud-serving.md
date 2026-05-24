@@ -167,3 +167,9 @@ These features are tracked as GitHub Issues on the project board:
 - **CI/CD workflow templates** — reusable `deploy-gcp.yml`, `deploy-aws.yml`, `deploy-vercel.yml` for spoke repos
 - **LLM provider abstraction layer** — shared wrapper library for RT2 Play 5
 - **Cloud-native CI/CD research spike** — GCP Cloud Build/Deploy vs AWS CodePipeline vs GitHub Actions evaluation
+
+## Azure Dev Container Lane
+
+For Azure-first spoke development, use [Azure Container Apps Dev Deploy](azure-container-apps-dev.md). It pairs a trusted local PC or self-hosted runner with Azure Container Registry and Azure Container Apps Dev, while keeping production promotion as a separate environment-gated workflow.
+
+For multi-cloud lifecycle routing, use [Lifecycle Promotion Management](lifecycle-promotion-management.md). It defines the local Docker gate and target-adapter pattern that can route a spoke to Azure Container Apps, GCP Cloud Run, Vertex AI Agent Engine, or future runtime targets.
