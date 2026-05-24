@@ -108,6 +108,7 @@ Rules:
 - prefer `workflow_dispatch` or protected environments for local Docker jobs
 - keep runner workspaces outside user profile secrets
 - keep `.env`, `.env.local`, provider keys, and personal agent settings uncommitted
+- prefer mounted secret files such as `ARCADEDB_PASSWORD_FILE` over plaintext password environment variables inside Compose stacks
 - never mount the host Docker socket into untrusted containers
 - avoid using your normal interactive admin account as the runner service identity
 
@@ -136,6 +137,8 @@ templates/local-docker-ci/compose.smoke.example.yml
 ```
 
 Spokes should update `agentarmy.services.json` so the doctor CLI knows which frontend, backend, database, or worker checks are required during strict local Docker runs.
+
+When a local smoke stack needs ArcadeDB, use Compose secrets and point `ARCADEDB_PASSWORD_FILE` at the mounted file. See [ArcadeDB Secret Hardening](arcadedb-secret-hardening.md) for the shared rule set.
 
 ## Validation
 

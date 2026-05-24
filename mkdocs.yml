@@ -98,6 +98,7 @@ nav:
     - Quick Start: quick-start.md
     - Platform Diagnostics CLI: platform-diagnostics-cli.md
     - Diagnostics Standards: diagnostics-standards.md
+    - ArcadeDB Secret Hardening: arcadedb-secret-hardening.md
     - Local Docker CI: local-docker-ci.md
     - Lifecycle Promotion Management: lifecycle-promotion-management.md
     - Azure Container Apps Dev Deploy: azure-container-apps-dev.md

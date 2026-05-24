@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fetchJson, makeCheck, strictStatus, timedCheck } from '../core.mjs'
 
@@ -8,7 +8,8 @@ export const arcadedbAdapter = {
     const url = normalizeUrl(context.env.ARCADEDB_URL || 'http://localhost:2480')
     const db = context.env.ARCADEDB_DATABASE || context.env.DB_NAME || 'knowledge'
     const user = context.env.ARCADEDB_USER || 'root'
-    const password = context.env.ARCADEDB_PASSWORD || ''
+    const passwordResult = readArcadeDbPassword(context.env)
+    const password = passwordResult.value
     const authHeader = password
       ? { Authorization: `Basic ${Buffer.from(`${user}:${password}`).toString('base64')}` }
       : {}
@@ -45,17 +46,38 @@ export const arcadedbAdapter = {
       }
     }))
 
+    if (passwordResult.error) {
+      checks.push(makeCheck({
+        id: 'arcadedb.credentials',
+        component: 'arcadedb',
+        status: strictStatus(context, 'warn'),
+        severity: 'recommended',
+        message: 'ArcadeDB password file could not be read; authenticated schema checks skipped',
+        evidence: { env: 'ARCADEDB_PASSWORD_FILE' },
+      }))
+      return checks
+    }
+
     if (!password) {
       checks.push(makeCheck({
         id: 'arcadedb.credentials',
         component: 'arcadedb',
         status: strictStatus(context, 'skip'),
         severity: 'recommended',
-        message: 'ARCADEDB_PASSWORD is not set; authenticated schema checks skipped',
-        evidence: { env: 'ARCADEDB_PASSWORD' },
+        message: 'ArcadeDB password is not set; authenticated schema checks skipped',
+        evidence: { accepted_env: ['ARCADEDB_PASSWORD_FILE', 'ARCADEDB_PASSWORD'] },
       }))
       return checks
     }
+
+    checks.push(makeCheck({
+      id: 'arcadedb.credentials',
+      component: 'arcadedb',
+      status: 'pass',
+      severity: 'recommended',
+      message: `ArcadeDB credentials loaded from ${passwordResult.source}`,
+      evidence: { source: passwordResult.source },
+    }))
 
     checks.push(await timedCheck({
       id: 'arcadedb.databases',
@@ -101,4 +123,30 @@ export const arcadedbAdapter = {
 
 function normalizeUrl(value) {
   return String(value).replace(/\/+$/, '')
+}
+
+function readArcadeDbPassword(env) {
+  const filePath = String(env.ARCADEDB_PASSWORD_FILE || '').trim()
+  if (filePath) {
+    try {
+      return {
+        value: readFileSync(filePath, 'utf8').trim(),
+        source: 'ARCADEDB_PASSWORD_FILE',
+        error: null,
+      }
+    } catch (error) {
+      return {
+        value: '',
+        source: 'ARCADEDB_PASSWORD_FILE',
+        error: error.message,
+      }
+    }
+  }
+
+  const value = env.ARCADEDB_PASSWORD || ''
+  return {
+    value,
+    source: value ? 'ARCADEDB_PASSWORD' : 'unset',
+    error: null,
+  }
 }

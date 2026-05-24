@@ -132,6 +132,7 @@ When no manifest exists, frontend and backend checks are skipped in normal mode 
 The ArcadeDB adapter should reuse the current cockpit contract:
 
 - Keep database credentials outside browser JavaScript and rendered pages.
+- Prefer `ARCADEDB_PASSWORD_FILE` for mounted runtime secrets; accept `ARCADEDB_PASSWORD` only when injected by a runtime secret channel.
 - Default to read-only probes.
 - Redact secrets and connection strings in all outputs.
 - Enforce limits on schema, graph, query, and traversal checks.
@@ -140,6 +141,8 @@ The ArcadeDB adapter should reuse the current cockpit contract:
 The existing cockpit can later read `tests/artifacts/doctor/latest.json` or a narrower `arcadedb.json` export to display CLI evidence without owning every probe directly.
 
 The local ArcadeDB cockpit now exposes `GET /api/doctor`, which returns the latest doctor artifact when `tests/artifacts/doctor/latest.json` exists. This keeps the cockpit credential-free while still letting it show development diagnostics.
+
+See [ArcadeDB Secret Hardening](arcadedb-secret-hardening.md) for the shared secret handling standard across local Docker, GitHub automation, and cloud workload targets.
 
 ## Standards Checklist
 
