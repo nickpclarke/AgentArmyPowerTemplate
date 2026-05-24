@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python scripts/mempalace_hook.py --hook session-start --harness claude-code",
+            "command": "python \"$CLAUDE_PROJECT_DIR/scripts/mempalace_hook.py\" --hook session-start --harness claude-code",
             "timeout": 30,
             "statusMessage": "Loading memories from MemPalace..."
           }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python scripts/mempalace_hook.py --hook stop --harness claude-code",
+            "command": "python \"$CLAUDE_PROJECT_DIR/scripts/mempalace_hook.py\" --hook stop --harness claude-code",
             "timeout": 60,
             "statusMessage": "Saving memories to MemPalace..."
           }
@@ -29,7 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python scripts/mempalace_hook.py --hook precompact --harness claude-code",
+            "command": "python \"$CLAUDE_PROJECT_DIR/scripts/mempalace_hook.py\" --hook precompact --harness claude-code",
             "timeout": 60,
             "statusMessage": "Emergency save to MemPalace before compaction..."
           }

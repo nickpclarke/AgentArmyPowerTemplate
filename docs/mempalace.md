@@ -6,10 +6,11 @@ This repo ships with `mempalace.yaml` already configured, `.claude/settings.json
 
 ## How It Works
 
-MemPalace intercepts two lifecycle events in both local assistants:
+MemPalace intercepts three lifecycle events in both local assistants:
 
 | Hook | When it fires | What it does |
 |---|---|---|
+| `SessionStart` | When a new session begins | Loads relevant context from the palace |
 | `Stop` | After every response | Saves context snapshot to the palace |
 | `PreCompact` | Before context window compression | Writes a diary entry preserving key facts |
 
@@ -29,38 +30,70 @@ mempalace --version
 
 ## Initialize the Palace
 
-Run once in the repo directory:
+MemPalace 3.x takes the **project directory as an argument** and stores the palace under
+`~/.mempalace/palace` (override with `--palace` or `~/.mempalace/config.json`). Two steps:
 
 ```bash
-mempalace init
+# 1. Detect rooms from the folder structure (non-interactive, heuristics-only).
+#    Drop --no-llm if you run a local Ollama and want LLM-assisted entity refinement.
+mempalace init . --yes --no-llm
+
+# 2. Mine code/docs into the palace. --wing must match `wing:` in mempalace.yaml.
+mempalace mine . --wing agentarmy
 ```
 
-This creates the local palace storage directory (`.mempalace/` by default, outside the repo).
+Verify content was filed:
+
+```bash
+mempalace status
+```
+
+> `init` writes a machine-specific `entities.json` (gitignored) and will try to add
+> `mempalace.yaml` to `.gitignore` too — but in this repo `mempalace.yaml` is a **curated,
+> committed template artifact**, so it is intentionally kept out of `.gitignore`. If you
+> re-run `init`, restore the curated `mempalace.yaml` (`git checkout -- mempalace.yaml`).
 
 ## Verify Hooks Are Wired
 
-The Claude Code hooks are already in `.claude/settings.json` and run through the cross-platform `scripts/mempalace_hook.py` helper:
+MemPalace only supports three lifecycle hooks: **`session-start`**, **`stop`**, and
+**`precompact`**. The Claude Code hooks are already in `.claude/settings.json`, all routed
+through `scripts/mempalace_hook.py` with an absolute `$CLAUDE_PROJECT_DIR` path:
 
 ```json
 {
   "hooks": {
+    "SessionStart": [{
+      "hooks": [{
+        "type": "command",
+        "command": "python \"$CLAUDE_PROJECT_DIR/scripts/mempalace_hook.py\" --hook session-start --harness claude-code",
+        "timeout": 30
+      }]
+    }],
     "Stop": [{
       "hooks": [{
         "type": "command",
-        "command": "python scripts/mempalace_hook.py --hook stop --harness claude-code",
+        "command": "python \"$CLAUDE_PROJECT_DIR/scripts/mempalace_hook.py\" --hook stop --harness claude-code",
         "timeout": 60
       }]
     }],
     "PreCompact": [{
       "hooks": [{
         "type": "command",
-        "command": "python scripts/mempalace_hook.py --hook precompact --harness claude-code",
+        "command": "python \"$CLAUDE_PROJECT_DIR/scripts/mempalace_hook.py\" --hook precompact --harness claude-code",
         "timeout": 60
       }]
     }]
   }
 }
 ```
+
+> **Why the wrapper, and why an absolute path?** `scripts/mempalace_hook.py` returns success
+> (exit 0) when `mempalace` is missing *and* for any hook MemPalace doesn't support, so a
+> missing CLI or a stray hook name can never block a tool call. Do **not** wire
+> `pre-tool-use`, `post-tool-use`, or `user-prompt-submit` to `mempalace hook run` directly —
+> MemPalace rejects them with a non-zero exit, and on `PreToolUse` that exit code blocks every
+> tool call (a hard session deadlock). The absolute `$CLAUDE_PROJECT_DIR` path avoids a second
+> trap: a relative `scripts/...` path breaks if the working directory ever changes.
 
 Codex uses the same lifecycle hooks from `.codex/hooks.json`, routed through the cross-platform `scripts/mempalace_hook.py` helper:
 

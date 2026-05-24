@@ -36,3 +36,8 @@ site/
 # Generated diagnostics artifacts
 tests/artifacts/doctor/*.json
 tests/artifacts/doctor/*.md
+
+# MemPalace machine-specific generated file (detected people/projects). Do not commit.
+# Note: mempalace.yaml is intentionally NOT ignored — it's a curated template artifact
+# (see docs/mempalace.md). `mempalace init` will try to re-add it here; leave it out.
+entities.json
