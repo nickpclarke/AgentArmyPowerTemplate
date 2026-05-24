@@ -56,25 +56,26 @@ public sealed class BusinessObjectCatalogStore
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.KebabCaseLower) }
     };
 
-    private readonly string catalogPath;
-    private BusinessObjectCatalog? cachedCatalog;
+    private readonly Lazy<BusinessObjectCatalog> catalog;
 
     public BusinessObjectCatalogStore(IConfiguration configuration)
     {
-        catalogPath = configuration["BUSINESS_OBJECT_CATALOG"] ?? "/app/catalog.json";
+        string catalogPath = configuration["BUSINESS_OBJECT_CATALOG"] ?? "/app/catalog.json";
+        catalog = new Lazy<BusinessObjectCatalog>(
+            () => LoadFromDisk(catalogPath),
+            LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
-    public BusinessObjectCatalog Load()
-    {
-        if (cachedCatalog is not null) return cachedCatalog;
+    public BusinessObjectCatalog Load() => catalog.Value;
 
+    private static BusinessObjectCatalog LoadFromDisk(string catalogPath)
+    {
         string json = File.ReadAllText(catalogPath);
         BusinessObjectCatalog catalog = JsonSerializer.Deserialize<BusinessObjectCatalog>(json, Options)
             ?? throw new InvalidOperationException("Business object catalog could not be deserialized.");
 
         catalog.Validate();
-        cachedCatalog = catalog;
-        return cachedCatalog;
+        return catalog;
     }
 }
 
@@ -87,20 +88,118 @@ public sealed record BusinessObjectCatalog(
 {
     public void Validate()
     {
-        if (SchemaVersion != "business-object-catalog.v1")
-            throw new InvalidOperationException("Catalog schema_version must be business-object-catalog.v1.");
-        if (ObjectTypes.Count == 0) throw new InvalidOperationException("Catalog must define object types.");
-        if (Scenarios.Count == 0) throw new InvalidOperationException("Catalog must define scenarios.");
+        List<string> errors = [];
 
-        HashSet<string> objectIds = ObjectTypes.Select(item => item.Id).ToHashSet(StringComparer.Ordinal);
+        if (SchemaVersion != "business-object-catalog.v1")
+            errors.Add("Catalog schema_version must be business-object-catalog.v1.");
+        if (ServiceLayers.Count == 0) errors.Add("Catalog must define service layers.");
+        if (ObjectTypes.Count == 0) errors.Add("Catalog must define object types.");
+        if (Scenarios.Count == 0) errors.Add("Catalog must define scenarios.");
+
+        HashSet<string> requiredLayers = new(StringComparer.Ordinal)
+        {
+            "arcadedb-capability-services",
+            "platform-operational-services",
+            "meta-services"
+        };
+        HashSet<string> layerIds = BuildUniqueIdSet(ServiceLayers.Select(layer => layer.Id), "service layer", errors);
+        foreach (string layerId in requiredLayers)
+        {
+            if (!layerIds.Contains(layerId)) errors.Add($"Catalog is missing required service layer '{layerId}'.");
+        }
+
+        HashSet<string> objectIds = BuildUniqueIdSet(ObjectTypes.Select(item => item.Id), "object type", errors);
+        HashSet<string> scenarioIds = BuildUniqueIdSet(Scenarios.Select(item => item.Id), "scenario", errors);
+        HashSet<string> capabilityIds = new(StringComparer.Ordinal);
+
+        foreach (BusinessObjectType item in ObjectTypes)
+        {
+            RequireNonEmpty(item.DisplayName, $"Object '{item.Id}' display_name", errors);
+            RequireNonEmpty(item.Description, $"Object '{item.Id}' description", errors);
+            if (!layerIds.Contains(item.OwnedByLayer))
+                errors.Add($"Object '{item.Id}' references unknown owned_by_layer '{item.OwnedByLayer}'.");
+            if (item.States.Count == 0) errors.Add($"Object '{item.Id}' must define at least one state.");
+            if (item.ProviderMappings.Count == 0) errors.Add($"Object '{item.Id}' must define provider mappings.");
+            if (item.RedactionPolicy.Count == 0) errors.Add($"Object '{item.Id}' must define a redaction policy.");
+
+            foreach (ProviderMapping mapping in item.ProviderMappings)
+            {
+                RequireNonEmpty(mapping.Provider, $"Object '{item.Id}' provider", errors);
+                if (mapping.Records.Count == 0) errors.Add($"Object '{item.Id}' provider '{mapping.Provider}' must define records.");
+                if (mapping.Capabilities.Count == 0) errors.Add($"Object '{item.Id}' provider '{mapping.Provider}' must define capabilities.");
+                foreach (string capability in mapping.Capabilities) capabilityIds.Add(capability);
+            }
+
+            foreach (ObjectRelationship relationship in item.Relationships)
+            {
+                if (!objectIds.Contains(relationship.Target))
+                    errors.Add($"Object '{item.Id}' relationship '{relationship.Type}' targets unknown object '{relationship.Target}'.");
+            }
+
+            foreach (string scenarioId in item.ScenarioMappings)
+            {
+                if (!scenarioIds.Contains(scenarioId))
+                    errors.Add($"Object '{item.Id}' maps to unknown scenario '{scenarioId}'.");
+            }
+        }
+
         foreach (ScenarioDefinition scenario in Scenarios)
         {
+            RequireNonEmpty(scenario.DisplayName, $"Scenario '{scenario.Id}' display_name", errors);
+            RequireNonEmpty(scenario.Description, $"Scenario '{scenario.Id}' description", errors);
+            if (scenario.ServiceLayers.Count == 0) errors.Add($"Scenario '{scenario.Id}' must reference at least one service layer.");
+            if (scenario.Outputs.Count == 0) errors.Add($"Scenario '{scenario.Id}' must define outputs.");
+            if (scenario.Capabilities.Count == 0) errors.Add($"Scenario '{scenario.Id}' must define capabilities.");
+            if (scenario.SafetyPolicy.Count == 0) errors.Add($"Scenario '{scenario.Id}' must define a safety policy.");
+
+            foreach (string layerId in scenario.ServiceLayers)
+            {
+                if (!layerIds.Contains(layerId))
+                    errors.Add($"Scenario '{scenario.Id}' references unknown service layer '{layerId}'.");
+            }
+
+            foreach (string input in scenario.Inputs)
+            {
+                if (!objectIds.Contains(input))
+                    errors.Add($"Scenario '{scenario.Id}' references unknown input object '{input}'.");
+            }
+
             foreach (string output in scenario.Outputs)
             {
                 if (!objectIds.Contains(output))
-                    throw new InvalidOperationException($"Scenario '{scenario.Id}' references unknown output object '{output}'.");
+                    errors.Add($"Scenario '{scenario.Id}' references unknown output object '{output}'.");
+            }
+
+            foreach (string capability in scenario.Capabilities)
+            {
+                if (!capabilityIds.Contains(capability))
+                    errors.Add($"Scenario '{scenario.Id}' references unknown capability '{capability}'.");
+            }
+
+            if (scenario.McpEligible && (scenario.InputSchema is null || scenario.OutputSchema is null))
+            {
+                errors.Add($"Scenario '{scenario.Id}' is MCP eligible but is missing input_schema or output_schema.");
             }
         }
+
+        if (errors.Count > 0)
+            throw new InvalidOperationException($"Business object catalog validation failed: {string.Join(" ", errors)}");
+    }
+
+    private static HashSet<string> BuildUniqueIdSet(IEnumerable<string> values, string label, List<string> errors)
+    {
+        HashSet<string> seen = new(StringComparer.Ordinal);
+        foreach (string value in values)
+        {
+            if (string.IsNullOrWhiteSpace(value)) errors.Add($"A {label} id is empty.");
+            else if (!seen.Add(value)) errors.Add($"Duplicate {label} id '{value}'.");
+        }
+        return seen;
+    }
+
+    private static void RequireNonEmpty(string value, string label, List<string> errors)
+    {
+        if (string.IsNullOrWhiteSpace(value)) errors.Add($"{label} must be non-empty.");
     }
 }
 

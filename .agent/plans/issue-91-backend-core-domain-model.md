@@ -41,6 +41,7 @@ The business-object layer can deploy as `middle-core`: a separate core container
 - `agentarmy.services.json`
 - `templates/business-object-catalog.example.json`
 - `templates/middle-core/`
+- `scripts/middle-core/Start-MiddleCoreLocal.ps1`
 - `tools/business-object-catalog.mjs`
 - `C:\Dev\backend-core\README.md`
 - `C:\Dev\backend-core\app\main.py`
@@ -89,6 +90,7 @@ Owner:
 - `templates/middle-core/Dockerfile`
 - `templates/middle-core/MiddleCore.csproj`
 - `templates/middle-core/Program.cs`
+- `scripts/middle-core/Start-MiddleCoreLocal.ps1`
 - `templates/service-manifest.example.json`
 - `tools/business-object-catalog.mjs`
 - `tools/business-objects/business-object-catalog.v1.schema.json`
@@ -104,6 +106,7 @@ Run as applicable:
 node tools/validate-routing.mjs
 node tools/business-object-catalog.mjs validate
 docker build -f templates/middle-core/Dockerfile -t middle-core:local .
+.\scripts\middle-core\Start-MiddleCoreLocal.ps1
 node tools/agentarmy-doctor.mjs
 python -m mkdocs build --strict
 ```
@@ -126,3 +129,4 @@ For this pass, validation should prove the new documentation can be rendered and
 - Add a business-object middle layer so scenarios, UI cards, diagnostics, graph views, and MCP tools can share stable nouns instead of binding directly to raw provider records or generic control-plane tables.
 - Treat `middle-core` as the deployable home for business-object contracts, scenario contracts, and meta-service projections. It should not own raw ArcadeDB storage; it composes `backend-core` capability services and platform operational services.
 - Use a typed service implementation for deployable `middle-core`. The repo-local catalog CLI can stay JavaScript because it follows AgentArmy's dependency-light tooling pattern, but the container starter is C#/.NET with records, enums, and nullable checks.
+- Add a local deployment script for reviewers so `middle-core` can be built, run, and smoked on localhost before promotion into a standalone repo.

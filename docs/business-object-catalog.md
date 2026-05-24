@@ -81,6 +81,8 @@ Generated business-object artifacts are ignored by Git, matching the doctor arti
 
 The service manifest examples now include `middle-core` as an optional backend service. In a workload repo, make it required only after the container exists and the health endpoint is stable.
 
+The local host port is `18001` to avoid colliding with existing local backend services. The container still listens on `8001` internally.
+
 The starter container template lives at:
 
 ```powershell
@@ -99,6 +101,39 @@ It is a typed C#/.NET minimal API, not a JavaScript service. It exposes the firs
 | `GET /scenarios/{id}` | One scenario contract. |
 
 The JavaScript CLI in `tools/business-object-catalog.mjs` remains repo tooling because AgentArmy already uses dependency-light Node tools. The deployable `middle-core` template is typed and object-oriented enough to grow real domain services behind these read models.
+
+## Local Deployment
+
+Reviewers can deploy and smoke-test the draft service locally from the repository root:
+
+```powershell
+.\scripts\middle-core\Start-MiddleCoreLocal.ps1
+```
+
+The script:
+
+- builds `templates/middle-core/Dockerfile`,
+- replaces any existing `middle-core-local` container,
+- maps container port `8001` to localhost port `18001`,
+- waits for `GET /health`,
+- confirms the explorer page contains `Business Object Catalog`,
+- prints the useful local URLs.
+
+Expected local URLs:
+
+| URL | Use |
+|---|---|
+| `http://127.0.0.1:18001/` | Visual business-object and scenario explorer. |
+| `http://127.0.0.1:18001/health` | Service readiness and catalog counts. |
+| `http://127.0.0.1:18001/catalog` | Full catalog JSON. |
+| `http://127.0.0.1:18001/objects/tool-offering` | MCP-ready business object example. |
+| `http://127.0.0.1:18001/scenarios/read-only-query-lab` | Guarded ArcadeDB query scenario example. |
+
+To stop the local container:
+
+```powershell
+docker rm -f middle-core-local
+```
 
 ## Modernity Check
 
