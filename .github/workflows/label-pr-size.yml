@@ -2,7 +2,7 @@ name: Label PR by size
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
 
 # Least-privilege GITHUB_TOKEN scopes, so this workflow does not depend on the
 # repo-wide "Read and write" Actions setting.
@@ -20,7 +20,7 @@ jobs:
   label-size:
     runs-on: ubuntu-latest
     steps:
-      - name: Apply size label
+      - name: Apply size + deep-review labels
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
@@ -39,19 +39,27 @@ jobs:
 
           echo "PR #$PR_NUM has $CHANGES changed lines -> $SIZE"
 
-          # Ensure all size labels exist with consistent colours.
+          # Ensure all labels exist with consistent colours.
           # || true: gh label create intermittently returns HTTP 401 from GitHub's
           # label API (a transient auth quirk distinct from the issues/PR API).
-          # Labels are idempotent bootstrapping; the critical step is gh pr edit below.
           gh label create "XS" --color "0e8a16" --description "PR size: XS (≤10 lines)"  --force || true
           gh label create "S"  --color "94d82d" --description "PR size: S (≤50 lines)"   --force || true
           gh label create "M"  --color "f9c74f" --description "PR size: M (≤200 lines)"  --force || true
           gh label create "L"  --color "f3722c" --description "PR size: L (≤500 lines)"  --force || true
           gh label create "XL" --color "d62828" --description "PR size: XL (>500 lines)" --force || true
+          gh label create "needs-deep-review" --color "e11d48" --description "Large PR — trigger Claude Code deep review via /review-pr" --force || true
 
-          # Remove stale size labels before applying the new one
+          # Remove stale size labels before applying the new one.
           for label in XS S M L XL; do
             gh pr edit "$PR_NUM" --remove-label "$label" 2>/dev/null || true
           done
+          # Guarded so a label-write hiccup never reds the workflow.
+          gh pr edit "$PR_NUM" --add-label "$SIZE" || true
 
-          gh pr edit "$PR_NUM" --add-label "$SIZE"
+          # Flag large PRs for deep review on every push (opened + synchronize) so a
+          # PR that grows past the threshold still gets caught. Never auto-removed —
+          # a reviewer may have applied needs-deep-review manually (per Codex review).
+          if [ "$CHANGES" -gt 200 ]; then
+            gh pr edit "$PR_NUM" --add-label "needs-deep-review" || true
+            echo "Flagged needs-deep-review ($CHANGES lines changed)"
+          fi
