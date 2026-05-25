@@ -124,6 +124,8 @@ nav:
     - Board Manager Extension: board-manager.md
   - Coordination & Planning:
     - Inter-Layer Contracts: contracts.md
+    - Spoke Artifacts (harvested): spokes/index.md
+    - Spoke Artifact Pipeline: spoke-artifact-pipeline.md
     - Labs (WIP Design Wiki): labs.md
     - GitHub Projects v2: github-projects.md
     - Postman Workspace: postman-workspace.md

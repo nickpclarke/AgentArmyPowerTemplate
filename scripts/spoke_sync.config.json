@@ -13,6 +13,7 @@
     ".agent/hub.json",
     ".github/ISSUE_TEMPLATE/epic-handoff.md",
     ".github/workflows/notify-hub.yml",
+    ".github/workflows/notify-hub-artifacts.yml",
     ".claude/agents",
     ".claude/commands",
     ".claude/agent-schema.json",

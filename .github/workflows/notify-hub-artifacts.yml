@@ -1,0 +1,93 @@
+name: notify hub (artifacts)
+
+# Spoke -> hub artifact intake. When a spoke PR touches a project-management artifact
+# (a spike, a research note, or an ADR), this reports it to the AgentArmy hub via a
+# `spoke-artifact` repository_dispatch so the hub can:
+#   - add the spoke PR to the hub Project board (Type=Spike/Decision, Status=In progress)
+#     as soon as it opens — including drafts, and
+#   - on merge, harvest the artifact files into the hub docs (Pages) and flip the card Done.
+#
+# Detection is by changed PATH (unambiguous, no labels/title required):
+#   spikes/**  ·  docs/research/**  ·  docs/decisions/**
+#
+# This is separate from notify-hub.yml (the generic activity log) on purpose: that one
+# fires on merge/close/comment for ALL work; this one is artifact-specific and fires early.
+#
+# Synced to every spoke from the hub — edit it in the hub. Guarded to no-op in the hub.
+#
+# Auth: PROJECT_TOKEN (classic PAT, repo + project scope on the hub) in the spoke's secrets.
+# If absent, the step skips (won't fail the spoke's CI).
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, closed]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  notify-artifacts:
+    if: github.repository != 'nickpclarke/AgentArmy'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Detect PM artifact and dispatch to hub
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_ACTION: ${{ github.event.action }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "PROJECT_TOKEN not set in this spoke — skipping artifact callback." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # Changed files in this PR (paginated; path only).
+          files="$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
+
+          # Keep only PM-artifact paths.
+          matched="$(printf '%s\n' "$files" | grep -E '^(spikes/|docs/research/|docs/decisions/)' || true)"
+          if [ -z "$matched" ]; then
+            echo "PR #${PR_NUMBER} touches no PM artifacts (spikes/**, docs/research/**, docs/decisions/**) — nothing to report." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # PR lifecycle state.
+          if [ "$PR_ACTION" = "closed" ]; then
+            if [ "$PR_MERGED" = "true" ]; then state="merged"; else state="closed"; fi
+          else
+            state="open"
+          fi
+
+          # Board Type by artifact kind (precedence: decision > spike > research).
+          if printf '%s\n' "$matched" | grep -q '^docs/decisions/'; then
+            kind="decision"
+          elif printf '%s\n' "$matched" | grep -q '^spikes/'; then
+            kind="spike"
+          else
+            kind="research"
+          fi
+
+          # Commit to harvest from: the merge commit if merged, else the PR head.
+          sha="${PR_MERGE_SHA:-}"
+          [ -z "$sha" ] && sha="${PR_HEAD_SHA}"
+
+          # Cap the file list (defensive against pathological PRs) and build a JSON array.
+          files_json="$(printf '%s\n' "$matched" | head -n 60 | jq -R . | jq -s .)"
+
+          jq -n \
+            --arg repo "$REPO" --arg number "$PR_NUMBER" --arg title "$PR_TITLE" \
+            --arg url "$PR_URL" --arg author "$PR_AUTHOR" --arg state "$state" \
+            --arg kind "$kind" --arg sha "$sha" --argjson files "$files_json" \
+            '{event_type:"spoke-artifact", client_payload:{repo:$repo, number:$number, title:$title, url:$url, author:$author, state:$state, kind:$kind, sha:$sha, files:$files}}' \
+          | gh api repos/nickpclarke/AgentArmy/dispatches --method POST --input -
+
+          echo "Reported ${kind} artifact PR #${PR_NUMBER} (${state}) to hub — $(printf '%s\n' "$matched" | wc -l) file(s)." >> "$GITHUB_STEP_SUMMARY"
