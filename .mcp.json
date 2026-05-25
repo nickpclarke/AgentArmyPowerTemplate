@@ -27,6 +27,13 @@
       "headers": {
         "Authorization": "Bearer ${GCP_BEARER_TOKEN}"
       }
+    },
+    "arcadedb": {
+      "type": "http",
+      "url": "${ARCADEDB_MCP_URL:-http://localhost:2480/api/v1/mcp}",
+      "headers": {
+        "Authorization": "Bearer ${ARCADEDB_MCP_TOKEN}"
+      }
     }
   }
 }

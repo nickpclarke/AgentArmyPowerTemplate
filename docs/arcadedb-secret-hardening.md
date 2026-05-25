@@ -86,9 +86,56 @@ node tools/agentarmy-doctor.mjs arcadedb --write-artifacts
 
 The `arcadedb.credentials` check should report `ARCADEDB_PASSWORD_FILE` or `ARCADEDB_PASSWORD` as the source when credentials are present. It should never include the password.
 
+## MCP Server
+
+ArcadeDB v26.3.1+ ships a **built-in** Model Context Protocol server inside the database process (your spike image, `arcadedata/arcadedb:26.5.1`, already includes it). It lets the Claude and Copilot armies query the knowledge graph natively in SQL, Cypher, Gremlin, or GraphQL, always against the live schema.
+
+- Endpoint: `http://<host>:2480/api/v1/mcp` (the standard ArcadeDB HTTP port).
+- Transport: HTTP. Claude Code connects directly — no `mcp-remote` / `npx` bridge is needed (that bridge is only for stdio-only clients such as older Claude Desktop).
+- Auth: `Authorization: Bearer <token>`. Create the token in ArcadeDB Studio → Security.
+
+### Client config
+
+The `arcadedb` server in the repo `.mcp.json` uses env-var interpolation, so no token is committed (same pattern as the `gcp-*` entries):
+
+```json
+"arcadedb": {
+  "type": "http",
+  "url": "${ARCADEDB_MCP_URL:-http://localhost:2480/api/v1/mcp}",
+  "headers": { "Authorization": "Bearer ${ARCADEDB_MCP_TOKEN}" }
+}
+```
+
+| Var | Purpose |
+|---|---|
+| `ARCADEDB_MCP_URL` | MCP endpoint. Defaults to local Docker; set to the Azure ACI instance host for shared Dev. |
+| `ARCADEDB_MCP_TOKEN` | Bearer token from Studio → Security. |
+
+Treat `ARCADEDB_MCP_TOKEN` like any other ArcadeDB credential: never commit it, inject it via a gitignored `.env` locally or a runtime secret channel, and rotate it if it is printed or shared.
+
+### Server-side posture (read-only by default)
+
+Match the platform default and enable MCP read-only. Configure it via Studio (Server > MCP), `POST /api/v1/mcp/config`, or `config/mcp-config.json`:
+
+```json
+{
+  "enabled": true,
+  "allowReads": true,
+  "allowInsert": false,
+  "allowUpdate": false,
+  "allowDelete": false,
+  "allowSchemaChange": false,
+  "allowAdmin": false,
+  "allowedUsers": ["platform_reader"]
+}
+```
+
+Scope `allowedUsers` to a service-specific reader (not `root`), and flip mutation flags only as a deliberate, reviewed change.
+
 ## Source Notes
 
 - Azure Container Apps supports Container Apps secrets and Key Vault references with managed identity: [Manage secrets in Azure Container Apps](https://learn.microsoft.com/azure/container-apps/manage-secrets).
 - Docker Compose supports secrets sourced from files or environment values: [Compose secrets](https://docs.docker.com/reference/compose-file/secrets/).
 - GitHub Actions supports repository, environment, and organization secrets: [Using secrets in GitHub Actions](https://docs.github.com/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).
 - ArcadeDB supports server users and password management through server APIs and commands: [ArcadeDB users](https://docs.arcadedb.com/arcadedb/how-to/operations/users.html).
+- ArcadeDB ships a built-in MCP server (v26.3.1+) over HTTP with Bearer-token auth: [ArcadeDB MCP Server](https://arcadedb.com/blog/arcadedb-mcp-server-connect-your-llm-to-your-database/).
