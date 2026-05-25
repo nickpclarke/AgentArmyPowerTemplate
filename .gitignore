@@ -12,6 +12,10 @@ obsidian/**/.trash/
 extensions/board-manager/.env
 extensions/arcadedb-cockpit/.env
 
+# ArcadeDB image template local secrets — keep only the placeholder README
+templates/arcadedb-image/examples/.secrets/*
+!templates/arcadedb-image/examples/.secrets/README.md
+
 # Dependencies
 node_modules/
 

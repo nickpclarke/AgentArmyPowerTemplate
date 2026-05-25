@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "allowReads": true,
+  "allowInsert": false,
+  "allowUpdate": false,
+  "allowDelete": false,
+  "allowSchemaChange": false,
+  "allowAdmin": false,
+  "allowedUsers": ["platform_reader"]
+}

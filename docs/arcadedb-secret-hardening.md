@@ -92,7 +92,9 @@ ArcadeDB v26.3.1+ ships a **built-in** Model Context Protocol server inside the 
 
 - Endpoint: `http://<host>:2480/api/v1/mcp` (the standard ArcadeDB HTTP port).
 - Transport: HTTP. Claude Code connects directly — no `mcp-remote` / `npx` bridge is needed (that bridge is only for stdio-only clients such as older Claude Desktop).
-- Auth: `Authorization: Bearer <token>`. Create the token in ArcadeDB Studio → Security.
+- Auth (either works, scoped by `allowedUsers`):
+  - **Basic** — `Authorization: Basic <base64(user:password)>` using a server user (e.g. `platform_reader`). Turnkey: no Studio step, fully scriptable. Used by the `templates/arcadedb-image/` setup scripts.
+  - **Bearer** — `Authorization: Bearer <token>`. Create the token in ArcadeDB Studio → Security. Prefer this for shared/hardened environments where you want a revocable token distinct from the DB password.
 
 ### Client config
 
@@ -110,8 +112,9 @@ The `arcadedb` server in the repo `.mcp.json` uses env-var interpolation, so no 
 |---|---|
 | `ARCADEDB_MCP_URL` | MCP endpoint. Defaults to local Docker; set to the Azure ACI instance host for shared Dev. |
 | `ARCADEDB_MCP_TOKEN` | Bearer token from Studio → Security. |
+| `ARCADEDB_MCP_BASIC` | `base64(platform_reader:password)` for the Basic-auth alternative. Swap the header to `Basic ${ARCADEDB_MCP_BASIC}`. |
 
-Treat `ARCADEDB_MCP_TOKEN` like any other ArcadeDB credential: never commit it, inject it via a gitignored `.env` locally or a runtime secret channel, and rotate it if it is printed or shared.
+Treat `ARCADEDB_MCP_TOKEN` / `ARCADEDB_MCP_BASIC` like any other ArcadeDB credential: never commit them, inject via a gitignored `.env` locally or a runtime secret channel, and rotate if printed or shared.
 
 ### Server-side posture (read-only by default)
 
