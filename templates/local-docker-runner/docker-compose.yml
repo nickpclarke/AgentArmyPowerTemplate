@@ -1,0 +1,67 @@
+# Local self-hosted GitHub Actions runners for the AgentArmy fleet.
+#
+# Free, unmetered CI on your own machine — self-hosted runner minutes do NOT count
+# against your monthly GitHub-hosted quota. One persistent Linux runner per private repo.
+#
+# Prereqs: Docker Desktop running. A classic GitHub PAT with `repo` scope (private repos).
+#
+# Start:
+#   export GH_PAT=ghp_xxx          # do NOT commit; or copy .env.example -> .env
+#   docker compose up -d
+#   docker compose logs -f         # watch them register
+#
+# Stop / remove:
+#   docker compose down            # de-registers cleanly on graceful stop
+#
+# The runners auto-carry the labels `self-hosted`, `Linux`, `X64`, so workflows that
+# say `runs-on: [self-hosted, linux]` route here. They run only while this machine is on.
+name: agentarmy-runners
+
+x-runner: &runner
+  image: myoung34/github-runner:latest
+  restart: unless-stopped
+  environment: &runner-env
+    ACCESS_TOKEN: ${GH_PAT:?set GH_PAT in your shell or .env (classic PAT, repo scope)}
+    RUNNER_SCOPE: repo
+    ORG_NAME: ""
+    LABELS: agentarmy,local
+    DISABLE_AUTO_UPDATE: "true"
+    RUNNER_WORKDIR: /tmp/runner/work
+  security_opt:
+    - no-new-privileges:true
+  # Persistent worker dir so tool caches survive restarts (per-repo, isolated).
+  tmpfs:
+    - /tmp/runner
+
+services:
+  runner-hub:
+    <<: *runner
+    container_name: aa-runner-hub
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/nickpclarke/AgentArmy
+      RUNNER_NAME: aa-local-hub
+
+  runner-frontend:
+    <<: *runner
+    container_name: aa-runner-frontend
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/nickpclarke/frontend-core
+      RUNNER_NAME: aa-local-frontend
+
+  runner-backend:
+    <<: *runner
+    container_name: aa-runner-backend
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/nickpclarke/backend-core
+      RUNNER_NAME: aa-local-backend
+
+  runner-middle:
+    <<: *runner
+    container_name: aa-runner-middle
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/nickpclarke/middle-core
+      RUNNER_NAME: aa-local-middle
