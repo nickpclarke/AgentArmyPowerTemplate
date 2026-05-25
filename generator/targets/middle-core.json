@@ -17,7 +17,9 @@
     "templates/middle-core/generated/ProjectionContracts.g.cs",
     "templates/middle-core/generated/GeneratedModelValidator.g.cs",
     "templates/middle-core/generated/ModelSummary.g.md",
-    "templates/middle-core/generated/model-runtime.fixture.json"
+    "templates/middle-core/generated/model-runtime.fixture.json",
+    "templates/middle-core/generated/model-runtime.shacl.ttl",
+    "templates/middle-core/generated/model-runtime.fixture.ttl"
   ],
   "runtime_project": "templates/middle-core/MiddleCore.csproj",
   "localhost_pipeline": "scripts/middle-core/Test-MiddleCoreLocalPipeline.ps1",

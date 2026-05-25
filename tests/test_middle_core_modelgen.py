@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import shutil
 import subprocess
 import sys
@@ -15,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MODEL = ROOT / "model" / "middle-core" / "model.yaml"
 GENERATOR = ROOT / "tools" / "modelgen" / "generate_middle_core.py"
 VALIDATOR = ROOT / "tools" / "modelgen" / "validate_middle_core.py"
+HAS_PYSHACL = importlib.util.find_spec("pyshacl") is not None
 
 
 class MiddleCoreModelgenTests(unittest.TestCase):
@@ -82,6 +84,14 @@ class MiddleCoreModelgenTests(unittest.TestCase):
 
         self.assertEqual(first, second)
 
+    def test_generator_emits_shacl_artifacts(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            out_dir = Path(temp) / "generated"
+            self.run_generator(out_dir)
+
+            self.assertTrue((out_dir / "model-runtime.shacl.ttl").exists())
+            self.assertTrue((out_dir / "model-runtime.fixture.ttl").exists())
+
     def test_generator_refuses_hand_authored_file(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             out_dir = Path(temp) / "generated"
@@ -98,6 +108,21 @@ class MiddleCoreModelgenTests(unittest.TestCase):
 
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("Refusing to overwrite", result.stderr + result.stdout)
+
+    @unittest.skipUnless(HAS_PYSHACL, "pyshacl is not installed")
+    def test_generated_shacl_fixture_validates(self) -> None:
+        from pyshacl import validate
+
+        with tempfile.TemporaryDirectory() as temp:
+            out_dir = Path(temp) / "generated"
+            self.run_generator(out_dir)
+
+            conforms, _, report = validate(
+                data_graph=str(out_dir / "model-runtime.fixture.ttl"),
+                shacl_graph=str(out_dir / "model-runtime.shacl.ttl"),
+            )
+
+        self.assertTrue(conforms, str(report))
 
     def run_generator(self, out_dir: Path) -> None:
         result = subprocess.run(

@@ -34,7 +34,7 @@ jobs:
           dotnet-version: "10.0.x"
 
       - name: Install Python deps
-        run: pip install pyyaml
+        run: pip install pyyaml pyshacl
 
       - name: Validate model
         run: python tools/modelgen/validate_middle_core.py --model model/middle-core/model.yaml
@@ -44,6 +44,9 @@ jobs:
 
       - name: modelgen + drift unit tests
         run: python -m unittest tests.test_middle_core_modelgen tests.test_middle_core_drift
+
+      - name: Validate generated SHACL fixture
+        run: pyshacl -s templates/middle-core/generated/model-runtime.shacl.ttl templates/middle-core/generated/model-runtime.fixture.ttl
 
       - name: Build middle-core
         run: dotnet build templates/middle-core/MiddleCore.csproj

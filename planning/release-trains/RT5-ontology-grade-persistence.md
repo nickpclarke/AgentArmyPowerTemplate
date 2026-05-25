@@ -86,8 +86,9 @@ Grounding (already in-repo):
 - **Scope:** `Runtime/Pinning/Adapters/ArcadeDb/ArcadeDbPinBackend.cs` — maps neutral ops to ArcadeDB
   HTTP/JSON command API; DDL for `OntologyElement`⟵`HyperNode`/`HyperEdge`, `BINDS_ROLE`, `ProvenanceVertex`
   + `WAS_GENERATED_BY`, immutable `PinLedgerEntry`; UNIQUE indexes on `ontology_iri` + `content_hash`,
-  composite `(type, valid_from, valid_to)`, hash index on `role_name`; `UPDATE…UPSERT` live + guarded
-  `INSERT` ledger. Credentials server-side (`ARCADEDB_PASSWORD_FILE`) per
+  composite `(type, valid_from, valid_to)`, `(identity_hash, superseded_at, recorded_at)`,
+  `(identity_hash, recorded_at)`, `(identity_hash, valid_from, recorded_at)`, hash index on `role_name`;
+  `UPDATE…UPSERT` live + guarded `INSERT` ledger. Credentials server-side (`ARCADEDB_PASSWORD_FILE`) per
   `extensions/arcadedb-cockpit/BACKEND_CONTRACT.md`. ArcadeDB is persistence only — **not** the reasoner.
 - **Acceptance (live ArcadeDB):** `EnsureReadyAsync` DDL is idempotent; unchanged object pinned twice →
   1 live row + 1 ledger row; `ingest-evidence` persists as a `HyperEdge` vertex with `BINDS_ROLE` edges.

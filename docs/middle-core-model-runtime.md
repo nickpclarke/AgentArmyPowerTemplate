@@ -89,6 +89,8 @@ The generator emits only generated surfaces:
 | `GeneratedModelValidator.g.cs` | Generated model description and lookup helpers. |
 | `ModelSummary.g.md` | Generated summary table for reviewers. |
 | `model-runtime.fixture.json` | Deterministic fixture for tests and agents. |
+| `model-runtime.shacl.ttl` | Generated SHACL shapes for closed-world validation. |
+| `model-runtime.fixture.ttl` | Generated RDF fixture that should conform to the SHACL shapes. |
 
 The generator refuses to overwrite files that do not carry its generated marker.
 
@@ -159,6 +161,7 @@ Use the following checks for this slice:
 python tools/modelgen/validate_middle_core.py --model model/middle-core/model.yaml
 python tools/modelgen/generate_middle_core.py --model model/middle-core/model.yaml --out templates/middle-core/generated
 python -m unittest tests.test_middle_core_modelgen
+pyshacl -s templates/middle-core/generated/model-runtime.shacl.ttl templates/middle-core/generated/model-runtime.fixture.ttl
 dotnet build templates/middle-core/MiddleCore.csproj
 dotnet test templates/middle-core/MiddleCore.csproj
 node tools/business-object-catalog.mjs validate
