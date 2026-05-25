@@ -24,14 +24,20 @@ x-runner: &runner
     ACCESS_TOKEN: ${GH_PAT:?set GH_PAT in your shell or .env (classic PAT, repo scope)}
     RUNNER_SCOPE: repo
     ORG_NAME: ""
-    LABELS: agentarmy,local
+    # `docker-local` routes docker-build jobs here (ACA can't do Docker — no DIND).
+    LABELS: agentarmy,local,docker-local
     DISABLE_AUTO_UPDATE: "true"
-    RUNNER_WORKDIR: /tmp/runner/work
+    # setup-dotnet installs here (writable) instead of root-only /usr/share/dotnet.
+    DOTNET_INSTALL_DIR: /home/runner/.dotnet
   security_opt:
     - no-new-privileges:true
-  # Persistent worker dir so tool caches survive restarts (per-repo, isolated).
-  tmpfs:
-    - /tmp/runner
+  # Mount the host's Docker socket (Docker-out-of-Docker) so `docker build` in a job
+  # uses your Docker Desktop daemon. NOTE: this grants jobs host-daemon (root-equivalent)
+  # access — acceptable only for PRIVATE repos with your own agents; never for public repos.
+  # The work dir stays on the container's normal (exec-able) fs — NOT a tmpfs: setup-python
+  # installs a binary there and a noexec tmpfs breaks it ("failed to map segment").
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
 
 services:
   runner-hub:

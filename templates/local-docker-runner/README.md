@@ -56,9 +56,18 @@ jobs:
 - **Code execution:** a self-hosted runner executes whatever a PR contains on your machine.
   Safe-ish here because these are **private** repos with your own agents — but never point a
   self-hosted runner at a public repo.
-- The container runs with `no-new-privileges` and an isolated tmpfs workdir. It does **not**
-  mount the Docker socket, so workflows needing in-container `docker build` (e.g.
-  `local-docker-smoke.yml`'s `docker-local` label) need a separate, socket-mounted runner.
+- **Docker socket (the reason for the local runner):** these runners mount
+  `/var/run/docker.sock` so jobs labelled `docker-local` can run `docker build` against your
+  Docker Desktop daemon — the one thing ACA runners **can't** do (no DIND). This grants those
+  jobs **host-daemon (root-equivalent) access**, so it's only acceptable for **private** repos
+  with your own agents. Never mount the socket on a runner attached to a public repo.
+- The container runs with `no-new-privileges` and an isolated tmpfs workdir.
+
+## Labels & routing
+
+Runners carry `self-hosted, Linux, X64` (auto) plus `agentarmy, local, docker-local`.
+- Non-docker jobs use `runs-on: [self-hosted, linux]` → run on **either** these or the ACA runners (whichever is up).
+- Docker-build jobs use `runs-on: [self-hosted, docker-local]` → run **only here** (ACA lacks the label and a daemon). These run only while your PC + this runner are up.
 
 ## Files
 
