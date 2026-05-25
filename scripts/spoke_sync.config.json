@@ -22,7 +22,8 @@
     "scripts/mempalace-hook.ps1",
     "scripts/board_commands.py",
     "scripts/onboarding-check.ps1",
-    "tools/status.mjs"
+    "tools/status.mjs",
+    "templates/arcadedb-image"
   ],
   "deny": [
     "CLAUDE.md",
