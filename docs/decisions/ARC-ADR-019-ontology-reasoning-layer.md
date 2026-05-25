@@ -5,7 +5,7 @@
 | ID | ARC-ADR-019 |
 | Status | Proposed |
 | Date | 2026-05-25 |
-| Deciders | Architecture Review (HITL — to be decided pending spike backend-core #63) |
+| Deciders | Architecture Review (HITL — to be decided; spike backend-core #65 complete, evidence folded in below) |
 | Supersedes | — |
 | Superseded by | — |
 | Tags | ontology, reasoning, owl, gufo, bfo, inference, uda, arcadedb, middle-core, backend-core |
@@ -40,11 +40,59 @@ Research [#60](https://github.com/nickpclarke/backend-core/pull/60) (`docs/resea
 
 ## Decision Outcome
 
-**To be decided** — deferred pending the evidence from the time-boxed spike **backend-core #63** (gUFO-over-a-snapshot PoC + a store/reasoner build-vs-buy note). This ADR is queued **Proposed** so the direction is on record and the spike has a target to confirm or refute. The HITL framing:
+**To be decided** by Architecture Review (HITL — the hub owner decides; this stays a Proposed
+stub with a recommendation, not a unilateral call). The gating spike has now **run** and
+confirms the direction — the recommendation below is upgraded from "conditional" to "Accept
+Option 1," pending the owner's call.
+
+### Evidence from the spike (backend-core #65)
+
+The time-boxed PoC (`spikes/ontology-reasoning/`, self-contained: no live ArcadeDB, no app
+import, no network, no Java) proved the **export → RDF → reason → materialize** loop end-to-end
+on a 4-vertex snapshot, deriving facts plain graph traversal cannot:
+
+- **Type propagation** — `alice` (asserted only as `Employee`) is classified up the gUFO chain
+  `Employee → Person → FunctionalComplex → Object → gufo:Endurant`.
+- **Inverse-edge materialization** — `alice worksAt acme` derives the write-back edge
+  `acme employs alice`.
+- **Relator range** — `Employment` relator's `gufo:mediates` range classifies its participants.
+- **Indirect inconsistency** — asserting `alice` is also an `Organization` violates the
+  `Person ⊓ Organization` disjointness **only after** reasoning (because `Person` is *inferred*),
+  which a traversal-only system would miss. This is the *traversal ≠ inference* point, demonstrated.
+
+The foundational ontology is a **pluggable profile** (`GufoProfile` works; `BfoProfile` is the
+parallel-pipeline placeholder), so BFO slots in as *a new profile + a TBox file*, not a rewrite —
+confirming D3.
+
+**Build-vs-buy (reasoner runtime), from the spike:** **rdflib + owlrl** (OWL 2 RL forward
+chaining, pure Python, no Java, zero infra) is the recommended seed. Escalate to **owlready2 +
+HermiT/Pellet** only if full OWL 2 DL classification is needed; **Oxigraph** (Rust) is a strong
+RDF/SPARQL *side-store* candidate (no DL reasoner) aligned with `rust-api-v2`; **Z3** is added for
+the BFO profile's beyond-DL (Common-Logic) axioms; **RDFox/GraphDB** only if data outgrows
+in-process reasoning. Watch closure size at scale.
 
 ### Recommendation note (not a decision)
 
-Lean **Option 1** (pluggable gUFO ‖ BFO, reasoner-behind-the-UDA, gUFO-first), conditioned on the #63 spike proving the export→reason→materialize boundary is practical. Rationale: it addresses the real gap (inference) without re-importing a declined engine (#60), keeps the bet reversible (D2/D6), and extends the platform's own "one model, many projections" thesis to reasoning (D3). The **reasoner runtime** (owlready2 Python vs Oxigraph Rust vs Z3 for BFO) is a build-vs-buy sub-decision the spike will inform — keep it pluggable, don't pre-commit. If #63 shows materialization or reasoner cost is impractical at scale, fall back to Option 3 and revisit when a concrete inference requirement forces it.
+**Accept Option 1** (pluggable gUFO ‖ BFO, reasoner-behind-the-UDA, gUFO-first), with **rdflib +
+owlrl** as the seed reasoner runtime. The spike proved the export→reason→materialize boundary is
+practical, addresses the real gap (inference) without re-importing a declined engine (#60), keeps
+the bet reversible (D2/D6), and extends the platform's "one model, many projections" thesis to
+reasoning (D3). Keep the reasoner runtime pluggable — don't pre-commit beyond the rdflib+owlrl
+seed.
+
+**Hardening that must land before any untrusted RDF/ontology is parsed (carry into the Story):**
+rdflib's RDF/XML path uses `xml.sax` and resolves external entities — an **XXE/SSRF** exposure if
+`format="xml"`/`application/rdf+xml` ever ingests untrusted input. Mandate **`defusedxml`** +
+disabled entity resolution. But `defusedxml` closes only the XML path: rdflib/owlrl can *also*
+reach the network/filesystem via **`owl:imports`, linked contexts, and other format parsers** — so
+the acceptance criteria must require **offline parsing/import for *all* accepted RDF formats** (no
+network or local-file retrieval of imports/contexts), not just the XML case, to close the residual
+SSRF/exfiltration gap. Also input-validate snapshot fields (`namespace`/`id`/`label`) before they
+become URIRefs. The spike's hand-curated gUFO subset must be replaced with the canonical `gufo.ttl`
+for production.
+
+If materialization or reasoner cost proves impractical at scale, fall back to Option 3 and revisit
+when a concrete inference requirement forces it.
 
 ## Pros and Cons of the Options
 
@@ -60,6 +108,6 @@ Lean **Option 1** (pluggable gUFO ‖ BFO, reasoner-behind-the-UDA, gUFO-first),
 ## Sources / references
 
 - Research: backend-core #60 (`0001-trinity-graph-engine.md`), #62 (`0002-ontology-reasoning-layer.md`)
-- Spike: backend-core #63 (gUFO reasoning PoC)
+- Spike: backend-core #65 (runnable gUFO reasoning PoC + store/reasoner build-vs-buy; `spikes/ontology-reasoning/`)
 - Inputs: middle-core #49 (gUFO OWL emitter); the Labs `knowledge-graph-snapshot` object + "one model, many projections" vision
 - Related: [ADR-005](ARC-ADR-005-backend-core-openapi-contract.md), [ADR-009](ARC-ADR-009-canonical-data-model-arrow.md); ADR-BACKLOG #016 (ontology *representation* — reification/hyperedges — distinct from this *reasoning* layer; the two compose)
