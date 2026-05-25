@@ -16,5 +16,6 @@ tags: [vision, open-question]
 - When does **ArcadeDB persistence + temporal snapshots** arrive (follow-up slice)?
 - Does the [[Universal Data Adapter]] register its connectors as **modeled objects** from day one, so the two threads share `model.yaml`?
 - How do **non-deterministic agents** propose model changes safely — via PRs/decision-records against the model?
+- **Offer both upper ontologies?** We author in UFO/gUFO but want a BFO 2020 + CCO alignment too (interop with [[IKW-GraphEngine (Parallel Track)]]). Keep one IR, emit *both* as alignment projections — where do UFO↔BFO commitments diverge, and is the divergence list maintainable?
 
 Related: [[Model-Driven Platform]], [[Evidence as a Primitive]].

@@ -41,6 +41,9 @@ gUFO is the core identity/aspect discipline layer (a lightweight OWL 2 DL implem
 
 Today the repo references two local ontologies (`model/middle-core/ontology/middle-core.ttl`, `top-level-ufo-lite.ttl`) as a gUFO bridge. The URIs above are the upstream catalog we vendor/pin from as the pipeline matures.
 
+> [!note] Offer both upper ontologies (UFO **and** BFO)
+> UFO/gUFO is our **primary** authoring + reasoning discipline. We also want a **BFO 2020 + CCO** alignment for interop with [[IKW-GraphEngine (Parallel Track)]]. Treat the upper-ontology grounding as *another projection*: keep one OntoUML-stereotyped IR and emit **both** alignments (gUFO OWL + BFO Common Logic), shipping a documented mapping + divergence list rather than a lossless round-trip.
+
 ## Canonical IR — the nervous system
 
 A YAML/JSON-Schema model (LinkML-like) is the stable transformation target every generator, source-generator, validator, and CI step reads. It must express types with stereotypes (`kind`, `subkind`, `role`, `phase`, `relator`, `event`, `situation`, `quality`, `mode`, `category`, `mixin`), **n-ary relations as first-class relators**, constraints, and per-element provenance.

@@ -22,6 +22,8 @@ The controlled vocabulary for this vault. **Use these tags consistently** so not
 - [[Scenarios as Agent Tools]]
 - [[Governance in the Model]]
 - [[Prior Art]]
+- [[IKW-GraphEngine (Parallel Track)]]
+- [[UFO & GraphEngine Ecosystem]]
 - [[Open Questions and Risks]]
 
 ### Middle-Core ontology

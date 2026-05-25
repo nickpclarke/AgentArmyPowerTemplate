@@ -12,6 +12,7 @@ Don't invent in a vacuum — these solve adjacent pieces of the model-driven vis
 - **dbt** — models → compiled, tested, documented SQL; the "disposable compiled artifact + tested model" discipline.
 - **Model-Driven Engineering (EMF/Ecore)** — decades of metamodel→codegen lessons (and the maintenance traps to avoid → [[Codegen vs Interpreted]]).
 - **JSON Canvas / RDF knowledge graphs** — the graph substrate; ArcadeDB is the runtime store.
+- **[[IKW-GraphEngine (Parallel Track)|IKW-GraphEngine]]** — a friendly sibling project (Trinity/Graph Engine + BFO/CCO semantics, native hypergraphs, TSL→C# codegen, LIKQ). *Parallel learning track*, not a foundation: we stay OntoUML/UFO but design to **offer both** upper ontologies as projections.
 
 > [!question] Build-vs-borrow
 > The generator is the riskiest hand-built piece. **LinkML** could do much of it. Spike: can LinkML (or a thin wrapper) emit the C# contracts we need, or is a custom Python generator genuinely warranted?

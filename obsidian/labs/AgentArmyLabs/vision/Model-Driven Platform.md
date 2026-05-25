@@ -18,6 +18,7 @@ This is the convergence of two threads we've been treating separately:
 - [[Skills as a Projection]] — the model as a *skill factory* (C# is just one output)
 - [[Governance in the Model]] — policy/DMN/SHACL as data, not bolt-ons
 - [[Prior Art]] — LinkML, Foundry, EnterpriseWeb, Temporal, dbt
+- [[IKW-GraphEngine (Parallel Track)]] — sibling engine; offer *both* UFO and BFO as projections
 - [[Open Questions and Risks]] — where this could go wrong
 
 > [!tip] Why it matters for AgentArmy

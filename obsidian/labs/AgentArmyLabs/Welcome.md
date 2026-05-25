@@ -22,6 +22,10 @@ tags: [moc]
 ### Converging thread
 - [[Universal Data Adapter]] — connection registry whose CDM is the *same model*
 
+### Parallel track
+- [[IKW-GraphEngine (Parallel Track)]] — friendly sibling engine (Trinity + BFO/CCO); learn alongside, offer *both* upper ontologies as projections
+- [[UFO & GraphEngine Ecosystem]] — research learnings: InKnowWorks stack + the OntoUML/UFO toolchain
+
 ### Reference
 - [[Taxonomy]] — tags + glossary (use these everywhere)
 
