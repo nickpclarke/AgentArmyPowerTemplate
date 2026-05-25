@@ -173,7 +173,10 @@ nav:
       - ARC-ADR-007 Agent Streaming Protocol (proposed): decisions/ARC-ADR-007-agent-streaming-protocol.md
       - ARC-ADR-008 Agent Memory Store (proposed): decisions/ARC-ADR-008-agent-memory-store.md
       - ARC-ADR-009 Canonical Data Model + Arrow (proposed): decisions/ARC-ADR-009-canonical-data-model-arrow.md
-      - ARC-ADR-010 Observability Standard (proposed): decisions/ARC-ADR-010-observability-standard.md
+      - ARC-ADR-010 Observability Standard: decisions/ARC-ADR-010-observability-standard.md
+      - ARC-ADR-011 Secret Resolution + Workload Identity (proposed): decisions/ARC-ADR-011-runtime-secret-resolution-workload-identity.md
+      - ARC-ADR-012 Read-Query Caching (proposed): decisions/ARC-ADR-012-read-query-caching-invalidation.md
+      - ARC-ADR-013 Per-Connection RBAC (proposed): decisions/ARC-ADR-013-per-connection-rbac-role-taxonomy.md
   - Resources:
     - Memory Palace System: mempalace.md
     - FAQ: faq.md
