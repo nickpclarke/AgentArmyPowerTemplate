@@ -1,6 +1,7 @@
 site_name: AgentArmy
 site_description: AI-powered software development template with coordinated Claude Code, GitHub Copilot, and dlt agents
 site_author: nickpclarke
+site_url: https://nickpclarke.github.io/AgentArmy/
 repo_url: https://github.com/nickpclarke/AgentArmy
 repo_name: AgentArmy
 edit_uri: edit/main/docs/

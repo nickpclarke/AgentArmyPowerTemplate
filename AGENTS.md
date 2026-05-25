@@ -9,6 +9,10 @@ this repo's `CLAUDE.md`, not here. The hub is a template (no app code); each spo
 real layer implementation with code to build and ship. Everything below applies to all
 of them.
 
+**Full documentation:** https://nickpclarke.github.io/AgentArmy/ — setup, agents,
+GitHub Projects, HITL, deployment, and n-layer architecture are published there. Spoke
+repos do not carry the hub's `docs/`, so use this link to read them.
+
 ## Task Backbone — depends on where you are
 
 **In the hub:** all work items live on the attached GitHub Projects v2 board.

@@ -30,6 +30,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -45,6 +46,9 @@ SEED_CLAUDE_MD = """# {spoke} — repository guidance
 
 This repository is an AgentArmy **spoke** (a layer implementation). Unlike the hub
 template, it contains real source code to build, run, test, and deploy.
+
+**Full AgentArmy docs:** https://nickpclarke.github.io/AgentArmy/ (this repo does not
+carry the hub's `docs/` — read them at that link).
 
 ## Shared agent guidance
 
@@ -185,7 +189,11 @@ def sync_spoke(spoke: str, cfg: dict, paths: list[str], hub_sha: str, dry_run: b
              "agentarmy-sync@users.noreply.github.com"])
         run(["git", "-C", str(dest), "commit", "-m",
              f"chore: sync Claude Code helpers from {cfg.get('source_repo')} @ {hub_sha[:7]}"])
-        run(["git", "-C", str(dest), "push", "--force-with-lease", "origin", branch])
+        # Plain --force (not --force-with-lease): the shallow `--branch main` clone has no
+        # remote-tracking ref for the sync branch, so --force-with-lease fails with
+        # "stale info" on re-runs once the branch exists remotely. This branch is
+        # bot-owned and regenerated from the hub each run, so unconditional force is safe.
+        run(["git", "-C", str(dest), "push", "--force", "origin", branch])
 
         number = run(["gh", "pr", "list", "--repo", repo, "--head", branch,
                       "--json", "number", "--jq", ".[0].number"], check=False).stdout.strip()
@@ -209,8 +217,24 @@ def sync_spoke(spoke: str, cfg: dict, paths: list[str], hub_sha: str, dry_run: b
         if not merge:
             return f"pr#{number} (open)"
 
-        # Land it — the whole point is that the helpers reach the spoke's default branch.
-        run(["gh", "pr", "merge", number, "--repo", repo, "--squash", "--admin", "--delete-branch"])
+        # GitHub computes mergeability asynchronously after a push; merging too soon
+        # fails with "not mergeable". Poll until the state is known, then admin-merge
+        # (bypasses required checks/reviews, but still needs a conflict-free state).
+        state = ""
+        for _ in range(15):
+            state = run(["gh", "pr", "view", number, "--repo", repo,
+                         "--json", "mergeable", "--jq", ".mergeable"], check=False).stdout.strip()
+            if state in ("MERGEABLE", "CONFLICTING"):
+                break
+            time.sleep(2)
+        if state == "CONFLICTING":
+            print(f"  PR #{number}: conflicts — left open for manual resolution")
+            return f"pr#{number} (conflicts)"
+        merged = run(["gh", "pr", "merge", number, "--repo", repo,
+                      "--squash", "--admin", "--delete-branch"], check=False)
+        if merged.returncode != 0:
+            print(f"  PR #{number}: auto-merge failed ({merged.stderr.strip()[:140]}) — left open")
+            return f"pr#{number} (merge failed)"
         print(f"  merged PR #{number} into {base}")
         return f"merged#{number}"
 
@@ -239,7 +263,13 @@ def main() -> int:
 
     print(f"hub {cfg.get('source_repo')} @ {hub_sha[:7]} -> {len(spokes)} spoke(s)"
           + (" [auto-merge]" if merge else " [PR only]") + (" [DRY RUN]" if args.dry_run else ""))
-    results = {s: sync_spoke(s, cfg, paths, hub_sha, args.dry_run, merge) for s in spokes}
+    results = {}
+    for s in spokes:
+        try:
+            results[s] = sync_spoke(s, cfg, paths, hub_sha, args.dry_run, merge)
+        except Exception as e:  # one spoke failing must not abort the others
+            results[s] = f"ERROR: {str(e).splitlines()[0][:120]}"
+            print(f"  {s}: ERROR — {str(e).splitlines()[0][:160]}")
 
     print("\n=== summary ===")
     for spoke, res in results.items():
