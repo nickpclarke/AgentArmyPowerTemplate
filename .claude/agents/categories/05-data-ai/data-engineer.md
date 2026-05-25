@@ -1,6 +1,6 @@
 ---
 name: data-engineer
-description: "Use this agent when you need to design, build, or optimize data pipelines, ETL/ELT processes, and data infrastructure. Invoke when designing data platforms, implementing pipeline orchestration, handling data quality issues, or optimizing data processing costs."
+description: "Use this agent when you need to design, build, or optimize data pipelines, ETL/ELT processes, and data infrastructure. Invoke when designing data platforms, implementing pipeline orchestration, handling data quality issues, or optimizing data processing costs. Boundary: I move and transform data (ETL/ELT pipelines, warehousing) — for building the semantic/knowledge layer on top of that data (ontology-grounded KGs, reasoners, SPARQL), use knowledge-engineer (12-knowledge-ontology)."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

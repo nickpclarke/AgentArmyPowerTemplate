@@ -1,0 +1,4 @@
+# OntoUML authoring source lands here (e.g. model.ontouml.json), aligned to the
+# ontouml-metamodel JSON schema so it can plug into OntoUML Server (OaaS) verification.
+# Optional: the canonical source of truth is ../model/model.yaml. Keep this dir even
+# when empty so the scaffold is complete.

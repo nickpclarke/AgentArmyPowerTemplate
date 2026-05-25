@@ -227,6 +227,31 @@ TOGAF ADM-aligned EA specialists for US commercial and federal contexts. All age
 
 ---
 
+## Knowledge & Ontology Agents
+
+The semantic layer — foundational/applied ontologies, vocabularies, and knowledge graphs. Backs the ontology-derived generative pipeline (UFO authoring + BFO/CCO interop projection). Arranged on a formality gradient for unambiguous routing. Full README: [.claude/agents/categories/12-knowledge-ontology/README.md](../.claude/agents/categories/12-knowledge-ontology/README.md).
+
+| Agent | Speciality | Skill | Model |
+|---|---|---|---|
+| `ontologist-ufo` | UFO/OntoUML/gUFO conceptual modeling — stereotypes, relators, anti-patterns (primary authoring discipline) | `ufo-ontology` | opus |
+| `ontologist-bfo` | BFO 2020 / OBO / CCO realist ontology + BFO/CCO interop projection | `bfo-ontology` | opus |
+| `ontologist-generalist` | Foundation-agnostic OWL/RDFS/SHACL, reuse & alignment, competency questions; cluster router | both (lightly) | sonnet |
+| `knowledge-engineer` | KG construction & population, rules, reasoners, SPARQL, KB lifecycle | both | sonnet |
+| `taxonomist` | Taxonomies, thesauri, SKOS, controlled vocabularies, facets (non-axiomatized) | — | sonnet |
+
+**Boundaries:** `information-architect` owns enterprise *data* architecture/governance (not formal semantics); `knowledge-synthesizer` learns from *agent interactions* (not domain KGs); `nlp-engineer` extracts from *text* (knowledge-engineer integrates & reasons).
+
+### Dual upper-ontology projection ("offer both")
+
+```
+1. ontologist-ufo        → OntoUML/gUFO source model (the design discipline)
+2. ontologist-bfo        → BFO/CCO realist sidecar (the interop projection)
+   ↳ ship mapping table + divergence list (best-effort, not a round-trip)
+3. knowledge-engineer    → populate & reason over both projections
+```
+
+---
+
 ## Agent Chaining Patterns
 
 ### Feature implementation (SAFE Story)

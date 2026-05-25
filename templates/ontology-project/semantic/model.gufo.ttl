@@ -1,0 +1,40 @@
+# GENERATED from model/model.yaml — do not hand-edit. gUFO projection (validation Level 3 target).
+# Reason over this with HermiT/ELK for satisfiability, disjointness, subsumption.
+@prefix ex:   <https://agentarmy.dev/ex/rmp#> .
+@prefix gufo: <http://purl.org/nemo/gufo#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+ex: a owl:Ontology ;
+    owl:imports <http://purl.org/nemo/gufo> .
+
+# --- Object kinds (rigid sortals; instances are gufo:Objects) ---
+ex:Person  a owl:Class, gufo:Kind ; rdfs:subClassOf gufo:Object ; rdfs:label "Person" .
+ex:Risk    a owl:Class, gufo:Kind ; rdfs:subClassOf gufo:Object ; rdfs:label "Risk" .
+ex:Control a owl:Class, gufo:Kind ; rdfs:subClassOf gufo:Object ; rdfs:label "Control" .
+ex:EvidenceBundle a owl:Class, gufo:Kind ; rdfs:subClassOf gufo:Object ; rdfs:label "Evidence Bundle" .
+
+# --- Role (anti-rigid sortal specializing a kind) ---
+ex:RiskOwner a owl:Class, gufo:Role ; rdfs:subClassOf ex:Person ; rdfs:label "Risk Owner" .
+
+# --- Quality (intrinsic moment characterizing its bearer) ---
+ex:RiskSeverity a owl:Class, gufo:QualityType ; rdfs:subClassOf gufo:Quality ; rdfs:label "Risk Severity" .
+ex:RiskSeverity rdfs:subClassOf [ a owl:Restriction ; owl:onProperty gufo:inheresIn ; owl:allValuesFrom ex:Risk ] .
+
+# --- Relator (mediates its participants; truthmaker of «material» mitigates) ---
+ex:MitigationCase a owl:Class, gufo:RelatorType ; rdfs:subClassOf gufo:Relator ; rdfs:label "Mitigation Case" .
+ex:MitigationCase rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty gufo:mediates ; owl:someValuesFrom ex:Risk ] ,
+    [ a owl:Restriction ; owl:onProperty gufo:mediates ; owl:someValuesFrom ex:Control ] ,
+    [ a owl:Restriction ; owl:onProperty gufo:mediates ; owl:qualifiedCardinality 1 ; owl:onClass ex:RiskOwner ] ,
+    [ a owl:Restriction ; owl:onProperty gufo:mediates ; owl:qualifiedCardinality 1 ; owl:onClass ex:EvidenceBundle ] .
+
+# Roles realized as gufo:mediates sub-properties (one per IR role)
+ex:mitigatedRisk     rdfs:subPropertyOf gufo:mediates ; rdfs:domain ex:MitigationCase ; rdfs:range ex:Risk .
+ex:mitigatingControl rdfs:subPropertyOf gufo:mediates ; rdfs:domain ex:MitigationCase ; rdfs:range ex:Control .
+ex:accountableOwner  rdfs:subPropertyOf gufo:mediates ; rdfs:domain ex:MitigationCase ; rdfs:range ex:RiskOwner .
+ex:evidence          rdfs:subPropertyOf gufo:mediates ; rdfs:domain ex:MitigationCase ; rdfs:range ex:EvidenceBundle .
+
+# «material» relation derived from the relator
+ex:mitigates a owl:ObjectProperty ; rdfs:domain ex:Control ; rdfs:range ex:Risk ; rdfs:label "mitigates" .

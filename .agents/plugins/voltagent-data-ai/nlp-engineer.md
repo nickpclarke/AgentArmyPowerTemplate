@@ -1,6 +1,6 @@
 ---
 name: nlp-engineer
-description: "Use when building production NLP systems, implementing text processing pipelines, developing language models, or solving domain-specific NLP tasks like named entity recognition, sentiment analysis, or machine translation."
+description: "Use when building production NLP systems, implementing text processing pipelines, developing language models, or solving domain-specific NLP tasks like named entity recognition, sentiment analysis, or machine translation. Boundary: I extract entities/relations from TEXT; for integrating and reasoning over them in an ontology-grounded knowledge graph, use knowledge-engineer (12-knowledge-ontology)."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

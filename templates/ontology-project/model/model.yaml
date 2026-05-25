@@ -1,0 +1,134 @@
+# Worked example IR — validates against ../ontology.ir.schema.json (validation Level 1).
+# Domain: risk mitigation. Showcases kind / role / quality / enumeration types,
+# an n-ary RELATOR (hyperedge-as-vertex) with typed roles + bitemporal validity,
+# material/characterization relations, layered constraints, and the dual projection.
+ontology:
+  id: risk-mitigation-example
+  version: 0.1.0
+  foundation: UFO/gUFO
+  default_namespace: https://agentarmy.dev/ex/rmp#
+  imports:
+    - { prefix: gufo, uri: "http://purl.org/nemo/gufo#" }
+    - { prefix: prov, uri: "http://www.w3.org/ns/prov#" }
+    - { prefix: time, uri: "http://www.w3.org/2006/time#" }
+    - { prefix: obo,  uri: "http://purl.obolibrary.org/obo/" }
+    - { prefix: cco,  uri: "https://www.commoncoreontologies.org/" }
+
+types:
+  - id: Risk
+    stereotype: kind
+    identity: functional-complex
+    rigidity: rigid
+    gufo_type: gufo:Kind
+    # Risk has no clean single BFO home (disposition-vs-role debate) — left unset,
+    # divergence recorded in ../docs/mapping-rules.md.
+    description: "A recognized uncertain condition relevant to value, obligation, or outcome."
+    properties:
+      - { id: likelihood, range: LikelihoodLevel, cardinality: "0..1" }
+    provenance: { source: "risk-register-SME", recorded_at: "2026-05-25T00:00:00Z" }
+
+  - id: Control
+    stereotype: kind
+    identity: functional-complex
+    rigidity: rigid
+    gufo_type: gufo:Kind
+    description: "A measure put in place to reduce the likelihood or impact of a risk."
+    properties:
+      - { id: controlObjective, range: string, cardinality: "1..1" }
+
+  - id: Person
+    stereotype: kind
+    identity: functional-complex
+    rigidity: rigid
+    gufo_type: gufo:Kind
+    bfo_class: cco:Person
+    description: "A human being."
+
+  - id: EvidenceBundle
+    stereotype: kind
+    rigidity: rigid
+    gufo_type: gufo:Kind
+    bfo_class: obo:IAO_0000030   # information content entity (a generically dependent continuant)
+    description: "A packaged set of artifacts evidencing that a control is operating."
+
+  - id: RiskOwner
+    stereotype: role
+    parent: Person
+    identity: inherited
+    rigidity: anti-rigid
+    gufo_type: gufo:Role
+    description: "A Person who is accountable for a risk by virtue of participating in its mitigation."
+
+  - id: RiskSeverity
+    stereotype: quality
+    gufo_type: gufo:Quality
+    description: "The severity aspect of a risk, valued in the SeverityLevel space."
+    properties:
+      - { id: value, range: SeverityLevel, cardinality: "1..1" }
+
+  - id: SeverityLevel
+    stereotype: enumeration
+    literals: [Low, Medium, High, Critical]
+
+  - id: LikelihoodLevel
+    stereotype: enumeration
+    literals: [Rare, Unlikely, Possible, Likely, AlmostCertain]
+
+relators:
+  - id: mitigation-case
+    stereotype: relator
+    description: "Reifies the n-ary fact that controls, owned by a person and backed by evidence, mitigate a risk over a time window."
+    roles:
+      - { name: mitigatedRisk,     participant_type: Risk,           cardinality: "1..*" }
+      - { name: mitigatingControl, participant_type: Control,        cardinality: "1..*" }
+      - { name: accountableOwner,  participant_type: RiskOwner,      cardinality: "1..1" }
+      - { name: evidence,          participant_type: EvidenceBundle, cardinality: "1..1" }
+    properties:
+      - { id: assembledAt, range: string, cardinality: "1..1" }
+    temporal: { valid_from: validFrom, valid_to: validTo, recorded_at: recordedAt }
+    bfo_pattern: interdependent-roles
+    provenance: { source: "knowledge-drop", generated_by: "modelgen", recorded_at: "2026-05-25T00:00:00Z" }
+
+relations:
+  - id: mitigates
+    stereotype: material
+    source: Control
+    target: Risk
+    derived_from: mitigation-case
+    source_cardinality: "1..*"
+    target_cardinality: "1..*"
+  - id: hasSeverity
+    stereotype: characterization
+    source: RiskSeverity
+    target: Risk
+    source_cardinality: "1..1"
+    target_cardinality: "1..1"
+
+constraints:
+  - id: mitigated-risk-needs-owner
+    language: shacl
+    severity: violation
+    target: mitigation-case
+    expression: "Every mitigation-case must bind exactly one accountableOwner (closed-world)."
+  - id: effective-window-ordered
+    language: smt
+    severity: violation
+    target: mitigation-case
+    expression: "validFrom < validTo"
+  - id: every-risk-mitigatable
+    language: alloy
+    severity: warning
+    target: Risk
+    expression: "There exists a finite world where every Risk participates in some mitigation-case."
+
+projections:
+  gufo: true
+  bfo_cco: true
+  owl: true
+  shacl: true
+  alloy: true
+  smt: true
+  csharp: true
+  arcadedb: true
+  prov: true
+  dlt_anchor: false

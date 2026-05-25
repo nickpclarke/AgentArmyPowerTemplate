@@ -26,7 +26,7 @@ When in doubt, infer intent from the issue/task context (e.g., “update the tem
 ## Repository Layout
 
 ```
-.claude/agents/categories/  → specialist agent definitions (11 categories)
+.claude/agents/categories/  → specialist agent definitions (12 categories)
 .claude/commands/           → local slash commands (/wardley, /ea-adr, /capability-map)
 .claude/skills/             → vendored Agent Skills (Obsidian: markdown/bases/canvas/cli/defuddle)
 .github/workflows/          → GitHub Actions: auto-status, routing, agent-onboarding-validation
@@ -113,6 +113,11 @@ Set the `Type` and `PI` fields on items so they're properly categorised.
 | Data pipeline work (dlt, ELT, connectors) | `dlt-engineer` (source → destination, incremental loading, schema evolution) |
 | Data analysis & modeling | `data-analyst`, `data-scientist`, `data-engineer` |
 | Production ML lifecycle | `machine-learning-engineer` (training pipelines, serving, retraining); `mlops-engineer` (ML platform/CI-CD) |
+| UFO/OntoUML conceptual modeling (primary authoring) | `ontologist-ufo` (stereotypes, relators, anti-patterns, gUFO OWL — loads `ufo-ontology` skill) |
+| BFO 2020 / OBO / CCO realist ontology + interop projection | `ontologist-bfo` (continuant/occurrent, Aristotelian defs, BFO/CCO sidecar — loads `bfo-ontology` skill) |
+| Applied OWL/RDFS/SHACL, ontology reuse & alignment, competency questions | `ontologist-generalist` (foundation-agnostic mid-tier + cluster router) |
+| Knowledge graph construction, rules, reasoners, SPARQL, KB lifecycle | `knowledge-engineer` (operationalizes ontologies into running systems) |
+| Taxonomies, thesauri, SKOS, controlled vocabularies, facets | `taxonomist` (non-axiomatized knowledge organization) |
 | Technical spike / build-vs-buy PoC | `spike-researcher` (time-boxed, runnable PoC + recommendation) |
 | Developer adoption / DevRel | `developer-advocate` (sample apps, external tutorials, community) |
 
@@ -120,6 +125,7 @@ Set the `Type` and `PI` fields on items so they're properly categorised.
 
 - **Contract cluster:** `api-designer` (design the contract) → `contract-test-engineer` (enforce it at runtime/CI across spokes) → `schema-migration-engineer` (evolve the DB behind it safely).
 - **Delivery/ops cluster:** `devops-engineer` (build & operate CI/CD + infra) → `deployment-engineer` (release/rollout strategy for one service) → `release-manager` (coordinate release trains across spoke repos) → `observability-engineer` (produce telemetry) → `sre-engineer` (consume it for SLOs/error budgets) → `finops-engineer` (govern cost) → `api-gateway-engineer` (edge policy).
+- **Knowledge/ontology cluster** (formality gradient): `taxonomist` (SKOS/taxonomies, no axioms) → `ontologist-generalist` (applied OWL/SHACL + cluster router) → `ontologist-ufo` / `ontologist-bfo` (foundational: UFO-design vs BFO-realist, *coordinating* on the dual projection) → `knowledge-engineer` (populate, reason, query). Distinct from `information-architect` (enterprise data architecture/governance) and `knowledge-synthesizer` (agent-interaction learning). See [.claude/agents/categories/12-knowledge-ontology/README.md](.claude/agents/categories/12-knowledge-ontology/README.md).
 
 **Enterprise Architecture specialists** — TOGAF ADM-aligned:
 
@@ -273,9 +279,18 @@ Run these with `/skill-name` in the Claude Code prompt:
 | `/ea-adr [decision topic]` | Architecture Decision Record in MADR v4.0 format |
 | `/capability-map [domain]` | Business capability model + investment heat map |
 
-### Vendored Skills (`.claude/skills/`)
+### Model-invoked Skills (`.claude/skills/`)
 
-Model-invoked [Agent Skills](https://agentskills.io/specification) — Claude auto-triggers them by file type/context (no slash command needed). Vendored from [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) (MIT, © Steph Ango / @kepano):
+[Agent Skills](https://agentskills.io/specification) — Claude auto-triggers them by file type/context (no slash command needed).
+
+**First-party (ontology knowledge bundles)** — loaded by the `12-knowledge-ontology` agents:
+
+| Skill | Triggers on |
+|---|---|
+| `ufo-ontology` | UFO/OntoUML/gUFO modeling — stereotypes, rigidity/sortality, relator reification, anti-patterns, UFO→BFO mapping (primary authoring discipline) |
+| `bfo-ontology` | BFO 2020 grounding — continuant/occurrent, time-indexed relations, OBO/CCO/IAO/RO, Common-Logic-vs-OWL, BFO/CCO interop projection |
+
+**Vendored** from [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) (MIT, © Steph Ango / @kepano):
 
 | Skill | Triggers on |
 |---|---|

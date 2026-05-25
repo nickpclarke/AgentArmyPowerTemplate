@@ -1,4 +1,17 @@
-# Vendored Skills
+# Skills
+
+## First-party skills
+
+Authored for AgentArmy (not vendored). Model-invoked — Claude auto-triggers them by context:
+
+| Skill | Description |
+|-------|-------------|
+| `ufo-ontology` | Model with UFO / OntoUML / gUFO — stereotypes (kind/role/phase/relator…), rigidity & sortality, relator reification, anti-patterns, gUFO OWL, UFO→BFO mapping. The primary authoring discipline. Loaded by `ontologist-ufo`. |
+| `bfo-ontology` | Ground in Basic Formal Ontology (BFO 2020, ISO/IEC 21838-2) — continuant/occurrent hierarchy, time-indexed relations, OBO Foundry/CCO/IAO/RO, Common-Logic-vs-OWL, BFO/CCO interop projection, UFO↔BFO mapping. Loaded by `ontologist-bfo`. |
+
+The two share a UFO↔BFO synthesis (mapping table + divergence list) supporting the "offer both / dual projection" design in the Labs vault. See `.claude/agents/categories/12-knowledge-ontology/`.
+
+## Vendored Skills
 
 ## obsidian-skills
 

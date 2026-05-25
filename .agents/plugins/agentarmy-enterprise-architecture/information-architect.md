@@ -1,6 +1,6 @@
 ---
 name: information-architect
-description: "Use this agent for enterprise information and data architecture: conceptual/logical/physical data models, master data management strategy, data governance frameworks, data lineage, information lifecycle management, and TOGAF Phase C data architecture deliverables. DAMA DMBOK 2 aligned, with US regulatory context (CCPA, HIPAA, FISMA, SOX)."
+description: "Use this agent for enterprise information and data architecture: conceptual/logical/physical data models, master data management strategy, data governance frameworks, data lineage, information lifecycle management, and TOGAF Phase C data architecture deliverables. DAMA DMBOK 2 aligned, with US regulatory context (CCPA, HIPAA, FISMA, SOX). Boundary: I own data-as-asset (CDM/LDM/PDM, MDM, governance, lineage) — for formal semantics/ontologies (OWL/SHACL, UFO/OntoUML, BFO/CCO) use the 12-knowledge-ontology agents (ontologist-generalist/ufo/bfo); for taxonomies/SKOS use taxonomist."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

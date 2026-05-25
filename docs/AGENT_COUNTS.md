@@ -1,6 +1,6 @@
 # Agent Counts by Category
 
-Auto-generated agent inventory. Last updated: 2026-05-25 04:53:36 UTC
+Auto-generated agent inventory. Last updated: 2026-05-25 21:00:22 UTC
 
 | # | Category | Count |
 |---|----------|-------|
@@ -15,7 +15,8 @@ Auto-generated agent inventory. Last updated: 2026-05-25 04:53:36 UTC
 | 9 | Meta Orchestration             | 14 |
 | 10 | Research Analysis              | 9 |
 | 11 | Enterprise Architecture        | 11 |
-|  | **TOTAL** | **172** |
+| 12 | Knowledge Ontology             | 5 |
+|  | **TOTAL** | **177** |
 
 ---
 

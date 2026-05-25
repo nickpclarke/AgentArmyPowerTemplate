@@ -1,6 +1,6 @@
 ---
 name: knowledge-synthesizer
-description: "Use when you need to extract actionable patterns from agent interactions, synthesize insights across multiple workflows, and enable organizational learning from collective experience."
+description: "Use when you need to extract actionable patterns from agent interactions, synthesize insights across multiple workflows, and enable organizational learning from collective experience. Boundary: this is learning from AGENT/workflow runs — for building DOMAIN knowledge graphs about the business/world, use knowledge-engineer (12-knowledge-ontology)."
 tools: Read, Write, Edit, Glob, Grep
 model: sonnet
 ---
