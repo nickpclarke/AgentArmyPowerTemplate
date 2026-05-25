@@ -122,6 +122,7 @@ nav:
     - Task Labeling: copilot-tasks.md
     - Board Manager Extension: board-manager.md
   - Coordination & Planning:
+    - Inter-Layer Contracts: contracts.md
     - Labs (WIP Design Wiki): labs.md
     - GitHub Projects v2: github-projects.md
     - Postman Workspace: postman-workspace.md
