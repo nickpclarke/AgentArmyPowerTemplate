@@ -110,6 +110,7 @@ nav:
     - Routing Matrix: routing-matrix.md
     - Agent Onboarding (Spokes): agent-onboarding.md
     - Spoke Work Intake: spoke-work-intake.md
+    - Agent Collaboration (cross-repo): agent-collaboration.md
   - Claude Code Army:
     - All 159 Agents: agents-glossary/index.md
     - Original Roster: agents.md
