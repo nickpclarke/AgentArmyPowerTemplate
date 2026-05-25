@@ -16,7 +16,7 @@ param projectName    = 'agentarmy'
 // ACR — the shared registry for the nickpclarke fleet
 param acrLoginServer = 'agentarmy.azurecr.io'
 param imageName      = 'aca-github-runner'
-param imageTag       = 'latest'
+param imageTag       = '2.334.0-tools'  // runner v2.334.0 + python/rust/semgrep/dotnet-dir toolchain layer
 
 // Leave empty to create a new ACA environment dedicated to CI runners.
 // Set to an existing environment name to co-locate with other services:

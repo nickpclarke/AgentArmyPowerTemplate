@@ -48,6 +48,13 @@ param imageName string = 'aca-github-runner'
 @description('Runner image tag to deploy.')
 param imageTag string = 'latest'
 
+@description('ACR admin username for image pull. Use managed identity instead when AAD data-plane RBAC is available on the registry; this is the fallback for registries where only admin auth works.')
+param acrUsername string = ''
+
+@secure()
+@description('ACR admin password (passed at deploy time; stored only as an ACA secret, never in the template). Leave empty to pull via the managed identity instead.')
+param acrPassword string = ''
+
 @description('Name of an existing Container Apps Environment to reuse. Leave empty to create a new Consumption-tier environment.')
 param containerAppsEnvironmentName string = ''
 
@@ -260,6 +267,36 @@ var resolvedEnvName = empty(containerAppsEnvironmentName)
 //   drop and does not scale out further when the queue is empty.
 // ---------------------------------------------------------------------------
 
+// Registry auth: prefer the managed identity; fall back to ACR admin creds when an
+// acrPassword is supplied (some registries don't honor AAD data-plane RBAC for pulls).
+var useAdminCreds = !empty(acrPassword)
+var kvPatSecret = {
+  name: acaSecretNamePat
+  keyVaultUrl: '${keyVault.properties.vaultUri}secrets/${kvSecretNamePat}'
+  identity: uami.id
+}
+var jobSecrets = useAdminCreds ? [
+  kvPatSecret
+  {
+    name: 'acr-password'
+    value: acrPassword
+  }
+] : [
+  kvPatSecret
+]
+var jobRegistries = useAdminCreds ? [
+  {
+    server: acrLoginServer
+    username: acrUsername
+    passwordSecretRef: 'acr-password'
+  }
+] : [
+  {
+    server: acrLoginServer
+    identity: uami.id
+  }
+]
+
 resource runnerJob 'Microsoft.App/jobs@2023-11-02-preview' = [for repo in repos: {
   // ACA job names must be <=32 chars, lowercase, no '--'. Keep it short: gh-runner-<repo>.
   name: toLower('gh-runner-${repo}')
@@ -284,20 +321,9 @@ resource runnerJob 'Microsoft.App/jobs@2023-11-02-preview' = [for repo in repos:
       // ---- ACA secrets backed by Key Vault reference ----
       // The managed identity resolves the secret at runtime; the PAT value is
       // never present in the ARM template, environment variables, or logs.
-      secrets: [
-        {
-          name: acaSecretNamePat
-          keyVaultUrl: '${keyVault.properties.vaultUri}secrets/${kvSecretNamePat}'
-          identity: uami.id
-        }
-      ]
-      // ---- Registry: pull via managed identity (no admin credentials) ----
-      registries: [
-        {
-          server: acrLoginServer
-          identity: uami.id
-        }
-      ]
+      secrets: jobSecrets
+      // ---- Registry: managed identity by default; ACR admin creds when acrPassword is supplied ----
+      registries: jobRegistries
       // ---- KEDA event-driven scale configuration ----
       eventTriggerConfig: {
         parallelism: 1           // one runner execution per triggering event

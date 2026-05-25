@@ -16,7 +16,9 @@
 #   - The runner registers as ephemeral (--ephemeral) — it deregisters after one job,
 #     and the container exits cleanly. KEDA then scales it to zero.
 
-ARG RUNNER_VERSION=2.317.0
+# Keep this current — GitHub deprecates old runner versions and refuses to dispatch
+# jobs to them ("Forbidden Runner version ... is deprecated and cannot receive messages").
+ARG RUNNER_VERSION=2.334.0
 ARG UBUNTU_VERSION=22.04
 
 FROM ubuntu:${UBUNTU_VERSION}
@@ -49,8 +51,18 @@ RUN apt-get update \
       sudo \
       libssl-dev \
       libicu-dev \
+      lsb-release \
+      python3 \
+      python3-pip \
+      python3-venv \
+      build-essential \
+ && ln -sf /usr/bin/python3 /usr/local/bin/python \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+
+# semgrep CLI (some spokes gate on it). Jobs that use the AppSec platform still need
+# SEMGREP_APP_TOKEN as a repo secret; the CLI alone covers local-rule scans.
+RUN pip3 install --no-cache-dir semgrep
 
 # ---------------------------------------------------------------------------
 # Runner user (non-root, uid 1001)
@@ -81,8 +93,20 @@ COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN sed -i 's/\r$//' /usr/local/bin/entrypoint.sh \
  && chmod 0755 /usr/local/bin/entrypoint.sh
 
+# Toolchain locations writable by the non-root runner:
+#  - setup-dotnet installs into DOTNET_INSTALL_DIR (its default /usr/share/dotnet is root-only)
+#  - rustup/cargo live under the runner's home
+ENV DOTNET_INSTALL_DIR=/home/runner/.dotnet \
+    CARGO_HOME=/home/runner/.cargo \
+    RUSTUP_HOME=/home/runner/.rustup \
+    PATH=/home/runner/.dotnet:/home/runner/.cargo/bin:/home/runner/.local/bin:${PATH}
+
 # Drop to non-root for runtime
 USER runner
 WORKDIR /home/runner/actions-runner
+
+# Rust toolchain (backend rust gate) — installed as the runner user into CARGO_HOME.
+RUN curl -fsSL https://sh.rustup.rs | sh -s -- -y --no-modify-path --profile minimal \
+ && /home/runner/.cargo/bin/rustc --version
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
