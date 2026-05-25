@@ -47,8 +47,9 @@ SEED_CLAUDE_MD = """# {spoke} — repository guidance
 This repository is an AgentArmy **spoke** (a layer implementation). Unlike the hub
 template, it contains real source code to build, run, test, and deploy.
 
-**Full AgentArmy docs:** https://nickpclarke.github.io/AgentArmy/ (this repo does not
-carry the hub's `docs/` — read them at that link).
+**Orientation keys** (this repo does not carry the hub's `docs/` — read them here):
+- Docs (settled reality): https://nickpclarke.github.io/AgentArmy/
+- Labs (vision / WIP, Obsidian): https://publish.obsidian.md/xlabs/Welcome
 
 ## Shared agent guidance
 

@@ -9,9 +9,16 @@ this repo's `CLAUDE.md`, not here. The hub is a template (no app code); each spo
 real layer implementation with code to build and ship. Everything below applies to all
 of them.
 
-**Full documentation:** https://nickpclarke.github.io/AgentArmy/ — setup, agents,
-GitHub Projects, HITL, deployment, and n-layer architecture are published there. Spoke
-repos do not carry the hub's `docs/`, so use this link to read them.
+## Orientation keys
+
+Two links anchor every agent — **start here, bookmark both:**
+
+- **Docs — tangible reality:** https://nickpclarke.github.io/AgentArmy/ — the published, settled
+  documentation (setup, agents, routing, HITL, n-layer, deployment, roadmap). Spoke repos don't
+  carry the hub's `docs/`, so read it here.
+- **Labs — vision / WIP:** https://publish.obsidian.md/xlabs/Welcome — the Obsidian vault:
+  research, design-in-progress, ontology/entity-relationship modeling. Where ideas are born and
+  shaped before they graduate to Docs.
 
 ## Task Backbone — depends on where you are
 

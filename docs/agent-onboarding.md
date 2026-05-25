@@ -4,6 +4,15 @@
 
 Welcome. You are an isolated AI agent running in a spoke repository—one layer of a distributed system. This guide gets you oriented and productive.
 
+## Orientation keys
+
+Two links anchor everything — **start here, bookmark both:**
+
+- **Docs — tangible reality:** <https://nickpclarke.github.io/AgentArmy/> — the published, settled documentation. The source of truth you act on.
+- **Labs — vision / WIP:** <https://publish.obsidian.md/xlabs/Welcome> — the Obsidian vault: research, design-in-progress, ontology/ER modeling. Where ideas are born and shaped before they graduate to Docs.
+
+You can reach both as URLs from inside your microVM; you do **not** have the hub's `docs/` or the vault checked out locally.
+
 ---
 
 ## The Landscape: Hub & Spokes
@@ -32,9 +41,9 @@ You run in a **microVM**—a completely isolated filesystem and runtime:
 - `CLAUDE.md` — routing rules and principles specific to spokes
 - `.claude/commands/` — slash commands (`/wardley`, `/ea-adr`, `/capability-map`)
 
-### What you must read at the hub's published Pages
-- **https://nickpclarke.github.io/AgentArmy/** — full docs (armies, setup, diagnostics, cloud patterns)
-- Link directly from docs you read locally to the Pages URL when you need hub context
+### What you must read at the hub's shared surfaces (your two orientation keys)
+- **Docs (reality):** **https://nickpclarke.github.io/AgentArmy/** — full published docs (armies, setup, diagnostics, cloud patterns, roadmap)
+- **Labs (vision/WIP):** **https://publish.obsidian.md/xlabs/Welcome** — the Obsidian vault for research, design-in-progress, and ontology/ER modeling
 
 ### What you CANNOT access
 - ❌ The hub repository itself (no direct git access)
@@ -121,7 +130,8 @@ Work arrives as **Epics** or **Features** with:
 | [n-layer-spoke-rules.md](n-layer-spoke-rules.md) | Layer identity, data boundaries, coordination rules |
 | [SAFE.md](safe.md) | Planning structure (PIs, sprints, estimation) |
 | [github-projects.md](https://nickpclarke.github.io/AgentArmy/github-projects/) | Hub board coordination (reference only; you won't use this) |
-| [github-pages](https://nickpclarke.github.io/AgentArmy/) | Full hub documentation site |
+| [Docs site (reality)](https://nickpclarke.github.io/AgentArmy/) | **Orientation key** — full published hub docs |
+| [Labs vault (vision)](https://publish.obsidian.md/xlabs/Welcome) | **Orientation key** — Obsidian WIP/design vault |
 
 ---
 
