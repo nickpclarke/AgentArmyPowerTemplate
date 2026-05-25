@@ -15,6 +15,7 @@ The RT1–RT4 platform-evolution backlog: **4 Epics + 21 Features** (issues #17�
 | RT3 — Spoke Readiness | [#31](https://github.com/nickpclarke/AgentArmy/issues/31) | #32–36 | PI-2 |
 | RT4 — Learning & Intelligence | [#37](https://github.com/nickpclarke/AgentArmy/issues/37) | #38–41 | PI-3 |
 | RT5 — Ontology-Grade Persistence | _to be created (PIN-E)_ | _PIN-F1–F4, EN1–EN2, S1–S2_ | PI-3 (candidate) |
+| RT7 — Middle-Core Runtime | [#7](https://github.com/nickpclarke/middle-core/issues/7) (middle-core repo) | [#8](https://github.com/nickpclarke/middle-core/issues/8)–[#16](https://github.com/nickpclarke/middle-core/issues/16) | PI-3 (candidate) |
 
 **RT5 (candidate, not yet on board):** the ontology-grade object-pinning Epic for the
 `middle-core` repo — 9 items decomposed with SAFE fields, acceptance criteria, and dependencies in

@@ -136,6 +136,7 @@ nav:
     - Platform Roadmap: roadmap/PLATFORM_ROADMAP.md
     - Release Train Index: release-trains/release-train-index.md
     - RT5 Ontology-Grade Persistence: release-trains/RT5-ontology-grade-persistence.md
+    - RT7 Middle-Core Runtime: release-trains/RT7-middle-core-runtime.md
     - ArcKit Synthesis: synthesis/ARCKIT_SYNTHESIS.md
     - Verification Levels (L1-L6): synthesis/RT-verification-levels.md
     - Spike — ArcadeDB Upsert (PIN-S1): synthesis/RT5-PIN-S1-arcadedb-upsert.md
