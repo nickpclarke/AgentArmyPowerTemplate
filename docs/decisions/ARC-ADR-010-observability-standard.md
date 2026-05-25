@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | ID | ARC-ADR-010 |
-| Status | Proposed |
+| Status | Accepted |
 | Date | 2026-05-25 |
-| Deciders | Architecture Review (HITL — to be decided) |
+| Deciders | Architecture Review; accepted by hub owner 2026-05-25 |
 | Supersedes | — |
 | Superseded by | — |
 | Tags | observability, opentelemetry, otel, prometheus, grafana, middle-core, backend-core, frontend-core, sre |
@@ -70,7 +70,7 @@ correlatable telemetry surface.
 
 ## Decision Outcome
 
-**To be decided.** HITL — the Architecture Review (with `observability-engineer` / `sre-engineer`
+**Accepted 2026-05-25 — Option 1: OpenTelemetry for all signals (OTLP everywhere) + Prometheus/Grafana, generalizing RT7's naming convention.** The HITL framing that produced this choice: HITL — the Architecture Review (with `observability-engineer` / `sre-engineer`
 input) must choose, because this sets a fleet-wide convention every spoke inherits and partly
 ratifies/redirects what RT7 is already building.
 

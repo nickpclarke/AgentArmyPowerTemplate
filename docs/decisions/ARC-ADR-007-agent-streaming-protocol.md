@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | ID | ARC-ADR-007 |
-| Status | Proposed |
+| Status | Accepted |
 | Date | 2026-05-25 |
-| Deciders | Architecture Review (HITL — to be decided) |
+| Deciders | Architecture Review; accepted by hub owner 2026-05-25 |
 | Supersedes | — |
 | Superseded by | — |
 | Tags | streaming, copilotkit, middle-core, frontend-core, sse, websocket, transport |
@@ -67,7 +67,7 @@ the JWT rides it.
 
 ## Decision Outcome
 
-**To be decided.** This is an HITL decision — the Architecture Review (or hub owner) must choose,
+**Accepted 2026-05-25 — Option 1: CopilotKit-native transport, with SSE as the documented fallback.** The HITL framing that produced this choice: This is an HITL decision — the Architecture Review (or hub owner) must choose,
 because the trade-off (lock-in to CopilotKit's evolving transport vs. control over an explicit
 SSE/WebSocket contract) is a strategic coupling call, not a mechanical one.
 

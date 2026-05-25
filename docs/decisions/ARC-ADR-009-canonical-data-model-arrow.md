@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | ID | ARC-ADR-009 |
-| Status | Proposed |
+| Status | Accepted |
 | Date | 2026-05-25 |
-| Deciders | Architecture Review (HITL — to be decided) |
+| Deciders | Architecture Review; accepted by hub owner 2026-05-25 |
 | Supersedes | — |
 | Superseded by | — |
 | Tags | uda, canonical-model, cdm, arrow, adbc, backend-core, middle-core, connectors, contract-first |
@@ -83,7 +83,7 @@ connector and consumer agrees on.
 
 ## Decision Outcome
 
-**To be decided.** HITL — this is a strategic convergence call (is the UDA's model *the* platform
+**Accepted 2026-05-25 — Option 1: the UDA registry is a projection of middle-core model.yaml (bound to MCR-F4 + SchemaVersion); value/type vocabulary via Arrow/ADBC.** The HITL framing that produced this choice: HITL — this is a strategic convergence call (is the UDA's model *the* platform
 model, or its own?) plus a foundational type-system choice that every connector inherits. The
 Architecture Review (with `solution-architect` / `information-architect` input) must decide.
 

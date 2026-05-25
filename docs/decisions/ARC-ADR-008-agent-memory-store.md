@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | ID | ARC-ADR-008 |
-| Status | Proposed |
+| Status | Accepted |
 | Date | 2026-05-25 |
-| Deciders | Architecture Review (HITL — to be decided) |
+| Deciders | Architecture Review; accepted by hub owner 2026-05-25 |
 | Supersedes | — |
 | Superseded by | — |
 | Tags | memory, thread-state, langgraph, checkpointer, middle-core, isolation, copilotkit |
@@ -70,7 +70,7 @@ in-process store immediately wrong).
 
 ## Decision Outcome
 
-**To be decided.** HITL — the Architecture Review must choose. The isolation mechanism (D3) is the
+**Accepted 2026-05-25 — Option 3: ArcadeDB-backed checkpointer (reuse the platform ArcadeDB); the principal-scoped thread-key isolation rule (key derived server-side from JWT sub) applies regardless of backend.** The HITL framing that produced this choice: HITL — the Architecture Review must choose. The isolation mechanism (D3) is the
 load-bearing part and is *common to every option*; the open question is the backend.
 
 ### Recommendation note (not a decision)
