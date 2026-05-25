@@ -129,12 +129,12 @@ public sealed class ModelGraphTests
         graph.AddObject("ks-1", BusinessObjectTypes.KnowledgeSource, new object());
 
         var before = graph.Snapshot();
-        Assert.Equal(1, before.Objects.Count);
+        Assert.Single(before.Objects);
 
         graph.AddObject("ks-2", BusinessObjectTypes.KnowledgeSource, new object());
 
         var after = graph.Snapshot();
-        Assert.Equal(1, before.Objects.Count);  // unchanged
+        Assert.Single(before.Objects);  // unchanged
         Assert.Equal(2, after.Objects.Count);
     }
 
