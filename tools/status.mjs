@@ -18,7 +18,7 @@ const FAST = ARGV.includes("--fast") || ARGV.includes("--no-network");
 const COLOR = process.stdout.isTTY && !ARGV.includes("--no-color");
 
 const HUB = "nickpclarke/AgentArmy";
-const SPOKES = ["nickpclarke/frontend-core", "nickpclarke/backend-core"];
+const SPOKES = ["nickpclarke/frontend-core", "nickpclarke/backend-core", "nickpclarke/middle-core"];
 const TARGETS = [
   "Azure Container Apps (dev)",
   "ArcadeDB (Azure ACI rg-arcadedb-test)",
@@ -89,15 +89,11 @@ function prLine(p) {
 const truncate = (s, n) => (s && s.length > n ? s.slice(0, n - 1) + "…" : s || "");
 
 async function main() {
-  const model = await readJson("templates/middle-core/generated/model-runtime.fixture.json");
-  const modelYaml = await readText("model/middle-core/model.yaml");
-  const schema = (modelYaml && (modelYaml.match(/schema_version:\s*(\S+)/) || [])[1]) || "?";
-
   // gather everything in parallel
   const [
     branch, head, dirty,
     vNode, vDotnet, vPython, vGh, vAz, vGcloud, vDocker,
-    hubPRs, fePRs, bePRs,
+    hubPRs, fePRs, bePRs, mcPRs,
     gate, issues, merged, notes,
   ] = await Promise.all([
     run("git", ["rev-parse", "--abbrev-ref", "HEAD"]).then((r) => r.out),
@@ -109,7 +105,8 @@ async function main() {
     ghJson(["pr", "list", "--repo", HUB, "--state", "open", "--json", "number,title,isDraft,headRefName"]),
     ghJson(["pr", "list", "--repo", SPOKES[0], "--state", "open", "--json", "number"]),
     ghJson(["pr", "list", "--repo", SPOKES[1], "--state", "open", "--json", "number"]),
-    ghJson(["run", "list", "--repo", HUB, "--workflow", "middle-core-model.yml", "--limit", "1", "--json", "conclusion,status"]),
+    ghJson(["pr", "list", "--repo", SPOKES[2], "--state", "open", "--json", "number"]),
+    ghJson(["run", "list", "--repo", "nickpclarke/middle-core", "--workflow", "middle-core-model.yml", "--limit", "1", "--json", "conclusion,status"]),
     ghJson(["issue", "list", "--repo", HUB, "--state", "open", "--limit", "100", "--json", "number,title,labels"]),
     ghJson(["pr", "list", "--repo", HUB, "--state", "merged", "--limit", "6", "--json", "number,title"]),
     vaultNotes(),
@@ -123,7 +120,6 @@ async function main() {
 
   // ENVIRONMENT
   L.push(bold("  ENVIRONMENT"));
-  if (model) L.push(`   model   ${cyan(model.model_id)} (${schema})  ${dim("·")}  ${model.object_types?.length ?? "?"} objects · ${model.state_machines?.length ?? "?"} machines · ${model.scenario_ids?.length ?? "?"} scenarios`);
   L.push(`   git     ${branch} @ ${head}${dirty ? yellow(`  (${dirty} uncommitted)`) : green("  (clean)")}`);
   const tools = [["node", vNode], ["dotnet", vDotnet], ["python", vPython], ["gh", vGh ? "ok" : null], ["az", vAz], ["gcloud", vGcloud ? "ok" : null], ["docker", vDocker]]
     .map(([n, v]) => `${v ? OK : BAD} ${n}${v && v !== "ok" ? dim(" " + ((v.match(/\d[\d.]*/) || [""])[0])) : ""}`).join("  ");
@@ -144,6 +140,7 @@ async function main() {
   L.push(`   ${OK} AgentArmy ${dim("(hub)")}      ${branch === "main" ? "main" : dim(branch)}   ${prCount(hubOpen)}`);
   L.push(`   ${OK} frontend-core ${dim("(spoke)")}  ${dim("main")}   ${prCount(Array.isArray(fePRs) ? fePRs.length : null)}`);
   L.push(`   ${OK} backend-core ${dim("(spoke)")}   ${dim("main")}   ${prCount(Array.isArray(bePRs) ? bePRs.length : null)}`);
+  L.push(`   ${OK} middle-core ${dim("(spoke)")}    ${dim("main")}   ${prCount(Array.isArray(mcPRs) ? mcPRs.length : null)}`);
   L.push("");
 
   // PRs IN FLIGHT

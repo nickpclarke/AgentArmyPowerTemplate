@@ -1,11 +1,12 @@
 {
-  "$comment": "One-way sync: hub (AgentArmy) -> spoke repos. Hub is the source of truth for the Claude Code microVM helper surface. Edit `spokes` to add a repo (e.g. middle-core once it exists). Edit `paths` to change what syncs. `deny` is a hard safety net enforced even if a path is added by mistake.",
+  "$comment": "One-way sync: hub (AgentArmy) -> spoke repos. Hub is the source of truth for the Claude Code microVM helper surface. Edit `spokes` to add a repo. Edit `paths` to change what syncs. `deny` is a hard safety net enforced even if a path is added by mistake.",
   "owner": "nickpclarke",
   "source_repo": "nickpclarke/AgentArmy",
   "branch": "chore/agentarmy-helper-sync",
   "spokes": [
     "frontend-core",
-    "backend-core"
+    "backend-core",
+    "middle-core"
   ],
   "paths": [
     "AGENTS.md",

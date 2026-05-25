@@ -1,5 +1,5 @@
 param(
-    [string]$Target = "middle-core",
+    [string]$Target = "backend-core",
     [int]$Port = 18001,
     [switch]$SkipDocs,
     [switch]$ListTargets
