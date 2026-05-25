@@ -50,6 +50,8 @@ template, it contains real source code to build, run, test, and deploy.
 **Orientation keys** (this repo does not carry the hub's `docs/` — read them here):
 - Docs (settled reality): https://nickpclarke.github.io/AgentArmy/
 - Labs (vision / WIP, Obsidian): https://publish.obsidian.md/xlabs/Welcome
+- Hub pointer: `.agent/hub.json` — repo / board / docs / Labs URLs. You don't need hub
+  board access; reporting back is automatic via `.github/workflows/notify-hub.yml`.
 
 ## Shared agent guidance
 

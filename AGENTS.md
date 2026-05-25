@@ -20,6 +20,12 @@ Two links anchor every agent — **start here, bookmark both:**
   research, design-in-progress, ontology/entity-relationship modeling. Where ideas are born and
   shaped before they graduate to Docs.
 
+**Where is the hub?** Every spoke carries `.agent/hub.json` — a synced pointer back to the
+AgentArmy hub (repo, board, docs, Labs). Read it to find the hub; you don't need (and a
+sandboxed spoke agent usually can't reach) the hub board directly. You also never relay status
+by hand: the `notify-hub` workflow reports your merged PRs, closed issues, and comments to the
+hub automatically. Just do the work and close your issues — the hub reconciles the rest.
+
 ## Task Backbone — depends on where you are
 
 **In the hub:** all work items live on the attached GitHub Projects v2 board.

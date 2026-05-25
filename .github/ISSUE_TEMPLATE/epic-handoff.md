@@ -78,4 +78,9 @@ Hub epic: <!-- https://github.com/nickpclarke/AgentArmy/issues/N -->
 - [ ] Every child Story/Enabler issue is closed via a merged PR containing `Closes #N`
 - [ ] Contracts (OpenAPI/schema) updated or confirmed unchanged
 - [ ] Spoke milestone marked closed
-- [ ] Hub notified (comment on hub Epic issue with link to spoke milestone)
+
+> **You do NOT manually notify the hub, and you do NOT need the hub's Epic number or board.**
+> The `notify-hub` workflow (in `.github/workflows/`) reports your PR-merges, issue-closes, and
+> comments to the AgentArmy hub automatically — it runs in CI with the hub token, not in your
+> sandbox. Just close your spoke issues; the hub reconciles the rest. See
+> [Spoke → Hub Callback](https://nickpclarke.github.io/AgentArmy/spoke-hub-callback/).

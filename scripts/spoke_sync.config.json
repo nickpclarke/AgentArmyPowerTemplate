@@ -10,6 +10,7 @@
   ],
   "paths": [
     "AGENTS.md",
+    ".agent/hub.json",
     ".github/ISSUE_TEMPLATE/epic-handoff.md",
     ".github/workflows/notify-hub.yml",
     ".claude/agents",

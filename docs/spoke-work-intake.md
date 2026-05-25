@@ -71,11 +71,23 @@ If an agent working a `copilot-task` Issue finds the scope is larger than expect
 
 ## Closing the loop with the hub
 
-When all Stories under an epic are closed and the epic's Definition of Done is met:
+Reporting back is **automatic** — you do not comment on the hub, and you do not need the hub
+Epic number or board access. The `notify-hub` workflow (`.github/workflows/notify-hub.yml`,
+synced into your repo) fires a `repository_dispatch` to the AgentArmy hub whenever you merge a
+PR, close an Issue, or comment. The hub records it on its **Spoke Activity Log** and reconciles
+its board. That workflow runs in CI with the hub token — not in your sandbox — which is why it
+can reach the hub even though you can't.
 
-1. Close the epic Issue in the spoke repo.
-2. Comment on the **hub Epic issue** with a link to the spoke's closed Milestone and a one-line summary of what shipped.
-3. The hub PM/scrum-master updates the hub board Status to Done and records velocity in `docs/release-trains/release-train-index.md`.
+Your only job when an epic's Definition of Done is met:
+
+1. Close the epic Issue (and its Milestone) in the spoke repo.
+2. That's it. The merged-PR / closed-Issue events are dispatched to the hub automatically; the
+   hub PM/scrum-master updates board Status and records velocity in
+   `docs/release-trains/release-train-index.md`.
+
+> Need to find the hub for reference? It's in `.agent/hub.json` (synced) — repo, board, docs,
+> and Labs URLs. Prereq for the dispatch: the `PROJECT_TOKEN` secret must exist in your repo
+> (the hub sets this up per spoke).
 
 ## Reference
 

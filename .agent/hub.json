@@ -1,0 +1,10 @@
+{
+  "_comment": "Your spoke's pointer back to the AgentArmy hub. Synced from the hub; do not edit here. A sandboxed spoke agent reads this to find the hub — it does NOT need (and usually cannot reach) the hub's board directly.",
+  "hub": "nickpclarke/AgentArmy",
+  "hub_url": "https://github.com/nickpclarke/AgentArmy",
+  "board_url": "https://github.com/users/nickpclarke/projects/1",
+  "docs_url": "https://nickpclarke.github.io/AgentArmy/",
+  "labs_url": "https://publish.obsidian.md/xlabs/Welcome",
+  "reporting": "automatic — .github/workflows/notify-hub.yml dispatches your PR-merges / issue-closes / comments to the hub. You do not relay manually and do not need the hub Epic number or board access.",
+  "collaboration_doc": "https://nickpclarke.github.io/AgentArmy/agent-collaboration/"
+}
