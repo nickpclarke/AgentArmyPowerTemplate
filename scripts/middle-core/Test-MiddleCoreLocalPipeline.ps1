@@ -9,6 +9,7 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $modelPath = Join-Path $repoRoot "model\middle-core\model.yaml"
 $generatedOut = Join-Path $repoRoot "templates\middle-core\generated"
 $projectPath = Join-Path $repoRoot "templates\middle-core\MiddleCore.csproj"
+$testProjectPath = Join-Path $repoRoot "templates\middle-core\MiddleCore.Tests\MiddleCore.Tests.csproj"
 $catalogPath = (Resolve-Path (Join-Path $repoRoot "templates\business-object-catalog.example.json")).Path
 $baseUrl = "http://127.0.0.1:$Port"
 $stdout = Join-Path $env:TEMP "middle-core-local-pipeline-out.log"
@@ -34,7 +35,7 @@ try {
     Invoke-CheckedNative python tools\modelgen\generate_middle_core.py --model $modelPath --out $generatedOut
     Invoke-CheckedNative python -m unittest tests.test_middle_core_modelgen
     Invoke-CheckedNative dotnet build $projectPath
-    Invoke-CheckedNative dotnet test $projectPath
+    Invoke-CheckedNative dotnet test $testProjectPath
     Invoke-CheckedNative node tools\business-object-catalog.mjs validate
 
     if (-not $SkipDocs) {

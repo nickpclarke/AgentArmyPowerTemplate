@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Generated contracts must always use LF to prevent spurious diffs on Windows checkout/regeneration
+templates/middle-core/generated/** text eol=lf
