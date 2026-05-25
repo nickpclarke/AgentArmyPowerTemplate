@@ -90,6 +90,18 @@ Run this **as a loop**, not reactively. Each cycle (and whenever a contract is a
 4. **Fan out via the orchestration layer, not by hand** — delegate the cross-repo dispatch to an orchestration/`general-purpose` agent (it checks each repo's labels + avoids duplicates), and let the two armies (Copilot via `copilot-coding-agent`, Claude via `@claude`) execute. Don't hand-crank issue creation in the main context.
 5. **Keep [docs/contracts.md](docs/contracts.md) the single registry** — update it whenever a contract is added, vendored, or changes status.
 
+### Fleet heartbeat (automated inventory + dispatch)
+
+The SOP above is automated by **`tools/fleet-heartbeat.mjs`** — the fleet's "heart." It inventories contracts, detects drift (unvendored contracts, agent-pack sync, missing PR-event workflows), checks repo health, and optionally dispatches gaps as deduped issues. Three run modes — pick your autonomy level:
+
+| Mode | What it does |
+|---|---|
+| `node tools/fleet-heartbeat.mjs` | **dry-run** (default) — inventory + report only; files nothing, spawns nothing |
+| `node tools/fleet-heartbeat.mjs --apply` | files a deduped issue per hard gap as **`agent-army-task`** (waits for `/loop`/human; no worker spawns) |
+| `node tools/fleet-heartbeat.mjs --apply --auto` | files gaps as **`copilot-task`** → Copilot coding agent **auto-spawns** to fix each |
+
+It runs three ways: the **SessionStart hook** (dry-run, every local session), a **scheduled cloud routine** (daily cron, off the Actions cap), and ad-hoc via **`/loop`**. Only the heartbeat dispatches, so spawning is a finite tree (heart → issues → workers → PRs → review bots), never a recursive cascade. **Full reference, the scheduled-routine config, and the dry-run → `--apply` → `--auto` graduation path: [docs/fleet-heartbeat.md](docs/fleet-heartbeat.md).**
+
 ### Route work to the right army first, then the right agent
 
 **Copilot army** — apply label and let automation handle it:

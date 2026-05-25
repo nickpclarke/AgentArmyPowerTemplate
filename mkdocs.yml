@@ -135,6 +135,7 @@ nav:
     - Issue Conventions: issue-conventions.md
     - Human-in-the-Loop: hitl.md
     - Autonomous Review Loop: pr-review-loop.md
+    - Fleet Heartbeat & Scheduled Audit: fleet-heartbeat.md
   - Planning & Roadmap:
     - Platform Roadmap: roadmap/PLATFORM_ROADMAP.md
     - Release Train Index: release-trains/release-train-index.md

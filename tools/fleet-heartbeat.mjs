@@ -12,7 +12,8 @@
 //
 // Usage:
 //   node tools/fleet-heartbeat.mjs            # dry-run: report only (default)
-//   node tools/fleet-heartbeat.mjs --apply    # also create dispatch issues for gaps (dedup'd)
+//   node tools/fleet-heartbeat.mjs --apply    # file a dedup'd issue per gap as agent-army-task (no auto-spawn)
+//   node tools/fleet-heartbeat.mjs --apply --auto  # gaps as copilot-task → Copilot coding agent auto-spawns
 //   node tools/fleet-heartbeat.mjs --json      # machine-readable findings
 
 import { execFileSync } from 'node:child_process';
@@ -22,7 +23,12 @@ const OWNER = 'nickpclarke';
 const HUB = 'AgentArmy';
 const SPOKES = ['frontend-core', 'backend-core', 'middle-core'];
 const APPLY = process.argv.includes('--apply');
+const AUTO = process.argv.includes('--auto');
 const JSON_OUT = process.argv.includes('--json');
+
+// Hard gaps route to Copilot (auto-execute) only with --auto; otherwise they file as
+// agent-army-task so an unattended/daily --apply run never spawns a Copilot worker swarm.
+const GAP_LABEL = AUTO ? 'copilot-task' : 'agent-army-task';
 
 // execFile (no shell) — args are passed literally, so no command injection.
 const gh = (args) => {
@@ -56,7 +62,7 @@ for (const spoke of SPOKES) {
 for (const spoke of ['frontend-core', 'middle-core']) {
   const ok = repoTrees[spoke].some((p) => p.endsWith('backend-core.openapi.json'));
   if (!ok) add(spoke, 'gap', 'unvendored-contract',
-    `backend-core OpenAPI is not vendored in ${spoke} — vendor it + generate the client.`, 'copilot-task');
+    `backend-core OpenAPI is not vendored in ${spoke} — vendor it + generate the client.`, GAP_LABEL);
 }
 
 const postmanNote = SPOKES.flatMap((s) => repoTrees[s].filter(isContract)).length
@@ -84,7 +90,7 @@ for (const repo of [HUB, ...SPOKES]) {
   if (missing.length) {
     add(repo, 'gap', 'pr-subscription-missing',
       `${repo} is not fully subscribed to PR events — missing ${missing.join(', ')}. Wire the pull_request-triggered workflow(s) so PRs get review / review-loop / @claude.`,
-      'copilot-task');
+      GAP_LABEL);
   }
 }
 
