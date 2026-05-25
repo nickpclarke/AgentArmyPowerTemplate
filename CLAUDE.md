@@ -64,6 +64,16 @@ Set the `Type` and `PI` fields on items so they're properly categorised.
 - **Mock caveat:** Postman mocks return 200 regardless of auth/headers — fine for shape/dev and parallel unblocking, but JWT/authz assertions must verify against the **real** producer, not the mock (don't let mock-backed tests pass falsely).
 - A pure **data-model** contract (e.g. middle-core MCR-F4 `data-platform-contract.g.json`) needs an HTTP read surface *designed* (OpenAPI, via `api-designer`) before it can be mocked — that design is the producer-mock enabler, not a blocker to skip.
 
+### Contract inventory & dispatch — SOP (recurring, not ad-hoc)
+
+Run this **as a loop**, not reactively. Each cycle (and whenever a contract is added/changed):
+
+1. **Inventory** — enumerate contract artifacts across hub + all spokes (`contract*/`, `*.openapi.*`, `*.asyncapi.*`, generated `*.g.json`) and build the producer→consumer matrix.
+2. **Check each contract is fully landed** — (a) source-of-truth in the producer repo, (b) **vendored into every consumer** repo, (c) **published + mocked** in Postman (per Contract-first & mock-first), (d) **consumed** (generated client wired, not raw fetch), (e) **registered in [docs/contracts.md](docs/contracts.md)**.
+3. **Each gap → a dispatched issue** in the owning repo with a routing label (`copilot-task` mechanical / `agent-army-task` bigger) + `Enabler`. This is how you "get the team busy."
+4. **Fan out via the orchestration layer, not by hand** — delegate the cross-repo dispatch to an orchestration/`general-purpose` agent (it checks each repo's labels + avoids duplicates), and let the two armies (Copilot via `copilot-coding-agent`, Claude via `@claude`) execute. Don't hand-crank issue creation in the main context.
+5. **Keep [docs/contracts.md](docs/contracts.md) the single registry** — update it whenever a contract is added, vendored, or changes status.
+
 ### Route work to the right army first, then the right agent
 
 **Copilot army** — apply label and let automation handle it:
