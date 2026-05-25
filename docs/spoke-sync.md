@@ -12,17 +12,24 @@ synced copies in a spoke (they get overwritten on the next sync).
 
 Declared in [`scripts/spoke_sync.config.json`](../scripts/spoke_sync.config.json):
 
+- `AGENTS.md` — the shared, fleet-wide agent guidance (roster, routing, skills,
+  chaining). Authoritative; the spoke's `CLAUDE.md` imports it via `@AGENTS.md`.
 - `.claude/agents/`, `.claude/commands/`, `.claude/agent-schema.json`
 - `.claude/settings.json` + the scripts its hooks call (`scripts/mempalace_hook.py`
   and the `.ps1` variant). MicroVMs won't have MemPalace installed — those hooks
   fail gracefully, so syncing the settings is safe.
 - `scripts/board_commands.py`, `scripts/onboarding-check.ps1`, `tools/status.mjs`
 
-Directories are **mirrored** (deletions in the hub propagate). A provenance stamp is
-written to `.claude/.agentarmy-sync.json` in each spoke recording the hub commit.
+Directories are **mirrored** (deletions in the hub propagate), and synced paths are
+**force-added** so a spoke's `.gitignore` can never silently drop them. A provenance
+stamp is written to `.claude/.agentarmy-sync.json` recording the hub commit.
+
+**CLAUDE.md** is *seeded only if the spoke lacks one* (it imports `@AGENTS.md` and
+leaves room for spoke-specific notes) and is on the **deny** list — the sync never
+overwrites a spoke's own `CLAUDE.md`, since that is repo-specific.
 
 **Never synced** (hard denylist, enforced even if added to the manifest):
-`settings.local.json`, `*.local.json`, `.claude/worktrees/`, `.env`, credentials.
+`CLAUDE.md`, `settings.local.json`, `*.local.json`, `.claude/worktrees/`, `.env`, credentials.
 
 ## Adding a spoke
 
@@ -35,16 +42,19 @@ exists — today middle-core lives as `templates/middle-core/` inside the hub).
 
 ```bash
 python scripts/sync_helpers_to_spokes.py --dry-run        # clone + diff, no push
-python scripts/sync_helpers_to_spokes.py                  # open/update a PR per spoke
+python scripts/sync_helpers_to_spokes.py                  # PR per spoke + auto-merge into main
+python scripts/sync_helpers_to_spokes.py --no-merge       # open the PR, leave it for review
 python scripts/sync_helpers_to_spokes.py --spoke backend-core
 ```
+
+By default the sync **auto-merges** (squash) the PR into each spoke's default branch —
+an unmerged PR means the helpers never reach the spoke, which is the whole point. Use
+`--no-merge` (or set `"auto_merge": false` in the config) to leave PRs open for review.
 
 **In CI** — `.github/workflows/sync-helpers-to-spokes.yml`:
 
 - `workflow_dispatch` (optional `spoke` / `dry_run` inputs), and
 - automatically on push to `main` that touches any synced path.
-
-It opens/updates a PR in each spoke — it never merges automatically.
 
 **Auth:** the workflow uses `PROJECT_TOKEN` (classic PAT, already scoped for this
 org's repos). The built-in `GITHUB_TOKEN` can't write to other repositories. If

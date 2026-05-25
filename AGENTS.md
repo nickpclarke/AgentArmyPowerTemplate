@@ -1,18 +1,13 @@
 # AGENTS.md
 
-Critical guidance for AI agents working in this repository.
+Shared, fleet-wide guidance for AI agents — the AgentArmy specialist roster, routing,
+skills, and chaining patterns. **This file is synced from the AgentArmy hub to every
+spoke repo; do not edit it in a spoke — edit it in the hub.**
 
-## What This Repo Is
-
-AgentArmy is a starter template — not an application. There is no source code to build or run. The deliverables are:
-
-- GitHub Actions in `.github/workflows/`
-- Claude Code agent definitions in `.claude/agents/categories/`
-- Codex configuration and hooks in `.codex/`
-- Docs in `docs/`
-- Configuration files at the repo root
-
-**There is no `index.html` or app to work on.** When a user asks you to "implement something", they mean updating docs, workflows, or config — not writing app code.
+Repo-specific guidance (what *this* repository is, how to build/run/deploy it) lives in
+this repo's `CLAUDE.md`, not here. The hub is a template (no app code); each spoke is a
+real layer implementation with code to build and ship. Everything below applies to all
+of them.
 
 ## GitHub Projects as the Task Backbone
 

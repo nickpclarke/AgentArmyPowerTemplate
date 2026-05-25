@@ -8,6 +8,7 @@
     "backend-core"
   ],
   "paths": [
+    "AGENTS.md",
     ".claude/agents",
     ".claude/commands",
     ".claude/agent-schema.json",
@@ -19,6 +20,7 @@
     "tools/status.mjs"
   ],
   "deny": [
+    "CLAUDE.md",
     "settings.local.json",
     "settings.local.example.json",
     ".claude/worktrees",

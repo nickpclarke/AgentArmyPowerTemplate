@@ -23,6 +23,7 @@ on:
   push:
     branches: [main]
     paths:
+      - "AGENTS.md"
       - ".claude/agents/**"
       - ".claude/commands/**"
       - ".claude/agent-schema.json"
