@@ -97,6 +97,29 @@ try {
             throw "disabled-handler scenario expected HTTP 400 but saw '$failureStatus'."
         }
 
+        # GraphQL surface: schema tier + graph tier (immutable snapshot).
+        $gqlBody = '{ "query": "{ model { modelId businessObjectCount } graphObjects { id } graphEdges { from to } }" }'
+        $gql = Invoke-RestMethod -Uri "$baseUrl/graphql" -Method Post -ContentType "application/json" -Body $gqlBody -TimeoutSec 10
+        if ($gql.data.model.model_id -ne "middle-core-runtime-prototype" -and $gql.data.model.modelId -ne "middle-core-runtime-prototype") {
+            throw "GraphQL model id unexpected."
+        }
+        $gqlObjects = $gql.data.graphObjects.Count
+        $gqlEdges = $gql.data.graphEdges.Count
+        if ($gqlObjects -ne 6 -or $gqlEdges -ne 5) {
+            throw "GraphQL graph tier expected 6 objects / 5 edges, saw $gqlObjects/$gqlEdges."
+        }
+        # Introspection must be blocked outside the Development environment (security).
+        $introBody = '{ "query": "{ __schema { types { name } } }" }'
+        $introBlocked = $false
+        try {
+            $intro = Invoke-RestMethod -Uri "$baseUrl/graphql" -Method Post -ContentType "application/json" -Body $introBody -TimeoutSec 10
+            if ($intro.errors) { $introBlocked = $true }
+        }
+        catch { $introBlocked = $true }
+        if (-not $introBlocked) {
+            throw "GraphQL introspection should be blocked outside Development but it succeeded."
+        }
+
         Invoke-CheckedNative node tools\middle-core-ui-smoke.mjs $baseUrl
         $env:MIDDLE_CORE_BASE_URL = $baseUrl
         Invoke-CheckedNative npx playwright test tests/e2e/middle-core-scenario-lab.spec.js --project=chromium
@@ -112,6 +135,9 @@ try {
             KnowledgeDropObjects = $scenarioRun.graph.objects.Count
             KnowledgeDropEdges = $scenarioRun.graph.edges.Count
             DisabledHandlerStatus = $failureStatus
+            GraphqlObjects = $gqlObjects
+            GraphqlEdges = $gqlEdges
+            GraphqlIntrospectionBlocked = $introBlocked
             HealthUrl = "$baseUrl/health"
             ModelUrl = "$baseUrl/model"
             ScenarioRunUrl = "$baseUrl/model/scenarios/knowledge-drop/run"

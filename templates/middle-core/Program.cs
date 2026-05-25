@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using MiddleCore.Generated;
 using MiddleCore.Runtime;
+using MiddleCore.Runtime.GraphQL;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -12,6 +13,16 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddSingleton<BusinessObjectCatalogStore>();
 builder.Services.AddSingleton<IProjectionPort, FakeArcadeDbProjectionPort>();
 builder.Services.AddSingleton<KnowledgeDropScenarioRunner>();
+
+// GraphQL exposes the generated model + an immutable snapshot of the
+// knowledge-drop graph (built once, never mutated → safe for concurrent reads).
+// Introspection is left at HotChocolate's secure default: enabled only in the
+// Development environment, so agents discover the schema locally without
+// exposing it in production.
+builder.Services.AddSingleton<ModelGraphSnapshotProvider>();
+builder.Services
+    .AddGraphQLServer()
+    .AddQueryType<Query>();
 
 var app = builder.Build();
 
@@ -43,6 +54,8 @@ app.MapGet("/model/scenarios/knowledge-drop/run", async (bool? disableLastHandle
     ScenarioRunResult result = await runner.RunAsync(disableLastHandler.GetValueOrDefault(), cancellationToken);
     return result.Status == "passed" ? Results.Ok(result) : Results.BadRequest(result);
 });
+
+app.MapGraphQL("/graphql");
 
 app.MapGet("/objects/{id}", (string id, BusinessObjectCatalogStore store) =>
 {
