@@ -112,6 +112,7 @@ nav:
     - Original Roster: agents.md
     - Language Routing Guide: language-routing.md
     - Using Claude Code: claude-code-guide.md
+    - Spoke Helper Sync: spoke-sync.md
   - GitHub Copilot Army:
     - Copilot Setup: copilot.md
     - Task Labeling: copilot-tasks.md
