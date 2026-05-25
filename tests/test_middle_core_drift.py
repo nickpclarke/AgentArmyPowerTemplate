@@ -67,7 +67,7 @@ class MiddleCoreDriftTests(unittest.TestCase):
             )
 
         self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("DRIFT DETECTED", result.stdout)
+        self.assertIn("DRIFT DETECTED", result.stderr)
 
     def test_hand_edit_of_generated_file_is_caught(self) -> None:
         """Hand-editing a .g.cs file should fail the gate."""
@@ -97,8 +97,8 @@ class MiddleCoreDriftTests(unittest.TestCase):
             )
 
         self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("DRIFT DETECTED", result.stdout)
-        self.assertIn("BusinessObjectTypes.g.cs", result.stdout)
+        self.assertIn("DRIFT DETECTED", result.stderr)
+        self.assertIn("BusinessObjectTypes.g.cs", result.stderr)
 
 
 if __name__ == "__main__":

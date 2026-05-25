@@ -33,7 +33,7 @@ Push-Location $repoRoot
 try {
     Invoke-CheckedNative python tools\modelgen\validate_middle_core.py --model $modelPath
     Invoke-CheckedNative python tools\modelgen\generate_middle_core.py --model $modelPath --out $generatedOut
-    Invoke-CheckedNative python -m unittest tests.test_middle_core_modelgen
+    Invoke-CheckedNative python -m unittest tests.test_middle_core_modelgen tests.test_middle_core_drift
     Invoke-CheckedNative dotnet build $projectPath
     Invoke-CheckedNative dotnet test $testProjectPath
     Invoke-CheckedNative node tools\business-object-catalog.mjs validate
