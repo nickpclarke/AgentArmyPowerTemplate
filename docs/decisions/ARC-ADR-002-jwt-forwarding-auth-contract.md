@@ -51,9 +51,9 @@ Without a documented contract, each layer could interpret the JWT differently, l
 
 ## Decision Outcome
 
-**To be decided.** The Architecture Review recommends Option 1 (pass-through Bearer forwarding) as the zero-infrastructure path consistent with the existing `require_principal` implementation, but this ADR must be accepted before implementation begins in any layer.
+**Accepted 2026-05-25 — Option 1 (pass-through Bearer forwarding).** The zero-infrastructure path consistent with the existing `require_principal` implementation. Implementation may proceed in all three layers.
 
-### Proposed decision: Option 1 — Pass-through Bearer forwarding
+### Decision: Option 1 — Pass-through Bearer forwarding
 
 - frontend-core: reads the signed-in user's JWT from the session; attaches it to the `/api/copilotkit` route request to middle-core as `Authorization: Bearer <jwt>`.
 - middle-core: reads the inbound `Authorization` header; injects the token into the LangGraph run config; `backend_client.py` attaches it as `Authorization: Bearer <jwt>` on every outbound request to backend-core.
@@ -67,6 +67,18 @@ Without a documented contract, each layer could interpret the JWT differently, l
 - An admin JWT is required for `DELETE /api/v1/sources/{id}` (HITL delete path).
 - A request with no JWT returns 401 at backend-core.
 - middle-core rejects requests that arrive at `/copilotkit` without a bearer token (401) — does not forward unauthenticated requests to backend-core.
+
+### Concrete claim shape (backend-core authoritative)
+
+Read from backend-core `app/auth.py` + `app/config.py`. middle-core/frontend-core pre-checks must bind to this, not to guessed "common shapes":
+
+- **Role claim key:** `roles` (default — `settings.role_claim`, env `ROLE_CLAIM`). If absent, backend falls back **in order** to `role` → `scp` → `scope`.
+- **Value format:** JSON array (`"roles": ["admin","contributor"]`) **or** space/comma-separated string (`"roles": "admin contributor"`); both parse to a role set (`_roles_from_claims`).
+- **Role values:** `reader`, `contributor`, `admin` (`settings.reader_role` / `contributor_role` / `admin_role`; env-overridable).
+- **Enforcement:** `require_roles(*roles)` → `principal.roles.intersection(roles)`; empty → HTTP 403. `DELETE /api/v1/sources/{id}` requires `admin` (see [ADR-006](ARC-ADR-006-hitl-destructive-ops.md)).
+- **Subject:** derived from `sub` → `oid` → `client_id`.
+
+A middle-core admin pre-check (e.g., the ADR-006 delete confirmation) reads the **`roles`** claim and treats the user as admin **iff `"admin"` is in the set**. These are the **defaults** — a non-default issuer config (`ROLE_CLAIM` / `ADMIN_ROLE`) overrides them, so confirm backend-core's env if it isn't running defaults.
 
 ---
 
