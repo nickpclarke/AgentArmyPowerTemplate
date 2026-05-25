@@ -11,12 +11,7 @@ on:
       - '.github/workflows/deploy-docs.yml'
       - 'README.md'
       - 'CLAUDE.md'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'docs/**'
-      - 'mkdocs.yml'
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:

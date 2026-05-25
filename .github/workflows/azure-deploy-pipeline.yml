@@ -3,8 +3,6 @@ name: Azure Infrastructure Deploy Pipeline
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 env:
@@ -108,11 +106,13 @@ jobs:
 
       - name: Determine target environment
         id: determine-env
+        env:
+          REF: ${{ github.ref }}
         run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          if [[ "$REF" == "refs/heads/main" ]]; then
             echo "environment=prod" >> $GITHUB_OUTPUT
             echo "param-file=infra/parameters-prod.bicepparam" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.ref }}" == "refs/heads/staging" ]]; then
+          elif [[ "$REF" == "refs/heads/staging" ]]; then
             echo "environment=staging" >> $GITHUB_OUTPUT
             echo "param-file=infra/parameters-staging.bicepparam" >> $GITHUB_OUTPUT
           else
