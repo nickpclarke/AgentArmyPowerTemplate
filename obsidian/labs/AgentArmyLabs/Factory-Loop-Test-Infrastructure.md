@@ -14,7 +14,7 @@ tags: [vision, middle-core, testing]
   - **No CI workflow** runs the middle-core loop (24 workflows, none for the model/generator) → regressions gated only locally.
   - **`dotnet test` is a no-op** — no C# test project exists, so the runtime (graph guards, scenario branches, enforcement API, soon relators) is covered *only* end-to-end via Playwright.
   - **No generated-code drift gate**; a latent LF/CRLF mismatch on `*.g.cs` makes regeneration noisy.
-  - Verification Levels 3–6 absent.
+  - Verification Levels 5–6 absent (L1–L2 in the validator; **L3 OWL** and **L4 SHACL** now shipped and CI-gated).
 
 ## Test stations (one per factory transform)
 
@@ -24,9 +24,9 @@ tags: [vision, middle-core, testing]
 | Generator | `tools/modelgen` | determinism + **drift gate** + negative-rule tests | pytest + diff gate | ~ partial · ◻ drift gate |
 | Generated contracts | `templates/middle-core/generated/*.g.cs` | compile + **conformance** | `dotnet build` + xUnit conformance | ✅ build · ◻ conformance |
 | Runtime (hand-authored) | `ModelGraph`/`ScenarioRuntime`/handlers | **unit** | xUnit (**missing**) | ◻ |
-| Projections | ArcadeDB / dlt / OWL / SHACL | round-trip / validation | per-projection | ◻ |
+| Projections | ArcadeDB / dlt / OWL / SHACL | round-trip / validation | per-projection | ✅ OWL+SHACL · ◻ ArcadeDB/dlt |
 | Service / API | endpoints + `/model/demo` | smoke + e2e | PS smoke + Playwright | ✅ |
-| Verification | model | Levels 1–6 | see roadmap | ~ L1–2 |
+| Verification | model | Levels 1–6 | see roadmap | ~ L1–L4 |
 
 The same stations run **locally** (the PS pipeline) and in **CI** (new `middle-core-model.yml`).
 
@@ -66,12 +66,12 @@ Each level is a **projection of the IR** (shapes/axioms generated from `model.ya
 |---|---|---|---|---|---|
 | 1 | Syntactic | JSON-Schema (`check-jsonschema`) | well-formed model, unique IDs, valid stereotypes | validate step + CI | ~ (validator does this ad-hoc) → formalize as schema · **near** |
 | 2 | OntoUML/UFO | `ontouml-js` / validator rules | sound stereotypes, anti-patterns (RelOver, FreeRole) | validate step | ~ partial · **near** |
-| 3 | Semantic | OWL 2 DL reasoner (ELK/HermiT via `owlready2`/ROBOT) | satisfiability, disjointness, subsumption | CI nightly (slow) | ◻ **later** |
-| 4 | Constraint | **SHACL (`pyshacl`)** | closed-world business rules, data quality | CI | ◻ **next — highest ROI** |
-| 5 | Structural | Alloy Analyzer (CLI) | finite-scope counterexamples ("can this model exist?") | on-demand/nightly | ◻ **later** |
-| 6 | Arithmetic/temporal | Z3 / SMT-LIB2 (`z3-solver`) | cardinality math, ordering, allocation, time windows | on-demand | ◻ **later** |
+| 3 | Semantic | OWL TBox + `rdflib` structural check (`owl_check.py`); full DL via HermiT/`owlready2` later | disjointness, domain/range respect (RL subset); satisfiability/subsumption on the DL upgrade | CI per-PR | ✅ **shipped** — `owl_check.py` (rdflib) in CI · ◻ DL reasoner upgrade |
+| 4 | Constraint | **SHACL (`pyshacl`)** | closed-world business rules, data quality | CI | ✅ **shipped (#123)** — `pyshacl` in CI |
+| 5 | Structural | Alloy Analyzer (CLI) | finite-scope counterexamples ("can this model exist?") | on-demand/nightly | ◻ **later** — see [[RT-verification-levels]] |
+| 6 | Arithmetic/temporal | Z3 / SMT-LIB2 (`z3-solver`) | cardinality math, ordering, allocation, time windows | on-demand | ◻ **later** — see [[RT-verification-levels]] |
 
-Sequencing: formalize **L1 JSON-Schema** + ship **L4 SHACL** alongside the Foundation work (both are generated from the model and gate cheaply). L2 hardens with reification (relator/role anti-patterns). L3/L5/L6 are deliberately *later* — don't stand up a reasoner/prover until a concrete invariant needs it.
+Sequencing: **L1 JSON-Schema** + **L4 SHACL** + **L3 OWL** gate cheaply per-PR (all generated from the model). L2 hardens with reification (relator/role anti-patterns). The L3 OWL gate today is a pure-`rdflib` structural pass (no Java) so it runs reliably in CI; a full OWL 2 DL reasoner (HermiT) that proves satisfiability/subsumption is a deliberate upgrade. **L5 Alloy** and **L6 Z3** stay *later* — don't stand up a prover until a concrete invariant needs it. Spike plan for the L3-DL upgrade + L5/L6: [[RT-verification-levels]] (`planning/synthesis/RT-verification-levels.md`).
 
 ## Open questions
 - Cardinality enforcement home: generate-time (Python) vs runtime (C#) vs DB (ArcadeDB) — lean generate-time + runtime, DB as backstop.
