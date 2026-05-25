@@ -107,6 +107,8 @@ nav:
   - Armies Overview:
     - The Three Armies: armies-overview.md
     - Routing Matrix: routing-matrix.md
+    - Agent Onboarding (Spokes): agent-onboarding.md
+    - Spoke Work Intake: spoke-work-intake.md
   - Claude Code Army:
     - All 159 Agents: agents-glossary/index.md
     - Original Roster: agents.md

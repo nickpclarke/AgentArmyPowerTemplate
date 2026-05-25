@@ -9,15 +9,20 @@ this repo's `CLAUDE.md`, not here. The hub is a template (no app code); each spo
 real layer implementation with code to build and ship. Everything below applies to all
 of them.
 
-## GitHub Projects as the Task Backbone
+## Task Backbone — depends on where you are
 
-All work items live in the attached GitHub Projects v2 board. Before starting any task:
+**In the hub:** all work items live on the attached GitHub Projects v2 board.
+- Check the board: `gh project item-list PROJECT_NUM --owner OWNER`
+- Create issues for non-trivial work: `gh issue create --title "..." --body "Closes #N"`
 
-1. Check the board for existing items: `gh project item-list PROJECT_NUM --owner OWNER`
-2. Create issues for non-trivial work: `gh issue create --title "..." --body "Closes #N"`
-3. Apply routing labels: `copilot-task` (bounded) or `agent-army-task` (complex/multi-file)
+**In a spoke (microVM agent):** you cannot reach the hub board. Your task queue is **your
+own repo's Issues + Milestones**. Epics are handed off to you as `[EPIC]` Issues opened in
+this repo by the hub's PM/scrum-master; decompose them into Stories/PRs locally. There is
+no GitHub Project for you. See [agent-onboarding](agent-onboarding.md) and
+[spoke-work-intake](spoke-work-intake.md).
 
-PR bodies must include `Closes #ISSUE_NUMBER` to trigger auto-status workflow.
+Either way: apply routing labels `copilot-task` (bounded) or `agent-army-task`
+(complex/multi-file), and every PR body must include `Closes #ISSUE_NUMBER`.
 
 ## Agent Routing
 

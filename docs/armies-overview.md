@@ -14,12 +14,14 @@ AgentArmy coordinates three specialized armies, each with distinct strengths and
 - Handles ambiguous requirements
 
 ### How to Delegate
-1. Create an issue on the GitHub Projects board
+1. Create an issue on the GitHub Projects board *(hub repo only)*
 2. Assign the correct specialist (e.g., `backend-developer`, `react-specialist`)
 3. Set Type, PI, and Size fields
 4. Agent picks up issue and works locally
 5. Opens PR with `Closes #N` link
 6. `auto-status` workflow moves issue to Done on merge
+
+**Note for spoke repos:** Work arrives as Issues/PRs in your own repository, not on a hub board. The hub's scrum-master and product manager create these issues and assign them to you directly. See [Agent Onboarding](agent-onboarding.md#how-work-reaches-you-your-repositorys-issues).
 
 ### Best For
 - Requirements analysis and user story refinement

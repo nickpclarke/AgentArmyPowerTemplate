@@ -9,6 +9,7 @@
   ],
   "paths": [
     "AGENTS.md",
+    ".github/ISSUE_TEMPLATE/epic-handoff.md",
     ".claude/agents",
     ".claude/commands",
     ".claude/agent-schema.json",
