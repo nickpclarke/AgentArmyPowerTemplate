@@ -55,6 +55,22 @@ gh project item-add 1 --owner OWNER --url "https://github.com/OWNER/AgentArmy/is
 
 Set the `Type` and `PI` fields on items so they're properly categorised.
 
+### Poll for work with a recurring loop
+
+For long-running, autonomous sessions, keep a heartbeat on the board with the `/loop` skill so new work and PR feedback are picked up without a human re-prompting:
+
+```
+/loop 5m check GitHub for new issues and PR activity, then pick up the next ready item
+```
+
+Each cycle should:
+
+1. **Issues** — list open issues (hub: the Projects board, `gh project item-list 1 --owner OWNER`; spoke: `gh issue list` filtered to your labels) and start the next *Ready* / unblocked item that isn't already assigned or *In Progress*.
+2. **PR activity** — for your open PRs, check review comments and CI (`gh pr status`, `gh pr checks`) and address actionable feedback, or let the `review-loop` label drive the auto-fix flow.
+3. **Stop when idle** — exit the loop once the queue is empty or when told to; don't spin on a clean board.
+
+Tune the interval (`5m` / `10m` / `15m`) to trade responsiveness against token/API cost — `/loop` defaults to `10m` if you omit the duration. `/loop` is a Claude Code skill; other agents in the fleet don't have it.
+
 ### Contract-first & mock-first (always)
 
 **Every contract goes up, and every contract gets a mock — proactively, up front, not on request.** This is a standing rule. The fleet integrates across sandboxed spokes only via contracts (OpenAPI/AsyncAPI/GraphQL/shared types), so a live mock per contract is what lets every layer build in parallel *before* the real producer exists.
@@ -288,6 +304,7 @@ Run these with `/skill-name` in the Claude Code prompt:
 | `/wardley [domain]` | Full Wardley analysis pipeline — value chain, map (OWM), doctrine, climate, gameplay |
 | `/ea-adr [decision topic]` | Architecture Decision Record in MADR v4.0 format |
 | `/capability-map [domain]` | Business capability model + investment heat map |
+| `/loop [interval] [prompt]` | Run a prompt/command on a recurring interval (e.g. `/loop 5m`) — poll the board for new issues + PR activity (see [Poll for work with a recurring loop](#poll-for-work-with-a-recurring-loop)) |
 
 ### Model-invoked Skills (`.claude/skills/`)
 
