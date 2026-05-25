@@ -16,6 +16,11 @@ permissions:
   issues: write
   contents: read
 
+# Serialize callbacks so two near-simultaneous spoke events can't both create the
+# tracker issue (which previously produced duplicate "Spoke Activity Log" issues).
+concurrency:
+  group: spoke-callback
+
 jobs:
   record:
     runs-on: ubuntu-latest
@@ -37,10 +42,14 @@ jobs:
             line="**$P_REPO** $P_KIND #$P_NUMBER: $P_TITLE ($P_URL)"
           fi
           echo "$line" >> "$GITHUB_STEP_SUMMARY"
-          tracker=$(gh issue list --repo "$GITHUB_REPOSITORY" --search "Spoke Activity Log in:title" --state all --json number --jq '.[0].number // empty')
+          # Find the tracker by exact title via the REST list (not `--search`, whose index
+          # lags behind issue creation and returned empty right after we created the issue).
+          tracker=$(gh issue list --repo "$GITHUB_REPOSITORY" --state all --limit 100 \
+            --json number,title --jq 'map(select(.title=="Spoke Activity Log"))|.[0].number // empty')
           if [ -z "$tracker" ]; then
-            gh issue create --repo "$GITHUB_REPOSITORY" --title "Spoke Activity Log" \
-              --body "Auto-updated by the spoke-callback workflow. Each comment is a spoke event reported back to the hub."
-            tracker=$(gh issue list --repo "$GITHUB_REPOSITORY" --search "Spoke Activity Log in:title" --state all --json number --jq '.[0].number // empty')
+            # Read the number straight from the create output rather than re-listing.
+            url=$(gh issue create --repo "$GITHUB_REPOSITORY" --title "Spoke Activity Log" \
+              --body "Auto-updated by the spoke-callback workflow. Each comment is a spoke event reported back to the hub.")
+            tracker="${url##*/}"
           fi
           gh issue comment "$tracker" --repo "$GITHUB_REPOSITORY" --body "$line"
