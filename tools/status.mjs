@@ -160,8 +160,10 @@ async function main() {
   // PROGRAM
   if (Array.isArray(issues)) {
     const by = {};
-    for (const i of issues) for (const lab of i.labels || []) by[lab.name] = (by[lab.name] || 0) + 1;
-    const counts = ["Epic", "Feature", "Enabler", "Spike", "Bug"].map((k) => `${by[k] || 0} ${k.toLowerCase()}${(by[k] || 0) === 1 ? "" : "s"}`).join(" · ");
+    // Repo label casing is inconsistent (e.g. `feature`/`epic` vs `Enabler`/`Spike`),
+    // so count case-insensitively.
+    for (const i of issues) for (const lab of i.labels || []) { const k = lab.name.toLowerCase(); by[k] = (by[k] || 0) + 1; }
+    const counts = ["Epic", "Feature", "Enabler", "Spike", "Bug"].map((k) => { const n = by[k.toLowerCase()] || 0; return `${n} ${k.toLowerCase()}${n === 1 ? "" : "s"}`; }).join(" · ");
     L.push(bold("  PROGRAM") + dim(` (${issues.length} open issues)`));
     L.push(`   ${counts}`);
     const pin = issues.find((i) => /PIN-E\b/.test(i.title));
