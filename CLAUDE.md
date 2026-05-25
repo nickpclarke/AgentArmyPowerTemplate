@@ -55,6 +55,15 @@ gh project item-add 1 --owner OWNER --url "https://github.com/OWNER/AgentArmy/is
 
 Set the `Type` and `PI` fields on items so they're properly categorised.
 
+### Contract-first & mock-first (always)
+
+**Every contract goes up, and every contract gets a mock — proactively, up front, not on request.** This is a standing rule. The fleet integrates across sandboxed spokes only via contracts (OpenAPI/AsyncAPI/GraphQL/shared types), so a live mock per contract is what lets every layer build in parallel *before* the real producer exists.
+
+- **Publish + mock in the paid Postman** — the **AgentArmy** workspace (`64b63429-ed44-4078-861a-c8867742eaf4`; PMAK in Key Vault `POSTMANTOKEN`, see [docs reference]). Whenever a contract/endpoint/spike defines or changes a contract: publish/refresh the spec **and** create/refresh its mock immediately, then hand the mock URL to consumer spokes as the "reachable producer endpoint."
+- **Don't wait to be asked.** Standing up the spec + mock is part of producing the contract, not a follow-up.
+- **Mock caveat:** Postman mocks return 200 regardless of auth/headers — fine for shape/dev and parallel unblocking, but JWT/authz assertions must verify against the **real** producer, not the mock (don't let mock-backed tests pass falsely).
+- A pure **data-model** contract (e.g. middle-core MCR-F4 `data-platform-contract.g.json`) needs an HTTP read surface *designed* (OpenAPI, via `api-designer`) before it can be mocked — that design is the producer-mock enabler, not a blocker to skip.
+
 ### Route work to the right army first, then the right agent
 
 **Copilot army** — apply label and let automation handle it:
@@ -196,6 +205,14 @@ Label every issue with its SAFE type:
 PR body must contain `Closes #N`, `Fixes #N`, or `Resolves #N` to trigger the `auto-status` workflow. This is what moves issues from *In Progress* to *Done* automatically.
 
 **Autonomous review loop:** add the `review-loop` label to a PR to have Claude auto-address Gemini/Copilot/Codex review comments until the PR is clean (or it escalates to HITL at the round cap). See [docs/pr-review-loop.md](docs/pr-review-loop.md).
+
+**Getting AI second opinions (cap-free — any agent/model can do this):** to get review on a PR, **`@`-mention an AI reviewer in a PR/issue comment** — no human and no GitHub Actions needed. Preferred reviewers:
+- **`@copilot`** — ample capacity (Copilot Pro+); also auto-requested on PRs via `copilot-review.yml`. Runs on Copilot's infra, off the Actions minutes cap.
+- **`@codex`** — reliable; `@codex review` to review, `@codex address that feedback` to have it push fixes. Off the Actions cap.
+- **`@gemini-code-assist`** — daily-quota-limited and the quota **cannot be raised**, so don't depend on it; it reviews only when quota allows.
+- **Avoid `@claude` for routine second opinions** — it runs via `claude.yml` on GitHub Actions and **burns the metered minutes cap**. Reserve it for when you want Claude to actually edit/commit.
+
+> Open question: whether a `@copilot` mention can pin a specific model (Copilot model selection, e.g. Opus 4.6) for the review — Copilot's automated PR review may use a fixed model regardless. Test before relying on per-mention model pinning.
 
 ## HITL Decision Pattern
 
