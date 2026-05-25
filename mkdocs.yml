@@ -143,6 +143,7 @@ nav:
     - Spike — ArcadeDB Upsert (PIN-S1): synthesis/RT5-PIN-S1-arcadedb-upsert.md
     - Spike — Bitemporal Queries (PIN-S2): synthesis/RT5-PIN-S2-bitemporal-queries.md
     - Plan — CopilotKit Generative UI: plans/copilotkit-generative-ui.md
+    - CopilotKit Rollout Coordination: plans/copilotkit-rollout-coordination.md
   - MECE Audit & Architecture:
     - N-Layer Architecture: n-layer-architecture.md
     - N-Layer Spoke Rules: n-layer-spoke-rules.md
@@ -161,6 +162,11 @@ nav:
     - ADR Guide: architecture-decisions.md
     - Architecture Decisions:
       - ARC-ADR-001 HITL Pattern: decisions/ARC-ADR-001-hitl-decision-point-pattern.md
+      - ARC-ADR-002 JWT Forwarding: decisions/ARC-ADR-002-jwt-forwarding-auth-contract.md
+      - ARC-ADR-003 No LLM Key in Browser: decisions/ARC-ADR-003-no-llm-key-in-browser.md
+      - ARC-ADR-004 LLM Provider Cerebras: decisions/ARC-ADR-004-llm-provider-cerebras.md
+      - ARC-ADR-005 backend-core OpenAPI Contract: decisions/ARC-ADR-005-backend-core-openapi-contract.md
+      - ARC-ADR-006 HITL Destructive Ops: decisions/ARC-ADR-006-hitl-destructive-ops.md
   - Resources:
     - Memory Palace System: mempalace.md
     - FAQ: faq.md

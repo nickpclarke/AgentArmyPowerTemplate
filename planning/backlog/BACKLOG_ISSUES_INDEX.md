@@ -22,11 +22,7 @@ The RT1–RT4 platform-evolution backlog: **4 Epics + 21 Features** (issues #17�
 [RT5-ontology-grade-persistence.md](../../docs/release-trains/RT5-ontology-grade-persistence.md).
 Create the issues per the [board-population runbook](board-population-checklist.md) when scheduled.
 
-**CopilotKit Generative-UI (candidate, cross-layer):** an in-app AI copilot with generative UI
-across `frontend-core` / `middle-core` / `backend-core` / `arcadedb` — the agent isolated in
-middle-core, with backend-core the single source of truth for data + RBAC. Full plan:
-[docs/plans/copilotkit-generative-ui.md](../../docs/plans/copilotkit-generative-ui.md). Candidate to
-hand off as an epic into each spoke.
+**CopilotKit Generative-UI (backlogs drafted):** three spoke epics created 2026-05-25 — `frontend-core` #12 (generative UI), `middle-core` #17 (agent runtime, distinct from RT7), `backend-core` #16 (CORS + RBAC pass-through); 5 ADR stubs in `docs/decisions/` (ARC-ADR-002–006, all Proposed); coordination map at [docs/plans/copilotkit-rollout-coordination.md](../../docs/plans/copilotkit-rollout-coordination.md). Full plan: [docs/plans/copilotkit-generative-ui.md](../../docs/plans/copilotkit-generative-ui.md).
 
 ## Querying the backlog
 
