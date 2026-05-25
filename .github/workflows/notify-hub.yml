@@ -1,0 +1,59 @@
+name: notify hub
+
+# Spoke -> hub feedback loop. Reports spoke activity back to the AgentArmy hub via a
+# repository_dispatch event so the hub (or another agent) is alerted when:
+#   - a PR merges to main, or an issue closes (work shipped), or
+#   - someone comments on a PR/issue (the back-and-forth).
+# The hub's `spoke-callback` workflow records it on the Spoke Activity Log.
+# Synced to every spoke from the hub; edit it in the hub.
+#
+# Auth: PROJECT_TOKEN (classic PAT, repo scope on the hub) in the spoke's secrets. If absent,
+# the step skips (won't fail the spoke's CI).
+
+on:
+  pull_request:
+    types: [closed]
+  issues:
+    types: [closed]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  notify-hub:
+    # Guards: (1) never run in the hub itself — it has no upstream and would loop on the
+    # Spoke Activity Log; (2) only merged PRs / closed issues / NON-BOT comments (bot
+    # comments like Gemini's quota notices would flood the hub otherwise).
+    if: >-
+      github.repository != 'nickpclarke/AgentArmy' &&
+      (
+        (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
+        github.event_name == 'issues' ||
+        (github.event_name == 'issue_comment' && github.event.comment.user.type != 'Bot')
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch spoke-update to the hub
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          P_REPO: ${{ github.repository }}
+          P_KIND: ${{ github.event_name == 'issue_comment' && 'comment' || (github.event_name == 'issues' && 'issue' || 'pull_request') }}
+          P_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+          P_TITLE: ${{ github.event.issue.title || github.event.pull_request.title }}
+          P_URL: ${{ github.event.comment.html_url || github.event.issue.html_url || github.event.pull_request.html_url }}
+          P_AUTHOR: ${{ github.event.comment.user.login || github.event.sender.login }}
+          P_BODY: ${{ github.event.comment.body }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "PROJECT_TOKEN not set in this spoke — skipping hub callback." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          snippet=$(printf '%s' "$P_BODY" | tr '\n' ' ' | cut -c1-280)
+          jq -n \
+            --arg repo "$P_REPO" --arg kind "$P_KIND" --arg number "$P_NUMBER" \
+            --arg title "$P_TITLE" --arg url "$P_URL" --arg author "$P_AUTHOR" --arg snippet "$snippet" \
+            '{event_type:"spoke-update", client_payload:{repo:$repo, kind:$kind, number:$number, title:$title, url:$url, author:$author, snippet:$snippet}}' \
+          | gh api repos/nickpclarke/AgentArmy/dispatches --method POST --input -
+          echo "Reported $P_KIND on #$P_NUMBER to the AgentArmy hub." >> "$GITHUB_STEP_SUMMARY"

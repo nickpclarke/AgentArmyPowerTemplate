@@ -1,0 +1,46 @@
+name: spoke callback
+
+# Hub receiver for spoke -> hub callbacks. A spoke fires a `spoke-update`
+# repository_dispatch (see the synced .github/workflows/notify-hub.yml) when it ships work
+# (PR merged / issue closed); this records it on the hub so cross-repo activity is visible
+# in one place — a "Spoke Activity Log" issue + the run summary.
+#
+# Untrusted client_payload is read via env vars and used only as quoted shell variables
+# (never interpolated into the run script), per GitHub Actions injection guidance.
+
+on:
+  repository_dispatch:
+    types: [spoke-update]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      P_REPO: ${{ github.event.client_payload.repo }}
+      P_KIND: ${{ github.event.client_payload.kind }}
+      P_NUMBER: ${{ github.event.client_payload.number }}
+      P_TITLE: ${{ github.event.client_payload.title }}
+      P_URL: ${{ github.event.client_payload.url }}
+      P_AUTHOR: ${{ github.event.client_payload.author }}
+      P_SNIPPET: ${{ github.event.client_payload.snippet }}
+    steps:
+      - name: Record spoke update on the hub
+        run: |
+          if [ "$P_KIND" = "comment" ]; then
+            line="**$P_REPO** comment by $P_AUTHOR on #$P_NUMBER — $P_SNIPPET ($P_URL)"
+          else
+            line="**$P_REPO** $P_KIND #$P_NUMBER: $P_TITLE ($P_URL)"
+          fi
+          echo "$line" >> "$GITHUB_STEP_SUMMARY"
+          tracker=$(gh issue list --repo "$GITHUB_REPOSITORY" --search "Spoke Activity Log in:title" --state all --json number --jq '.[0].number // empty')
+          if [ -z "$tracker" ]; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "Spoke Activity Log" \
+              --body "Auto-updated by the spoke-callback workflow. Each comment is a spoke event reported back to the hub."
+            tracker=$(gh issue list --repo "$GITHUB_REPOSITORY" --search "Spoke Activity Log in:title" --state all --json number --jq '.[0].number // empty')
+          fi
+          gh issue comment "$tracker" --repo "$GITHUB_REPOSITORY" --body "$line"

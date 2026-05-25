@@ -11,10 +11,12 @@
   "paths": [
     "AGENTS.md",
     ".github/ISSUE_TEMPLATE/epic-handoff.md",
+    ".github/workflows/notify-hub.yml",
     ".claude/agents",
     ".claude/commands",
     ".claude/agent-schema.json",
     ".claude/settings.json",
+    ".claude/hooks/setup-dotnet.sh",
     "scripts/mempalace_hook.py",
     "scripts/mempalace-hook.ps1",
     "scripts/board_commands.py",

@@ -117,6 +117,7 @@ nav:
     - Language Routing Guide: language-routing.md
     - Using Claude Code: claude-code-guide.md
     - Spoke Helper Sync: spoke-sync.md
+    - Spoke → Hub Callback: spoke-hub-callback.md
   - GitHub Copilot Army:
     - Copilot Setup: copilot.md
     - Task Labeling: copilot-tasks.md
