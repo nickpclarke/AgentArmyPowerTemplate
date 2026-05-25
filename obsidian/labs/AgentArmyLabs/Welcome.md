@@ -1,7 +1,11 @@
 ---
 tags: [moc]
+updated: 2026-05-25
 ---
 # 🧪 AgentArmy Labs — Home
+
+> [!info] Last updated
+> 2026-05-25
 
 > [!tip] Skunkworks & Labs vault — start here.
 > **Everything is reachable from this page.** For a more “dashboard” feel, jump to [[Obsidian Board]]. The graph is the thinking tool (`Ctrl/⌘ + G`). See [[Taxonomy]] for the tags + glossary used across the vault.
