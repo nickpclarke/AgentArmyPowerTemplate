@@ -20,6 +20,16 @@
             "statusMessage": "Installing .NET SDK..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/status.mjs\"",
+            "timeout": 30,
+            "statusMessage": "Building platform status dashboard..."
+          }
+        ]
       }
     ],
     "Stop": [
