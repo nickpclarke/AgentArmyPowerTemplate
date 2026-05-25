@@ -48,13 +48,15 @@ The decision to be made is: **which HITL pattern governs the `delete_source` too
 
 ## Decision Outcome
 
-**To be decided.** The Architecture Review recommends Option 1 as the correct pattern for in-session destructive operations: `renderAndWaitForResponse` provides the synchronous user-facing confirmation, while the admin role pre-check prevents non-admin users from ever reaching the confirmation step.
+**Accepted 2026-05-25 — Option 1 (renderAndWaitForResponse + admin pre-check).** `renderAndWaitForResponse` provides the synchronous user-facing confirmation, while the admin role pre-check prevents non-admin users from ever reaching the confirmation step.
 
-### Proposed decision: Option 1 — renderAndWaitForResponse + admin pre-check
+> **Read ≠ verify ≠ modify ([ADR-002 clarification](ARC-ADR-002-jwt-forwarding-auth-contract.md#read-vs-verify--clarification-2026-05-25)):** the role extraction below is a **read-only claim decode for UX only**. middle-core does **not** verify the signature, does **not** mutate the token (it forwards byte-for-byte unchanged), and this pre-check is a **UX hint, not enforcement** — backend-core remains the sole authoritative RBAC gate. If the role claim can't be parsed, **proceed to the confirmation** and let backend-core decide; never block a legitimate admin on a parse miss.
+
+### Decision: Option 1 — renderAndWaitForResponse + admin pre-check
 
 **In `tools.py` (`delete_source` tool):**
-1. Extract the user's role from the JWT claims (decoded in `app.py` and injected into the LangGraph run config).
-2. If role is not `admin`: return a structured error message to the LLM ("Permission denied: admin role required to delete sources."). Do not call backend-core.
+1. Read the user's role from the JWT claims (decoded read-only in `app.py` and injected into the LangGraph run config) — claim key `roles`, admin value `admin` (see ADR-002).
+2. If role is **confidently** not `admin`: return a structured error message to the LLM ("Permission denied: admin role required to delete sources."). Do not call backend-core. (If the claim is unparseable, skip this short-circuit and proceed — backend-core will 403 if truly unauthorized.)
 3. If role is `admin`: invoke `renderAndWaitForResponse` with a confirmation card showing source name, source ID, and estimated object count (fetched from `list_sources` if available).
 4. If user clicks "Confirm": call `BackendClient.delete_source(source_id)` with the forwarded admin JWT. Return success/failure to the LLM.
 5. If user clicks "Cancel" (or times out): return a cancellation message. Do not call backend-core.

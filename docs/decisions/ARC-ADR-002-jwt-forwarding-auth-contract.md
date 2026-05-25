@@ -80,6 +80,19 @@ Read from backend-core `app/auth.py` + `app/config.py`. middle-core/frontend-cor
 
 A middle-core admin pre-check (e.g., the ADR-006 delete confirmation) reads the **`roles`** claim and treats the user as admin **iff `"admin"` is in the set**. These are the **defaults** — a non-default issuer config (`ROLE_CLAIM` / `ADMIN_ROLE`) overrides them, so confirm backend-core's env if it isn't running defaults.
 
+### Read vs. verify — clarification (2026-05-25)
+
+"Pass-through / opaque Bearer" and D2/D3 forbid middle-core from **modifying, re-signing, augmenting, exchanging, or verifying** the JWT — **not** from **reading** it. A **read-only claim decode** (no signature verification, no mutation) **for UX only** is explicitly permitted, so the [ADR-006](ARC-ADR-006-hitl-destructive-ops.md) `delete_source` gate can read the `roles` claim and avoid showing a non-admin a destructive confirmation that backend-core would `403` anyway.
+
+Invariants that keep this consistent with single-source-of-truth RBAC:
+
+- The token still forwards **byte-for-byte unchanged** downstream.
+- middle-core's read is a **UX hint, never enforcement** — **backend-core remains the sole authoritative RBAC gate.**
+- If the claim **can't be parsed**, **proceed** to the confirmation and let backend-core decide — fail to the authority, never block a legitimate admin on a parse miss.
+- The decoded token is **never logged or persisted** (per the secret-handling rules above).
+
+This resolves the apparent contradiction with ADR-006: both Accepted ADRs hold because *read ≠ verify ≠ modify*.
+
 ---
 
 ## Affected Layers / Repos
