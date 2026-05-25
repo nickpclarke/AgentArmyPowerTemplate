@@ -1,11 +1,13 @@
 # AgentArmy Template Platform Roadmap
-## Strategic Brief & Visual Roadmap (2026 Q2–Q4)
+## Strategic Brief & Visual Roadmap (rolling, session-paced)
 
 ---
 
 ## Executive Summary
 
-AgentArmy must climb from **Custom/Manual orchestration** (today) to **Self-Service, Observable, Cost-Optimized Platform** (6 months). The competitive pressure is real: new agent frameworks (Copilot extensibility, Anthropic Managed Agents) are disrupting the routing/orchestration layer that AgentArmy currently executes by hand.
+AgentArmy must climb from **Custom/Manual orchestration** (today) to **Self-Service, Observable, Cost-Optimized Platform** (~15 agent sessions across 4 release trains). The competitive pressure is real: new agent frameworks (Copilot extensibility, Anthropic Managed Agents) are disrupting the routing/orchestration layer that AgentArmy currently executes by hand.
+
+> **Planning unit:** This army plans in **agent sessions** — one parallel-agent invocation — not human calendar time. All durations and timelines below are expressed in sessions or session ranges.
 
 **The keystone move:** Convert the static CLAUDE.md routing table into an **executable policy engine**. This single shift unblocks intelligent routing, spoke self-service, observability, and the learning loop — everything downstream depends on it.
 
@@ -80,21 +82,21 @@ annotation 2 [0.55, 0.12] Learning loop is the durable moat
 
 | # | Play | What | Why | Timeline | Viability |
 |---|------|------|-----|----------|-----------|
-| **1** | **Sensing Engine** | Instrument delegation flow → OTel spans (borrow Langfuse) | Unlocks doctrine: situational awareness + flow metrics | Weeks 1–4 (Jun) | HIGH — borrow, don't build |
-| **2** | **Manage Inertia / Policy Engine** | Convert CLAUDE.md table → executable routing policy resolver | Removes keystone constraint; unblocks spoke init + choreography | Weeks 5–7 (mid-Jul) | HIGH — CRITICAL dependency |
-| **3** | **Land & Expand (Spoke Init)** | Ship `spoke init` generator; wires repo + board + armies automatically | First user-facing win; depends on Play 2 | Weeks 8–9 (late Jul) | HIGH |
-| **4** | **Learning Loop (Durable Moat)** | Operationalize `error-coordinator` + `knowledge-synthesizer` runtime; close the loop on failures | Builds what competitors cannot replicate (your failure history) | Weeks 5–10 (concurrent) | HIGH — genius zone |
-| **5** | **Buy, Don't Build (Obs/Cost)** | Integrate Langfuse + Helicone; abstract LLM provider (avoid lock-in) | Frees capital for Play 4; lets vendors win the commodity WAR | Weeks 8–11 (concurrent) | HIGH — strategic deferral |
+| **1** | **Sensing Engine** | Instrument delegation flow → OTel spans (borrow Langfuse) | Unlocks doctrine: situational awareness + flow metrics | Sessions 1–2 (RT1) | HIGH — borrow, don't build |
+| **2** | **Manage Inertia / Policy Engine** | Convert CLAUDE.md table → executable routing policy resolver | Removes keystone constraint; unblocks spoke init + choreography | Sessions 1–2 (RT1 keystone) | HIGH — CRITICAL dependency |
+| **3** | **Land & Expand (Spoke Init)** | Ship `spoke init` generator; wires repo + board + armies automatically | First user-facing win; depends on Play 2 | Sessions 5–6 (RT3) | HIGH |
+| **4** | **Learning Loop (Durable Moat)** | Operationalize `error-coordinator` + `knowledge-synthesizer` runtime; close the loop on failures | Builds what competitors cannot replicate (your failure history) | Sessions 3–4 (RT2, concurrent) | HIGH — genius zone |
+| **5** | **Buy, Don't Build (Obs/Cost)** | Integrate Langfuse + Helicone; abstract LLM provider (avoid lock-in) | Frees capital for Play 4; lets vendors win the commodity WAR | Sessions 4–5 (RT2/RT3, concurrent) | HIGH — strategic deferral |
 | **6** | **Open Standard** (Future) | Release routing policy schema + spoke-init as open standard | Build ecosystem; commoditize the layer beneath your moat | After Plays 1–4 prove model | MEDIUM — requires proof first |
 
 ---
 
 ## Release Train Structure & Alignment
 
-Four 10-week release trains, layered by capability maturity and dependency order:
+Four release trains, sequenced by capability maturity and dependency order. **This army plans in agent sessions, not calendar weeks** — durations below are session ranges; see the [Release Train Index](../release-trains/release-train-index.md) for the session-by-session plan and velocity calibration.
 
 ### Release Train 1: Foundation & Routing (Plays 1, 2 + enablers)
-**Duration:** Jun 1 – Jul 12 (~6 weeks)  
+**Duration:** Sessions 1–2 (~2 sessions)  
 **Theme:** Make agent capabilities explicit; routing deterministic.
 
 | Feature | Area | Type | Size | Routing | Outcome |
@@ -118,7 +120,7 @@ Ready for Plays 2–5
 ---
 
 ### Release Train 2: Operations & Quality (Plays 3, 4, 5 + operationals)
-**Duration:** Jul 12 – Aug 23 (~6 weeks)  
+**Duration:** Sessions 3–5 (~2–3 sessions)  
 **Theme:** Formalize multi-agent workflows; measure quality; establish learning loop.
 
 | Feature | Area | Type | Size | Routing | Outcome |
@@ -145,7 +147,7 @@ Ready for spoke onboarding (RT3)
 ---
 
 ### Release Train 3: Spoke Readiness & Observability (Play 3 completion + operationals)
-**Duration:** Aug 23 – Oct 4 (~6 weeks)  
+**Duration:** Sessions 5–6 (~2 sessions)  
 **Theme:** Spoke teams self-serve; cost is visible; observability is wired.
 
 | Feature | Area | Type | Size | Routing | Outcome |
@@ -169,7 +171,7 @@ Ready for advanced learning (RT4)
 ---
 
 ### Release Train 4: Learning & Advanced Observability (Play 4 completion + intelligence)
-**Duration:** Oct 4 – Nov 15 (~6 weeks)  
+**Duration:** Sessions 6–7 (~1–2 sessions)  
 **Theme:** Accumulate and share lessons; trace agent decisions; iterate on routing.
 
 | Feature | Area | Type | Size | Routing | Outcome |
@@ -309,14 +311,14 @@ All four release trains improve these three principles simultaneously.
 
 ## Budget & Capacity Estimate
 
-| Release Train | Duration | Team Size | Agent Routing | Notes |
+| Release Train | Sessions | Parallel agents | Agent Routing | Notes |
 |---|---|---|---|---|
-| RT1 | 6 weeks | 2.5 FTE | `agent-distinctiveness-advocate`, `architect-reviewer`, `observability-engineer`, `prompt-engineer` | Foundation blocks RT2–4 |
-| RT2 | 6 weeks | 3 FTE | `workflow-orchestrator`, `observability-engineer`, `knowledge-synthesizer`, `tooling-engineer` | Concurrent with Play 4, 5 |
-| RT3 | 6 weeks | 2.5 FTE | `platform-engineer`, `finops-engineer`, `prompt-engineer`, `observability-engineer` | Spoke feedback informs RT4 |
-| RT4 | 6 weeks | 2 FTE | `knowledge-synthesizer`, `observability-engineer`, `prompt-engineer` | Continuous improvement |
+| RT1 | ~2 sessions | up to 4 | `agent-distinctiveness-advocate`, `architect-reviewer`, `observability-engineer`, `prompt-engineer` | Foundation blocks RT2–4 |
+| RT2 | ~2–3 sessions | up to 4 | `workflow-orchestrator`, `observability-engineer`, `knowledge-synthesizer`, `tooling-engineer` | Concurrent with Play 4, 5 |
+| RT3 | ~2 sessions | up to 3 | `platform-engineer`, `finops-engineer`, `prompt-engineer`, `observability-engineer` | Spoke feedback informs RT4 |
+| RT4 | ~1–2 sessions | up to 3 | `knowledge-synthesizer`, `observability-engineer`, `prompt-engineer` | Continuous improvement |
 
-**Total:** 6 months, ~2.5–3 FTE average, 10–12 agents routing across 2 armies.
+**Total:** ~7–9 sessions across the hub trains; up to 4 parallel agents per session; 10–12 specialist agents routing across 2 armies. (Planning unit = agent sessions, not calendar time — see the Release Train Index.)
 
 ---
 
@@ -329,8 +331,8 @@ All four release trains improve these three principles simultaneously.
    - Parent/child hierarchy (Epic → Feature → Story/Enabler)
    - Routing guidance (which agents + armies own each item)
    - Dependencies marked
-4. **Add to the GitHub Projects board** — set Status, Priority, Start/Target dates
-5. **Kick off Play 1 (Sensing Engine)** — week of Jun 1
+4. **Add to the GitHub Projects board** — set Status, Priority, PI, Iteration (no calendar dates; the army plans in sessions)
+5. **Kick off Play 1 (Sensing Engine)** — next agent session
 
 ---
 

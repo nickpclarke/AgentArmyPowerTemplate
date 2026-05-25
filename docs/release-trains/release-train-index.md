@@ -1,7 +1,9 @@
 # Release Train Master Index
 
 Strategic index of Release Trains RT1–RT8 for the AgentArmy template platform and spoke implementations.
-6-month rolling roadmap (Jun 2026 – Q4 2026+).
+Rolling roadmap across ~15 agent sessions (hub RT1–RT4) + ~11 spoke sessions (RT5–RT8).
+
+> **Planning unit:** This army plans in **agent sessions** — one parallel-agent invocation — not human calendar time. All durations are expressed in sessions. A PI (Program Increment) spans approximately 5 sessions.
 
 > **The [GitHub Projects board](https://github.com/users/nickpclarke/projects/1) holds live status, fields, and per-issue details — not this page.** This page holds the durable strategy: themes, success factors, cross-RT dependencies, and the milestone calendar. For the issue index see [backlog/BACKLOG_ISSUES_INDEX.md](../backlog/BACKLOG_ISSUES_INDEX.md); for the strategic rationale see [roadmap/PLATFORM_ROADMAP.md](../roadmap/PLATFORM_ROADMAP.md).
 
@@ -12,14 +14,14 @@ Strategic index of Release Trains RT1–RT8 for the AgentArmy template platform 
 These trains deliver artifacts to the AgentArmy hub repo itself — agent specs, routing policy, CI/CD
 workflows, spoke-init tooling, and the learning loop runtime. They do not ship running application code.
 
-| RT | Name | Theme | Duration | Epic / Features | PI |
+| RT | Name | Theme | Session range | Epic / Features | PI |
 |---|---|---|---|---|---|
-| **RT1** | Foundation & Routing | Make capabilities explicit; routing deterministic | Jun 1 – Jul 12 | [#17](https://github.com/nickpclarke/AgentArmy/issues/17) / #18–23 | PI-1 |
-| **RT2** | Operations & Quality | Formalize workflows; close the learning loop | Jul 12 – Aug 23 | [#24](https://github.com/nickpclarke/AgentArmy/issues/24) / #25–30 | PI-2 |
-| **RT3** | Spoke Readiness | Spoke teams self-serve; context travels | Aug 23 – Oct 4 | [#31](https://github.com/nickpclarke/AgentArmy/issues/31) / #32–36 | PI-2 |
-| **RT4** | Learning & Intelligence | Accumulate & share lessons; iterate routing | Oct 4 – Nov 15 | [#37](https://github.com/nickpclarke/AgentArmy/issues/37) / #38–41 | PI-3 |
+| **RT1** | Foundation & Routing | Make capabilities explicit; routing deterministic | Sessions 1–2 | [#17](https://github.com/nickpclarke/AgentArmy/issues/17) / #18–23 | PI-1 |
+| **RT2** | Operations & Quality | Formalize workflows; close the learning loop | Sessions 3–5 | [#24](https://github.com/nickpclarke/AgentArmy/issues/24) / #25–30 | PI-2 |
+| **RT3** | Spoke Readiness | Spoke teams self-serve; context travels | Sessions 5–6 | [#31](https://github.com/nickpclarke/AgentArmy/issues/31) / #32–36 | PI-2 |
+| **RT4** | Learning & Intelligence | Accumulate & share lessons; iterate routing | Sessions 6–7 | [#37](https://github.com/nickpclarke/AgentArmy/issues/37) / #38–41 | PI-3 |
 
-**Hub total:** 25 issues across 4 epics · ~11 FTE-weeks · 24 weeks.
+**Hub total:** 25 issues across 4 epics · ~7–9 sessions · PI-1 through PI-3.
 
 ### Spoke-implementation trains (RT5–RT8)
 
@@ -34,7 +36,7 @@ based on spoke-repo readiness, not hub template delivery.
 | **RT7** | Middle-Core Runtime | Administrable, instrumented, ArcadeDB-backed C# platform | middle-core | MCR-E (#7) / MCR-F1–F5, EN1–EN2, S1–S2 | PI-3 (candidate) |
 | **RT8** | Generative Platform Maturity | Agent runtime + generative UI: streaming, memory, cockpit, observability, ACA deploy | middle-core + frontend-core | GPM-E1 (MC #32–#39) + GPM-E2 (FE #32–#37) | PI-3 (candidate) |
 
-**Spoke total:** ~35 items across 4 epics in 3 spoke repos. RT6 Phase 1 shipped. RT5/RT7/RT8 planned.
+**Spoke total:** ~35 items across 4 epics in 3 spoke repos · ~11 sessions · RT6 Phase 1 shipped · RT5/RT7/RT8 planned.
 
 See the per-RT docs for full Epic → Feature → Enabler decomposition and acceptance criteria:
 - [RT5-ontology-grade-persistence.md](RT5-ontology-grade-persistence.md)
@@ -52,7 +54,6 @@ See the per-RT docs for full Epic → Feature → Enabler decomposition and acce
 
 | Metric | Value |
 |---|---|
-| Session duration | ~3 hours |
 | Parallel agents | 4 |
 | Features completed | 4 Size:M (draft PRs open) |
 | Throughput | **4 Size:M features / session** |
@@ -71,7 +72,7 @@ These agents work in **sessions**, not calendar weeks. The relevant planning uni
 
 > **Features per session** (not story points per week)
 
-A session = one parallel-agent invocation, typically 2–4 hours wall-clock time.
+A session = one parallel-agent invocation. No calendar clock applies; throughput is measured in features delivered per session.
 
 ### Projected Session Count by Release Train
 
@@ -88,7 +89,7 @@ A session = one parallel-agent invocation, typically 2–4 hours wall-clock time
 - **RT2+ features are implementation-heavy.** Choreography patterns, learning loop runtime, and cost-visibility integrations involve real executable code (not YAML policy or shell scripts). Expect 2–3 features/session, not 4.
 - **Parallelism ceiling.** Session 1 ran 4 agents in true parallel on independent features. RT2+ features have tighter dependencies (see Cross-RT Dependency Graph below) — some will serialize, reducing throughput.
 - **Revision rounds.** Draft PRs from Session 1 will require review and revision passes. Count those as fractional sessions if significant rework is needed.
-- **This baseline replaces FTE-week estimates for agent-driven work.** Calendar durations in the Milestone Calendar remain as reference anchors for stakeholder communication, but session counts are the operational planning unit.
+- **This baseline replaces all FTE-week and calendar estimates.** Session counts are the sole operational planning unit for this army. No calendar anchors are maintained.
 
 ---
 
@@ -205,36 +206,26 @@ UDA-F3 as a dependency gate when scheduling RT8 sessions.
 
 ---
 
-## Milestone Calendar
+## Session-Sequenced Milestone Plan
 
-> **Two views:** Calendar dates (original estimates, kept for stakeholder reference) and session-based milestones (the operational planning unit for agent-driven work). Use the session column to plan the next session; use the calendar column for reporting to humans.
+> **Operational view only.** This army plans in agent sessions, not calendar time. No calendar dates are maintained. Each row below is one session-level commitment: what lands, which issues close, and the cumulative throughput against the session baseline (~4 Size:M/session for foundation work; ~1–3/session for implementation-heavy work). Update this table after each session.
 
-### Q2 (Jun–Aug): RT1 + RT2 ramp-up
+### Hub trains RT1–RT4 — session plan
 
-| Calendar window (~Jun–Aug 2026) | Session | Issues | Status |
-|---|---|---|---|
-| Jun 1–12: RT1 Sprint 1 — Agent Specs, Routing Tree kickoff | **Session 1** | #18, #19, #20, #44 | **DONE** — draft PRs #55, #56, #57, #58 open |
-| Jun 12–26: RT1 Sprint 2 — Hooks, Context Graph, routing cont. | **Session 2** | #21, #22, #23 | Not started |
-| Jun 26–Jul 10: RT1 Sprint 3 — Telemetry, Prompt Library, wrap | _(absorbed into Session 2 or earlier)_ | — | Dependent on Session 2 scope |
-| Jul 10–24: RT2 Sprint 1 — Choreography, Eval Gates | **Session 3** | #25, #26 | Not started |
-| Jul 24–Aug 7: RT2 Sprint 2 — Skills, Learning Loop, Artifacts | **Session 4** | #27, #28, #29 | Not started |
-| Aug 7–21: RT2 Sprint 3 — Cost Visibility, wrap | _(Session 4 or Session 5 if slippage)_ | #30 | Not started |
+| Session | RT | Target issues | What lands | Expected throughput | Status |
+|---|---|---|---|---|---|
+| **Session 1** ✅ | RT1 | #18, #19, #20, #44 | Agent Spec Template, Routing Tree, Hook System, Token-setup docs | 4 features | **DONE** — draft PRs #55–#58 open |
+| **Session 2** | RT1 | #21, #22, #23 | Context Graph, Telemetry Instrumentation, Prompt Library Phase 1 | 3 features | Not started |
+| **Session 3** | RT2 | #25, #26 | Multi-Agent Choreography, Eval Gates | 2 features | Not started |
+| **Session 4** | RT2 | #27, #28, #29 | Skill Scaffolding, Learning Loop Runtime, Artifact Lifecycle | 2–3 features | Not started |
+| **Session 5** | RT2/RT3 | #30, #32, #33, #34 | Cost Visibility wrap + RT3 ramp: Onboarding Playbook, Capacity Model, Spoke Manifest | 2–3 features | Not started |
+| **Session 6** | RT3/RT4 | #35, #36, #38, #39 | Observability Dashboard, Prompt Adaptation, KB, Tracing | 2–3 features | Not started |
+| **Session 7** | RT4 | #40, #41 | Feedback Integration, Competency Tracking — final hub sprint | 2 features | Not started |
+| **Session 8** _(buffer)_ | — | Spillover / revision passes | — | — | Hold in reserve |
 
-### Q3 (Aug–Oct): RT2 completion + RT3 ramp-up
-
-| Calendar window (~Aug–Oct 2026) | Session | Issues | Status |
-|---|---|---|---|
-| Aug 21–Sep 4: RT3 Sprint 1 — Onboarding, Manifest | **Session 5** | #32, #34 | Not started |
-| Sep 4–18: RT3 Sprint 2 — Capacity Model, Dashboard | **Session 5 (cont.) or Session 6** | #33, #35 | Not started |
-| Sep 18–Oct 2: RT3 Sprint 3 — Prompt Adaptation, first real spoke | _(Session 5–6 tail)_ | #36 | Not started |
-
-### Q4 (Oct–Nov): RT3 wrap + RT4 execution
-
-| Calendar window (~Oct–Nov 2026) | Session | Issues | Status |
-|---|---|---|---|
-| Oct 2–16: RT4 Sprint 1 — KB, Tracing | **Session 6** | #38, #39 | Not started |
-| Oct 16–30: RT4 Sprint 2 — Feedback Integration, Competency | **Session 7** | #40, #41 | Not started |
-| Oct 30–Nov 15: RT4 Sprint 3 — wrap, learning synthesis | _(Session 7 tail or Session 8 if needed)_ | — | Not started |
+**Cumulative throughput target (Sessions 1–7):** ~18–21 features closed across hub RT1–RT4.
+**PI mapping:** PI-1 = Sessions 1–2 (RT1); PI-2 = Sessions 3–5 (RT2/RT3); PI-3 = Sessions 6–7 (RT4).
+A PI spans approximately 5 sessions at current velocity; recalibrate at each PI boundary.
 
 ### Session Summary (operational view) — Hub trains RT1–RT4
 
@@ -270,7 +261,7 @@ features/session).
 | **Spoke-S11** _(buffer)_ | Spillover, integration testing, revision passes | — | — | Hold in reserve; use if RT5/RT7 dependencies slip |
 
 > Spoke sessions do not yet have assigned Iterations on the board — add them at PI Planning.
-> Calendar sprint dates for spoke trains are anchors only; session numbers are the execution cadence.
+> Session numbers are the sole execution cadence; no calendar dates are maintained for spoke trains.
 > The spoke boards are the live status source: `nickpclarke/middle-core`, `nickpclarke/backend-core`,
 > `nickpclarke/frontend-core`.
 
