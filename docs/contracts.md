@@ -15,15 +15,19 @@ it, and the test that enforces it.
 |---|---|---|---|---|---|
 | **Data API** (`contracts/backend-core.openapi.json`, `agentarmy-platform.openapi.yaml`) | backend-core | frontend-core (copy + generated `src/lib/api/client.ts`); middle-core (CopilotKit tools, UDA) | **shipped** | [ADR-005](decisions/ARC-ADR-005-backend-core-openapi-contract.md) | `contract-provider.yml` (BE) ↔ `contract-consumer.yml` (FE) — Pact-style |
 | **Model contracts** (`ProjectionContracts.g.cs`, `StateMachineContracts.g.cs`, `WorkflowContracts.g.cs`) | middle-core (factory) | middle-core runtime | **shipped** (generated) | — | drift gate (`check_drift.py`) |
-| **C# data-platform objects + projection interfaces** (`DataPlatformContracts.g.cs`, MCR-F4) | middle-core | **backend-core UDA** (RT6) | **PENDING** — middle-core #11 (draft) | RT7 + [ADR-005](decisions/ARC-ADR-005-backend-core-openapi-contract.md) | _to wire when MCR-F4 ships_ |
+| **Data-platform contract** (`data-platform-contract.g.json` — `schema_version` + `*Data` fields/types + state enums; `DataPlatformContracts.g.cs`, MCR-F4) | middle-core | **backend-core UDA** (RT6) | **producer shipped** — middle-core #47 (versioned artifact + drift gate + 11 provider conformance tests). Consumer side dormant until backend-core supplies pact expectations (#40/#44) | RT7 + [ADR-005](decisions/ARC-ADR-005-backend-core-openapi-contract.md), [ADR-009](decisions/ARC-ADR-009-canonical-data-model-arrow.md) | provider conformance tests + `check_drift.py --strict` schema-version gate (MC); consumer-pact hook pending backend #40 |
 | **JWT-forwarding auth contract** (FE → MC → BE, verified once in BE) | cross-cutting | frontend-core, middle-core, backend-core | **ADR accepted** — contract to wire | [ADR-002](decisions/ARC-ADR-002-jwt-forwarding-auth-contract.md) | _to wire (auth integration test)_ |
 | **Agent endpoint** (`/copilotkit`) | middle-core (#22) | frontend-core (#13 runtime route) | **ADRs accepted** — code draft | [ADR-003](decisions/ARC-ADR-003-no-llm-key-in-browser.md), [ADR-004](decisions/ARC-ADR-004-llm-provider-cerebras.md) | _to wire_ |
 
 ## Who's waiting on whom
 
-- **backend-core UDA (RT6) ← middle-core (MCR-F4 #11):** the one true inter-layer *wait*. The
-  UDA binds to middle-core's typed data-platform objects / projection interfaces, which aren't
-  shipped yet. Drive MCR-F4 (and register + test it) to unblock the UDA.
+- **backend-core UDA (RT6) ← middle-core (MCR-F4):** producer contract **shipped** (middle-core #47 —
+  versioned `data-platform-contract.g.json` + drift gate + provider conformance tests). The wait is
+  now on **backend-core**: bind the UDA to it (#40) and supply consumer pact expectations
+  (`PACT_FILE`/`PACT_BROKER_URL`) so MC's dormant consumer-pact hook activates.
+- **Ingest contract gap (MC agent ↔ backend-core `/api/v1/ingest`):** middle-core #44 found the
+  agent assumed JSON `{uri}` ingest but backend-core's endpoint is **multipart file upload**. Open
+  cross-layer decision (URI-ingest endpoint vs agent file-upload flow) — see the governing ADR/issue.
 - **CopilotKit middle-core runtime → backend-core OpenAPI:** the contract is **already shipped**,
   so middle-core's tools aren't blocked on it — only on their own draft code (#18–#22).
 - **Auth (ADR-002): settled — accepted 2026-05-25.** Forward the user JWT unchanged across all
