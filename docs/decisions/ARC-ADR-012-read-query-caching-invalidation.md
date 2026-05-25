@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | ID | ARC-ADR-012 |
-| Status | Proposed |
+| Status | Accepted |
 | Date | 2026-05-25 |
-| Deciders | Architecture Review (with `performance-engineer` / `finops-engineer` input); HITL — pending hub owner |
+| Deciders | Architecture Review; accepted by hub owner 2026-05-25 |
 | Supersedes | — |
 | Superseded by | — |
 | Tags | caching, uda, performance, ttl, redis, invalidation, backend-core, cost-control |
@@ -72,7 +72,7 @@ cross-tenant read. Decided early, one cache contract governs key shape, TTL, inv
 
 ## Decision Outcome
 
-**To be decided.** This is an **HITL** decision — the Architecture Review (or hub owner) must choose,
+**Accepted 2026-05-25 — Option 3: fold read-query caching into the platform / middle-core runtime cache layer (not a backend-core-local cache); keep the cache contract reads-only + principal-scoped.** The HITL framing that produced this choice: This is an **HITL** decision — the Architecture Review (or hub owner) must choose,
 because the topology trade-off (operational simplicity vs cross-replica correctness vs alignment with
 the canonical-model runtime) couples to the deployment model (ARC-ADR-015) and the authorization model
 (ARC-ADR-013), and is a strategic call, not a mechanical one.

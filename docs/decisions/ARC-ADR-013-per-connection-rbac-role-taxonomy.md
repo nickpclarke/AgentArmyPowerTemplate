@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | ID | ARC-ADR-013 |
-| Status | Proposed |
+| Status | Accepted |
 | Date | 2026-05-25 |
-| Deciders | Architecture Review (with `security-architect` input); HITL — pending hub owner |
+| Deciders | Architecture Review; accepted by hub owner 2026-05-25 |
 | Supersedes | — |
 | Superseded by | — |
 | Tags | authz, rbac, uda, connections, roles, governance, backend-core, security |
@@ -72,7 +72,7 @@ point — governs the whole connection registry.
 
 ## Decision Outcome
 
-**To be decided.** This is an **HITL** decision — the Architecture Review (or hub owner) must choose,
+**Accepted 2026-05-25 — Option 3: external policy engine (policy-as-code) for connection authorization, default-deny; ADR-002 roles remain the identity claims it evaluates.** The HITL framing that produced this choice: This is an **HITL** decision — the Architecture Review (or hub owner) must choose,
 because extending the RBAC model is a governance-and-security posture call (least-privilege strictness,
 self-service vs central grant, build-vs-adopt a policy engine) with long-lived consequences, not a
 mechanical one.

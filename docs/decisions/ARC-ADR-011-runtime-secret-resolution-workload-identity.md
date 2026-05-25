@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | ID | ARC-ADR-011 |
-| Status | Proposed |
+| Status | Accepted |
 | Date | 2026-05-25 |
-| Deciders | Architecture Review (with `security-architect` / `azure-infra-engineer` input); HITL — pending hub owner |
+| Deciders | Architecture Review; accepted by hub owner 2026-05-25 |
 | Supersedes | — |
 | Superseded by | — |
 | Tags | secrets, identity, workload-identity, key-vault, oidc, wif, managed-identity, security, deployment |
@@ -72,7 +72,7 @@ resolver contract, one precedence, and one rule that prod identity is always fed
 
 ## Decision Outcome
 
-**To be decided.** This is an **HITL** decision — the Architecture Review (or hub owner) must choose,
+**Accepted 2026-05-25 — Option 1: a single shared secret-resolver library + strict production-identity mandate — managed identity in prod, OIDC/WIF at deploy, static keys only in local/CI.** The HITL framing that produced this choice: This is an **HITL** decision — the Architecture Review (or hub owner) must choose,
 because how strictly identity is standardized across spokes and clouds is a security-posture and
 fleet-governance call with real cost/portability trade-offs, not a mechanical one.
 
