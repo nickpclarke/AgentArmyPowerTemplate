@@ -48,7 +48,10 @@ USER root
 COPY config/mcp-config.json            /opt/agentarmy/mcp-config.json
 COPY bootstrap/doctor-stub-schema.json /opt/agentarmy/doctor-stub-schema.json
 COPY entrypoint.sh                     /usr/local/bin/agentarmy-entrypoint.sh
-RUN chmod 0755 /opt/agentarmy /usr/local/bin/agentarmy-entrypoint.sh \
+# Strip any CRLF (Windows checkouts) before chmod — a CRLF shebang makes the
+# kernel look for `sh\r` and the container exits 127.
+RUN sed -i 's/\r$//' /usr/local/bin/agentarmy-entrypoint.sh \
+ && chmod 0755 /opt/agentarmy /usr/local/bin/agentarmy-entrypoint.sh \
  && chmod 0644 /opt/agentarmy/mcp-config.json /opt/agentarmy/doctor-stub-schema.json
 USER arcadedb
 
