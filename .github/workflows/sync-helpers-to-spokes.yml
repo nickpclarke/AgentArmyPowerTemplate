@@ -33,6 +33,7 @@ on:
       - "scripts/board_commands.py"
       - "scripts/onboarding-check.ps1"
       - "tools/status.mjs"
+      - "tools/fleet-heartbeat.mjs"
       - "scripts/spoke_sync.config.json"
       - "scripts/sync_helpers_to_spokes.py"
 

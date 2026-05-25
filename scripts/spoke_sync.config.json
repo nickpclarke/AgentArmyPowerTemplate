@@ -24,6 +24,7 @@
     "scripts/board_commands.py",
     "scripts/onboarding-check.ps1",
     "tools/status.mjs",
+    "tools/fleet-heartbeat.mjs",
     "templates/arcadedb-image"
   ],
   "deny": [
