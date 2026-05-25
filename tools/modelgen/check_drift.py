@@ -10,7 +10,6 @@ if any differences found.
 from __future__ import annotations
 
 import argparse
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -33,7 +32,7 @@ def run_generator(model: Path, out_dir: Path, repo_root: Path) -> bool:
         text=True,
     )
     if result.returncode != 0:
-        print(f"Generator failed: {result.stdout}\n{result.stderr}")
+        print(f"Generator failed: {result.stdout}\n{result.stderr}", file=sys.stderr)
         return False
     return True
 
@@ -114,7 +113,7 @@ def main() -> int:
     args.generated = args.generated.resolve()
 
     if not args.model.exists():
-        print(f"ERROR: model not found: {args.model}")
+        print(f"ERROR: model not found: {args.model}", file=sys.stderr)
         return 1
 
     if args.write:
@@ -136,11 +135,11 @@ def main() -> int:
             print("Generated code is in sync with model (no drift detected).")
             return 0
 
-        print("DRIFT DETECTED: generated code differs from model:")
+        print("DRIFT DETECTED: generated code differs from model:", file=sys.stderr)
         for diff in differences:
-            print(diff)
+            print(diff, file=sys.stderr)
         return 1
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())

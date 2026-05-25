@@ -6,4 +6,11 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
+
+  <!-- The xUnit test project lives under MiddleCore.Tests/; keep its sources out
+       of this web project's default compile glob (it has its own .csproj). -->
+  <ItemGroup>
+    <Compile Remove="MiddleCore.Tests/**/*.cs" />
+    <Content Remove="MiddleCore.Tests/**/*" />
+  </ItemGroup>
 </Project>
