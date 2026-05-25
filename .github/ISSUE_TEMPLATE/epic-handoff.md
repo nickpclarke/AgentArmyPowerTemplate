@@ -58,7 +58,7 @@ Hub epic: <!-- https://github.com/nickpclarke/AgentArmy/issues/N -->
 
 - Hub docs site: <https://nickpclarke.github.io/AgentArmy/>
 - Hub Obsidian vault: `obsidian/` in the hub repo (clone or browse on GitHub)
-- Hub planning: `planning/release-trains/release-train-index.md`
+- Hub planning: `docs/release-trains/release-train-index.md`
 
 ## Suggested agent routing
 

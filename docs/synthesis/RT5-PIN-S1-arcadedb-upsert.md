@@ -4,7 +4,7 @@
 **Informed by:** Live execution against `arcadedata/arcadedb:26.5.1`
 **Informs:** PIN-F4 — ArcadeDB adapter (`ArcadeDbPinBackend`)
 **Verdict:** All critical hypotheses confirmed live. See implementation patterns below.
-**Evidence:** `planning/synthesis/spike_arcadedb_test.py` — 35/36 assertions passed; the 1 non-pass is a gotcha (see section 6).
+**Evidence:** `docs/synthesis/spike_arcadedb_test.py` — 35/36 assertions passed; the 1 non-pass is a gotcha (see section 6).
 
 ---
 
@@ -437,7 +437,7 @@ RETURN $live;
 
 **ArcadeDB version:** 26.5.1 (build `b6d08fee549dd5930303b362223869901aab0fac`)
 **Container:** `arcadedata/arcadedb:26.5.1` via `docker run --name spike-arcadedb-test -p 12480:2480`
-**Test script:** `planning/synthesis/spike_arcadedb_test.py`
+**Test script:** `docs/synthesis/spike_arcadedb_test.py`
 **Result:** 35 PASS / 1 NOTED (CIDX-01 — gotcha documented above)
 
 | Group | Tests | Pass | Notes |

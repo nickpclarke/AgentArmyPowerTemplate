@@ -21,7 +21,7 @@ These markdown files should be **deleted** because their content is now on the G
 | File | Reason for Deletion | Location |
 |---|---|---|
 | **BACKLOG_ISSUES_INDEX.md** | Issue list, metadata, and field mappings now on board | `planning/backlog/` |
-| **release-train-index.md** | RT1-RT4 issue lists and timelines now on board | `planning/release-trains/` |
+| **release-train-index.md** | RT1-RT4 issue lists and timelines now on board | `docs/release-trains/` |
 | **board-population-checklist.md** | One-time setup artifact; no longer needed after board populated | `planning/backlog/` |
 
 **Why:** These were workarounds for "waiting for GitHub Projects TOKEN access." Once issues are on the board, these markdown duplicates create drift and maintenance burden.
@@ -46,7 +46,7 @@ These markdown files should be **deleted** because their content is now on the G
 
 | Artifact | Purpose | Owner | Location | Cadence |
 |---|---|---|---|---|
-| **PLATFORM_ROADMAP.md** | 6-month strategic vision for AgentArmy template platform evolution. Includes Wardley analysis, 5 strategic plays, Quarterly milestones, success criteria, cost/effort estimates | Product | `planning/roadmap/` | Quarterly update (end of each RT) |
+| **PLATFORM_ROADMAP.md** | 6-month strategic vision for AgentArmy template platform evolution. Includes Wardley analysis, 5 strategic plays, Quarterly milestones, success criteria, cost/effort estimates | Product | `docs/roadmap/` | Quarterly update (end of each RT) |
 
 **Why keep:** This is the *strategic narrative* and rationale for the 4 release trains. It explains WHY we're building what's on the board. GitHub Projects shows WHAT and WHEN; this shows WHY.
 
@@ -56,7 +56,7 @@ These markdown files should be **deleted** because their content is now on the G
 
 | Artifact | Purpose | Owner | Location | Cadence |
 |---|---|---|---|---|
-| **ARCKIT_SYNTHESIS.md** | Deep synthesis of ArcKit enterprise architecture patterns integrated into AgentArmy structure. Documents design decisions from external framework research | Architecture | `planning/synthesis/` | Quarterly review; update when new patterns discovered |
+| **ARCKIT_SYNTHESIS.md** | Deep synthesis of ArcKit enterprise architecture patterns integrated into AgentArmy structure. Documents design decisions from external framework research | Architecture | `docs/synthesis/` | Quarterly review; update when new patterns discovered |
 
 **Why keep:** This is the "working theory" document that justifies architectural decisions. Useful for onboarding, explaining design rationale, and evaluating new patterns. Not task-tracking.
 
@@ -192,7 +192,7 @@ Spoke templates      ← SPOKE_META_PLANNING_TEMPLATE.md
 ```bash
 # Delete workarounds (they're now on the board)
 git rm planning/backlog/BACKLOG_ISSUES_INDEX.md
-git rm planning/release-trains/release-train-index.md
+git rm docs/release-trains/release-train-index.md
 git rm planning/backlog/board-population-checklist.md
 
 # Commit
@@ -240,7 +240,7 @@ After rationalization:
 **Risk:** New contributors don't understand which source to trust  
 **Mitigation:** CLAUDE.md section explains three-layer structure:
 - GitHub Projects (task tracking)
-- `/planning/release-trains/` (strategy)
+- `/docs/release-trains/` (strategy)
 - `/planning/meta/` (governance)
 
 ---
@@ -250,8 +250,8 @@ After rationalization:
 | Artifact Type | Count | Location |
 |---|---|---|
 | **Governance Principles** | 3 | `/planning/meta/` |
-| **Strategic Vision** | 1 | `/planning/roadmap/` |
-| **Research & Architecture** | 1 | `/planning/synthesis/` |
+| **Strategic Vision** | 1 | `/docs/roadmap/` |
+| **Research & Architecture** | 1 | `/docs/synthesis/` |
 | **Process Definitions** | 4 | `/planning/meta/{ceremonies,learning,decisions}/` (planned) |
 | **Total Markdown SAFE Artifacts** | **9** | **Core, permanent** |
 | **GitHub Projects Board** | 25 issues | **Source of truth for work** |

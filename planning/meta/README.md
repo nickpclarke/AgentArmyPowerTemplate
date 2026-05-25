@@ -2,7 +2,7 @@
 
 Strategic governance for how AgentArmy template system itself evolves and improves.
 
-**This is NOT about planning features.** See `/planning/release-trains/` for that.  
+**This is NOT about planning features.** See `/docs/release-trains/` for that.  
 **This is about planning how we PLAN** — principles, ceremonies, decision frameworks, and learning workflows.
 
 ---
@@ -64,7 +64,7 @@ This is what **closes the learning loop**.
 
 ---
 
-## Key Differences from `/planning/release-trains/`
+## Key Differences from `/docs/release-trains/`
 
 | Aspect | Release Trains | Meta-Planning |
 |---|---|---|

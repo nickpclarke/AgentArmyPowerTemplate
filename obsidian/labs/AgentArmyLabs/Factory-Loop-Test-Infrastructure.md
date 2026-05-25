@@ -71,7 +71,7 @@ Each level is a **projection of the IR** (shapes/axioms generated from `model.ya
 | 5 | Structural | Alloy Analyzer (CLI) | finite-scope counterexamples ("can this model exist?") | on-demand/nightly | ◻ **later** — see [[RT-verification-levels]] |
 | 6 | Arithmetic/temporal | Z3 / SMT-LIB2 (`z3-solver`) | cardinality math, ordering, allocation, time windows | on-demand | ◻ **later** — see [[RT-verification-levels]] |
 
-Sequencing: **L1 JSON-Schema** + **L4 SHACL** + **L3 OWL** gate cheaply per-PR (all generated from the model). L2 hardens with reification (relator/role anti-patterns). The L3 OWL gate today is a pure-`rdflib` structural pass (no Java) so it runs reliably in CI; a full OWL 2 DL reasoner (HermiT) that proves satisfiability/subsumption is a deliberate upgrade. **L5 Alloy** and **L6 Z3** stay *later* — don't stand up a prover until a concrete invariant needs it. Spike plan for the L3-DL upgrade + L5/L6: [[RT-verification-levels]] (`planning/synthesis/RT-verification-levels.md`).
+Sequencing: **L1 JSON-Schema** + **L4 SHACL** + **L3 OWL** gate cheaply per-PR (all generated from the model). L2 hardens with reification (relator/role anti-patterns). The L3 OWL gate today is a pure-`rdflib` structural pass (no Java) so it runs reliably in CI; a full OWL 2 DL reasoner (HermiT) that proves satisfiability/subsumption is a deliberate upgrade. **L5 Alloy** and **L6 Z3** stay *later* — don't stand up a prover until a concrete invariant needs it. Spike plan for the L3-DL upgrade + L5/L6: [[RT-verification-levels]] (`docs/synthesis/RT-verification-levels.md`).
 
 ## Open questions
 - Cardinality enforcement home: generate-time (Python) vs runtime (C#) vs DB (ArcadeDB) — lean generate-time + runtime, DB as backstop.

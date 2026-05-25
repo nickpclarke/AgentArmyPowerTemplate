@@ -56,7 +56,7 @@ The business-object layer can deploy as `middle-core`: a separate core container
 - `docs/github-projects.md`
 - `docs/diagnostics-standards.md`
 - `docs/platform-diagnostics-cli.md`
-- `planning/roadmap/PLATFORM_ROADMAP.md`
+- `docs/roadmap/PLATFORM_ROADMAP.md`
 - `.agent/plans/issue-80-platform-diagnostics-cli.md`
 
 ## Subagents Used

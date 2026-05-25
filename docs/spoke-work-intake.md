@@ -75,11 +75,11 @@ When all Stories under an epic are closed and the epic's Definition of Done is m
 
 1. Close the epic Issue in the spoke repo.
 2. Comment on the **hub Epic issue** with a link to the spoke's closed Milestone and a one-line summary of what shipped.
-3. The hub PM/scrum-master updates the hub board Status to Done and records velocity in `planning/release-trains/release-train-index.md`.
+3. The hub PM/scrum-master updates the hub board Status to Done and records velocity in `docs/release-trains/release-train-index.md`.
 
 ## Reference
 
 - Hub docs site: <https://nickpclarke.github.io/AgentArmy/>
 - Epic handoff template: `.github/ISSUE_TEMPLATE/epic-handoff.md`
-- Hub planning: `planning/release-trains/release-train-index.md`
+- Hub planning: `docs/release-trains/release-train-index.md`
 - Routing guide: `CLAUDE.md` (Route work to the right army section)

@@ -130,6 +130,15 @@ nav:
     - Issue Conventions: issue-conventions.md
     - Human-in-the-Loop: hitl.md
     - Autonomous Review Loop: pr-review-loop.md
+  - Planning & Roadmap:
+    - Platform Roadmap: roadmap/PLATFORM_ROADMAP.md
+    - Release Train Index: release-trains/release-train-index.md
+    - RT5 Ontology-Grade Persistence: release-trains/RT5-ontology-grade-persistence.md
+    - ArcKit Synthesis: synthesis/ARCKIT_SYNTHESIS.md
+    - Verification Levels (L1-L6): synthesis/RT-verification-levels.md
+    - Spike — ArcadeDB Upsert (PIN-S1): synthesis/RT5-PIN-S1-arcadedb-upsert.md
+    - Spike — Bitemporal Queries (PIN-S2): synthesis/RT5-PIN-S2-bitemporal-queries.md
+    - Plan — CopilotKit Generative UI: plans/copilotkit-generative-ui.md
   - MECE Audit & Architecture:
     - N-Layer Architecture: n-layer-architecture.md
     - N-Layer Spoke Rules: n-layer-spoke-rules.md

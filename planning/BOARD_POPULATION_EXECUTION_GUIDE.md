@@ -131,7 +131,7 @@ Once board is populated, delete these markdown files (they're now in GitHub Proj
 
 ```bash
 rm planning/backlog/BACKLOG_ISSUES_INDEX.md
-rm planning/release-trains/release-train-index.md
+rm docs/release-trains/release-train-index.md
 ```
 
 **Reason:** These were workarounds for "waiting for TOKEN." Now that issues are on the board, these files are redundant. The board is source of truth for:
@@ -151,8 +151,8 @@ After deletion, the remaining markdown SAFE program artifacts are:
 | **ARMY_PRINCIPLES.md** | `/planning/meta/principles/` | Foundational governance axioms | Architecture | Quarterly review |
 | **AGENT_ONBOARDING_RUBRIC.md** | `/planning/meta/decisions/` | New agent validation checklist | Governance | Per-agent |
 | **SPOKE_META_PLANNING_TEMPLATE.md** | `/planning/meta/spoke-templates/` | Fork governance inheritance | Architects | Per-Spoke |
-| **PLATFORM_ROADMAP.md** | `/planning/roadmap/` | 6-month strategic vision | Product | Quarterly update |
-| **ARCKIT_SYNTHESIS.md** | `/planning/synthesis/` | ArcKit pattern integration research | Architects | Quarterly review |
+| **PLATFORM_ROADMAP.md** | `/docs/roadmap/` | 6-month strategic vision | Product | Quarterly update |
+| **ARCKIT_SYNTHESIS.md** | `/docs/synthesis/` | ArcKit pattern integration research | Architects | Quarterly review |
 | **FILE_ORGANIZATION.md** | `/planning/governance/` | Folder strategy & conventions | Team | Reference |
 | **PLANNING_CEREMONIES.md** | `/planning/meta/ceremonies/` | Sprint/PI planning cadence | Scrum Master | Reference |
 | **INCIDENT_WORKFLOW.md** | `/planning/meta/learning/` | Error → KB → principle update loop | Knowledge | Reference |

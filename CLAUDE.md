@@ -148,7 +148,7 @@ The agent army operates under **7 foundational principles** defined in `/plannin
 | Layer | Location | Purpose | Cadence |
 |---|---|---|---|
 | **Tasks** | GitHub Projects board | Issue tracking, sprints, burndown | Per-sprint |
-| **Strategy** | `/planning/release-trains/` | Feature delivery roadmap (RT1–RT4) | Quarterly |
+| **Strategy** | `/docs/release-trains/` | Feature delivery roadmap (RT1–RT4) | Quarterly |
 | **Governance** | `/planning/meta/` | Principles, agent validation, learning loops | Quarterly + continuous |
 
 **For fork users (Spokes):** See `/planning/meta/spoke-templates/SPOKE_META_PLANNING_TEMPLATE.md` for how to inherit Hub principles while customizing for your layer.

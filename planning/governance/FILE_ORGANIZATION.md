@@ -25,32 +25,39 @@ mkdocs.yml         # Documentation build config
 
 **Rule:** If it's not essential for repository bootstrap, it doesn't live at root.
 
-### 2. **Planning & Strategy** (→ `/planning/`)
-Strategic planning, synthesis work, and release train artifacts for the **template platform itself**.
+### 2. **Planning & Strategy** (durable → `/docs/`, hub-internal → `/planning/`)
 
-**Not for users.** Not for application-layer work. For "how do we improve AgentArmy as a template?"
+As of 2026-05-25, **durable strategy that agents and users should read lives in `/docs/`** so it
+publishes to GitHub Pages — spoke microVM agents can only reach the published docs site + their own
+repo, so plans buried in `/planning/` were invisible to them. **Hub-internal coordination** stays
+in `/planning/` (not published).
 
 ```
-/planning/
-├── release-trains/       # RT1, RT2, RT3, RT4 planning
-├── backlog/              # GitHub Issues index, board population scripts
-├── synthesis/            # Working synthesis of patterns, integrations
-├── roadmap/              # 6-month platform vision, quarterly milestones
-└── governance/           # Process, naming conventions, artifact lifecycle
+/docs/                    # PUBLISHED to Pages
+├── roadmap/              # platform vision, quarterly milestones
+├── release-trains/       # RT1–RT5 planning + the release-train index
+├── synthesis/            # patterns, integrations, spikes (ArcKit, verification levels)
+└── plans/                # cross-layer initiative plans (e.g. CopilotKit generative UI)
+
+/planning/                # HUB-INTERNAL (not published)
+├── backlog/              # GitHub Issues index, board population (the board is source of truth)
+├── governance/           # process, naming conventions, artifact lifecycle (this doc)
+├── meta/                 # army principles, agent validation, learning loops
+└── ideas/                # early/raw ideas not yet promoted
 ```
 
-**Move here if:**
-- It describes template platform evolution (not application features)
-- It's strategic or roadmap-level (3+ months out)
-- It's a synthesis of patterns or external frameworks
-- It coordinates release trains or major initiatives
+**Goes in `/docs/` (published) if** it describes platform evolution, is strategic/roadmap-level,
+synthesizes patterns/frameworks, or coordinates release trains — anything agents/users should read.
+
+**Stays in `/planning/` (hub-internal) if** it's the board backlog index, governance/process, army
+meta, or raw ideas not yet promoted.
 
 **Examples:**
-- ✅ PLATFORM_ROADMAP.md (how AgentArmy evolves)
-- ✅ ARCKIT_SYNTHESIS.md (patterns integration)
-- ✅ RT1-FOUNDATION-ROUTING.md (release train plan)
-- ❌ API endpoint documentation (belongs in `/docs/`)
-- ❌ User guide to agents (belongs in `/docs/`)
+- ✅ `/docs/roadmap/PLATFORM_ROADMAP.md` (how AgentArmy evolves)
+- ✅ `/docs/synthesis/ARCKIT_SYNTHESIS.md` (patterns integration)
+- ✅ `/docs/release-trains/` (release train plans + index)
+- ✅ `/docs/plans/` (cross-layer initiative plans)
+- ➡️ `/planning/backlog/`, `/planning/governance/`, `/planning/meta/` (hub-internal coordination)
 - ❌ Specific feature implementation (belongs in application code)
 
 ### 3. **User-Facing Documentation** (→ `/docs/`)
@@ -76,7 +83,7 @@ Guides, tutorials, reference material for people adopting or extending AgentArmy
 - ✅ agents.md (roster of available agents)
 - ✅ setup.md (installation & configuration)
 - ❌ RT2 release train plan (belongs in `/planning/`)
-- ❌ ArcKit synthesis work (belongs in `/planning/synthesis/`)
+- ❌ ArcKit synthesis work (belongs in `/docs/synthesis/`)
 
 ---
 
@@ -85,7 +92,7 @@ Guides, tutorials, reference material for people adopting or extending AgentArmy
 ### Release Train Documents
 **Format:** `RT<N>-<LIFECYCLE>-<TITLE>.md`
 
-Location: `/planning/release-trains/`
+Location: `/docs/release-trains/`
 
 ```
 RT1-FOUNDATION-ROUTING.md
@@ -109,7 +116,7 @@ board-population-checklist.md    # GitHub Projects setup guide
 ### Working Synthesis Documents
 **Format:** `<SUBJECT>-<DATE-or-QUARTER>-<STAGE>.md` OR descriptive name
 
-Location: `/planning/synthesis/`
+Location: `/docs/synthesis/`
 
 **Include dates for drafts, drop them for stable documents:**
 
@@ -123,7 +130,7 @@ learning-loop-Q2-synthesis.md    # Quarterly snapshot
 ### Roadmap & Strategy
 **Format:** `<TOPIC>.md` (no dates for permanent artifacts)
 
-Location: `/planning/roadmap/`
+Location: `/docs/roadmap/`
 
 ```
 PLATFORM_ROADMAP.md              # 6-month platform vision
@@ -151,7 +158,7 @@ contributing.md
 Documents flow through these phases. Where they live changes as they mature.
 
 ### Phase 1: Discovery (Internal, Drafting)
-- **Where:** `/planning/synthesis/` or `/planning/backlog/`
+- **Where:** `/docs/synthesis/` or `/planning/backlog/`
 - **Naming:** Include date or "draft" suffix
 - **Example:** `hook-system-2026-05-draft.md`
 - **Status:** Open to major revision
@@ -160,7 +167,7 @@ Documents flow through these phases. Where they live changes as they mature.
 - **Next:** Move to Specification when direction is decided
 
 ### Phase 2: Specification (Internal, Decided)
-- **Where:** `/planning/release-trains/` or `/planning/roadmap/`
+- **Where:** `/docs/release-trains/` or `/docs/roadmap/`
 - **Naming:** No draft suffix, may include RT# or quarter
 - **Example:** `RT1-FOUNDATION-ROUTING.md`
 - **Status:** Team has decided; tactical adjustments OK
@@ -198,11 +205,11 @@ Is it about the AgentArmy TEMPLATE PLATFORM (not an app)?
 └─ NO → Goes to /docs/ or application code
 
 Is it strategy/roadmap for the TEMPLATE?
-├─ YES → /planning/roadmap/ or /planning/release-trains/
+├─ YES → /docs/roadmap/ or /docs/release-trains/
 └─ NO → Keep asking...
 
 Is it working synthesis or drafting for the TEMPLATE?
-├─ YES → /planning/synthesis/
+├─ YES → /docs/synthesis/
 └─ NO → Keep asking...
 
 Is it GitHub Issues management for the TEMPLATE?
@@ -278,7 +285,7 @@ When reviewing PRs:
 Script to check:
 ```bash
 # Warn if synthesis/ contains non-date files without "draft" suffix
-ls planning/synthesis/ | grep -v "draft\|SYNTHESIS\|design\|_" && echo "⚠️  Non-standard naming in synthesis/"
+ls docs/synthesis/ | grep -v "draft\|SYNTHESIS\|design\|_" && echo "⚠️  Non-standard naming in synthesis/"
 ```
 
 ---
@@ -287,9 +294,9 @@ ls planning/synthesis/ | grep -v "draft\|SYNTHESIS\|design\|_" && echo "⚠️  
 
 | What You're Writing | Location | Naming | Lifespan | Audience |
 |---|---|---|---|---|
-| 6-month platform vision | `/planning/roadmap/` | PLATFORM_ROADMAP.md | Months | Team |
-| Release train plan | `/planning/release-trains/` | RT<N>-LIFECYCLE.md | Weeks–months | Team |
-| Pattern synthesis | `/planning/synthesis/` | TOPIC.md or TOPIC-DATE-draft.md | Days–weeks | Contributors |
+| 6-month platform vision | `/docs/roadmap/` | PLATFORM_ROADMAP.md | Months | Team |
+| Release train plan | `/docs/release-trains/` | RT<N>-LIFECYCLE.md | Weeks–months | Team |
+| Pattern synthesis | `/docs/synthesis/` | TOPIC.md or TOPIC-DATE-draft.md | Days–weeks | Contributors |
 | GitHub Issues index | `/planning/backlog/` | BACKLOG_ISSUES_INDEX.md | Months | Board ops |
 | User guide | `/docs/guides/` | topic.md | Ongoing | Users |
 | API reference | `/docs/reference/` | topic.md | Ongoing | Users |
@@ -300,7 +307,7 @@ ls planning/synthesis/ | grep -v "draft\|SYNTHESIS\|design\|_" && echo "⚠️  
 ## Related Documents
 
 - `/planning/README.md` — Purpose & scope of planning folder
-- `/planning/release-trains/release-train-index.md` — Master index of all RTs
+- `/docs/release-trains/release-train-index.md` — Master index of all RTs
 - `/planning/backlog/board-population-checklist.md` — GitHub Projects setup guide
 - `/planning/governance/` — This folder (process & conventions)
 
