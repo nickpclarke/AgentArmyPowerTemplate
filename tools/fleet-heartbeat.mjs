@@ -73,6 +73,21 @@ for (const spoke of SPOKES) {
   }
 }
 
+// ---- 2b. PR-event subscriptions (PRs are the webhook surface) --------------
+// PRs are event-driven: each repo must keep its pull_request-triggered automation
+// wired. Issues are cron/poll-driven (this heartbeat + the /loop mind); PRs ride
+// the GitHub webhook → the review/loop/@claude workflows. Enforce as a rule.
+const EXPECTED_PR_WORKFLOWS = ['copilot-review.yml', 'review-loop.yml', 'claude.yml'];
+for (const repo of [HUB, ...SPOKES]) {
+  const wf = repoTrees[repo].filter((p) => p.startsWith('.github/workflows/'));
+  const missing = EXPECTED_PR_WORKFLOWS.filter((w) => !wf.some((p) => p.endsWith('/' + w)));
+  if (missing.length) {
+    add(repo, 'gap', 'pr-subscription-missing',
+      `${repo} is not fully subscribed to PR events — missing ${missing.join(', ')}. Wire the pull_request-triggered workflow(s) so PRs get review / review-loop / @claude.`,
+      'copilot-task');
+  }
+}
+
 // ---- 3. Fleet health -------------------------------------------------------
 const health = {};
 for (const repo of [HUB, ...SPOKES]) {
