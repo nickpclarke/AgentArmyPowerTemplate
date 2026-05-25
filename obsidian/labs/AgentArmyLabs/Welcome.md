@@ -4,11 +4,16 @@ tags: [moc]
 # 🧪 AgentArmy Labs — Home
 
 > [!tip] Skunkworks & Labs vault — start here.
-> **Everything is reachable from this page.** The graph is the thinking tool (`Ctrl/⌘ + G`). See [[Taxonomy]] for the tags + glossary used across the vault.
+> **Everything is reachable from this page.** For a more “dashboard” feel, jump to [[Obsidian Board]]. The graph is the thinking tool (`Ctrl/⌘ + G`). See [[Taxonomy]] for the tags + glossary used across the vault.
 
-**🧪 Skunkworks & Labs (here, in-repo) → 📋 [Board](https://github.com/users/nickpclarke/projects/1) → 📚 Docs** · Published → **https://publish.obsidian.md/xlabs**
+**🧪 Skunkworks & Labs (here, in-repo) → 🎛 [[Obsidian Board]] → 📋 [GitHub Project Board](https://github.com/users/nickpclarke/projects/1) → 📚 Docs** · Published → **https://publish.obsidian.md/xlabs**
 
 ## 🗺 Map of content
+
+### The dashboards
+- [[Obsidian Board]] — a fun, navigable home dashboard (Bases + “choose a track”)
+- [[Platform Atlas]] — a cross-layer map for “platform that builds platforms”
+- `AgentArmy Labs Atlas.canvas` — a visual canvas map (drop it into Obsidian and click around)
 
 ### The vision
 - [[Model-Driven Platform]] — MOC for the model-driven bet
@@ -21,6 +26,11 @@ tags: [moc]
 
 ### Converging thread
 - [[Universal Data Adapter]] — connection registry whose CDM is the *same model*
+
+### Platform “all layers” track
+- [[Platform Atlas]] — the layer map (UI/API/worker/data/infra) + cross-cutting primitives
+- [[Data & Database Science Track]] — database + data science “spine” for the platform
+- [[OOP Patterns for Agentic Platforms]] — object models that stay sane under agentic change
 
 ### Parallel track
 - [[IKW-GraphEngine (Parallel Track)]] — friendly sibling engine (Trinity + BFO/CCO); learn alongside, offer *both* upper ontologies as projections

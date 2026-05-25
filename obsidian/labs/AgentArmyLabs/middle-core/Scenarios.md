@@ -1,3 +1,7 @@
+---
+tags: [middle-core, scenario]
+track: middle-core
+---
 # Scenarios
 
 Reusable flows that exercise platform capabilities. Each scenario is a [[scenario-template]]; a run is a [[capability-exercise]] that produces an [[evidence-pack]].

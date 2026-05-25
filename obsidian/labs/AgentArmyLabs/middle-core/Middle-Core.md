@@ -1,3 +1,7 @@
+---
+tags: [moc, middle-core]
+track: middle-core
+---
 # Middle-Core
 
 `middle-core` is a deployable core (port **8001**, a typed **C#/.NET** minimal API) that sits between `backend-core` provider capabilities and the platform operational APIs. It holds **semantic contracts, scenario definitions, safety policy, evidence expectations, and MCP readiness** — not a storage-shaped CRUD layer.

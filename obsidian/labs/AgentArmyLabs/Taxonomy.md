@@ -9,9 +9,13 @@ The controlled vocabulary for this vault. **Use these tags consistently** so not
 
 ### Hubs (maps of content)
 - [[Welcome]] — home / map of content
+- [[Obsidian Board]] — dashboard / “board” inside the vault
+- [[Platform Atlas]] — cross-layer navigation for “platform that builds platforms”
 - [[Taxonomy]] — tags, glossary, this index
 - [[Model-Driven Platform]] — vision MOC
 - [[Middle-Core]] — ontology MOC
+- [[Data & Database Science Track]] — data + database science track
+- [[OOP Patterns for Agentic Platforms]] — OOP track + patterns
 
 ### Vision — the model-driven bet
 - [[Model-Driven Platform]]
@@ -35,6 +39,19 @@ The controlled vocabulary for this vault. **Use these tags consistently** so not
 ### Converging thread
 - [[Universal Data Adapter]]
 
+### Platform layers (how a platform builds platforms)
+- [[Platform Atlas]] (MOC)
+- [[Layer — UI]] · [[Layer — API]] · [[Layer — Worker]] · [[Layer — Data]] · [[Layer — Infra]]
+- [[Agentic Loop Primitives]] — the “agentic-but-governed” spine
+
+### OOP patterns (keep the model from melting)
+- [[OOP Patterns for Agentic Platforms]] (MOC)
+- [[Scenario Objects]] · [[Policy Objects]] · [[Evidence-Backed Aggregates]]
+
+### Data & database science (the storage + evidence spine)
+- [[Data & Database Science Track]] (MOC)
+- [[Universal Data Adapter]] · [[Data Products & Semantic Contracts]] · [[Schema Scout as Science]] · [[Graph + Relational Together]]
+
 ## Tags
 | Tag                | Use on                                                                                              |
 | ------------------ | --------------------------------------------------------------------------------------------------- |
@@ -45,8 +62,17 @@ The controlled vocabulary for this vault. **Use these tags consistently** so not
 | `#scenario`        | a scenario definition                                                                               |
 | `#open-question`   | unresolved questions to revisit                                                                     |
 | `#prior-art`       | external references / inspiration                                                                   |
+| `#platform`        | platform layers, primitives, “platform that builds platforms” notes                                 |
+| `#layer`           | a specific platform layer note (UI/API/worker/data/infra)                                           |
+| `#agentic`         | agent workflow primitives and their invariants                                                      |
+| `#oop`             | object modeling patterns and architecture                                                           |
+| `#pattern`         | a reusable modeling / architecture pattern                                                          |
+| `#data`            | data platform concepts, data products, pipelines                                                    |
+| `#database`        | database design/operations, schema, indexing, query patterns                                         |
+| `#data-science`    | evaluation, measurement, experimentation, inference constraints                                      |
 
 **Rule:** every note gets at least one tag. Hubs → `#moc`; concept notes → `#vision`; catalog entities → `#middle-core` (+ `#business-object`).
+If it spans multiple layers, add `#platform` and a `track:` property (see [[Obsidian Board]]).
 
 ## Glossary
 - **model.yaml** — the single canonical model; everything else is a [[One Model, Many Projections|projection]].

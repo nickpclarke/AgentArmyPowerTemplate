@@ -1,3 +1,7 @@
+---
+tags: [vision, platform, data]
+track: vision
+---
 # Ontology Pipeline (North-Star)
 
 > **Status:** living design doc — current thinking for the ontology-derived generative pipeline that the middle-core runtime is growing into. This page reconciles the two raw idea notes ([Ontology.md](https://github.com/nickpclarke/AgentArmy/blob/main/planning/ideas/Ontology.md), [ontology2.md](https://github.com/nickpclarke/AgentArmy/blob/main/planning/ideas/ontology2.md)) into one authoritative direction. Where they conflicted, the decision is recorded in [Rejected alternatives](#rejected-alternatives).

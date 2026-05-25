@@ -1,0 +1,27 @@
+filters:
+  and:
+    - file.hasTag("open-question")
+properties:
+  file.folder:
+    displayName: Folder
+  track:
+    displayName: Track
+  file.links:
+    displayName: Relates to
+views:
+  - type: table
+    name: Open questions
+    groupBy:
+      property: file.folder
+      direction: ASC
+    order:
+      - file.name
+      - file.folder
+      - track
+      - file.links
+  - type: cards
+    name: Cards
+    order:
+      - file.name
+      - file.folder
+      - file.links

@@ -1,0 +1,45 @@
+filters:
+  or:
+    - file.hasTag("vision")
+    - file.hasTag("middle-core")
+    - file.hasTag("platform")
+    - file.hasTag("data")
+    - file.hasTag("database")
+    - file.hasTag("oop")
+formulas:
+  computed_track: 'if(track, track, if(file.hasTag("middle-core"), "middle-core", if(file.hasTag("vision"), "vision", "")))'
+  kind: 'if(file.hasTag("moc"), "hub", "note")'
+properties:
+  formula.computed_track:
+    displayName: Track
+  formula.kind:
+    displayName: Kind
+  layer:
+    displayName: Layer
+  file.folder:
+    displayName: Folder
+  file.links:
+    displayName: Relates to
+views:
+  - type: table
+    name: Atlas
+    groupBy:
+      property: formula.computed_track
+      direction: ASC
+    order:
+      - file.name
+      - formula.kind
+      - formula.computed_track
+      - layer
+      - file.folder
+      - file.links
+  - type: cards
+    name: Cards
+    groupBy:
+      property: formula.computed_track
+      direction: ASC
+    order:
+      - file.name
+      - formula.kind
+      - layer
+      - file.links

@@ -1,0 +1,29 @@
+filters:
+  or:
+    - file.hasTag("data")
+    - file.hasTag("database")
+    - file.hasTag("data-science")
+properties:
+  track:
+    displayName: Track
+  file.folder:
+    displayName: Folder
+  file.links:
+    displayName: Relates to
+views:
+  - type: cards
+    name: Data cards
+    groupBy:
+      property: file.folder
+      direction: ASC
+    order:
+      - file.name
+      - track
+      - file.links
+  - type: table
+    name: Data table
+    order:
+      - file.name
+      - track
+      - file.folder
+      - file.links

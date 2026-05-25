@@ -1,0 +1,28 @@
+filters:
+  or:
+    - file.hasTag("oop")
+    - file.hasTag("pattern")
+properties:
+  track:
+    displayName: Track
+  file.folder:
+    displayName: Folder
+  file.links:
+    displayName: Relates to
+views:
+  - type: cards
+    name: OOP cards
+    groupBy:
+      property: file.folder
+      direction: ASC
+    order:
+      - file.name
+      - track
+      - file.links
+  - type: table
+    name: OOP table
+    order:
+      - file.name
+      - track
+      - file.folder
+      - file.links
