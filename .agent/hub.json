@@ -4,7 +4,10 @@
   "hub_url": "https://github.com/nickpclarke/AgentArmy",
   "board_url": "https://github.com/users/nickpclarke/projects/1",
   "docs_url": "https://nickpclarke.github.io/AgentArmy/",
+  "adrs_url": "https://nickpclarke.github.io/AgentArmy/architecture-decisions/",
+  "contracts_url": "https://nickpclarke.github.io/AgentArmy/contracts/",
   "labs_url": "https://publish.obsidian.md/xlabs/Welcome",
+  "how_to_work": "Your work queue is THIS repo's Issues — not the hub board. Before coding, read the governing decisions at adrs_url and the inter-layer contracts at contracts_url. Then: pick an Issue (label agent-army-task = complex/multi-file, copilot-task = bounded), implement it, and open a PR whose body contains `Closes #<issue>`. Hub PM/scrum-master hand you epics as [EPIC] Issues opened in this repo; decompose them into Stories/PRs locally.",
   "reporting": "automatic — .github/workflows/notify-hub.yml dispatches your PR-merges / issue-closes / comments to the hub. You do not relay manually and do not need the hub Epic number or board access.",
   "collaboration_doc": "https://nickpclarke.github.io/AgentArmy/agent-collaboration/"
 }

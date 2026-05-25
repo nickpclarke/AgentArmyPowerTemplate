@@ -15,7 +15,9 @@ Two links anchor every agent — **start here, bookmark both:**
 
 - **Docs — tangible reality:** https://nickpclarke.github.io/AgentArmy/ — the published, settled
   documentation (setup, agents, routing, HITL, n-layer, deployment, roadmap). Spoke repos don't
-  carry the hub's `docs/`, so read it here.
+  carry the hub's `docs/`, so read it here. Two pages govern your implementation directly:
+  - **ADRs (decisions you must follow):** https://nickpclarke.github.io/AgentArmy/architecture-decisions/
+  - **Inter-layer contracts:** https://nickpclarke.github.io/AgentArmy/contracts/
 - **Labs — vision / WIP:** https://publish.obsidian.md/xlabs/Welcome — the Obsidian vault:
   research, design-in-progress, ontology/entity-relationship modeling. Where ideas are born and
   shaped before they graduate to Docs.
@@ -33,9 +35,11 @@ hub automatically. Just do the work and close your issues — the hub reconciles
 - Create issues for non-trivial work: `gh issue create --title "..." --body "Closes #N"`
 
 **In a spoke (microVM agent):** you cannot reach the hub board. Your task queue is **your
-own repo's Issues + Milestones**. Epics are handed off to you as `[EPIC]` Issues opened in
-this repo by the hub's PM/scrum-master; decompose them into Stories/PRs locally. There is
-no GitHub Project for you. See [agent-onboarding](agent-onboarding.md) and
+own repo's Issues + Milestones** — `gh issue list` in this repo, filtered to your labels.
+Epics are handed off to you as `[EPIC]` Issues opened in this repo by the hub's PM/scrum-master;
+decompose them into Stories/PRs locally. There is no GitHub Project for you. **Before coding an
+Issue, read the ADRs and inter-layer contracts (links above) that govern it** — those are the
+hub's binding decisions. See [agent-onboarding](agent-onboarding.md) and
 [spoke-work-intake](spoke-work-intake.md).
 
 Either way: apply routing labels `copilot-task` (bounded) or `agent-army-task`
