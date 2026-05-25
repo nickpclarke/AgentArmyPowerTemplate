@@ -4,62 +4,58 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-# Least-privilege GITHUB_TOKEN scopes, so this workflow does not depend on the
-# repo-wide "Read and write" Actions setting.
 permissions:
   contents: read
-  issues: write          # gh label create (repo labels live under the issues API)
-  pull-requests: write   # gh pr edit --add-label / --remove-label
-
-# This workflow has no checkout, so gh resolves the target repo from GH_REPO
-# rather than a local git remote.
-env:
-  GH_REPO: ${{ github.repository }}
+  issues: write          # create labels (labels live under the issues API)
+  pull-requests: write   # add/remove labels on the PR
 
 jobs:
   label-size:
-    runs-on: ubuntu-latest
+    # Runs on the self-hosted runners (free, off the GitHub-hosted minutes cap).
+    # Uses actions/github-script (octokit + GITHUB_TOKEN) — no `gh` CLI dependency,
+    # so it works on any runner image without extra tooling.
+    runs-on: [self-hosted, linux]
     steps:
       - name: Apply size + deep-review labels
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-          PR_NUM: ${{ github.event.pull_request.number }}
-          ADDITIONS: ${{ github.event.pull_request.additions }}
-          DELETIONS: ${{ github.event.pull_request.deletions }}
-        run: |
-          CHANGES=$(( ADDITIONS + DELETIONS ))
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const changes = (pr.additions || 0) + (pr.deletions || 0);
+            const size =
+              changes <= 10  ? 'XS' :
+              changes <= 50  ? 'S'  :
+              changes <= 200 ? 'M'  :
+              changes <= 500 ? 'L'  : 'XL';
+            const { owner, repo } = context.repo;
+            const issue_number = pr.number;
 
-          if   [ "$CHANGES" -le 10  ]; then SIZE="XS"
-          elif [ "$CHANGES" -le 50  ]; then SIZE="S"
-          elif [ "$CHANGES" -le 200 ]; then SIZE="M"
-          elif [ "$CHANGES" -le 500 ]; then SIZE="L"
-          else SIZE="XL"
-          fi
+            const defs = {
+              XS: ['0e8a16', 'PR size: XS (≤10 lines)'],
+              S:  ['94d82d', 'PR size: S (≤50 lines)'],
+              M:  ['f9c74f', 'PR size: M (≤200 lines)'],
+              L:  ['f3722c', 'PR size: L (≤500 lines)'],
+              XL: ['d62828', 'PR size: XL (>500 lines)'],
+              'needs-deep-review': ['e11d48', 'Large PR — trigger Claude Code deep review via /review-pr'],
+            };
+            for (const [name, [color, description]] of Object.entries(defs)) {
+              try {
+                await github.rest.issues.createLabel({ owner, repo, name, color, description });
+              } catch (e) {
+                if (e.status !== 422) throw e; // 422 = label already exists
+              }
+            }
 
-          echo "PR #$PR_NUM has $CHANGES changed lines -> $SIZE"
+            for (const stale of ['XS', 'S', 'M', 'L', 'XL']) {
+              if (stale === size) continue;
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number, name: stale });
+              } catch (e) {
+                if (e.status !== 404) throw e; // 404 = label wasn't applied
+              }
+            }
 
-          # Ensure all labels exist with consistent colours.
-          # || true: gh label create intermittently returns HTTP 401 from GitHub's
-          # label API (a transient auth quirk distinct from the issues/PR API).
-          gh label create "XS" --color "0e8a16" --description "PR size: XS (≤10 lines)"  --force || true
-          gh label create "S"  --color "94d82d" --description "PR size: S (≤50 lines)"   --force || true
-          gh label create "M"  --color "f9c74f" --description "PR size: M (≤200 lines)"  --force || true
-          gh label create "L"  --color "f3722c" --description "PR size: L (≤500 lines)"  --force || true
-          gh label create "XL" --color "d62828" --description "PR size: XL (>500 lines)" --force || true
-          gh label create "needs-deep-review" --color "e11d48" --description "Large PR — trigger Claude Code deep review via /review-pr" --force || true
-
-          # Remove stale size labels before applying the new one.
-          for label in XS S M L XL; do
-            gh pr edit "$PR_NUM" --remove-label "$label" 2>/dev/null || true
-          done
-          # Guarded so a label-write hiccup never reds the workflow.
-          gh pr edit "$PR_NUM" --add-label "$SIZE" || true
-
-          # Flag large PRs for deep review on every push (opened + synchronize) so a
-          # PR that grows past the threshold still gets caught. Never auto-removed —
-          # a reviewer may have applied needs-deep-review manually (per Codex review).
-          if [ "$CHANGES" -gt 200 ]; then
-            gh pr edit "$PR_NUM" --add-label "needs-deep-review" || true
-            echo "Flagged needs-deep-review ($CHANGES lines changed)"
-          fi
+            const labels = [size];
+            if (changes > 200) labels.push('needs-deep-review'); // never auto-removed
+            await github.rest.issues.addLabels({ owner, repo, issue_number, labels });
+            core.info(`PR #${issue_number}: ${changes} changed lines -> ${size}`);
