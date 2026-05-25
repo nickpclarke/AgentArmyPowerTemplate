@@ -1,73 +1,90 @@
-# Local self-hosted GitHub Actions runners for the AgentArmy fleet.
+# Local self-hosted GitHub Actions runners for the AgentArmy fleet — EPHEMERAL POOL.
 #
-# Free, unmetered CI on your own machine — self-hosted runner minutes do NOT count
-# against your monthly GitHub-hosted quota. One persistent Linux runner per private repo.
+# Free, unmetered CI on your own machine — self-hosted minutes don't count against the
+# GitHub-hosted quota. Each runner is EPHEMERAL: it registers, runs exactly one job, then
+# exits; Docker restarts it so it re-registers fresh. A clean container per job, no leakage.
+#
+# Pool size = `replicas` per repo = max concurrent jobs that repo can run locally.
+# Rule of thumb: replicas ≈ min(cores, RAM_GB / 2) — RAM (~2 GB/job) is usually the cap.
 #
 # Prereqs: Docker Desktop running. A classic GitHub PAT with `repo` scope (private repos).
 #
-# Start:
+# Start (default 2 runners/repo = 8 total):
 #   export GH_PAT=ghp_xxx          # do NOT commit; or copy .env.example -> .env
 #   docker compose up -d
-#   docker compose logs -f         # watch them register
 #
-# Stop / remove:
-#   docker compose down            # de-registers cleanly on graceful stop
+# Use a lot of capacity (e.g. 8 runners/repo = 32 total):
+#   LOCAL_RUNNERS_PER_REPO=8 docker compose up -d
+# Or scale one repo on the fly:
+#   docker compose up -d --scale runner-middle=12
 #
-# The runners auto-carry the labels `self-hosted`, `Linux`, `X64`, so workflows that
-# say `runs-on: [self-hosted, linux]` route here. They run only while this machine is on.
+# Watch / stop:
+#   docker compose logs -f
+#   docker compose down           # graceful; ephemeral runners drop out of the repo
+#
+# Runners auto-carry `self-hosted, Linux, X64` plus `agentarmy, local, docker-local`.
+#   runs-on: [self-hosted, linux]         -> these OR the always-on ACA runners
+#   runs-on: [self-hosted, docker-local]  -> ONLY here (Docker/browsers; ACA can't)
 name: agentarmy-runners
 
 x-runner: &runner
   image: myoung34/github-runner:latest
+  # Ephemeral runners exit after one job; restart respawns them to re-register.
   restart: unless-stopped
   environment: &runner-env
     ACCESS_TOKEN: ${GH_PAT:?set GH_PAT in your shell or .env (classic PAT, repo scope)}
     RUNNER_SCOPE: repo
     ORG_NAME: ""
-    # `docker-local` routes docker-build jobs here (ACA can't do Docker — no DIND).
+    EPHEMERAL: "1"
+    # `docker-local` routes docker-build / browser jobs here (ACA can't do Docker — no DIND).
     LABELS: agentarmy,local,docker-local
     DISABLE_AUTO_UPDATE: "true"
     # setup-dotnet installs here (writable) instead of root-only /usr/share/dotnet.
     DOTNET_INSTALL_DIR: /home/runner/.dotnet
   security_opt:
     - no-new-privileges:true
-  # Mount the host's Docker socket (Docker-out-of-Docker) so `docker build` in a job
-  # uses your Docker Desktop daemon. NOTE: this grants jobs host-daemon (root-equivalent)
-  # access — acceptable only for PRIVATE repos with your own agents; never for public repos.
-  # The work dir stays on the container's normal (exec-able) fs — NOT a tmpfs: setup-python
-  # installs a binary there and a noexec tmpfs breaks it ("failed to map segment").
+  # Host Docker socket (Docker-out-of-Docker) so `docker build` / Playwright use your daemon.
+  # Grants jobs host-daemon (root-equivalent) access — PRIVATE repos + your own agents only.
+  # Work dir stays on the normal (exec-able) container fs — NOT a tmpfs (noexec breaks
+  # setup-python: "./python: failed to map segment from shared object").
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
 
 services:
+  # One scalable service per repo (runners register per-repo on a user account).
+  # No container_name / fixed RUNNER_NAME — both are incompatible with replicas.
   runner-hub:
     <<: *runner
-    container_name: aa-runner-hub
+    deploy:
+      replicas: ${LOCAL_RUNNERS_PER_REPO:-2}
     environment:
       <<: *runner-env
       REPO_URL: https://github.com/nickpclarke/AgentArmy
-      RUNNER_NAME: aa-local-hub
+      RUNNER_NAME_PREFIX: aa-hub
 
   runner-frontend:
     <<: *runner
-    container_name: aa-runner-frontend
+    deploy:
+      replicas: ${LOCAL_RUNNERS_PER_REPO:-2}
     environment:
       <<: *runner-env
       REPO_URL: https://github.com/nickpclarke/frontend-core
-      RUNNER_NAME: aa-local-frontend
+      RUNNER_NAME_PREFIX: aa-fe
 
   runner-backend:
     <<: *runner
-    container_name: aa-runner-backend
+    deploy:
+      replicas: ${LOCAL_RUNNERS_PER_REPO:-2}
     environment:
       <<: *runner-env
       REPO_URL: https://github.com/nickpclarke/backend-core
-      RUNNER_NAME: aa-local-backend
+      RUNNER_NAME_PREFIX: aa-be
 
   runner-middle:
     <<: *runner
-    container_name: aa-runner-middle
+    deploy:
+      replicas: ${LOCAL_RUNNERS_PER_REPO:-2}
     environment:
       <<: *runner-env
       REPO_URL: https://github.com/nickpclarke/middle-core
-      RUNNER_NAME: aa-local-middle
+      RUNNER_NAME_PREFIX: aa-mid

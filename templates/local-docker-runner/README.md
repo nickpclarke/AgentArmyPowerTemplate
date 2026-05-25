@@ -26,14 +26,29 @@ secrets, and logs; your container is just leased compute. One persistent runner 
    PROJECT_TOKEN-style PAT or mint one at <https://github.com/settings/tokens>.
 3. From this folder:
    ```bash
-   export GH_PAT=ghp_your_token       # or: cp .env.example .env  &&  edit .env
-   docker compose up -d
-   docker compose logs -f             # watch all four register
+   export GH_PAT=ghp_your_token            # or: cp .env.example .env  &&  edit .env
+   docker compose up -d                    # default: 2 ephemeral runners/repo (8 total)
+   docker compose logs -f
    ```
-4. Confirm they're online: GitHub → each repo → Settings → Actions → Runners
-   (or `gh api repos/nickpclarke/<repo>/actions/runners`).
+4. Confirm they're online: `gh api repos/nickpclarke/<repo>/actions/runners`.
 
-Stop with `docker compose down` (de-registers on graceful shutdown).
+Stop with `docker compose down` (ephemeral runners drop out cleanly).
+
+## Capacity (ephemeral pool)
+
+Each runner is **ephemeral** — one job, then it exits and respawns fresh. Pool size per
+repo = `replicas` = max concurrent jobs that repo runs locally.
+
+```bash
+LOCAL_RUNNERS_PER_REPO=8 docker compose up -d   # 8/repo = 32 total
+docker compose up -d --scale runner-middle=12   # crank one repo
+```
+
+**Sizing — RAM is the cap, not cores.** A CI job wants ~2 GB; concurrency ≈ RAM ÷ 2 GB.
+On a **32 GB** box, keep total runners ≤ ~12 (≈24 GB) so the OS + Docker Desktop + your other
+work have headroom — heavy docker-build/browser jobs spike higher, so the default 2/repo (8)
+is the safe starting point. Cores (you have plenty) let them all run at once; they don't raise
+the ceiling. **The NPU is not used by CI at all.**
 
 ## Using the runners
 
