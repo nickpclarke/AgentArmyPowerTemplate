@@ -137,7 +137,9 @@ nav:
     - Platform Roadmap: roadmap/PLATFORM_ROADMAP.md
     - Release Train Index: release-trains/release-train-index.md
     - RT5 Ontology-Grade Persistence: release-trains/RT5-ontology-grade-persistence.md
+    - RT6 Universal Data Adapter: release-trains/RT6-universal-data-adapter.md
     - RT7 Middle-Core Runtime: release-trains/RT7-middle-core-runtime.md
+    - RT8 Generative Platform Maturity: release-trains/RT8-generative-platform-maturity.md
     - ArcKit Synthesis: synthesis/ARCKIT_SYNTHESIS.md
     - Verification Levels (L1-L6): synthesis/RT-verification-levels.md
     - Spike — ArcadeDB Upsert (PIN-S1): synthesis/RT5-PIN-S1-arcadedb-upsert.md
@@ -160,6 +162,7 @@ nav:
     - Wardley Mapping Guide: wardley.md
     - Capability Maps: capability-maps.md
     - ADR Guide: architecture-decisions.md
+    - ADR Backlog (forward queue): decisions/ADR-BACKLOG.md
     - Architecture Decisions:
       - ARC-ADR-001 HITL Pattern: decisions/ARC-ADR-001-hitl-decision-point-pattern.md
       - ARC-ADR-002 JWT Forwarding: decisions/ARC-ADR-002-jwt-forwarding-auth-contract.md
@@ -167,6 +170,10 @@ nav:
       - ARC-ADR-004 LLM Provider Cerebras: decisions/ARC-ADR-004-llm-provider-cerebras.md
       - ARC-ADR-005 backend-core OpenAPI Contract: decisions/ARC-ADR-005-backend-core-openapi-contract.md
       - ARC-ADR-006 HITL Destructive Ops: decisions/ARC-ADR-006-hitl-destructive-ops.md
+      - ARC-ADR-007 Agent Streaming Protocol (proposed): decisions/ARC-ADR-007-agent-streaming-protocol.md
+      - ARC-ADR-008 Agent Memory Store (proposed): decisions/ARC-ADR-008-agent-memory-store.md
+      - ARC-ADR-009 Canonical Data Model + Arrow (proposed): decisions/ARC-ADR-009-canonical-data-model-arrow.md
+      - ARC-ADR-010 Observability Standard (proposed): decisions/ARC-ADR-010-observability-standard.md
   - Resources:
     - Memory Palace System: mempalace.md
     - FAQ: faq.md
