@@ -3,10 +3,10 @@ tags: [moc]
 ---
 # 🧪 AgentArmy Labs — Home
 
-> [!tip] Skunkworks vault — start here.
+> [!tip] Skunkworks & Labs vault — start here.
 > **Everything is reachable from this page.** The graph is the thinking tool (`Ctrl/⌘ + G`). See [[Taxonomy]] for the tags + glossary used across the vault.
 
-**🧪 Skunkworks (here) → 🛠 [Labs wiki](https://github.com/nickpclarke/AgentArmy/wiki) → 📋 [Board](https://github.com/users/nickpclarke/projects/1) → 📚 Docs** · Published → **https://publish.obsidian.md/xlabs**
+**🧪 Skunkworks & Labs (here, in-repo) → 📋 [Board](https://github.com/users/nickpclarke/projects/1) → 📚 Docs** · Published → **https://publish.obsidian.md/xlabs**
 
 ## 🗺 Map of content
 
@@ -31,13 +31,12 @@ tags: [moc]
 ## The idea pipeline
 | Stage | Where | Holds |
 |---|---|---|
-| 🧪 **Skunkworks** | this vault | research, ideation, ontology — graph-native, human, local |
-| 🛠 **Labs** | [Wiki](https://github.com/nickpclarke/AgentArmy/wiki) | shared WIP design — cross-agent, no PR |
+| 🧪 **Skunkworks & Labs** | this vault (`obsidian/labs/AgentArmyLabs/`, in-repo) | research, ideation, ontology, shared WIP design — graph-native, cross-agent via PRs |
 | 📋 **Work** | [Project #1](https://github.com/users/nickpclarke/projects/1) | committed tasks, status |
 | 📚 **Docs** | GitHub Pages | finished, stable docs |
 
 > [!info] Ontology has a destination
-> Entities modeled here graduate into **ArcadeDB** schema + the **OpenAPI contract** — and now also **agent skills** ([[Skills as a Projection]]). Designed here → runs in ArcadeDB → agreed in the wiki/contract.
+> Entities modeled here graduate into **ArcadeDB** schema + the **OpenAPI contract** — and now also **agent skills** ([[Skills as a Projection]]). Designed here → runs in ArcadeDB → agreed in the contract.
 
 ---
-> [!quote] Think here. Share in the wiki. Commit on the board. Publish in the docs.
+> [!quote] Think here. Share in this vault. Commit on the board. Publish in the docs.
