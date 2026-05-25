@@ -12,8 +12,10 @@ Strategic index of Release Trains RT1–RT4 for the AgentArmy template platform 
 | **RT2** | Operations & Quality | Formalize workflows; close the learning loop | Jul 12 – Aug 23 | 3.5 FTE | [#24](https://github.com/nickpclarke/AgentArmy/issues/24) / #25–30 | PI-2 |
 | **RT3** | Spoke Readiness | Spoke teams self-serve; context travels | Aug 23 – Oct 4 | 2.5 FTE | [#31](https://github.com/nickpclarke/AgentArmy/issues/31) / #32–36 | PI-2 |
 | **RT4** | Learning & Intelligence | Accumulate & share lessons; iterate routing | Oct 4 – Nov 15 | 2.0 FTE | [#37](https://github.com/nickpclarke/AgentArmy/issues/37) / #38–41 | PI-3 |
+| **RT5** | Ontology-Grade Persistence | Pin middle-core objects: immutable, content-addressed, bitemporal; backend-neutral | TBD (PI planning) | — | PIN-E / PIN-F1–F4, EN1–EN2, S1–S2 | PI-3 (candidate) |
 
-**Total:** 25 issues across 4 epics · ~11 FTE-weeks · 24 weeks (6 months).
+**Total:** 25 issues across 4 epics · ~11 FTE-weeks · 24 weeks (6 months). **Plus RT5** (candidate, not
+yet scheduled): 1 Epic + 8 items — see [RT5-ontology-grade-persistence.md](RT5-ontology-grade-persistence.md).
 
 ---
 
