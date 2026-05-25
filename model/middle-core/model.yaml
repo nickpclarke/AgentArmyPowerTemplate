@@ -41,54 +41,63 @@ object_types:
     ontology_concept: SemanticAsset
     states: [landed, ingesting, indexed, searchable, archived, failed]
     state_machine: knowledge-source-lifecycle
+    state_property: state
     use_cases: [UC-01, UC-13, UC-15]
   - id: knowledge-chunk
     data_object: KnowledgeChunkData
     ontology_concept: SemanticAsset
     states: [created, embedded, searchable, stale, failed]
     state_machine: knowledge-chunk-lifecycle
+    state_property: state
     use_cases: [UC-01, UC-02, UC-14, UC-15]
   - id: knowledge-graph-snapshot
     data_object: GraphSnapshotData
     ontology_concept: SemanticAsset
     states: [requested, materialized, published, expired, failed]
     state_machine: knowledge-graph-snapshot-lifecycle
+    state_property: state
     use_cases: [UC-02, UC-03, UC-15]
   - id: capability-exercise
     data_object: CapabilityExerciseData
     ontology_concept: CapabilityObservation
     states: [draft, ready, running, passed, failed, deprecated]
     state_machine: capability-exercise-lifecycle
+    state_property: status
     use_cases: [UC-01, UC-07, UC-12]
   - id: evidence-pack
     data_object: EvidencePackData
     ontology_concept: EvidenceBundle
     states: [collecting, complete, waived, rejected, expired]
     state_machine: evidence-pack-lifecycle
+    state_property: status
     use_cases: [UC-01, UC-06, UC-12]
   - id: work-packet
     data_object: WorkPacketData
     ontology_concept: ActorIntent
     states: [todo, ready, in-progress, in-review, done, blocked, awaiting-decision]
     state_machine: work-packet-lifecycle
+    state_property: state
     use_cases: [UC-05, UC-06, UC-15]
   - id: decision-record
     data_object: DecisionRecordData
     ontology_concept: GovernedDecision
     states: [proposed, accepted, rejected, superseded]
     state_machine: decision-record-lifecycle
+    state_property: status
     use_cases: [UC-05, UC-08, UC-11]
   - id: tool-offering
     data_object: ToolOfferingData
     ontology_concept: ToolCandidate
     states: [candidate, schema-ready, enabled, disabled, deprecated]
     state_machine: tool-offering-lifecycle
+    state_property: state
     use_cases: [UC-08, UC-09, UC-16]
   - id: scenario-template
     data_object: ScenarioTemplateData
     ontology_concept: ScenarioContract
     states: [draft, validated, published, retired]
     state_machine: scenario-template-lifecycle
+    state_property: state
     use_cases: [UC-07, UC-08, UC-10, UC-16]
 
 data_objects:
@@ -110,6 +119,7 @@ data_objects:
       source_ids: string[]
       node_count: int
       edge_count: int
+      state: string
   - name: CapabilityExerciseData
     properties:
       exercise_id: string
@@ -146,6 +156,7 @@ data_objects:
       version: string
       workflow_id: string
       decision_refs: string[]
+      state: string
 
 relationship_types:
   - id: contains

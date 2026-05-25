@@ -39,6 +39,11 @@ def validate_model(model: dict[str, Any], model_path: Path) -> list[str]:
     scenarios = id_set(model, "scenarios", errors)
     projections = id_set(model, "projections", errors)
     data_objects = name_set(model, "data_objects", errors)
+    data_object_props = {
+        item.get("name"): set(item["properties"].keys())
+        for item in list_items(model, "data_objects")
+        if isinstance(item.get("name"), str) and isinstance(item.get("properties"), dict)
+    }
 
     for section in ["object_types", "relationship_types", "state_machines", "workflow_steps", "scenarios", "projections"]:
         for item in list_items(model, section):
@@ -53,6 +58,19 @@ def validate_model(model: dict[str, Any], model_path: Path) -> list[str]:
         state_machine = item.get("state_machine")
         if state_machine not in state_machines:
             errors.append(f"object_type {item.get('id')} references unknown state_machine {state_machine}")
+        state_property = item.get("state_property")
+        if state_property is None:
+            errors.append(
+                f"object_type {item.get('id')} must declare state_property "
+                f"(its state machine's enum binds to that data_object field)"
+            )
+        else:
+            props = data_object_props.get(data_object, set())
+            if not isinstance(state_property, str) or state_property not in props:
+                errors.append(
+                    f"object_type {item.get('id')} state_property {state_property!r} "
+                    f"is not a property of data_object {data_object}"
+                )
         for use_case in item.get("use_cases", []):
             if use_case not in use_cases:
                 errors.append(f"object_type {item.get('id')} references unknown use case {use_case}")
@@ -99,6 +117,19 @@ def validate_model(model: dict[str, Any], model_path: Path) -> list[str]:
             errors.append(f"state_machine {machine_id} must define states")
         if states != object_states.get(object_type, set()):
             errors.append(f"state_machine {machine_id} states must match object_type {object_type} states")
+        # states must be kebab-case and yield unique C# enum members (pascal-cased)
+        pascal_states: dict[str, str] = {}
+        for state in item.get("states", []):
+            if not isinstance(state, str) or not KEBAB.match(state):
+                errors.append(f"state_machine {machine_id} state must be kebab-case: {state}")
+                continue
+            member = pascal(state)
+            if member in pascal_states:
+                errors.append(
+                    f"state_machine {machine_id} states {state!r} and {pascal_states[member]!r} "
+                    f"collide as C# enum member {member}"
+                )
+            pascal_states[member] = state
         if item.get("initial_state") not in states:
             errors.append(f"state_machine {machine_id} initial_state is not a known state")
         for terminal_state in item.get("terminal_states", []):

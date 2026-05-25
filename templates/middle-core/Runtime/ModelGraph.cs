@@ -1,3 +1,5 @@
+using MiddleCore.Generated;
+
 namespace MiddleCore.Runtime;
 
 public interface IModelObject
@@ -33,10 +35,15 @@ public sealed class ModelObjectGraph : IModelObjectGraph
 
     public IReadOnlyList<ModelObject> Objects => objects.Values.ToArray();
 
-    public IReadOnlyList<ModelEdge> Edges => edges;
+    public IReadOnlyList<ModelEdge> Edges => edges.ToArray();
 
     public ModelObject AddObject(string id, string objectType, object data)
     {
+        if (!GeneratedModelValidator.IsObjectType(objectType))
+            throw new InvalidOperationException($"Unknown object type '{objectType}'.");
+        if (objects.ContainsKey(id))
+            throw new InvalidOperationException($"Object '{id}' already exists in the graph.");
+
         ModelObject modelObject = new(id, objectType, data);
         objects[id] = modelObject;
         return modelObject;

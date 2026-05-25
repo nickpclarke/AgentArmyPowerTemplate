@@ -5,12 +5,12 @@ using System.Collections.Generic;
 
 namespace MiddleCore.Generated;
 
-public sealed record KnowledgeSourceData(string SourceId, string DisplayName, string State, string ProviderRef);
-public sealed record KnowledgeChunkData(string ChunkId, string SourceId, string Excerpt, string State);
-public sealed record GraphSnapshotData(string SnapshotId, IReadOnlyList<string> SourceIds, int NodeCount, int EdgeCount);
-public sealed record CapabilityExerciseData(string ExerciseId, string ScenarioId, string Status, string EvidencePackId);
-public sealed record EvidencePackData(string EvidencePackId, string Status, int ClaimCount, IReadOnlyList<string> ArtifactRefs);
-public sealed record WorkPacketData(string WorkPacketId, string Title, string State, string EvidencePackId);
-public sealed record DecisionRecordData(string DecisionId, string Status, string Rationale, string TargetObjectId);
-public sealed record ToolOfferingData(string ToolId, string ScenarioId, string State, string PolicyStatus);
-public sealed record ScenarioTemplateData(string ScenarioId, string Version, string WorkflowId, IReadOnlyList<string> DecisionRefs);
+public sealed record KnowledgeSourceData(string SourceId, string DisplayName, KnowledgeSourceState State, string ProviderRef);
+public sealed record KnowledgeChunkData(string ChunkId, string SourceId, string Excerpt, KnowledgeChunkState State);
+public sealed record GraphSnapshotData(string SnapshotId, IReadOnlyList<string> SourceIds, int NodeCount, int EdgeCount, KnowledgeGraphSnapshotState State);
+public sealed record CapabilityExerciseData(string ExerciseId, string ScenarioId, CapabilityExerciseState Status, string EvidencePackId);
+public sealed record EvidencePackData(string EvidencePackId, EvidencePackState Status, int ClaimCount, IReadOnlyList<string> ArtifactRefs);
+public sealed record WorkPacketData(string WorkPacketId, string Title, WorkPacketState State, string EvidencePackId);
+public sealed record DecisionRecordData(string DecisionId, DecisionRecordState Status, string Rationale, string TargetObjectId);
+public sealed record ToolOfferingData(string ToolId, string ScenarioId, ToolOfferingState State, string PolicyStatus);
+public sealed record ScenarioTemplateData(string ScenarioId, string Version, string WorkflowId, IReadOnlyList<string> DecisionRefs, ScenarioTemplateState State);

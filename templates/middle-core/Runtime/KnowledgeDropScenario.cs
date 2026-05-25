@@ -102,7 +102,7 @@ public sealed class ValidateSourcePolicyHandler : IWorkflowStepHandler<ScenarioE
     {
         DecisionRecordData decision = new(
             "decision-source-activation-policy",
-            "accepted",
+            DecisionRecordState.Accepted,
             "Prototype source passes deterministic activation policy.",
             "source-platform-vision");
 
@@ -132,7 +132,7 @@ public sealed class LandRawObjectHandler : IWorkflowStepHandler<ScenarioExecutio
         KnowledgeSourceData data = new(
             source.Values["source_id"],
             source.Values["display_name"],
-            "landed",
+            KnowledgeSourceState.Landed,
             source.Values["provider_ref"]);
 
         input.Graph.AddObject(data.SourceId, BusinessObjectTypes.KnowledgeSource, data);
@@ -166,7 +166,7 @@ public sealed class GenerateKnowledgeChunksHandler : IWorkflowStepHandler<Scenar
                 chunk.Values["chunk_id"],
                 sourceData.SourceId,
                 chunk.Values["excerpt"],
-                "searchable");
+                KnowledgeChunkState.Searchable);
 
             input.Graph.AddObject(data.ChunkId, BusinessObjectTypes.KnowledgeChunk, data);
             input.Graph.AddEdge(sourceData.SourceId, "contains", data.ChunkId);
@@ -193,12 +193,12 @@ public sealed class AssembleIngestEvidenceHandler : IWorkflowStepHandler<Scenari
         CapabilityExerciseData exercise = new(
             "exercise-knowledge-drop-001",
             ScenarioIds.KnowledgeDrop,
-            "passed",
+            CapabilityExerciseState.Passed,
             evidencePackId);
 
         EvidencePackData evidence = new(
             evidencePackId,
-            "complete",
+            EvidencePackState.Complete,
             chunkCount + 2,
             ["fixture:model-runtime", "projection:fake-arcadedb"]);
 

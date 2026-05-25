@@ -91,10 +91,18 @@ def scenario_ids(model: dict[str, Any]) -> str:
 
 def data_objects(model: dict[str, Any]) -> str:
     lines = [HEADER, "using System.Collections.Generic;\n", "namespace MiddleCore.Generated;\n"]
+    # data_object name -> (state_property, enum_name); binds a state field to its machine's enum.
+    state_bindings = {
+        ot["data_object"]: (ot["state_property"], f"{pascal(ot['id'])}State")
+        for ot in model["object_types"]
+        if ot.get("state_property")
+    }
     for item in model["data_objects"]:
+        binding = state_bindings.get(item["name"])
         parameters = []
         for prop_name, prop_type in item["properties"].items():
-            parameters.append(f"{cs_type(prop_type)} {pascal(prop_name)}")
+            cs = binding[1] if binding and prop_name == binding[0] else cs_type(prop_type)
+            parameters.append(f"{cs} {pascal(prop_name)}")
         lines.append(f"public sealed record {item['name']}({', '.join(parameters)});")
     lines.append("")
     return "\n".join(lines)
@@ -149,7 +157,9 @@ def workflow_contracts(model: dict[str, Any]) -> str:
 def state_machine_contracts(model: dict[str, Any]) -> str:
     lines = [
         HEADER,
-        "using System.Collections.Generic;\n",
+        "using System.Collections.Generic;",
+        "using System.Linq;\n",
+        "#nullable enable\n",
         "namespace MiddleCore.Generated;\n",
         "public sealed record StateTransitionContract(string FromState, string ToState, string Trigger);",
         "public sealed record StateMachineContract(string Id, string ObjectType, string InitialState, IReadOnlyList<string> TerminalStates, IReadOnlyList<string> States, IReadOnlyList<StateTransitionContract> Transitions);",
@@ -176,6 +186,48 @@ def state_machine_contracts(model: dict[str, Any]) -> str:
             f"{cs_string(item['initial_state'])}, [{terminal_states}], [{states}], [{transitions}]),"
         )
     lines.append("    ];")
+    lines.append("}")
+    lines.append("")
+
+    # One enum per machine so a typed state field cannot hold an undeclared state.
+    for item in model["state_machines"]:
+        lines.append(f"public enum {pascal(item['object_type'])}State")
+        lines.append("{")
+        for state in item.get("states", []):
+            lines.append(f"    {pascal(state)},")
+        lines.append("}")
+        lines.append("")
+
+    # Data-driven enforcement API the runtime can call (same invariants the
+    # Python validator checks, now available at runtime).
+    lines.append("public static partial class GeneratedModel")
+    lines.append("{")
+    lines.append("    public static StateMachineContract? StateMachineFor(string objectType) =>")
+    lines.append("        StateMachines.FirstOrDefault(machine => machine.ObjectType == objectType);")
+    lines.append("    public static bool IsValidState(string objectType, string state) =>")
+    lines.append("        StateMachineFor(objectType)?.States.Contains(state) ?? false;")
+    lines.append("    public static bool CanTransition(string objectType, string fromState, string toState) =>")
+    lines.append("        StateMachineFor(objectType)?.Transitions.Any(transition => transition.FromState == fromState && transition.ToState == toState) ?? false;")
+    lines.append("    public static string? InitialState(string objectType) =>")
+    lines.append("        StateMachineFor(objectType)?.InitialState;")
+    lines.append("    public static bool IsTerminalState(string objectType, string state) =>")
+    lines.append("        StateMachineFor(objectType)?.TerminalStates.Contains(state) ?? false;")
+    lines.append("}")
+    lines.append("")
+
+    # enum -> model (kebab) string. The enforcement API above is canonical on model
+    # strings; the runtime holds PascalCase enums, so convert with ToModelString()
+    # to avoid a casing mismatch (e.g. KnowledgeChunkState.Searchable -> "searchable").
+    lines.append("public static class StateNames")
+    lines.append("{")
+    for item in model["state_machines"]:
+        enum_name = f"{pascal(item['object_type'])}State"
+        lines.append(f"    public static string ToModelString(this {enum_name} value) => value switch")
+        lines.append("    {")
+        for state in item.get("states", []):
+            lines.append(f"        {enum_name}.{pascal(state)} => {cs_string(state)},")
+        lines.append("        _ => value.ToString()")
+        lines.append("    };")
     lines.append("}")
     lines.append("")
     return "\n".join(lines)
