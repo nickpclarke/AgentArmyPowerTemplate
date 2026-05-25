@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | ID | ARC-ADR-006 |
-| Status | Proposed |
+| Status | Accepted |
 | Date | 2026-05-25 |
-| Deciders | Architecture Review |
+| Deciders | Architecture Review; accepted by hub owner 2026-05-25 |
 | Supersedes | — |
 | Superseded by | — |
 | Tags | hitl, security, copilotkit, middle-core, frontend-core, delete, rbac |

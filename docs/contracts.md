@@ -16,8 +16,8 @@ it, and the test that enforces it.
 | **Data API** (`contracts/backend-core.openapi.json`, `agentarmy-platform.openapi.yaml`) | backend-core | frontend-core (copy + generated `src/lib/api/client.ts`); middle-core (CopilotKit tools, UDA) | **shipped** | [ADR-005](decisions/ARC-ADR-005-backend-core-openapi-contract.md) | `contract-provider.yml` (BE) ↔ `contract-consumer.yml` (FE) — Pact-style |
 | **Model contracts** (`ProjectionContracts.g.cs`, `StateMachineContracts.g.cs`, `WorkflowContracts.g.cs`) | middle-core (factory) | middle-core runtime | **shipped** (generated) | — | drift gate (`check_drift.py`) |
 | **C# data-platform objects + projection interfaces** (`DataPlatformContracts.g.cs`, MCR-F4) | middle-core | **backend-core UDA** (RT6) | **PENDING** — middle-core #11 (draft) | RT7 + [ADR-005](decisions/ARC-ADR-005-backend-core-openapi-contract.md) | _to wire when MCR-F4 ships_ |
-| **JWT-forwarding auth contract** (FE → MC → BE, verified once in BE) | cross-cutting | frontend-core, middle-core, backend-core | **PROPOSED** | [ADR-002](decisions/ARC-ADR-002-jwt-forwarding-auth-contract.md) | _to wire (auth integration test)_ |
-| **Agent endpoint** (`/copilotkit`) | middle-core (#22) | frontend-core (#13 runtime route) | **PENDING** — both draft | [ADR-003](decisions/ARC-ADR-003-no-llm-key-in-browser.md), [ADR-004](decisions/ARC-ADR-004-llm-provider-cerebras.md) | _to wire_ |
+| **JWT-forwarding auth contract** (FE → MC → BE, verified once in BE) | cross-cutting | frontend-core, middle-core, backend-core | **ADR accepted** — contract to wire | [ADR-002](decisions/ARC-ADR-002-jwt-forwarding-auth-contract.md) | _to wire (auth integration test)_ |
+| **Agent endpoint** (`/copilotkit`) | middle-core (#22) | frontend-core (#13 runtime route) | **ADRs accepted** — code draft | [ADR-003](decisions/ARC-ADR-003-no-llm-key-in-browser.md), [ADR-004](decisions/ARC-ADR-004-llm-provider-cerebras.md) | _to wire_ |
 
 ## Who's waiting on whom
 
@@ -26,7 +26,9 @@ it, and the test that enforces it.
   shipped yet. Drive MCR-F4 (and register + test it) to unblock the UDA.
 - **CopilotKit middle-core runtime → backend-core OpenAPI:** the contract is **already shipped**,
   so middle-core's tools aren't blocked on it — only on their own draft code (#18–#22).
-- **Auth (ADR-002):** a forward decision; settle it before the FE→MC→BE chain is wired.
+- **Auth (ADR-002): settled — accepted 2026-05-25.** Forward the user JWT unchanged across all
+  three hops; RBAC enforced once in backend-core. Wire the auth integration test as the
+  FE→MC→BE chain is built.
 
 ## Drift management
 
