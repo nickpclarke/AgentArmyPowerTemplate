@@ -3,7 +3,7 @@
 ## obsidian-skills
 
 The following skills are vendored from [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills)
-(MIT License, Copyright (c) 2026 Steph Ango / @kepano) and follow the
+(MIT License, Copyright (c) 2026 Steph Ango (@kepano); see [LICENSE](LICENSE)) and follow the
 [Agent Skills specification](https://agentskills.io/specification):
 
 | Skill | Description |
