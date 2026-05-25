@@ -30,6 +30,16 @@
             "statusMessage": "Building platform status dashboard..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/fleet-heartbeat.mjs\"",
+            "timeout": 60,
+            "statusMessage": "Fleet heartbeat — contract drift + health..."
+          }
+        ]
       }
     ],
     "Stop": [
