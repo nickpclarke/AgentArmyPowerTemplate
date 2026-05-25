@@ -10,6 +10,16 @@
             "statusMessage": "Loading memories from MemPalace..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/setup-dotnet.sh\"",
+            "timeout": 300,
+            "statusMessage": "Installing .NET SDK..."
+          }
+        ]
       }
     ],
     "Stop": [
