@@ -125,6 +125,7 @@ nav:
   - Coordination & Planning:
     - Agent Tracks (Run vs Design): agent-tracks.md
     - Inter-Layer Contracts: contracts.md
+    - Secrets Rotation Policy: security/secrets-rotation.md
     - Spoke Artifacts (harvested): spokes/index.md
     - Spoke Artifact Pipeline: spoke-artifact-pipeline.md
     - Labs (WIP Design Wiki): labs.md
