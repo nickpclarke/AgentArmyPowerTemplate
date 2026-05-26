@@ -88,6 +88,48 @@ The fleet is Claude-first, so Anthropic is a **first-class provider** — but un
 - **−** Guardrail + SSE pass-through add latency/complexity — stream chunks through, run cheap
   guards inline and heavier checks async where possible.
 
+## Update — Runtime Decoupling per ARC-ADR-023 (2026-05-26)
+
+[ARC-ADR-023](ARC-ADR-023-container-tiering-strategy.md) (fleet container tiering)
+applies the **Function tier** rule to the gateway: it now runs as its own
+container, sibling to the backend-core application container, rather than
+inside the backend-core process.
+
+This **does not contradict** the placement decision above ("in backend-core,
+for guardrails") — it refines *where the code lives* vs. *where the runtime
+runs*:
+
+- **Code locality (preserved)** — the gateway code stays in the
+  backend-core repo, importing the same `app.auth` (JWT/RBAC) and
+  `app.audit` modules as the full backend-core service. The "guardrails
+  sit naturally where the policy engine already is" rationale holds:
+  the JWT verification, role decorators, and audit middleware are the
+  *same Python code*, exercised at build time by the same repo's tests.
+- **Runtime decoupling (new)** — backend-core's `app/main_llm_gateway.py`
+  is a standalone FastAPI factory that mounts only `/v1` + `/healthz`.
+  `Dockerfile.llm-gateway` builds a slim image (no LibreOffice, no DBOS,
+  no pyarrow/dlt — ~200 MB vs. ~1.2 GB for the full backend-core image)
+  and runs it on its own port. Both containers share `AUTH_JWT_SECRET`
+  so a single user token verifies in either.
+- **Why now (not "if egress volume warrants")** — the cost is low (one
+  factory module + one Dockerfile), the gains are independent rollout
+  + faster cold-start + smaller blast radius if the gateway hangs on a
+  provider, and ADR-023 needed a concrete function-tier reference. The
+  earlier "extract later" guidance becomes "extracted now."
+- **Production routing** — both containers expose `/v1`. Production
+  traffic should prefer the standalone gateway surface for scaling /
+  rollout cadence reasons; the full backend-core retains `/v1` as a
+  dev convenience (no two-container setup needed for local hacking).
+
+Realized in:
+
+- backend-core [PR #96](https://github.com/nickpclarke/backend-core/pull/96)
+  — `app/main_llm_gateway.py`, `Dockerfile.llm-gateway`,
+  `llm-gateway/image.json`, `llm-gateway/scripts/llm-gateway-doctor.sh`
+- Verified end-to-end on the dev host: doctor 3/3 PASS — readiness +
+  `/v1/models` 401 (auth gate enforced) + unauthenticated chat-completion
+  rejected with 401.
+
 ## Relationship to other contracts
 
 Distinct from the **AG-UI agent stream** ([[ARC-ADR-007]], `agui-stream.asyncapi.yaml`): that
