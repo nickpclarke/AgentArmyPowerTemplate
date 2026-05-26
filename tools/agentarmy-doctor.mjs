@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { arcadedbAdapter } from './doctor/adapters/arcadedb.mjs'
 import { containersAdapter } from './doctor/adapters/containers.mjs'
 import { contractsAdapter } from './doctor/adapters/contracts.mjs'
+import { imageAdapter } from './doctor/adapters/image.mjs'
 import { repoAdapter } from './doctor/adapters/repo.mjs'
 import { serviceChecksFor } from './doctor/adapters/services.mjs'
 import { buildEnvelope, createContext, writeArtifact } from './doctor/core.mjs'
@@ -71,6 +72,7 @@ async function main() {
 
 function selectAdapters(command, components) {
   const byName = new Map(adapters.map((adapter) => [adapter.name, adapter]))
+  if (command === 'image') return [imageAdapter(components[0])]
   if (components.length) {
     return components.map((name) => {
       if (!byName.has(name)) throw new Error(`Unknown component: ${name}`)
@@ -143,6 +145,7 @@ Commands:
   arcadedb           Run ArcadeDB readiness and schema checks
   containers         Run Docker and compose checks
   contracts          Run contract artifact checks
+  image <dir>        Validate an image.json manifest + probe its services (Image Standard)
   export             Run all checks and render output
 
 Options:

@@ -136,6 +136,7 @@ nav:
     - Human-in-the-Loop: hitl.md
     - Autonomous Review Loop: pr-review-loop.md
     - Fleet Heartbeat & Scheduled Audit: fleet-heartbeat.md
+    - Image Standard: image-standard.md
   - Planning & Roadmap:
     - Platform Roadmap: roadmap/PLATFORM_ROADMAP.md
     - Release Train Index: release-trains/release-train-index.md
