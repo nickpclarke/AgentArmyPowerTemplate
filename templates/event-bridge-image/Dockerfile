@@ -2,9 +2,11 @@
 # Built from python:3.12-slim. Drops back to non-root before ENTRYPOINT (CWE-269).
 # Conforms to the AgentArmy Image Standard (image.json + setup + doctor).
 
-FROM python:3.12-slim
+FROM python:3.12-slim@sha256:090ba77e2958f6af52a5341f788b50b032dd4ca28377d2893dcf1ecbdfdfe203
 
-USER root
+# python:3.12-slim defaults to root, so RUN executes as root without an explicit
+# USER directive. The only USER directive in this file is the final `USER bridge`
+# below, which is the runtime identity (CWE-269 hardening).
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends curl ca-certificates; \

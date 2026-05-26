@@ -13,9 +13,11 @@
 # knowledge-engineer / taxonomist).
 
 ARG JENA_VERSION=5.5.0
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:21-jre@sha256:010e0a06bd4e0184dec58626afb3ba727b42c56c91b977e2f0a9e0837e0fa3fb
 
-USER root
+# eclipse-temurin:21-jre defaults to root, so RUN executes as root without an
+# explicit USER directive. The only USER directive in this file is the final
+# `USER fuseki` below, which is the runtime identity (CWE-269 hardening).
 ARG JENA_VERSION
 RUN set -eux; \
     apt-get update; \
