@@ -18,6 +18,7 @@
 //   node tools/fleet-heartbeat.mjs --dora      # add DORA metrics block (deploy freq / lead time / CFR / MTTR)
 //   node tools/fleet-heartbeat.mjs --slo       # probe known live services' health endpoints + warn on non-2xx
 //   node tools/fleet-heartbeat.mjs --secrets   # check KV secret ages against the rotation policy + warn on stale
+//   node tools/fleet-heartbeat.mjs --disk      # warn when host free disk < 5 GB (override: AGENTARMY_DISK_MIN_FREE_GB)
 
 import { execFileSync } from 'node:child_process';
 import { readFileSync, existsSync } from 'node:fs';
@@ -384,7 +385,7 @@ const renderTier = (label, list) => {
 };
 
 if (JSON_OUT) {
-  console.log(JSON.stringify({ mode: APPLY ? 'apply' : 'dry-run', findings, health, containers, doraMetrics, sloProbes, secretsState, dispatched, postmanNote }, null, 2));
+  console.log(JSON.stringify({ mode: APPLY ? 'apply' : 'dry-run', findings, health, containers, doraMetrics, sloProbes, secretsState, diskStatus, dispatched, postmanNote }, null, 2));
 } else {
   let out = `# 🫀 Fleet heartbeat — ${new Date().toISOString()} (${APPLY ? 'APPLY' : 'dry-run'})\n\n`;
   out += `## Findings (${findings.length})\n`;
@@ -433,6 +434,13 @@ if (JSON_OUT) {
       const icon = s.overdueGrace ? '⚠️' : s.stale ? '🟡' : '✅';
       return `- ${icon} ${s.name} — age ${s.ageDays}d / cadence ${s.cadenceDays}d`;
     }).join('\n');
+  }
+
+  // Host disk (only if --disk flag) — preventive backstop for the
+  // 2026-05-26 disk-cascade incident.
+  if (DISK_PROBE && diskStatus) {
+    const icon = diskStatus.availGB < DISK_MIN_FREE_GB ? '⚠️' : '✅';
+    out += `\n\n## Host Disk\n- ${icon} ${diskStatus.availGB} GB free / ${diskStatus.totalGB} GB total (${diskStatus.usePct} used) — threshold ${DISK_MIN_FREE_GB} GB`;
   }
 
   out += `\n\n## Health & Issue Queue\n` + Object.entries(health).map(([r, h]) =>
