@@ -123,6 +123,7 @@ nav:
     - Task Labeling: copilot-tasks.md
     - Board Manager Extension: board-manager.md
   - Coordination & Planning:
+    - Agent Tracks (Run vs Design): agent-tracks.md
     - Inter-Layer Contracts: contracts.md
     - Spoke Artifacts (harvested): spokes/index.md
     - Spoke Artifact Pipeline: spoke-artifact-pipeline.md
@@ -185,6 +186,7 @@ nav:
       - ARC-ADR-021 LLM Gateway (backend-core, guardrails): decisions/ARC-ADR-021-llm-gateway.md
       - ARC-ADR-022 Event Bus Bridges (proposed): decisions/ARC-ADR-022-event-bus-bridges.md
       - ARC-ADR-023 Container Tiering Strategy: decisions/ARC-ADR-023-container-tiering-strategy.md
+      - ARC-ADR-024 Platform Maturity Audit: decisions/ARC-ADR-024-platform-maturity-audit.md
   - Resources:
     - Memory Palace System: mempalace.md
     - FAQ: faq.md
