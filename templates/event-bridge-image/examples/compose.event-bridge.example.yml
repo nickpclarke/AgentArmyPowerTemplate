@@ -1,0 +1,41 @@
+# Local dev compose for the AgentArmy event-bridge image + a NATS JetStream broker.
+# Run via setup.sh / setup.ps1 — generates the webhook secret, builds, waits, doctors.
+services:
+  nats:
+    image: nats:2.10-alpine
+    container_name: event-bridge-nats
+    command: ["-js", "-sd", "/data", "-m", "8222"]
+    volumes:
+      - nats-data:/data
+    ports:
+      - "4222:4222"   # NATS client
+      - "8222:8222"   # monitoring
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:8222/healthz || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+  bridge:
+    build:
+      context: ..
+    image: agentarmy-event-bridge:local
+    environment:
+      NATS_URL: nats://nats:4222
+      SUBJECT_PREFIX: fleet.gh
+      STREAM_NAME: FLEET
+      STREAM_SUBJECTS: fleet.>
+      GITHUB_WEBHOOK_SECRET_FILE: /run/secrets/github_webhook_secret
+      PORT: "8080"
+    secrets:
+      - github_webhook_secret
+    depends_on:
+      nats:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+secrets:
+  github_webhook_secret:
+    file: ./.secrets/github_webhook_secret.txt
+volumes:
+  nats-data:

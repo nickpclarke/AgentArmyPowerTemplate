@@ -181,6 +181,7 @@ nav:
       - ARC-ADR-012 Read-Query Caching: decisions/ARC-ADR-012-read-query-caching-invalidation.md
       - ARC-ADR-013 Per-Connection RBAC: decisions/ARC-ADR-013-per-connection-rbac-role-taxonomy.md
       - ARC-ADR-019 Ontology + Reasoning Layer (proposed): decisions/ARC-ADR-019-ontology-reasoning-layer.md
+      - ARC-ADR-022 Event Bus Bridges (proposed): decisions/ARC-ADR-022-event-bus-bridges.md
   - Resources:
     - Memory Palace System: mempalace.md
     - FAQ: faq.md

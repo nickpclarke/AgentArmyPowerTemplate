@@ -1,0 +1,45 @@
+{
+  "$schema": "../image-schema.json",
+  "name": "agentarmy-event-bridge",
+  "kind": "single",
+  "base": "python:3.12-slim",
+  "description": "AgentArmy HTTP↔NATS event-bus bridge — inbound webhook receiver (HMAC-verified, CloudEvents v1.0) and outbound NATS-to-HTTP relay (JetStream push-consumer + retry/DLQ). One image, two modes (serve-inbound / relay-outbound). Realizes ARC-ADR-022 on top of middle-core's NATS JetStream + CloudEvents broker choice (ARC-ADR-001 / PR #73).",
+  "owner": "hub template",
+  "services": [
+    {
+      "name": "bridge",
+      "build": ".",
+      "role": "api",
+      "ports": ["8080:8080"],
+      "healthcheck": { "http": "/healthz", "expect": 200 },
+      "entrypointModes": ["serve-inbound", "relay-outbound"]
+    }
+  ],
+  "secrets": [
+    { "name": "github_webhook_secret", "env": "GITHUB_WEBHOOK_SECRET", "fileEnv": "GITHUB_WEBHOOK_SECRET_FILE", "description": "GitHub webhook HMAC-SHA256 shared secret (X-Hub-Signature-256)." }
+  ],
+  "shims": {
+    "apt": ["curl", "ca-certificates"],
+    "pip": ["fastapi", "uvicorn[standard]", "pydantic", "nats-py", "httpx", "cryptography"],
+    "note": "stdlib hmac.compare_digest is constant-time (secure-by-default); cryptography pulled for KV-resolved secrets; pydantic guards input shape; nats-py + JetStream auto-stream-create on boot."
+  },
+  "baked": [
+    { "path": "entrypoint.sh", "purpose": "serve-inbound (default, uvicorn) | relay-outbound | <cmd>." },
+    { "path": "scripts/webhook_receiver.py", "purpose": "FastAPI inbound receiver: HMAC verify -> replay dedup -> CloudEvents v1.0 envelope -> JetStream publish (auto-creates FLEET stream on boot)." },
+    { "path": "scripts/nats-relay.py", "purpose": "JetStream push-consumer that POSTs each event to SINK_URL; acks on 2xx, naks on non-2xx (JS redeliver -> DLQ in Phase 1)." }
+  ],
+  "setup": { "sh": "setup.sh", "ps1": "setup.ps1" },
+  "doctor": {
+    "cmd": "scripts/event-bus-doctor.sh",
+    "proves": ["readiness", "hmac-rejects-bad-sig", "events-flowing"],
+    "description": "/healthz 200; POST with wrong HMAC -> 401 (sieve holds); POST with good HMAC -> 202 + the same CloudEvent reads back from the JetStream FLEET stream (events flowing end-to-end)."
+  },
+  "deploy": {
+    "target": "aca",
+    "notes": "Receiver needs a public URL for inbound webhooks (Container Apps ingress); relay is internal. NATS lives in middle-core per ARC-ADR-001."
+  },
+  "volumes": [],
+  "contract": [
+    { "service": "bridge", "type": "prose", "registry": "docs/contracts.md", "note": "CloudEvents v1.0 over JetStream (registered as 'Event bus' in docs/contracts.md). Inbound HTTP surface = POST /webhooks/<source>; OpenAPI worth formalizing if more inbound sources land." }
+  ]
+}
