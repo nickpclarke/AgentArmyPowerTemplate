@@ -352,6 +352,22 @@ Run these with `/skill-name` in the Claude Code prompt:
 | `claude` | Responds to `@claude` mentions on issues/PRs — edits, commits, pushes |
 | `review-loop` | Autonomous review-fix loop (opt-in via `review-loop` label) — don't remove the label mid-loop |
 
+## Container Tiering ([ARC-ADR-023](docs/decisions/ARC-ADR-023-container-tiering-strategy.md))
+
+Every container in the fleet belongs to exactly one tier. Pick the right one before adding a Dockerfile or `image.json`:
+
+| Tier | Lifecycle | Has state? | Examples |
+|---|---|---|---|
+| **Platform** | Slow (days–months); careful upgrades | Yes | ArcadeDB, Postgres, NATS, Fuseki — composed via `templates/local-stack/` |
+| **Application** | Rolling deploys (hours–days) | No | One container per spoke: backend-core, middle-core, frontend-core |
+| **Function** | Fast, independently rolled out | No | event-bridge; planned LLM gateway (ADR-021), local embedder (#184) |
+
+**Rule of thumb:** two pieces belong in the same container iff they always deploy together AND one failing must take the other down anyway. Otherwise split.
+
+**Don'ts:** don't pre-split a spoke into 12 micros; don't bundle a platform database into a spoke's `image.json` ("fusion images" are retired — that's what `local-stack` is for); don't put state into Application or Function tiers.
+
+**Composition patterns** (not new tiers): sidecar for cross-cutting concerns (HMAC verify, OTel collector); init container for pre-start work (migrations, schema seeds); Docker-in-Docker **only** for CI runners.
+
 ## Copilot Handoff Conventions
 
 - When closing a `copilot-task` issue via PR, ensure the PR body contains `Closes #N` so `auto-status` fires correctly

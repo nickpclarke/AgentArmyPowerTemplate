@@ -184,6 +184,7 @@ nav:
       - ARC-ADR-019 Ontology + Reasoning Layer (proposed): decisions/ARC-ADR-019-ontology-reasoning-layer.md
       - ARC-ADR-021 LLM Gateway (backend-core, guardrails): decisions/ARC-ADR-021-llm-gateway.md
       - ARC-ADR-022 Event Bus Bridges (proposed): decisions/ARC-ADR-022-event-bus-bridges.md
+      - ARC-ADR-023 Container Tiering Strategy: decisions/ARC-ADR-023-container-tiering-strategy.md
   - Resources:
     - Memory Palace System: mempalace.md
     - FAQ: faq.md
