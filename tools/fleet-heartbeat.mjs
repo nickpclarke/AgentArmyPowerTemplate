@@ -15,6 +15,8 @@
 //   node tools/fleet-heartbeat.mjs --apply    # file a dedup'd issue per gap as agent-army-task (no auto-spawn)
 //   node tools/fleet-heartbeat.mjs --apply --auto  # gaps as copilot-task → Copilot coding agent auto-spawns
 //   node tools/fleet-heartbeat.mjs --json      # machine-readable findings
+//   node tools/fleet-heartbeat.mjs --dora      # add DORA metrics block (deploy freq / lead time / CFR / MTTR)
+//   node tools/fleet-heartbeat.mjs --slo       # probe known live services' health endpoints + warn on non-2xx
 
 import { execFileSync } from 'node:child_process';
 import { readFileSync, existsSync } from 'node:fs';
@@ -234,6 +236,76 @@ for (const repo of [HUB, ...SPOKES]) {
   health[repo] = { openPRs, openIssues, recentFailedRuns, armyTask, copilotTask };
 }
 
+// ---- 3b. DORA metrics (ARC-ADR-024 / platform-architect finding) ----------
+// Four DORA metrics, computed from GH Actions data only — no external service:
+//   • Deployment Frequency = successful runs of the deploy workflow / period
+//   • Lead Time for Changes ≈ PR open → merge median (proxy: merge ≈ deploy)
+//   • Change Failure Rate  = failed deploy-workflow runs / total deploy runs
+//   • MTTR (approx)        = elapsed between a failed deploy run and the
+//                            next successful one on the same workflow
+// Window: last 30 days. Off by default; emit only when --dora is set so
+// daily heartbeats don't fan out N more `gh run list` calls than needed.
+const DORA = process.argv.includes('--dora');
+const DEPLOY_WORKFLOWS = ['arcadedb-aca-deploy.yml']; // extend per repo as deploy lanes land
+const doraMetrics = {};
+if (DORA) {
+  const sinceISO = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+  for (const repo of [HUB, ...SPOKES]) {
+    if (treeFetchFailed.has(repo)) continue;
+    const wfs = safeTree(repo).filter((p) => p.startsWith('.github/workflows/') && DEPLOY_WORKFLOWS.some((w) => p.endsWith('/' + w)));
+    if (!wfs.length) continue;
+    const wf = wfs[0].split('/').pop();
+    // Recent runs of this workflow (limit 100 — plenty for 30d at fleet cadence).
+    const runsRaw = gh(['api', `repos/${OWNER}/${repo}/actions/workflows/${wf}/runs?per_page=100&created=>=${sinceISO.slice(0, 10)}`, '--jq', '.workflow_runs']);
+    let runs = []; try { runs = JSON.parse(runsRaw || '[]'); } catch {}
+    const successes = runs.filter((r) => r.conclusion === 'success');
+    const failures = runs.filter((r) => r.conclusion === 'failure');
+    // MTTR approx: average time between each failure and the next success on this workflow.
+    const sorted = runs.slice().sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    let mttrSecs = 0, mttrCount = 0;
+    for (let i = 0; i < sorted.length; i++) {
+      if (sorted[i].conclusion !== 'failure') continue;
+      const next = sorted.slice(i + 1).find((r) => r.conclusion === 'success');
+      if (next) { mttrSecs += (new Date(next.created_at) - new Date(sorted[i].created_at)) / 1000; mttrCount++; }
+    }
+    doraMetrics[repo] = {
+      workflow: wf,
+      windowDays: 30,
+      deployFrequency: successes.length,
+      changeFailureRate: runs.length ? +(failures.length / runs.length).toFixed(3) : 0,
+      mttrAvgMinutes: mttrCount ? Math.round(mttrSecs / mttrCount / 60) : null,
+      totalRuns: runs.length,
+    };
+  }
+}
+
+// ---- 3c. SLO burn-rate probe (ARC-ADR-024 / sre-engineer finding) ----------
+// Probes each known live service's health endpoint; warns on non-2xx (the
+// "fleet on fire" surface ADR-024 calls for at solo-team scale). The list of
+// targets is intentionally explicit — the heartbeat shouldn't try to be a
+// service-discovery layer. Off by default; emit only when --slo is set.
+const SLO_PROBE = process.argv.includes('--slo');
+const SLO_TARGETS = [
+  { name: 'frontend-core (ACA, public)', url: 'https://frontend-core.kindcoast-b0a6ea84.eastus.azurecontainerapps.io/', expect: [200, 301, 302] },
+  // backend-core + arcadedb are internal-ingress; reachable only from inside
+  // the ACA env. Add an in-env probe-runner later (or expose a minimal status
+  // page via the frontend BFF) before promoting them here.
+];
+const sloProbes = [];
+if (SLO_PROBE) {
+  for (const t of SLO_TARGETS) {
+    const code = Number(gh(['api', t.url, '--jq', '.']) ? '0' : '0'); // unreliable via gh, use curl shape
+    // gh API doesn't fit arbitrary URLs cleanly; fall back to execFileSync('curl', ...)
+    let curlOut = '';
+    try { curlOut = execFileSync('curl', ['-sS', '-o', '/dev/null', '-w', '%{http_code}', '--max-time', '5', t.url], { encoding: 'utf8' }).trim(); } catch {}
+    const status = Number(curlOut) || 0;
+    const ok = t.expect.includes(status);
+    sloProbes.push({ name: t.name, url: t.url, status, ok });
+    if (!ok) add(HUB, 'warn', 'slo-probe-failed',
+      `${t.name} health probe -> ${status} (expected ${t.expect.join('/')}). Investigate before user-visible burn accrues.`);
+  }
+}
+
 // ---- 4. Dispatch (optional, --apply) ---------------------------------------
 const dispatched = [];
 if (APPLY) {
@@ -262,7 +334,7 @@ const renderTier = (label, list) => {
 };
 
 if (JSON_OUT) {
-  console.log(JSON.stringify({ mode: APPLY ? 'apply' : 'dry-run', findings, health, containers, dispatched, postmanNote }, null, 2));
+  console.log(JSON.stringify({ mode: APPLY ? 'apply' : 'dry-run', findings, health, containers, doraMetrics, sloProbes, dispatched, postmanNote }, null, 2));
 } else {
   let out = `# 🫀 Fleet heartbeat — ${new Date().toISOString()} (${APPLY ? 'APPLY' : 'dry-run'})\n\n`;
   out += `## Findings (${findings.length})\n`;
@@ -285,6 +357,22 @@ if (JSON_OUT) {
   if (containers.untiered.length) {
     out += `\n\n### ⚠️ Untiered (${containers.untiered.length}) — missing \`tier\` field\n`;
     out += renderTier('untiered', containers.untiered);
+  }
+
+  // DORA (only if --dora flag) — emit a compact per-repo table.
+  if (DORA && Object.keys(doraMetrics).length) {
+    out += `\n\n## DORA (last 30 days)\n`;
+    out += Object.entries(doraMetrics).map(([r, m]) =>
+      `- **${r}** (${m.workflow}): deploys=${m.deployFrequency} · CFR=${(m.changeFailureRate * 100).toFixed(1)}% · MTTR=${m.mttrAvgMinutes ?? 'n/a'} min · total runs=${m.totalRuns}`
+    ).join('\n');
+  }
+
+  // SLO probes (only if --slo flag) — one line per probed target.
+  if (SLO_PROBE && sloProbes.length) {
+    out += `\n\n## SLO Probes\n`;
+    out += sloProbes.map((p) =>
+      `- ${p.ok ? '✅' : '⚠️'} ${p.name} → ${p.status} (${p.url})`
+    ).join('\n');
   }
 
   out += `\n\n## Health & Issue Queue\n` + Object.entries(health).map(([r, h]) =>
