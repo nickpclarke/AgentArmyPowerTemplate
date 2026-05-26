@@ -11,6 +11,7 @@
   "paths": [
     "AGENTS.md",
     ".agent/hub.json",
+    ".agent/environments.json",
     ".github/ISSUE_TEMPLATE/epic-handoff.md",
     ".github/workflows/notify-hub.yml",
     ".github/workflows/notify-hub-artifacts.yml",
