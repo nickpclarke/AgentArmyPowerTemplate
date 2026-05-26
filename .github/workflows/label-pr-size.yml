@@ -4,16 +4,17 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+# Least-privilege: PR labels live under the Issues API (a PR is a special issue),
+# so `issues: write` covers every call here. `contents`/`pull-requests` are NOT
+# needed — github-script doesn't check out the repo, and label ops aren't on the
+# pulls endpoint. All other scopes default to `none`.
 permissions:
-  contents: read
-  issues: write          # create labels (labels live under the issues API)
-  pull-requests: write   # add/remove labels on the PR
+  issues: write
 
 jobs:
   label-size:
-    # Runs on the self-hosted runners (free, off the GitHub-hosted minutes cap).
-    # Uses actions/github-script (octokit + GITHUB_TOKEN) — no `gh` CLI dependency,
-    # so it works on any runner image without extra tooling.
+    # Self-hosted (free, off the metered minutes). Uses github-script (octokit +
+    # GITHUB_TOKEN) so no `gh` CLI is required on the runner.
     runs-on: [self-hosted, linux]
     steps:
       - name: Apply size + deep-review labels
@@ -30,6 +31,26 @@ jobs:
             const { owner, repo } = context.repo;
             const issue_number = pr.number;
 
+            // Labeling is best-effort and MUST NOT fail the workflow. The old
+            // `gh ... || true` chain guarded this; the github-script rewrite has
+            // to do it explicitly. Common non-bug failure modes the labeler must
+            // tolerate:
+            //   • read-only GITHUB_TOKEN on fork PRs / restricted contexts → 403
+            //   • rate-limit / 5xx during a labels API hiccup
+            //   • label-write races (concurrent runs)
+            // We log a warning so anomalies are still visible in the run log,
+            // but a labeling problem must never red the PR check.
+            const safe = async (what, fn) => {
+              try { return await fn(); }
+              catch (e) {
+                core.warning(`label op '${what}' skipped (${e.status || '?'}): ${e.message}`);
+                return null;
+              }
+            };
+
+            // Ensure each label exists with current color/description. The old
+            // workflow used `gh label create --force`, which UPDATES on conflict;
+            // mirror that here so colors don't drift if defs change.
             const defs = {
               XS: ['0e8a16', 'PR size: XS (≤10 lines)'],
               S:  ['94d82d', 'PR size: S (≤50 lines)'],
@@ -39,23 +60,35 @@ jobs:
               'needs-deep-review': ['e11d48', 'Large PR — trigger Claude Code deep review via /review-pr'],
             };
             for (const [name, [color, description]] of Object.entries(defs)) {
-              try {
-                await github.rest.issues.createLabel({ owner, repo, name, color, description });
-              } catch (e) {
-                if (e.status !== 422) throw e; // 422 = label already exists
-              }
+              await safe(`upsert ${name}`, async () => {
+                try {
+                  await github.rest.issues.createLabel({ owner, repo, name, color, description });
+                } catch (e) {
+                  if (e.status === 422) {
+                    // already exists → update to keep color/description current
+                    await github.rest.issues.updateLabel({ owner, repo, name, color, description });
+                  } else {
+                    throw e; // bubble to safe() → warning, never throw
+                  }
+                }
+              });
             }
 
+            // Remove stale size labels. 404 = label wasn't applied → silently OK.
             for (const stale of ['XS', 'S', 'M', 'L', 'XL']) {
               if (stale === size) continue;
-              try {
-                await github.rest.issues.removeLabel({ owner, repo, issue_number, name: stale });
-              } catch (e) {
-                if (e.status !== 404) throw e; // 404 = label wasn't applied
-              }
+              await safe(`remove ${stale}`, async () => {
+                try {
+                  await github.rest.issues.removeLabel({ owner, repo, issue_number, name: stale });
+                } catch (e) {
+                  if (e.status !== 404) throw e;
+                }
+              });
             }
 
             const labels = [size];
             if (changes > 200) labels.push('needs-deep-review'); // never auto-removed
-            await github.rest.issues.addLabels({ owner, repo, issue_number, labels });
+            await safe(`add ${labels.join(',')}`,
+              () => github.rest.issues.addLabels({ owner, repo, issue_number, labels })
+            );
             core.info(`PR #${issue_number}: ${changes} changed lines -> ${size}`);
