@@ -169,6 +169,59 @@ for (const repo of [HUB, ...SPOKES]) {
   }
 }
 
+// ---- 2d. Contract version skew (ARC-ADR-024 / release-manager finding) ----
+// When backend-core.openapi.json bumps its info.version, consumers must vendor
+// the new spec or risk runtime breakage. Compare the producer's info.version
+// against each consumer's vendored copy and warn on mismatch. Today we only
+// implement this for backend-core.openapi.json (the highest-leverage contract);
+// extend the producers list as more shared contracts get version-stamped.
+const PRODUCER_CONTRACTS = [
+  { producerRepo: 'backend-core', producerPath: 'contracts/backend-core.openapi.json',
+    consumers: ['frontend-core', 'middle-core'] },
+];
+const readVersion = (raw) => {
+  if (!raw) return null;
+  try {
+    if (raw.trim().startsWith('{')) return JSON.parse(raw)?.info?.version || null;
+    // YAML — naive grep for `version: x.y.z` under `info:` (good enough for OpenAPI)
+    const m = raw.match(/^info:\s*[\s\S]*?\n\s+version:\s+["']?([^"'\s]+)/m);
+    return m ? m[1] : null;
+  } catch { return null; }
+};
+for (const c of PRODUCER_CONTRACTS) {
+  if (treeFetchFailed.has(c.producerRepo)) continue;
+  const producerRaw = fetchFile(c.producerRepo, c.producerPath);
+  const producerVer = readVersion(producerRaw);
+  if (!producerVer) continue;
+  for (const cons of c.consumers) {
+    if (treeFetchFailed.has(cons)) continue;
+    const consPath = safeTree(cons).find((p) => p.endsWith(c.producerPath.split('/').pop()));
+    if (!consPath) continue; // unvendored — already caught by the contract-vendoring check
+    const consVer = readVersion(fetchFile(cons, consPath));
+    if (consVer && consVer !== producerVer) {
+      add(cons, 'warn', 'contract-version-skew',
+        `${cons} vendors ${consPath} at v${consVer}; producer ${c.producerRepo} is at v${producerVer} — run the contract-consumer-update playbook (ADR-024 finding 4 / ADR-005).`);
+    }
+  }
+}
+
+// ---- 2e. OTel readiness (ARC-ADR-024 / observability-engineer finding) ----
+// ADR-010 says traces should originate at frontend-core's BFF and propagate
+// through middle-core → backend-core. Detect SDK init presence per spoke.
+const OTEL_HEURISTIC = {
+  'frontend-core': ['instrumentation.ts', 'instrumentation.js', 'src/instrumentation.ts'],
+  'backend-core': ['app/otel_setup.py', 'otel_setup.py', 'app/instrumentation.py'],
+  'middle-core': ['otel_setup.py', 'src/instrumentation.rs', 'agent_runtime/otel_setup.py'],
+};
+for (const [spoke, candidates] of Object.entries(OTEL_HEURISTIC)) {
+  if (treeFetchFailed.has(spoke)) continue;
+  const has = candidates.some((c) => safeTree(spoke).some((p) => p.endsWith(c)));
+  if (!has) {
+    add(spoke, 'warn', 'otel-not-initialized',
+      `${spoke} has no OpenTelemetry SDK init file (looked for: ${candidates.join(', ')}). Per ADR-010 + ADR-024, every spoke originates/propagates traceparent — wire OTel SDK + emit traces.`);
+  }
+}
+
 // ---- 3. Fleet health + issue queue (the "subscribe to every open issue" surface)
 const health = {};
 const parseIssues = (raw) => { try { return JSON.parse(raw || '[]'); } catch { return []; } };
