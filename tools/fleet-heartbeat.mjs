@@ -17,6 +17,7 @@
 //   node tools/fleet-heartbeat.mjs --json      # machine-readable findings
 //   node tools/fleet-heartbeat.mjs --dora      # add DORA metrics block (deploy freq / lead time / CFR / MTTR)
 //   node tools/fleet-heartbeat.mjs --slo       # probe known live services' health endpoints + warn on non-2xx
+//   node tools/fleet-heartbeat.mjs --secrets   # check KV secret ages against the rotation policy + warn on stale
 
 import { execFileSync } from 'node:child_process';
 import { readFileSync, existsSync } from 'node:fs';
@@ -224,6 +225,55 @@ for (const [spoke, candidates] of Object.entries(OTEL_HEURISTIC)) {
   }
 }
 
+// ---- 2f. Secrets staleness (ADR-024 + docs/security/secrets-rotation.md) ----
+// Reads Key Vault secret `updated` timestamps via `az` and warns when any
+// exceeds its rotation cadence + a 14-day grace window. Off by default
+// (`--secrets`) because it requires az login + KV read perms; daily heartbeat
+// runs in the cloud routine don't have that context.
+const SECRETS_PROBE = process.argv.includes('--secrets');
+// Cadence in days, per docs/security/secrets-rotation.md.
+const SECRETS_POLICY = [
+  { name: 'JWT_SIGNING_KEY', cadenceDays: 90 },
+  { name: 'OPENAI_API_KEY', cadenceDays: 180 },
+  { name: 'ANTHROPIC_API_KEY', cadenceDays: 180 },
+  { name: 'ARCADEDB_ROOT_PASSWORD', cadenceDays: 180 },
+  { name: 'ARCADEDB_PASSWORD', cadenceDays: 180 },
+  { name: 'POSTGRES_PASSWORD', cadenceDays: 180 },
+  { name: 'PROJECT_TOKEN', cadenceDays: 90 },
+  { name: 'GHRUNNERPAT', cadenceDays: 90 },
+  { name: 'GITHUB_WEBHOOK_SECRET', cadenceDays: 180 },
+];
+const GRACE_DAYS = 14;
+const secretsState = [];
+if (SECRETS_PROBE) {
+  const KV = process.env.AGENTARMY_KV || 'akv01-agentarmy';
+  const nowMs = Date.now();
+  for (const s of SECRETS_POLICY) {
+    let updatedIso = '';
+    try {
+      updatedIso = execFileSync('az',
+        ['keyvault', 'secret', 'show', '--vault-name', KV, '--name', s.name,
+         '--query', 'attributes.updated', '-o', 'tsv'],
+        { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
+      ).trim();
+    } catch { /* missing/inaccessible — surface as warn */ }
+    if (!updatedIso) {
+      secretsState.push({ name: s.name, status: 'missing', cadenceDays: s.cadenceDays });
+      add(HUB, 'warn', 'secret-not-found',
+        `KV secret ${s.name} not present in ${KV} (or no read perm). docs/security/secrets-rotation.md expects it.`);
+      continue;
+    }
+    const ageDays = Math.floor((nowMs - new Date(updatedIso).getTime()) / 86400000);
+    const stale = ageDays > s.cadenceDays;
+    const overdueGrace = ageDays > s.cadenceDays + GRACE_DAYS;
+    secretsState.push({ name: s.name, ageDays, cadenceDays: s.cadenceDays, stale, overdueGrace });
+    if (overdueGrace) {
+      add(HUB, 'warn', 'secret-stale',
+        `KV secret ${s.name} age=${ageDays}d exceeds cadence ${s.cadenceDays}d + ${GRACE_DAYS}d grace. Rotate per docs/security/secrets-rotation.md.`);
+    }
+  }
+}
+
 // ---- 3. Fleet health + issue queue (the "subscribe to every open issue" surface)
 const health = {};
 const parseIssues = (raw) => { try { return JSON.parse(raw || '[]'); } catch { return []; } };
@@ -334,7 +384,7 @@ const renderTier = (label, list) => {
 };
 
 if (JSON_OUT) {
-  console.log(JSON.stringify({ mode: APPLY ? 'apply' : 'dry-run', findings, health, containers, doraMetrics, sloProbes, dispatched, postmanNote }, null, 2));
+  console.log(JSON.stringify({ mode: APPLY ? 'apply' : 'dry-run', findings, health, containers, doraMetrics, sloProbes, secretsState, dispatched, postmanNote }, null, 2));
 } else {
   let out = `# 🫀 Fleet heartbeat — ${new Date().toISOString()} (${APPLY ? 'APPLY' : 'dry-run'})\n\n`;
   out += `## Findings (${findings.length})\n`;
@@ -373,6 +423,16 @@ if (JSON_OUT) {
     out += sloProbes.map((p) =>
       `- ${p.ok ? '✅' : '⚠️'} ${p.name} → ${p.status} (${p.url})`
     ).join('\n');
+  }
+
+  // Secrets staleness (only if --secrets flag) — per-secret age vs cadence.
+  if (SECRETS_PROBE && secretsState.length) {
+    out += `\n\n## Secrets Staleness\n`;
+    out += secretsState.map((s) => {
+      if (s.status === 'missing') return `- ❓ ${s.name} — not found in KV (cadence ${s.cadenceDays}d)`;
+      const icon = s.overdueGrace ? '⚠️' : s.stale ? '🟡' : '✅';
+      return `- ${icon} ${s.name} — age ${s.ageDays}d / cadence ${s.cadenceDays}d`;
+    }).join('\n');
   }
 
   out += `\n\n## Health & Issue Queue\n` + Object.entries(health).map(([r, h]) =>
