@@ -41,6 +41,7 @@
   },
   "volumes": [],
   "contract": [
-    { "service": "bridge", "type": "prose", "registry": "docs/contracts.md", "note": "CloudEvents v1.0 over JetStream (registered as 'Event bus' in docs/contracts.md). Inbound HTTP surface = POST /webhooks/<source>; OpenAPI worth formalizing if more inbound sources land." }
+    { "service": "bridge", "type": "openapi", "spec": "../../contracts/webhook-receiver.openapi.yaml", "registry": "docs/contracts.md", "mock": "https://27f2561e-8b6b-473b-9be3-95607ac7dcd1.mock.pstmn.io", "governingAdr": "ARC-ADR-022", "note": "Inbound HTTP surface (POST /webhooks/github + GET /healthz). Distinct from the broker-side contract (CloudEvents v1.0 over JetStream, registered as 'Event bus')." },
+    { "service": "bridge", "type": "prose", "registry": "docs/contracts.md", "note": "Outbound NATS→HTTP relay is governed by ARC-ADR-022; its sink endpoint is configured per-deployment (SINK_URL)." }
   ]
 }
