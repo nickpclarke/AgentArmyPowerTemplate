@@ -38,6 +38,52 @@ In Codex desktop sessions, a bundled Python may be available even when system Py
 & "$env:USERPROFILE\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" -m mkdocs build
 ```
 
+## Optional — Install language servers (LSPs)
+
+Claude Code's `LSP` tool gives it code intelligence — go-to-definition, find-references, hover types, document symbols, diagnostics — by talking to language-server-protocol servers spawned on demand. **They are not daemons; nothing to start at boot.** Claude Code spawns them per-file when the LSP tool is called, and they exit with the session.
+
+### Install matrix (priority for this fleet)
+
+| Language | Surface in fleet | LSP | Install (Windows-friendly) | Works on Windows? |
+|---|---|---|---|---|
+| **Python** | `backend-core`, `middle-core` | `pyright` | `pip install pyright` | ✅ |
+| **Rust** | `backend-core/rust-api-v2` | `rust-analyzer` | `rustup component add rust-analyzer` | ✅ |
+| **C# / .NET** | `middle-core` | `csharp-ls` | `dotnet tool install -g csharp-ls` | ✅ (needs `.csproj`/`.sln` in tree) |
+| **TypeScript / JavaScript** | `frontend-core`, all `.mjs` tooling | `typescript-language-server` | `npm i -g typescript-language-server typescript` | ⚠️ Windows spawn bug — see below |
+| **Bash** | `setup.sh` / `doctor.sh` / sync scripts | `bash-language-server` | `npm i -g bash-language-server` | ⚠️ same Windows issue |
+| **YAML** | Workflows, AsyncAPI/OpenAPI configs | `yaml-language-server` | `npm i -g yaml-language-server` | ⚠️ same Windows issue |
+
+### Verify the install
+
+After installing **and restarting Claude Code once** (so its parent process picks up the refreshed PATH), confirm the binaries resolve:
+
+```powershell
+typescript-language-server --version   # 5.x
+pyright --version                      # 1.1.x
+rust-analyzer --version                # rust-analyzer 1.x.x
+csharp-ls --version                    # csharp-ls 0.x.x
+bash-language-server --version         # 5.x
+yaml-language-server --version         # 1.x
+```
+
+### Known issue: Windows `.cmd`-shim spawn bug
+
+LSPs installed via `npm -g` (TypeScript, bash-LS, yaml-LS) fail under Claude Code on Windows with:
+
+```
+Error performing documentSymbol: ENOENT: no such file or directory, uv_spawn 'typescript-language-server'
+```
+
+**Root cause:** npm-global only writes `name.cmd` and `name.ps1` shims on Windows — no `.exe`. Node's `uv_spawn` (used by Claude Code's LSP launcher) does not search PATHEXT, so a bare command name without `.exe` extension fails to resolve.
+
+**Workaround for now:** prefer LSPs distributed via tools that produce native `.exe` shims — `pip`, `rustup`, `dotnet tool`. The Python / Rust / C# LSPs in the table above all install this way and **work today on Windows**. The npm-based ones (`bash-language-server`, `yaml-language-server`, `typescript-language-server`) are installed but not spawnable until upstream Claude Code patches the launcher to append `.cmd` on Windows or use a shell-search spawn. Track upstream at [anthropics/claude-code issues](https://github.com/anthropics/claude-code/issues).
+
+**Linux / macOS** are unaffected — the npm shim is a real shell script with a shebang, directly executable.
+
+### Why install them at all?
+
+Even with the partial Windows coverage, **pyright + rust-analyzer cover the largest non-frontend surface in this fleet** (both Python spokes + the Rust API in `backend-core`). With those two installed, Claude Code can navigate, refactor, and surface diagnostics across most of the backend stack without manual file reads. The TS/JS bunch is the biggest gap, but until the spawn bug is fixed, `Read` + `Grep` are the practical fallback for `frontend-core`.
+
 ## Step 1 — Fork and clone
 
 ```bash

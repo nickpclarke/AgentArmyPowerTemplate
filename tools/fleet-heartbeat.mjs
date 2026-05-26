@@ -21,7 +21,7 @@
 //   node tools/fleet-heartbeat.mjs --disk      # warn when host free disk < 5 GB (override: AGENTARMY_DISK_MIN_FREE_GB)
 
 import { execFileSync } from 'node:child_process';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, statfsSync } from 'node:fs';
 
 const OWNER = 'nickpclarke';
 const HUB = 'AgentArmy';
@@ -354,6 +354,29 @@ if (SLO_PROBE) {
     sloProbes.push({ name: t.name, url: t.url, status, ok });
     if (!ok) add(HUB, 'warn', 'slo-probe-failed',
       `${t.name} health probe -> ${status} (expected ${t.expect.join('/')}). Investigate before user-visible burn accrues.`);
+  }
+}
+
+// ---- 3d. Host disk probe (ARC-ADR-024 follow-up) ---------------------------
+// Backstop against the 2026-05-26 disk-cascade incident (Docker VHDX filled
+// the dev box, jobs OOM'd / failed in cryptic ways). Off by default; emit only
+// when --disk is set. Uses Node's portable statfs (works on Linux + Windows).
+const DISK_PROBE = process.argv.includes('--disk');
+const DISK_MIN_FREE_GB = Number(process.env.AGENTARMY_DISK_MIN_FREE_GB) || 5;
+let diskStatus = null;
+if (DISK_PROBE) {
+  try {
+    const s = statfsSync(process.cwd());
+    const totalGB = Math.round((s.bsize * s.blocks) / 1e9);
+    const availGB = Math.round((s.bsize * s.bavail) / 1e9);
+    const usePct = `${Math.round((1 - s.bavail / s.blocks) * 100)}%`;
+    diskStatus = { availGB, totalGB, usePct };
+    if (availGB < DISK_MIN_FREE_GB) {
+      add(HUB, 'warn', 'host-disk-low',
+        `Host disk ${availGB} GB free / ${totalGB} GB total (${usePct} used) — under threshold ${DISK_MIN_FREE_GB} GB. Run aggressive prune before the next CI/build wave.`);
+    }
+  } catch (e) {
+    add(HUB, 'warn', 'host-disk-probe-failed', `statfs failed: ${e.message}`);
   }
 }
 

@@ -92,6 +92,8 @@ nav:
   - Home: index.md
   - Getting Started:
     - Installation & Setup: setup.md
+    - Running Locally (fleet boot): running-locally.md
+    - Env & Secrets Handling: env-handling.md
     - Onboarding Sanity Check: onboarding.md
     - Quick Start: quick-start.md
     - Platform Diagnostics CLI: platform-diagnostics-cli.md
