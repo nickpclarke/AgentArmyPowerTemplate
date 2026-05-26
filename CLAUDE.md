@@ -45,6 +45,8 @@ planning/
 
 ### GitHub Projects is the task backbone
 
+**Default — check Issues AND the PRs that reference them FIRST, always.** Before starting work, creating/closing/duplicating an issue, or opening a PR, do BOTH: (a) list open Issues (the board in the hub; `gh issue list` in a spoke) and pick up / align with an existing one; (b) **list open PRs that reference candidate issues** (`gh pr list --search "linked:issue/N"` or read PR bodies for `Closes #N`/`supersedes #M`) BEFORE marking duplicate / closing. A PR in flight against an issue is the strongest "not a duplicate" signal — two issues with one open PR each are two architectural *tracks*, not duplicates. Create a new issue only if no Issue and no in-flight PR covers the work.
+
 Before starting significant work, check whether an issue exists on the board. If not, create one and add it to the project. Use `gh` CLI:
 
 ```bash

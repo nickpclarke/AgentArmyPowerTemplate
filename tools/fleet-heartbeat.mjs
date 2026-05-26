@@ -94,12 +94,16 @@ for (const repo of [HUB, ...SPOKES]) {
   }
 }
 
-// ---- 3. Fleet health -------------------------------------------------------
+// ---- 3. Fleet health + issue queue (the "subscribe to every open issue" surface)
 const health = {};
+const parseIssues = (raw) => { try { return JSON.parse(raw || '[]'); } catch { return []; } };
 for (const repo of [HUB, ...SPOKES]) {
   const openPRs = Number(gh(['pr', 'list', '--repo', `${OWNER}/${repo}`, '--state', 'open', '--json', 'number', '--jq', 'length']) || '0');
   const recentFailedRuns = Number(gh(['run', 'list', '--repo', `${OWNER}/${repo}`, '--limit', '8', '--json', 'conclusion', '--jq', '[.[] | select(.conclusion=="failure")] | length']) || '0');
-  health[repo] = { openPRs, recentFailedRuns };
+  const openIssues = Number(gh(['issue', 'list', '--repo', `${OWNER}/${repo}`, '--state', 'open', '--json', 'number', '--jq', 'length']) || '0');
+  const armyTask = parseIssues(gh(['issue', 'list', '--repo', `${OWNER}/${repo}`, '--state', 'open', '--label', 'agent-army-task', '--limit', '50', '--json', 'number,title']));
+  const copilotTask = parseIssues(gh(['issue', 'list', '--repo', `${OWNER}/${repo}`, '--state', 'open', '--label', 'copilot-task', '--limit', '50', '--json', 'number,title']));
+  health[repo] = { openPRs, openIssues, recentFailedRuns, armyTask, copilotTask };
 }
 
 // ---- 4. Dispatch (optional, --apply) ---------------------------------------
@@ -130,8 +134,11 @@ if (JSON_OUT) {
     ? findings.map((f) => `- **[${f.severity}] ${f.repo}** · ${f.kind}: ${f.detail}`).join('\n')
     : '- none — fleet contracts/agents in sync ✅';
   if (postmanNote) out += `\n\n> ⚠️ ${postmanNote}`;
-  out += `\n\n## Health\n` + Object.entries(health).map(([r, h]) =>
-    `- **${r}**: ${h.openPRs} open PR(s), ${h.recentFailedRuns} recent failed run(s)${h.recentFailedRuns ? ' ⚠️' : ''}`).join('\n');
+  out += `\n\n## Health & Issue Queue\n` + Object.entries(health).map(([r, h]) =>
+    `- **${r}**: ${h.openIssues} open issue(s) · ${h.openPRs} open PR(s) · ${h.recentFailedRuns} recent failed run(s)${h.recentFailedRuns ? ' ⚠️' : ''}` +
+    (h.armyTask.length ? `\n  - dispatched (agent-army-task, ${h.armyTask.length}, waiting pickup): ${h.armyTask.map((i) => `#${i.number}`).join(', ')}` : '') +
+    (h.copilotTask.length ? `\n  - copilot-task (${h.copilotTask.length}, auto-spawns): ${h.copilotTask.map((i) => `#${i.number}`).join(', ')}` : '')
+  ).join('\n');
   out += APPLY
     ? `\n\n## Dispatched (${dispatched.length})\n` + (dispatched.length ? dispatched.map((d) => `- ${d}`).join('\n') : '- nothing to dispatch')
     : `\n\n_(dry-run — re-run with \`--apply\` to dispatch ${findings.filter((f) => f.severity === 'gap').length} gap(s) as issues)_`;

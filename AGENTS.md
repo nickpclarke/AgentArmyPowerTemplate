@@ -30,6 +30,17 @@ hub automatically. Just do the work and close your issues — the hub reconciles
 
 ## Task Backbone — depends on where you are
 
+> **Default — check Issues FIRST, and the PRs that reference them.** Before you start work,
+> create/close/duplicate an issue, or open a PR, do BOTH:
+> 1. **List open Issues** (`gh issue list` in your repo; the board in the hub) and pick up /
+>    align with an existing one — don't begin untracked work, don't open a duplicate.
+> 2. **List open PRs that reference candidate issues** (`gh pr list --search "linked:issue/N"`
+>    or `gh pr list` then read bodies for `Closes #N` / `supersedes #M`) BEFORE marking an issue
+>    duplicate or closing it. A PR in flight against an issue is the strongest signal it isn't
+>    a duplicate — two issues with one open PR each is two *tracks*, not duplicates.
+>
+> Create a new issue only when no Issue and no in-flight PR covers the work.
+
 **In the hub:** all work items live on the attached GitHub Projects v2 board.
 - Check the board: `gh project item-list PROJECT_NUM --owner OWNER`
 - Create issues for non-trivial work: `gh issue create --title "..." --body "Closes #N"`
