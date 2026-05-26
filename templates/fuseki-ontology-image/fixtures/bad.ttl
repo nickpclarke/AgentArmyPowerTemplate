@@ -1,0 +1,5 @@
+@prefix ex: <https://example.org/> .
+
+# Violating — missing the required ex:name. The sieve MUST reject this with a
+# SHACL conformance report (sh:conforms false).
+ex:bob  a  ex:Person .

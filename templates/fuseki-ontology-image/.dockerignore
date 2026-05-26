@@ -1,0 +1,7 @@
+examples/.secrets/*
+!examples/.secrets/README.md
+shapes/
+ontologies/
+.env
+.env.example
+README.md

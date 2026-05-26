@@ -1,0 +1,49 @@
+{
+  "$schema": "../image-schema.json",
+  "name": "agentarmy-fuseki-ontology",
+  "kind": "single",
+  "base": "eclipse-temurin:21-jre",
+  "description": "Apache Jena Fuseki 5 + the AgentArmy ontology toolchain, as one image: TDB2 store, Jena CLI (shacl/sparql/riot/tdb2.tdbloader), pyshacl + rdflib (Python), ROBOT (OBO workflow). Built from eclipse-temurin + the official Apache Jena tarballs (no third-party image dependency). Implements an ontology pipeline — a 'sieve' that accepts ONLY SHACL-conformant input and emits structures/knowledge-graphs via SPARQL CONSTRUCT. Realizes ARC-ADR-019 (Ontology + Reasoning Layer).",
+  "owner": "hub template",
+  "services": [
+    {
+      "name": "fuseki",
+      "build": ".",
+      "role": "graph-db",
+      "ports": ["3030:3030"],
+      "healthcheck": { "http": "/$/ping", "expect": 200 },
+      "entrypointModes": ["server", "sieve", "emit", "shacl", "sparql", "riot", "robot", "pyshacl"]
+    }
+  ],
+  "secrets": [
+    { "name": "fuseki_admin_password", "env": "ADMIN_PASSWORD", "fileEnv": "ADMIN_PASSWORD_FILE", "description": "Fuseki admin password (only /$/* admin endpoints; the dataset is open in dev)." }
+  ],
+  "shims": {
+    "apt": ["curl", "python3", "python3-pip", "ca-certificates"],
+    "pip": ["pyshacl", "rdflib"],
+    "note": "Adds Python ontology toolkit (pyshacl as a second SHACL impl, rdflib for scripts); ROBOT JAR pulled from ontodev release; Jena CLI tools extracted from the matching apache-jena tarball so server + tools share a version."
+  },
+  "baked": [
+    { "path": "entrypoint.sh", "purpose": "Dispatch: server (default, TDB2 /knowledge dataset) | sieve | emit | shacl | sparql | riot | robot | pyshacl | <cmd>." },
+    { "path": "scripts/sieve.sh", "purpose": "Strict ingest: SHACL-validate → on conformance, load via Graph Store Protocol; on violation, reject with the report (the 'sieve')." },
+    { "path": "scripts/emit.sh", "purpose": "Knowledge emission: SPARQL CONSTRUCT/SELECT against the dataset, emits JSON-LD / Turtle / GraphML." },
+    { "path": "fixtures/shapes.ttl", "purpose": "Minimal demo SHACL shapes used by the doctor (a Person with ex:name [1..1])." },
+    { "path": "fixtures/good.ttl", "purpose": "Demo conformant data (the sieve must accept)." },
+    { "path": "fixtures/bad.ttl", "purpose": "Demo non-conformant data (the sieve MUST reject — proves the strict gate)." }
+  ],
+  "setup": { "sh": "setup.sh", "ps1": "setup.ps1" },
+  "doctor": {
+    "cmd": "scripts/fuseki-doctor.sh",
+    "proves": ["readiness", "sieve-accepts-conformant", "sieve-rejects-violating", "construct-emits"],
+    "description": "Hits /$/ping, runs the sieve against bundled good/bad fixtures + shapes (asserts accept and reject), then SPARQL-CONSTRUCTs the loaded triples back as JSON-LD."
+  },
+  "deploy": {
+    "target": "aca",
+    "notes": "Stateful TDB2 store needs persistent storage; ACA with a mounted Azure Files volume, or AKS with a PVC. Copy into the spoke to build/push."
+  },
+  "volumes": ["fuseki-data", "shapes", "ontologies"],
+  "contract": [
+    { "service": "fuseki", "type": "upstream", "spec": "https://www.w3.org/TR/sparql11-protocol/", "note": "Upstream W3C SPARQL 1.1 Protocol + Graph Store Protocol — the contract callers bind to. AgentArmy-authored pipeline conventions (sieve + emit) live in the entrypoint + scripts/." },
+    { "service": "fuseki", "type": "prose", "registry": "docs/contracts.md", "note": "Ontology-pipeline contract (SHACL-only ingest, CONSTRUCT-based emission) is documented prose; formalize as a Data Products contract if it stabilizes." }
+  ]
+}
