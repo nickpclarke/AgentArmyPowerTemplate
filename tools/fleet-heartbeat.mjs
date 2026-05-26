@@ -35,9 +35,21 @@ const gh = (args) => {
   try { return execFileSync('gh', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); }
   catch { return ''; }
 };
+// Tree fetch can hiccup in the cloud-routine context (transient gh-api error,
+// rate-limit, etc.). Distinguish "tree fetch failed" from "tree is genuinely
+// empty" so file-based gap checks don't fire as false positives (real-world
+// fire: AgentArmy #207, 2026-05-26 cron run — all 3 PR workflows reported
+// missing on a healthy repo because the tree call returned empty).
+const MIN_TREE_FILES = 10; // any real repo has more files than this
 const treePaths = (repo) => {
-  const o = gh(['api', `repos/${OWNER}/${repo}/git/trees/main?recursive=1`, '--jq', '.tree[].path']);
-  return o ? o.split('\n') : [];
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const o = gh(['api', `repos/${OWNER}/${repo}/git/trees/main?recursive=1`, '--jq', '.tree[].path']);
+    if (o) {
+      const paths = o.split('\n');
+      if (paths.length >= MIN_TREE_FILES) return paths;
+    }
+  }
+  return null; // distinct from [] — signals the tree fetch failed
 };
 const isContract = (p) => /\.(openapi|asyncapi)\.(json|ya?ml)$/.test(p);
 const isImageManifest = (p) => p === 'image.json' || p.endsWith('/image.json');
@@ -57,8 +69,20 @@ const add = (repo, severity, kind, detail, label = 'agent-army-task') => finding
 const registry = existsSync('docs/contracts.md') ? readFileSync('docs/contracts.md', 'utf8') : '';
 const repoTrees = Object.fromEntries([HUB, ...SPOKES].map((r) => [r, treePaths(r)]));
 
+// Tree-fetch failures → emit a warn AND skip dispatch decisions for these repos
+// this cycle (a missing tree would false-positive every file-based gap).
+const treeFetchFailed = new Set(
+  Object.entries(repoTrees).filter(([, v]) => v === null).map(([k]) => k),
+);
+for (const repo of treeFetchFailed) {
+  add(repo, 'warn', 'tree-fetch-failed',
+    `gh api git/trees/main returned empty/failed after a retry (transient hiccup likely); file-based dispatch checks skipped for this cycle.`);
+}
+// Safe-empty fallback for warn-only iterators that don't dispatch.
+const safeTree = (repo) => repoTrees[repo] || [];
+
 for (const spoke of SPOKES) {
-  for (const c of repoTrees[spoke].filter(isContract)) {
+  for (const c of safeTree(spoke).filter(isContract)) {
     const base = c.split('/').pop();
     if (registry && !registry.includes(base)) {
       add(HUB, 'warn', 'unregistered-contract',
@@ -67,21 +91,23 @@ for (const spoke of SPOKES) {
   }
 }
 
-// backend OpenAPI must be vendored into its consumers (fe + mc)
+// backend OpenAPI must be vendored into its consumers (fe + mc). Skip the spoke
+// if its tree fetch failed (don't dispatch on a phantom-empty tree).
 for (const spoke of ['frontend-core', 'middle-core']) {
+  if (treeFetchFailed.has(spoke)) continue;
   const ok = repoTrees[spoke].some((p) => p.endsWith('backend-core.openapi.json'));
   if (!ok) add(spoke, 'gap', 'unvendored-contract',
     `backend-core OpenAPI is not vendored in ${spoke} — vendor it + generate the client.`, GAP_LABEL);
 }
 
-const postmanNote = SPOKES.flatMap((s) => repoTrees[s].filter(isContract)).length
+const postmanNote = SPOKES.flatMap((s) => safeTree(s).filter(isContract)).length
   ? 'Verify each contract has a published Postman spec + mock (run locally with Key Vault creds — not checkable from the heartbeat).'
   : null;
 
 // ---- 2. Agent / skills pack drift (hub-authoritative, one-way hub→spoke) ----
-const hubAgents = repoTrees[HUB].filter((p) => p.startsWith('.claude/agents/') && p.endsWith('.md'));
+const hubAgents = safeTree(HUB).filter((p) => p.startsWith('.claude/agents/') && p.endsWith('.md'));
 for (const spoke of SPOKES) {
-  const spokeAgents = repoTrees[spoke].filter((p) => p.startsWith('.claude/agents/') && p.endsWith('.md'));
+  const spokeAgents = safeTree(spoke).filter((p) => p.startsWith('.claude/agents/') && p.endsWith('.md'));
   if (hubAgents.length && spokeAgents.length < Math.floor(hubAgents.length * 0.5)) {
     add(spoke, 'warn', 'agent-pack-drift',
       `agent pack out of sync: hub has ${hubAgents.length} agent files, ${spoke} has ${spokeAgents.length}. Re-run the hub→spoke sync.`);
@@ -94,6 +120,7 @@ for (const spoke of SPOKES) {
 // the GitHub webhook → the review/loop/@claude workflows. Enforce as a rule.
 const EXPECTED_PR_WORKFLOWS = ['copilot-review.yml', 'review-loop.yml', 'claude.yml'];
 for (const repo of [HUB, ...SPOKES]) {
+  if (treeFetchFailed.has(repo)) continue; // don't dispatch on a phantom-empty tree
   const wf = repoTrees[repo].filter((p) => p.startsWith('.github/workflows/'));
   const missing = EXPECTED_PR_WORKFLOWS.filter((w) => !wf.some((p) => p.endsWith('/' + w)));
   if (missing.length) {
