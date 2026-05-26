@@ -1,0 +1,232 @@
+openapi: 3.1.0
+info:
+  title: AgentArmy LLM Gateway
+  version: 0.1.0
+  description: >-
+    Internal, provider-agnostic gateway for chat completions, embeddings, and
+    model discovery. Deliberately **OpenAI-compatible** (Chat Completions API)
+    so any layer can use the OpenAI SDK / openai-fetch unchanged, while the
+    gateway hides the real provider (OpenAI, Cerebras [ARC-ADR-004], Azure
+    Foundry, or a local OpenAI-compatible server e.g. Ollama/vLLM/LM Studio).
+    Anthropic/Claude is supported via an adapter: its native Messages API is NOT
+    OpenAI-shaped (system is a top-level param, max_tokens required, content
+    blocks, different SSE events), so the gateway translates OpenAI<->Messages for
+    claude-* models (reachable via the Anthropic API directly, or Bedrock/Vertex).
+    Claude-only features (extended thinking, prompt caching, citations) don't map
+    to chat-completions — add a native passthrough if the platform needs them.
+
+    Why a gateway contract:
+    - Provider swap without touching middle-core / frontend-core.
+    - Keys live ONLY in the gateway — the browser never holds an LLM key
+      (ARC-ADR-003). Callers forward the user JWT (ARC-ADR-002); the gateway
+      attaches the provider key server-side.
+    - One choke point for rate-limiting, cost, and observability.
+
+    Streaming note: `stream: true` returns Server-Sent Events
+    (`text/event-stream`) — a sequence of `data: <ChatCompletionChunk>` lines
+    terminated by `data: [DONE]`. OpenAPI cannot fully model an SSE stream, so
+    the streamed media type is described as a string and the per-event payload
+    is the `ChatCompletionChunk` schema below. Distinct from the higher-level
+    AG-UI agent-run stream (agui-stream.asyncapi.yaml, ARC-ADR-007).
+
+    STATUS: proposed (ARC-ADR-021). Producer/placement TBD by that ADR; on
+    acceptance this spec relocates to the chosen producer repo and the server
+    URL is finalized.
+servers:
+  - url: "{LLM_GATEWAY_URL}"
+    description: Host-only base (no /v1 suffix — paths carry it) so generated clients/mocks don't double the prefix.
+    variables:
+      LLM_GATEWAY_URL:
+        default: http://localhost:8081
+security:
+  - bearerAuth: []
+paths:
+  /v1/chat/completions:
+    post:
+      operationId: createChatCompletion
+      summary: Create a chat completion (streaming or not)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChatCompletionRequest" }
+      responses:
+        "200":
+          description: >-
+            Non-streaming: a single ChatCompletionResponse (application/json).
+            Streaming (`stream: true`): text/event-stream of `data: <ChatCompletionChunk>`
+            lines ending with `data: [DONE]`.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChatCompletionResponse" }
+            text/event-stream:
+              schema:
+                type: string
+                description: SSE stream; each event's data is a ChatCompletionChunk (JSON), final line is `[DONE]`.
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /v1/embeddings:
+    post:
+      operationId: createEmbedding
+      summary: Create embeddings (OpenAI-compatible)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EmbeddingRequest" }
+      responses:
+        "200":
+          description: Embedding vectors.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EmbeddingResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /v1/models:
+    get:
+      operationId: listModels
+      summary: List the models the gateway exposes
+      responses:
+        "200":
+          description: Available models.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ModelList" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: The caller's user JWT (forwarded per ARC-ADR-002). The provider key is attached server-side by the gateway and is never exposed to callers.
+  responses:
+    Unauthorized:
+      description: Missing/invalid JWT.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    RateLimited:
+      description: Rate or quota limit hit.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    BadRequest:
+      description: Malformed request.
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+  schemas:
+    ChatMessage:
+      type: object
+      required: [role, content]
+      properties:
+        role: { type: string, enum: [system, user, assistant, tool] }
+        content: { type: string }
+        name: { type: string }
+        tool_call_id: { type: string }
+    ChatCompletionRequest:
+      type: object
+      required: [model, messages]
+      properties:
+        model: { type: string, description: "Logical model id (the gateway maps it to a provider/model)." }
+        messages:
+          type: array
+          items: { $ref: "#/components/schemas/ChatMessage" }
+        stream: { type: boolean, default: false, description: "true → SSE stream of ChatCompletionChunk." }
+        temperature: { type: number, minimum: 0, maximum: 2 }
+        max_tokens: { type: integer, minimum: 1 }
+        top_p: { type: number }
+        stop:
+          oneOf:
+            - { type: string }
+            - { type: array, items: { type: string } }
+        metadata: { type: object, additionalProperties: true, description: "Pass-through tags for cost/observability (caller, tenant, agent)." }
+    Choice:
+      type: object
+      properties:
+        index: { type: integer }
+        message: { $ref: "#/components/schemas/ChatMessage" }
+        finish_reason: { type: string, enum: [stop, length, content_filter, tool_calls, null] }
+    Usage:
+      type: object
+      properties:
+        prompt_tokens: { type: integer }
+        completion_tokens: { type: integer }
+        total_tokens: { type: integer }
+    ChatCompletionResponse:
+      type: object
+      required: [id, object, model, choices]
+      properties:
+        id: { type: string }
+        object: { type: string, const: chat.completion }
+        created: { type: integer }
+        model: { type: string }
+        choices:
+          type: array
+          items: { $ref: "#/components/schemas/Choice" }
+        usage: { $ref: "#/components/schemas/Usage" }
+    Delta:
+      type: object
+      properties:
+        role: { type: string }
+        content: { type: string }
+    ChunkChoice:
+      type: object
+      properties:
+        index: { type: integer }
+        delta: { $ref: "#/components/schemas/Delta" }
+        finish_reason: { type: string, nullable: true }
+    ChatCompletionChunk:
+      type: object
+      description: One SSE event payload when stream=true.
+      required: [id, object, choices]
+      properties:
+        id: { type: string }
+        object: { type: string, const: chat.completion.chunk }
+        created: { type: integer }
+        model: { type: string }
+        choices:
+          type: array
+          items: { $ref: "#/components/schemas/ChunkChoice" }
+    EmbeddingRequest:
+      type: object
+      required: [model, input]
+      properties:
+        model: { type: string }
+        input:
+          oneOf:
+            - { type: string }
+            - { type: array, items: { type: string } }
+    EmbeddingResponse:
+      type: object
+      properties:
+        object: { type: string, const: list }
+        model: { type: string }
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              object: { type: string, const: embedding }
+              index: { type: integer }
+              embedding: { type: array, items: { type: number } }
+        usage: { $ref: "#/components/schemas/Usage" }
+    Model:
+      type: object
+      properties:
+        id: { type: string }
+        object: { type: string, const: model }
+        owned_by: { type: string, description: "The backing provider (openai|cerebras|foundry|local)." }
+    ModelList:
+      type: object
+      properties:
+        object: { type: string, const: list }
+        data:
+          type: array
+          items: { $ref: "#/components/schemas/Model" }
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message: { type: string }
+            type: { type: string }
+            code: { type: string }
