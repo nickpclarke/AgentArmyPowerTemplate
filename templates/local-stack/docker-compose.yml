@@ -1,0 +1,179 @@
+# AgentArmy local-stack — one docker-compose to bring up every "data/infra
+# system" the fleet runs against locally. Five services, one network, one
+# `docker compose up`.
+#
+# What's NOT here: the spoke applications (frontend-core / backend-core /
+# middle-core). Those run separately and POINT at this stack via the ports
+# below. Keeping data systems independent of app code is intentional — the
+# data systems have slower lifecycles and we want to dev-loop app code
+# against a stable platform.
+#
+# Bring up with:    ./setup.sh                (or setup.ps1 on Windows)
+# Verify with:      ./local-stack-doctor.sh
+# Tear down with:   docker compose down --volumes      (drops data)
+# Tear down with:   docker compose down                (keeps volumes)
+
+name: agentarmy-local-stack
+
+services:
+  # ─── ArcadeDB ────────────────────────────────────────────────────────────
+  # Graph database. Used by backend-core (pin store, business object store)
+  # and middle-core (PinBackend via ArcadeDB adapter, PIN-F4).
+  # Studio UI:  http://localhost:2480
+  arcadedb:
+    build:
+      context: ../arcadedb-image
+      dockerfile: Dockerfile
+    image: agentarmy-arcadedb:local
+    container_name: agentarmy-arcadedb
+    ports:
+      - "2480:2480"
+    environment:
+      ARCADEDB_DATABASE: knowledge
+      ARCADEDB_SERVICE_USER: platform_reader
+      ARCADEDB_ROOT_PASSWORD_FILE: /run/secrets/arcadedb_root_password
+      ARCADEDB_SERVICE_PASSWORD_FILE: /run/secrets/arcadedb_password
+    secrets:
+      - arcadedb_root_password
+      - arcadedb_password
+    volumes:
+      - arcadedb_config:/home/arcadedb/config
+      - arcadedb_data:/home/arcadedb/databases
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "wget -qO- http://127.0.0.1:2480/api/v1/ready >/dev/null 2>&1 || exit 1"
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+    restart: unless-stopped
+
+  # ─── Postgres ────────────────────────────────────────────────────────────
+  # Stock image — no AgentArmy customisation. DBOS (the Python durable-
+  # execution library backend-core uses) stores workflow status / steps /
+  # queues here. Also a sensible default for app-owned relational data.
+  postgres:
+    image: postgres:16-alpine
+    container_name: agentarmy-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: dbos
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_DB: dbos_system
+    secrets:
+      - postgres_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dbos -d dbos_system"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  # ─── NATS JetStream ──────────────────────────────────────────────────────
+  # Event broker. Used by event-bridge and the fleet's pub/sub story
+  # (middle-core #74, backend-core #94). JetStream = NATS + durable streams.
+  nats:
+    image: nats:2.10-alpine
+    container_name: agentarmy-nats
+    command: ["-js", "-sd", "/data", "-m", "8222"]
+    ports:
+      - "4222:4222"   # NATS client protocol
+      - "8222:8222"   # HTTP monitoring + /healthz
+    volumes:
+      - nats_data:/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "wget -qO- http://127.0.0.1:8222/healthz >/dev/null 2>&1 || exit 1"
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+    restart: unless-stopped
+
+  # ─── Event-bridge ────────────────────────────────────────────────────────
+  # HTTP webhook receiver (HMAC-verified) → CloudEvents v1.0 → NATS JetStream.
+  # The "ingress" side of the fleet event bus. Useful for letting external
+  # systems (GitHub webhooks, alerting) post into the bus.
+  event-bridge:
+    build:
+      context: ../event-bridge-image
+      dockerfile: Dockerfile
+    image: agentarmy-event-bridge:local
+    container_name: agentarmy-event-bridge
+    depends_on:
+      nats:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      NATS_URL: nats://nats:4222
+      SUBJECT_PREFIX: fleet.gh
+      STREAM_NAME: FLEET
+      STREAM_SUBJECTS: fleet.>
+      GITHUB_WEBHOOK_SECRET_FILE: /run/secrets/github_webhook_secret
+      PORT: "8080"
+    secrets:
+      - github_webhook_secret
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/healthz',timeout=2).status==200 else 1)\""
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  # ─── Fuseki + Jena + SHACL ───────────────────────────────────────────────
+  # The "ontology sieve": SPARQL endpoint + SHACL validator + Jena CLI for
+  # ontology ingest. Strict typing in / knowledge graphs out (hub #111).
+  # Studio UI: http://localhost:3030
+  fuseki:
+    build:
+      context: ../fuseki-ontology-image
+      dockerfile: Dockerfile
+    image: agentarmy-fuseki-ontology:local
+    container_name: agentarmy-fuseki
+    ports:
+      - "3030:3030"
+    environment:
+      ADMIN_PASSWORD_FILE: /run/secrets/fuseki_admin_password
+      DS_NAME: knowledge
+    secrets:
+      - fuseki_admin_password
+    volumes:
+      - fuseki_data:/fuseki/databases
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "wget -qO- http://127.0.0.1:3030/$$/ping >/dev/null 2>&1 || exit 1"
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+    restart: unless-stopped
+
+secrets:
+  arcadedb_root_password:
+    file: ./.secrets/arcadedb_root_password.txt
+  arcadedb_password:
+    file: ./.secrets/arcadedb_password.txt
+  postgres_password:
+    file: ./.secrets/postgres_password.txt
+  github_webhook_secret:
+    file: ./.secrets/github_webhook_secret.txt
+  fuseki_admin_password:
+    file: ./.secrets/fuseki_admin_password.txt
+
+volumes:
+  arcadedb_config:
+  arcadedb_data:
+  postgres_data:
+  nats_data:
+  fuseki_data:
