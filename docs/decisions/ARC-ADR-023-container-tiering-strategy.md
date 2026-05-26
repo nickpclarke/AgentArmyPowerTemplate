@@ -101,6 +101,55 @@ split them.
 | Local embedder | Function (planned) | Hub #184 — different hardware profile (NPU/iGPU), must be its own container |
 | HMAC verifier | Sidecar (planned) | Companion to event-bridge or any future ingress receiver |
 
+## Platform Image Ownership (amendment, 2026-05-26)
+
+The tiering above answers *what* a container is. This subsection answers *who
+owns it*: which repo builds it, publishes it, deploys it, and rolls upgrades.
+
+**The hub owns all Platform-tier deployables, end-to-end.** That means:
+
+- The **Dockerfile and the `image.json` manifest** live in `templates/*-image/`
+  in the hub. Spokes do **NOT** vendor those directories — they consume the
+  running platform instance via env (`ARCADEDB_URL`, `POSTGRES_URL`,
+  `NATS_URL`, `FUSEKI_URL`).
+- The **deploy lane** (Bicep / Terraform / workflows) lives in the hub. Each
+  platform image has its `.bicep` + bootstrap under
+  `templates/<name>-image/deploy/`, and the **runnable workflow** lives at
+  `.github/workflows/<name>-aca-deploy.yml` (or equivalent) in the hub.
+- **One instance per environment.** There is one shared dev ArcadeDB, one
+  shared dev Postgres, etc. — not one per spoke. The whole fleet writes to
+  the same database in dev, the same in staging, the same in prod (separate
+  resource groups per env, single platform instance per env).
+- The **`scripts/spoke_sync.config.json` does NOT sync `templates/*-image/`**.
+  Hub-owned platform manifests stay in the hub; spoke-owned application
+  `image.json` files stay in the spoke.
+
+Why centralized over per-spoke platforms:
+
+1. **Cost** — one ArcadeDB / one Postgres in ACA per env, not N (one per spoke).
+2. **Single source of truth** — graph data isn't fragmented across N
+   database instances each spoke imported into independently.
+3. **Slow lifecycle by definition** — Platform tier upgrades are careful;
+   doing them in one place beats coordinating N.
+4. **Clear blast radius** — when ArcadeDB has a problem, there's one place to
+   look + one place to fix.
+
+Spokes still get to choose:
+
+- **For local dev** — run the hub's [`templates/local-stack`](../../templates/local-stack/)
+  to bring up the full platform in one `docker compose up`.
+- **For CI** — pull the published image (`agentarmy.azurecr.io/agentarmy-arcadedb:<tag>`)
+  and point at it via env.
+- **For prod** — connect to the hub-deployed ACA instance via env.
+
+The same rule applies to future Platform images (`fuseki-ontology-image`,
+`event-bridge-image`, future `postgres-platform-image`, etc.): hub owns the
+Dockerfile, deploy lane, and operations; spokes consume via env.
+
+Backend-core issue [#41](https://github.com/nickpclarke/backend-core/issues/41)
+("Deploy ArcadeDB to ACA") is closed by this amendment + the hub-side deploy
+lane; the work was always cross-spoke, and a spoke is the wrong home for it.
+
 ## Consequences
 
 - **+** Every new container has a clear tier question with a clear answer;

@@ -1,6 +1,8 @@
-# ArcadeDB image template
+# ArcadeDB image
 
 > **Tier:** `platform` ([ARC-ADR-023](../../docs/decisions/ARC-ADR-023-container-tiering-strategy.md)) — has state, slow lifecycle, careful upgrades. Composed into the fleet via [`templates/local-stack`](../local-stack/).
+>
+> **Owned by the hub.** This is a fleet-shared platform image. The hub builds it, the hub publishes it to ACR (`agentarmy.azurecr.io/agentarmy-arcadedb:<tag>`), and the hub deploys it to Azure Container Apps via [`.github/workflows/arcadedb-aca-deploy.yml`](../../.github/workflows/arcadedb-aca-deploy.yml). **Spokes do not vendor or run their own ArcadeDB** — they connect to the URL emitted by this deploy via env (`ARCADEDB_URL`). One database, one source of truth.
 
 A **thin derived** ArcadeDB image: `FROM arcadedata/arcadedb:26.5.1` with the
 AgentArmy platform's opinions baked on top. It is **not** a fork or a from-source

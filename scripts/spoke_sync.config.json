@@ -24,9 +24,9 @@
     "scripts/board_commands.py",
     "scripts/onboarding-check.ps1",
     "tools/status.mjs",
-    "tools/fleet-heartbeat.mjs",
-    "templates/arcadedb-image"
+    "tools/fleet-heartbeat.mjs"
   ],
+  "$ownership_note": "templates/arcadedb-image (and future templates/*-image/ platform images: fuseki, event-bridge, …) are intentionally NOT synced — they're hub-owned platform infra per ARC-ADR-023. Spokes consume the running instances via env (ARCADEDB_URL, NATS_URL, …), not by vendoring the Dockerfile.",
   "deny": [
     "CLAUDE.md",
     "settings.local.json",
