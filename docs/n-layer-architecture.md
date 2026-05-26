@@ -32,6 +32,22 @@ You can add more spokes at any time (N is unbounded): e.g. `myapp-ml`, `myapp-an
 
 ---
 
+## Container Tiering (ARC-ADR-023)
+
+The N-Layer model decomposes the fleet by **repo** (hub + N spokes); container tiering decomposes the fleet by **runtime lifecycle**. They're orthogonal — every container belongs to one tier *and* one repo:
+
+| Tier | Lifecycle | Examples | Where the image manifest lives |
+|---|---|---|---|
+| `platform` | Slow, has state | ArcadeDB, Postgres, NATS, Fuseki | Hub `templates/*-image/` (composed via `templates/local-stack/`) |
+| `application` | Rolling deploys | backend-core, middle-core, frontend-core | Spoke-root `image.json` (one per spoke) |
+| `function` | Fast, independent rollouts | event-bridge, LLM gateway, future micros | Hub `templates/*-image/` OR a spoke-owned function dir (e.g. backend-core's `llm-gateway/`) |
+
+A spoke can own both an `application` container (its main service) and one or more `function` containers (extracted features) — they share the spoke's repo and code, but run as separate processes. The LLM gateway is the canonical example: code lives in backend-core's repo for code-locality with the auth/RBAC stack (ARC-ADR-021), runtime is its own container for independent scaling (ARC-ADR-023).
+
+See [ARC-ADR-023 — Fleet Container Tiering Strategy](decisions/ARC-ADR-023-container-tiering-strategy.md) for the full rule, anti-patterns, and composition patterns (sidecar, init container, DinD).
+
+---
+
 ## MicroVM / Runtime Isolation
 
 Because each layer is a separate repo, each spoke runs AI agents in a **completely isolated filesystem + runtime**:

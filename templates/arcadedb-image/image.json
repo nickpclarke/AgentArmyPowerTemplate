@@ -5,6 +5,7 @@
   "base": "arcadedata/arcadedb:26.5.1",
   "description": "Thin derived ArcadeDB image, correct-by-default: read-only MCP posture, platform_reader service user, knowledge database, and doctor-stub types baked in.",
   "owner": "hub template",
+  "tier": "platform",
   "services": [
     {
       "name": "arcadedb",

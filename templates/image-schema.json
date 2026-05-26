@@ -27,6 +27,11 @@
       "type": "string",
       "description": "Where this image lives / who owns it (e.g. 'hub template', 'backend-core spoke')."
     },
+    "tier": {
+      "type": "string",
+      "enum": ["platform", "application", "function"],
+      "description": "Container tier per ARC-ADR-023 (docs/decisions/ARC-ADR-023-container-tiering-strategy.md). 'platform' = slow lifecycle, has state (DBs, brokers, ontology stores); 'application' = one container per spoke, stateless, rolling deploys; 'function' = small stateless workers / sidecars / one-shots, independently rolled out. Optional but recommended on all new manifests; the fleet-heartbeat groups its container inventory by this field."
+    },
     "services": {
       "type": "array",
       "minItems": 1,

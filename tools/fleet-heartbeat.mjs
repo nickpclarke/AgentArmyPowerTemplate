@@ -40,6 +40,15 @@ const treePaths = (repo) => {
   return o ? o.split('\n') : [];
 };
 const isContract = (p) => /\.(openapi|asyncapi)\.(json|ya?ml)$/.test(p);
+const isImageManifest = (p) => p === 'image.json' || p.endsWith('/image.json');
+
+// Fetch a file's raw content from a repo at main. Returns null if missing or unreadable.
+// Uses the GitHub raw-content endpoint — one API call per file, no base64 decode.
+const fetchFile = (repo, path) => {
+  const raw = gh(['api', `repos/${OWNER}/${repo}/contents/${path}?ref=main`,
+    '-H', 'Accept: application/vnd.github.raw']);
+  return raw || null;
+};
 
 const findings = [];
 const add = (repo, severity, kind, detail, label = 'agent-army-task') => findings.push({ repo, severity, kind, detail, label });
@@ -94,6 +103,45 @@ for (const repo of [HUB, ...SPOKES]) {
   }
 }
 
+// ---- 2c. Container inventory by tier (ARC-ADR-023) -------------------------
+// Enumerate every image.json across hub+spokes, read its tier, and group the
+// fleet's containers by Platform / Application / Function. Drift detection:
+// (a) image.json missing the `tier` field (ADR-023 says new manifests should
+// declare it); (b) `kind: "multi-service"` is a likely anti-pattern in the
+// new tiering model ("fusion images" are retired — Platform DBs shouldn't be
+// bundled into an Application image.json).
+const containers = { platform: [], application: [], function: [], untiered: [] };
+for (const repo of [HUB, ...SPOKES]) {
+  for (const path of repoTrees[repo].filter(isImageManifest)) {
+    const raw = fetchFile(repo, path);
+    if (!raw) continue;
+    let manifest;
+    try { manifest = JSON.parse(raw); } catch {
+      add(repo, 'warn', 'image-manifest-unparseable',
+        `${repo}/${path} could not be parsed as JSON — fix the manifest.`);
+      continue;
+    }
+    const entry = {
+      repo, path,
+      name: manifest.name || '(unnamed)',
+      kind: manifest.kind || '(no kind)',
+      tier: manifest.tier || null,
+      doctor: manifest.doctor?.proves ? manifest.doctor.proves.join(', ') : '—',
+      deploy: manifest.deploy?.target || '—',
+    };
+    if (entry.tier && containers[entry.tier]) containers[entry.tier].push(entry);
+    else containers.untiered.push(entry);
+    if (!entry.tier) {
+      add(repo, 'warn', 'image-missing-tier',
+        `${repo}/${path} ("${entry.name}") declares no \`tier\` — add tier: platform | application | function per ARC-ADR-023.`);
+    }
+    if (entry.kind === 'multi-service' && entry.tier === 'application') {
+      add(repo, 'warn', 'tier-bundle-antipattern',
+        `${repo}/${path} ("${entry.name}") is tier=application but kind=multi-service — likely bundles Platform DBs into an app image. ADR-023 retires this 'fusion image' pattern; split into image.json (app only) + a separate stack file referencing templates/local-stack.`);
+    }
+  }
+}
+
 // ---- 3. Fleet health + issue queue (the "subscribe to every open issue" surface)
 const health = {};
 const parseIssues = (raw) => { try { return JSON.parse(raw || '[]'); } catch { return []; } };
@@ -125,8 +173,16 @@ if (APPLY) {
 }
 
 // ---- Output ----------------------------------------------------------------
+// Render a single tier's container list as a markdown table row block.
+const renderTier = (label, list) => {
+  if (!list.length) return `- _(none)_`;
+  return list.map((c) =>
+    `- **${c.name}** (\`${c.repo}/${c.path}\`) · kind=\`${c.kind}\` · proves: ${c.doctor} · deploy: \`${c.deploy}\``
+  ).join('\n');
+};
+
 if (JSON_OUT) {
-  console.log(JSON.stringify({ mode: APPLY ? 'apply' : 'dry-run', findings, health, dispatched, postmanNote }, null, 2));
+  console.log(JSON.stringify({ mode: APPLY ? 'apply' : 'dry-run', findings, health, containers, dispatched, postmanNote }, null, 2));
 } else {
   let out = `# 🫀 Fleet heartbeat — ${new Date().toISOString()} (${APPLY ? 'APPLY' : 'dry-run'})\n\n`;
   out += `## Findings (${findings.length})\n`;
@@ -134,6 +190,23 @@ if (JSON_OUT) {
     ? findings.map((f) => `- **[${f.severity}] ${f.repo}** · ${f.kind}: ${f.detail}`).join('\n')
     : '- none — fleet contracts/agents in sync ✅';
   if (postmanNote) out += `\n\n> ⚠️ ${postmanNote}`;
+
+  // Tier-grouped container inventory (ARC-ADR-023) — answers "what's deployed
+  // where, by tier" in one glance. The fleet's 'shape report'.
+  const totalContainers = containers.platform.length + containers.application.length + containers.function.length + containers.untiered.length;
+  out += `\n\n## Container Inventory by Tier (ARC-ADR-023)\n`;
+  out += `_${totalContainers} image.json manifest(s) across hub + ${SPOKES.length} spoke(s)._\n\n`;
+  out += `### Platform tier (${containers.platform.length})  — slow lifecycle, has state\n`;
+  out += renderTier('platform', containers.platform);
+  out += `\n\n### Application tier (${containers.application.length})  — one container per spoke, stateless\n`;
+  out += renderTier('application', containers.application);
+  out += `\n\n### Function tier (${containers.function.length})  — small, stateless, independently rolled out\n`;
+  out += renderTier('function', containers.function);
+  if (containers.untiered.length) {
+    out += `\n\n### ⚠️ Untiered (${containers.untiered.length}) — missing \`tier\` field\n`;
+    out += renderTier('untiered', containers.untiered);
+  }
+
   out += `\n\n## Health & Issue Queue\n` + Object.entries(health).map(([r, h]) =>
     `- **${r}**: ${h.openIssues} open issue(s) · ${h.openPRs} open PR(s) · ${h.recentFailedRuns} recent failed run(s)${h.recentFailedRuns ? ' ⚠️' : ''}` +
     (h.armyTask.length ? `\n  - dispatched (agent-army-task, ${h.armyTask.length}, waiting pickup): ${h.armyTask.map((i) => `#${i.number}`).join(', ')}` : '') +

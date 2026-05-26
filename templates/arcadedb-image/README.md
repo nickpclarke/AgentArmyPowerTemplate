@@ -1,5 +1,7 @@
 # ArcadeDB image template
 
+> **Tier:** `platform` ([ARC-ADR-023](../../docs/decisions/ARC-ADR-023-container-tiering-strategy.md)) — has state, slow lifecycle, careful upgrades. Composed into the fleet via [`templates/local-stack`](../local-stack/).
+
 A **thin derived** ArcadeDB image: `FROM arcadedata/arcadedb:26.5.1` with the
 AgentArmy platform's opinions baked on top. It is **not** a fork or a from-source
 build — engine fixes still arrive by bumping the pinned base in the `Dockerfile`.

@@ -5,6 +5,7 @@
   "base": "python:3.12-slim",
   "description": "AgentArmy HTTP↔NATS event-bus bridge — inbound webhook receiver (HMAC-verified, CloudEvents v1.0) and outbound NATS-to-HTTP relay (JetStream push-consumer + retry/DLQ). One image, two modes (serve-inbound / relay-outbound). Realizes ARC-ADR-022 on top of middle-core's NATS JetStream + CloudEvents broker choice (ARC-ADR-001 / PR #73).",
   "owner": "hub template",
+  "tier": "function",
   "services": [
     {
       "name": "bridge",

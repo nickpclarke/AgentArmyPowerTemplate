@@ -1,5 +1,7 @@
 # Event-bridge — HTTP ↔ NATS + CloudEvents v1.0
 
+> **Tier:** `function` ([ARC-ADR-023](../../docs/decisions/ARC-ADR-023-container-tiering-strategy.md)) — small, stateless, independently rolled out. The reference function-tier container.
+
 An AgentArmy event-bus bridge in one image: an **inbound** webhook receiver
 (HMAC-verified, CloudEvents-wrapped, JetStream-published) and an **outbound**
 NATS-to-HTTP relay (JS push-consumer + retry + DLQ). Realizes

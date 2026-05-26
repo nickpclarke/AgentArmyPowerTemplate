@@ -116,12 +116,39 @@ human (or CI) runs one command and gets a proven-good stack or a clear failure.
   deploy/                    # ACA bicep + bootstrap + deploy.yml (optional)
 ```
 
+## Tiering (ARC-ADR-023)
+
+Every image declares which **tier** it belongs to. The tier governs lifecycle expectations, manifest shape, and rollout cadence — it's *the* placement question for a new container.
+
+| Tier | Lifecycle | Has state? | What lives here | `kind` (typical) |
+|---|---|---|---|---|
+| **`platform`** | Slow (days–months); careful upgrades | Yes | Databases, brokers, ontology stores, persistent caches | `single` (per-service); composed via `templates/local-stack/` |
+| **`application`** | Rolling deploys (hours–days) | No | One container per spoke (the spoke's main service) | `single` |
+| **`function`** | Fast (minutes); independently rolled out | No (or one-shot) | Small workers, sidecars, ontology jobs, micro-services | `single` |
+
+Declare the tier in the manifest:
+
+```jsonc
+{
+  "name": "agentarmy-event-bridge",
+  "kind": "single",
+  "tier": "function",  // ← required (recommended) on new manifests
+  ...
+}
+```
+
+The fleet-heartbeat reads this field to emit a tier-grouped container inventory; tier mismatches (e.g. a `platform`-tier image bundling app code, or an `application`-tier manifest with `kind: "multi-service"` and a database companion) get flagged as drift. See [ARC-ADR-023 — Fleet Container Tiering Strategy](decisions/ARC-ADR-023-container-tiering-strategy.md) for the rule and the anti-patterns.
+
 ## Reference instances
 
-| Image | `kind` | Doctor proves | Contract |
-|---|---|---|---|
-| [`templates/arcadedb-image`](https://github.com/nickpclarke/AgentArmy/tree/main/templates/arcadedb-image) | `single` | readiness, schema-stubs, MCP posture | upstream ArcadeDB API + cockpit prose (to formalize) |
-| **backend-core DBOS fusion** | `app+db` | readiness, durable-workflow, **crash-recovery** | Data API OpenAPI (`ARC-ADR-005`, `contract-provider.yml`) |
+| Image | `kind` | `tier` | Doctor proves | Contract |
+|---|---|---|---|---|
+| [`templates/arcadedb-image`](https://github.com/nickpclarke/AgentArmy/tree/main/templates/arcadedb-image) | `single` | `platform` | readiness, schema-stubs, MCP posture | upstream ArcadeDB API + cockpit prose (to formalize) |
+| [`templates/fuseki-ontology-image`](https://github.com/nickpclarke/AgentArmy/tree/main/templates/fuseki-ontology-image) | `single` | `platform` | readiness, SHACL sieve, KG emit | SPARQL + SHACL prose |
+| [`templates/event-bridge-image`](https://github.com/nickpclarke/AgentArmy/tree/main/templates/event-bridge-image) | `single` | `function` | readiness, HMAC-rejects-bad-sig, events-flowing | webhook-receiver OpenAPI + CloudEvents prose |
+| [`templates/local-stack`](https://github.com/nickpclarke/AgentArmy/tree/main/templates/local-stack) | _(compose only)_ | `platform` umbrella | 5/5 services healthy | composes the three platform images + Postgres + NATS |
+| [backend-core/image.json](https://github.com/nickpclarke/backend-core/blob/main/image.json) | `single` | `application` | readiness, ArcadeDB-reachable, Postgres-reachable | backend-core OpenAPI (`ARC-ADR-005`) |
+| [backend-core/llm-gateway/image.json](https://github.com/nickpclarke/backend-core/blob/main/llm-gateway/image.json) | `single` | `function` | readiness, `/v1/models` wired, unauth-rejected | LLM gateway OpenAPI (`ARC-ADR-021`) |
 
 ## Adding a new image
 

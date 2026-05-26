@@ -1,5 +1,7 @@
 # Fuseki super-image — the AgentArmy ontology pipeline
 
+> **Tier:** `platform` ([ARC-ADR-023](../../docs/decisions/ARC-ADR-023-container-tiering-strategy.md)) — has state (TDB2 store), slow lifecycle, careful upgrades. Composed into the fleet via [`templates/local-stack`](../local-stack/).
+
 An Apache Jena Fuseki 5 super-image built from **`eclipse-temurin:21-jre`** +
 the official **Apache Jena Fuseki** and **Jena** tarballs (no third-party image
 dependency), with the ontology toolchain baked on top: **Jena CLI** (`shacl`,

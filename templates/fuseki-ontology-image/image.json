@@ -5,6 +5,7 @@
   "base": "eclipse-temurin:21-jre",
   "description": "Apache Jena Fuseki 5 + the AgentArmy ontology toolchain, as one image: TDB2 store, Jena CLI (shacl/sparql/riot/tdb2.tdbloader), pyshacl + rdflib (Python), ROBOT (OBO workflow). Built from eclipse-temurin + the official Apache Jena tarballs (no third-party image dependency). Implements an ontology pipeline — a 'sieve' that accepts ONLY SHACL-conformant input and emits structures/knowledge-graphs via SPARQL CONSTRUCT. Realizes ARC-ADR-019 (Ontology + Reasoning Layer).",
   "owner": "hub template",
+  "tier": "platform",
   "services": [
     {
       "name": "fuseki",
