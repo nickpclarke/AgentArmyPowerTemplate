@@ -23,6 +23,7 @@ import { PORT, HOST, resolveBearerToken, CF_ACCESS_ISSUER } from "./config.mjs";
 import { TOOLS, findTool, INSTANCE, REGISTRY_SUMMARY } from "./registry.mjs";
 import { newAuditId, logCall, logSecurityEvent } from "./audit.mjs";
 import { verifyAccessJwt, authorizeByEmail, isCfAccessConfigured } from "./cfaccess.mjs";
+import { verifyEdgeJwt, resolveEdgePrincipal, isEdgeConfigured } from "./cfaccess-edge.mjs";
 import { takeAuthed, takeAnon, takeAuthFail } from "./ratelimit.mjs";
 import { loadAllTokens, verifyAgainstRegistry } from "./tokens.mjs";
 
@@ -40,24 +41,44 @@ resolveBearerToken();
 const TOKEN_REGISTRY = loadAllTokens();
 
 // ---------- auth ------------------------------------------------------------
-// Dual-auth, in priority order:
-//   1. Cloudflare Access JWT (preferred for cloud agents via claude.ai
-//      MCP connector OAuth flow). Verifies signature + iss/aud/exp/nbf,
-//      enforces email allowlist.
-//   2. Static bearer (legacy, for local-laptop Claude Code + curl tests).
-//      Constant-time compare against the KV-bootstrapped token.
+// Triple-auth, in priority order:
+//   1. CF Access EDGE JWT (`Cf-Access-Jwt-Assertion` header) — preferred
+//      for ANY request that came through CF Access enforcement. Injected
+//      by CF Access after it verified user/service-token auth at the edge.
+//      Carries identity (email for users, common_name for service tokens).
+//   2. CF Access SaaS JWT (`Authorization: Bearer <jwt>`) — legacy path
+//      for claude.ai MCP custom connector OAuth flow.
+//   3. Static bearer registry (`Authorization: Bearer <token>`) — local
+//      laptop debug + cloud agents using KV-stored tokens. Falling back
+//      here means request did NOT go through CF Access (i.e. localhost
+//      direct, or a future scenario).
 //
 // Returns { ok, principal } on success; { ok: false, reason } on failure.
-// `principal` is the verified caller identity for audit logging:
-//   - "cfaccess:<email>" for CF Access JWT
-//   - "bearer:static" for the legacy static token
 async function checkAuth(req) {
+  // 1) CF Access edge JWT — present iff CF Access fronted the request.
+  const edgeJwt = req.headers["cf-access-jwt-assertion"];
+  if (edgeJwt && isEdgeConfigured()) {
+    try {
+      const claims = await verifyEdgeJwt(edgeJwt);
+      const r = resolveEdgePrincipal(claims);
+      if (r.ok) return { ok: true, principal: r.principal };
+      return { ok: false, reason: r.reason };
+    } catch (e) {
+      // Edge JWT was present but failed — refuse outright (we know the
+      // request came through CF Access, so it should be valid). Do NOT
+      // fall through to bearer; that would let an attacker bypass edge
+      // enforcement by sending a malformed edge JWT alongside a valid
+      // bearer.
+      return { ok: false, reason: `edge JWT failed: ${e.message}` };
+    }
+  }
+
   const hdr = req.headers["authorization"];
   if (!hdr) return { ok: false, reason: "no authorization header" };
 
-  // Try CF Access JWT first (the OAuth-driven path). JWT tokens are much
-  // longer than our 48-char static bearer + carry a `.` separator, so we
-  // can cheaply detect them.
+  // 2) CF Access SaaS JWT (the OAuth-driven path for claude.ai). JWT
+  // tokens are much longer than our 48-char static bearer + carry a `.`
+  // separator, so we can cheaply detect them.
   if (isCfAccessConfigured()) {
     const m = hdr.match(/^Bearer\s+(.+)$/i);
     if (m && m[1].includes(".") && m[1].length > 80) {
@@ -69,13 +90,12 @@ async function checkAuth(req) {
         // Token LOOKED like a JWT but failed verification. Fall through to
         // static-bearer check — caller might still have a valid static token
         // they're passing alongside a malformed JWT, though uncommon.
-        // But surface the JWT error reason in case static fails too.
         var jwtReason = e.message || "JWT verify failed";
       }
     }
   }
 
-  // Bearer fallback — try every loaded token (legacy + per-agent).
+  // 3) Bearer fallback — try every loaded token (legacy + per-agent).
   // Returns the matched token's principal name so audit captures WHICH
   // cloud-agent identity authenticated. timingSafeEqual is per-compare.
   const tokenMatch = verifyAgainstRegistry(hdr, TOKEN_REGISTRY);

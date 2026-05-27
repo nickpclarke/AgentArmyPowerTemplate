@@ -55,6 +55,25 @@ export const CF_ACCESS_EMAIL_ALLOWLIST = (
   process.env.CF_ACCESS_EMAIL_ALLOWLIST || "nick@livecreative.com"
 ).split(",").map((s) => s.trim()).filter(Boolean);
 
+// ---- Cloudflare Access EDGE enforcement (Self-Hosted Application) -------
+// Different from the SaaS-app OIDC above. Here CF Access is configured as
+// an Access Application gating mcp.untool.ai/* — it enforces auth at the
+// edge and injects `Cf-Access-Jwt-Assertion` headers on forwarded requests.
+// We verify those JWTs in cfaccess-edge.mjs for defense-in-depth + identity.
+//
+// To enable:
+//   1. CF Zero Trust → Access → Applications → Add → Self-hosted
+//   2. Domain: mcp.untool.ai (or mcp.untool.ai/mcp* path-scoped)
+//   3. Note the application's AUD tag — set as CF_ACCESS_EDGE_APP_AUD env
+//      (or paste into the default below)
+//   4. Team domain is the same `untool.cloudflareaccess.com`
+export const CF_ACCESS_EDGE_TEAM_DOMAIN = process.env.CF_ACCESS_EDGE_TEAM_DOMAIN
+  || "untool.cloudflareaccess.com";
+// MUST be set before edge enforcement is meaningful — without it, any CF
+// Access user on the team domain could call us. Empty by default to keep
+// existing behavior while the CF dashboard side is being set up.
+export const CF_ACCESS_EDGE_APP_AUD = process.env.CF_ACCESS_EDGE_APP_AUD || "";
+
 // Azure CLI on Windows is `az.cmd` (a batch wrapper). Node 18+ refuses to
 // spawn .cmd/.bat directly (CVE-2024-27980); the workaround is to route
 // through cmd.exe explicitly. shell:false stays — no expansion of our args.
