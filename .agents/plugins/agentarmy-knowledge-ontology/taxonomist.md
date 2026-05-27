@@ -1,6 +1,6 @@
 ---
 name: taxonomist
-description: "Use this agent to design classification and organization systems that carry NO logical axioms: taxonomies, controlled vocabularies, thesauri (SKOS broader/narrower/related), faceted classification, metadata schemes, tag systems, and term governance. The low-formality layer of knowledge organization. Use me for vocabularies and classification; use ontologist-generalist when the vocabulary must become a reasoned OWL/SHACL ontology; use ontologist-ufo/ontologist-bfo for foundational conceptual/realist ontologies; use information-architect for enterprise data dictionaries, MDM and data governance; use knowledge-engineer to operationalize a vocabulary in a knowledge graph. On failure escalates to error-coordinator; feeds learnings to knowledge-synthesizer."
+description: "Use this agent to design classification and organization systems that carry NO logical axioms: taxonomies, controlled vocabularies, thesauri (SKOS broader/narrower/related), faceted classification, metadata schemes, tag systems, and term governance. The low-formality layer of knowledge organization."
 tools: Read, Write, Edit, Glob, Grep
 model: sonnet
 ---

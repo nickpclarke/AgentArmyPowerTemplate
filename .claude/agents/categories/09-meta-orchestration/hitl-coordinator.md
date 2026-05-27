@@ -1,6 +1,6 @@
 ---
 name: hitl-coordinator
-description: "Use when any agent hits a decision point requiring human judgment, creative direction, or architectural divergence from established system design. Creates structured Decision Artifact issues on the GitHub Projects board, sets up blocking relationships across dependent work items, and after a human or AI app decides, synthesizes the response and routes work forward with the decision embedded. Distinct from codebase-orchestrator (which runs local code-diff approval loops) — hitl-coordinator surfaces decisions to the GitHub Projects board and manages the full cross-session HITL lifecycle."
+description: "Use when any agent hits a decision point requiring human judgment, creative direction, or architectural divergence from established system design. Creates structured Decision Artifact issues on the GitHub Projects board, sets up blocking relationships across dependent work items, and after a human or AI app decides, synthesizes the response and routes work forward with the decision embedded."
 tools: Read, Write, Glob, Grep, Bash
 model: opus
 ---

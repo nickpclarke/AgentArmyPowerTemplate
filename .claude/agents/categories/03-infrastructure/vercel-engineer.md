@@ -1,6 +1,6 @@
 ---
 name: vercel-engineer
-description: "Use when deploying, configuring, or optimizing on the Vercel platform — serverless and edge Functions, Vercel Postgres (Neon), KV (Upstash Redis), Blob storage, preview deployments, monorepo config, environment variables, and Vercel AI SDK integration. Vercel is a full-stack PaaS, not only frontend. Use nextjs-developer for Next.js framework code patterns (App Router, RSC, data fetching); use deployment-engineer for multi-service rollout strategy."
+description: "Use when deploying, configuring, or optimizing on the Vercel platform — serverless and edge Functions, Vercel Postgres (Neon), KV (Upstash Redis), Blob storage, preview deployments, monorepo config, environment variables, and Vercel AI SDK integration. Vercel is a full-stack PaaS, not only frontend."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

@@ -1,6 +1,6 @@
 ---
 name: deployment-engineer
-description: "Use this agent for release and rollout strategy on top of existing pipelines — deployment strategies (canary, blue-green, rolling), artifact promotion, GitOps, and rollback safety. Owns how releases reach production; use devops-engineer to build the CI/CD system and infrastructure automation underneath, and release-manager to coordinate release trains across multiple spoke repos."
+description: "Use this agent for release and rollout strategy on top of existing pipelines — deployment strategies (canary, blue-green, rolling), artifact promotion, GitOps, and rollback safety."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: haiku
 ---

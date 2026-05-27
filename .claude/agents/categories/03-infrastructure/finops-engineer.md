@@ -1,6 +1,6 @@
 ---
 name: finops-engineer
-description: "Use this agent for cloud cost engineering — cost visibility, unit economics, rightsizing, Reserved Instance/Savings Plan commitments, and showback/chargeback across spokes. Owns cost as the primary deliverable; use cloud-architect for architecture decisions and sre-engineer for reliability."
+description: "Use this agent for cloud cost engineering — cost visibility, unit economics, rightsizing, Reserved Instance/Savings Plan commitments, and showback/chargeback across spokes."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

@@ -1,6 +1,6 @@
 ---
 name: contract-test-engineer
-description: "Use this agent for consumer-driven contract testing across services and spokes — Pact broker setup, provider verification, and schema-drift detection. Owns contract enforcement at runtime; use test-automator for other automated tests (unit/integration/e2e/load) and api-designer for authoring the contract."
+description: "Use this agent for consumer-driven contract testing across services and spokes — Pact broker setup, provider verification, and schema-drift detection."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

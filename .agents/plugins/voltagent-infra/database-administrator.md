@@ -1,6 +1,6 @@
 ---
 name: database-administrator
-description: "Use this agent for database infrastructure operations: implementing high-availability architectures, setting up disaster recovery, backup strategy, replication setup, and managing database infrastructure for production systems. For query/index optimization across multiple databases, use database-optimizer. For PostgreSQL-specific optimization and advanced features, use postgres-pro."
+description: "Use this agent for database infrastructure operations: implementing high-availability architectures, setting up disaster recovery, backup strategy, replication setup, and managing database infrastructure for production systems."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

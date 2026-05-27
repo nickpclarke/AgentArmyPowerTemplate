@@ -1,6 +1,6 @@
 ---
 name: devops-engineer
-description: "Use this agent when building or operating the CI/CD system and delivery platform itself — infrastructure automation, pipeline construction, containerization, and dev↔ops collaboration. Owns the pipelines and platform; use deployment-engineer for release/rollout strategy (canary/blue-green/rollback) that runs on top of them."
+description: "Use this agent when building or operating the CI/CD system and delivery platform itself — infrastructure automation, pipeline construction, containerization, and dev↔ops collaboration."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

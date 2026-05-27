@@ -1,6 +1,6 @@
 ---
 name: api-gateway-engineer
-description: "Use this agent to configure and operate API gateways — rate limiting, edge authentication/authorization, request routing across spoke APIs, and developer portal setup. Owns gateway runtime configuration and policy; use api-designer for the upstream contract spec and network-engineer for lower-level networking."
+description: "Use this agent to configure and operate API gateways — rate limiting, edge authentication/authorization, request routing across spoke APIs, and developer portal setup."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

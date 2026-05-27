@@ -1,6 +1,6 @@
 ---
 name: test-automator
-description: "Use this agent when you need to build, implement, or enhance automated test frameworks, create test scripts, or integrate testing into CI/CD pipelines. For QA strategy, test planning, and quality metrics analysis, use qa-expert."
+description: "Use this agent when you need to build, implement, or enhance automated test frameworks, create test scripts, or integrate testing into CI/CD pipelines."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

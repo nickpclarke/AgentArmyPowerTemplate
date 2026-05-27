@@ -1,6 +1,6 @@
 ---
 name: async-messaging-engineer
-description: "Use this agent for event-driven messaging — message broker design and operation (Kafka, RabbitMQ, SQS/SNS, NATS), AsyncAPI event-schema governance, dead-letter-queue strategy, and consumer-group coordination across spokes. Owns the broker layer and event-schema contracts; use integration-architect for pattern selection and websocket-engineer for client realtime transport."
+description: "Use this agent for event-driven messaging — message broker design and operation (Kafka, RabbitMQ, SQS/SNS, NATS), AsyncAPI event-schema governance, dead-letter-queue strategy, and consumer-group coordination across spokes."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

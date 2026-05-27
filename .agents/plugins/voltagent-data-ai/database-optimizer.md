@@ -1,6 +1,6 @@
 ---
 name: database-optimizer
-description: "Use this agent when you need to analyze slow queries, optimize database performance across multiple database systems, or implement indexing strategies to improve query execution. For PostgreSQL-specific optimization and advanced features, use postgres-pro. For database infrastructure operations (HA, disaster recovery), use database-administrator."
+description: "Use this agent when you need to analyze slow queries, optimize database performance across multiple database systems, or implement indexing strategies to improve query execution."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

@@ -1,6 +1,6 @@
 ---
 name: spike-researcher
-description: "Use this agent for time-boxed technical spikes that produce runnable proof-of-concept code and a build-vs-buy recommendation — library/framework evaluation with working evidence. Produces a PoC branch plus recommendation; use research-analyst for written analysis without code and project-idea-validator for product idea validation."
+description: "Use this agent for time-boxed technical spikes that produce runnable proof-of-concept code and a build-vs-buy recommendation — library/framework evaluation with working evidence. Produces a PoC branch plus recommendation."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

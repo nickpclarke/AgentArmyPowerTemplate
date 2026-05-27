@@ -1,6 +1,6 @@
 ---
 name: knowledge-engineer
-description: "Use this agent to operationalize ontologies into working knowledge systems: knowledge acquisition/elicitation, knowledge graph construction and population (entity/relation instantiation, identity resolution into the graph), rule systems (SWRL, SHACL-AF rules, Datalog/RIF), reasoner selection and execution (HermiT/ELK/Pellet), SPARQL query/inference design, and knowledge-base lifecycle/maintenance. I build and run the system from an ontology others designed. Use ontologist-generalist/ontologist-ufo/ontologist-bfo to DESIGN the ontology; use knowledge-synthesizer for agent-interaction/org learning (not domain KGs); use nlp-engineer for text extraction; use data-engineer for ETL pipelines. On failure escalates to error-coordinator; feeds learnings to knowledge-synthesizer."
+description: "Use this agent to operationalize ontologies into working knowledge systems: knowledge acquisition/elicitation, knowledge graph construction and population (entity/relation instantiation, identity resolution into the graph), rule systems (SWRL, SHACL-AF rules, Datalog/RIF), reasoner selection and execution (HermiT/ELK/Pellet), SPARQL query/inference design, and knowledge-base lifecycle/maintenance. I build and run the system from an ontology others designed."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

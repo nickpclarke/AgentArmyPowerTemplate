@@ -1,6 +1,6 @@
 ---
 name: schema-migration-engineer
-description: "Use this agent for database schema versioning and migration orchestration — Flyway/Liquibase/Alembic migrations, zero-downtime and contract-safe schema evolution across spokes. Owns the migration artifact lifecycle and execution; use database-administrator for database operations and tuning."
+description: "Use this agent for database schema versioning and migration orchestration — Flyway/Liquibase/Alembic migrations, zero-downtime and contract-safe schema evolution across spokes."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

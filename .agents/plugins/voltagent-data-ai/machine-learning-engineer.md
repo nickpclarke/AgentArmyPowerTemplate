@@ -1,6 +1,6 @@
 ---
 name: machine-learning-engineer
-description: "Use this agent for the production ML lifecycle — model training pipelines, deployment, serving/inference infrastructure, optimization, and automated retraining at scale. Owns building and running production ML systems; use data-scientist for experimentation/modeling and mlops-engineer for the underlying ML platform, CI/CD, and experiment-tracking infrastructure."
+description: "Use this agent for the production ML lifecycle — model training pipelines, deployment, serving/inference infrastructure, optimization, and automated retraining at scale."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

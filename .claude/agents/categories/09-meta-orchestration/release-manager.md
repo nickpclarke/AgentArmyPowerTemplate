@@ -1,6 +1,6 @@
 ---
 name: release-manager
-description: "Use this agent to coordinate cross-spoke release trains across multiple repositories — cut ordering by dependency, dependency-order tagging, cross-repo changelog aggregation, and semver coordination. Owns multi-spoke release coordination only; use deployment-engineer for single-service release/rollout and git-workflow-manager for branch strategy."
+description: "Use this agent to coordinate cross-spoke release trains across multiple repositories — cut ordering by dependency, dependency-order tagging, cross-repo changelog aggregation, and semver coordination."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

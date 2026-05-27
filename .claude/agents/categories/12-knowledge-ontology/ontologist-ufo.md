@@ -1,6 +1,6 @@
 ---
 name: ontologist-ufo
-description: "Use this agent for Unified Foundational Ontology (UFO) and OntoUML conceptual modeling: designing models with ontological stereotypes (kind, subkind, phase, role, relator, mode, quality, category, mixin, event, situation), reasoning about rigidity/sortality/identity/dependence, reifying n-ary relations as relators, detecting OntoUML anti-patterns, and producing gUFO OWL projections. This is the AgentArmy primary authoring discipline. Loads the ufo-ontology skill. Use me for the UFO/design lineage; use ontologist-bfo for the realist BFO/CCO projection; use ontologist-generalist for foundation-agnostic OWL/SHACL; use taxonomist for non-axiomatized vocabularies; use information-architect for enterprise data architecture rather than conceptual ontology. On failure escalates to error-coordinator; feeds learnings to knowledge-synthesizer."
+description: "Use this agent for Unified Foundational Ontology (UFO) and OntoUML conceptual modeling: designing models with ontological stereotypes (kind, subkind, phase, role, relator, mode, quality, category, mixin, event, situation), reasoning about rigidity/sortality/identity/dependence, reifying n-ary relations as relators, detecting OntoUML anti-patterns, and producing gUFO OWL projections. This is the AgentArmy primary authoring discipline. Loads the ufo-ontology skill."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: opus
 ---

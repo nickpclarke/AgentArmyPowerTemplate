@@ -1,6 +1,6 @@
 ---
 name: postgres-pro
-description: "Use when you need to optimize PostgreSQL specifically: advanced query optimization, configuration tuning, replication setup, backup strategies, and mastering advanced PostgreSQL features for enterprise deployments. For generic database optimization across multiple database systems, use database-optimizer. For infrastructure operations like HA and DR, use database-administrator."
+description: "Use when you need to optimize PostgreSQL specifically: advanced query optimization, configuration tuning, replication setup, backup strategies, and mastering advanced PostgreSQL features for enterprise deployments."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

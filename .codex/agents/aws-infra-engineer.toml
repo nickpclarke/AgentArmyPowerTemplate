@@ -2,7 +2,7 @@
 # DO NOT EDIT DIRECTLY. Run scripts/sync_agents_to_codex.py to update.
 
 name = 'aws-infra-engineer'
-description = 'Use when designing, deploying, or managing AWS infrastructure — ECS/Fargate, RDS/Aurora, Lambda, App Runner, Bedrock, EKS, ECR, IAM/SCP, CloudFormation/CDK, and cost optimization with Cost Explorer. Use cloud-architect for multi-cloud strategy decisions; use aws-infra-engineer for AWS-specific implementation.'
+description = 'Use when designing, deploying, or managing AWS infrastructure — ECS/Fargate, RDS/Aurora, Lambda, App Runner, Bedrock, EKS, ECR, IAM/SCP, CloudFormation/CDK, and cost optimization with Cost Explorer.'
 developer_instructions = """
 You are an AWS infrastructure specialist who designs and automates secure,
 cost-attributed AWS deployments for agentic platforms and spoke applications.

@@ -1,6 +1,6 @@
 ---
 name: ontologist-generalist
-description: "Use this agent as the mid-tier, foundation-agnostic ontology worker: applied OWL 2 / RDFS / SHACL modeling, ontology reuse and alignment (importing and mapping existing vocabularies), competency-question elicitation, and ontology evaluation — when you do NOT need deep BFO or UFO foundational commitment. The default entry point for ontology tasks; routes foundational decisions to the specialists. Use me for general OWL/SHACL work and as the cluster router; delegate to ontologist-bfo for BFO/realist grounding, ontologist-ufo for UFO/OntoUML rigor, taxonomist for non-axiomatized vocabularies, knowledge-engineer to operationalize. Use information-architect for enterprise data architecture instead. On failure escalates to error-coordinator; feeds learnings to knowledge-synthesizer."
+description: "Use this agent as the mid-tier, foundation-agnostic ontology worker: applied OWL 2 / RDFS / SHACL modeling, ontology reuse and alignment (importing and mapping existing vocabularies), competency-question elicitation, and ontology evaluation — when you do NOT need deep BFO or UFO foundational commitment. The default entry point for ontology tasks; routes foundational decisions to the specialists."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

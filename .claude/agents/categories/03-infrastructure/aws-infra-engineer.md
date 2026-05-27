@@ -1,6 +1,6 @@
 ---
 name: aws-infra-engineer
-description: "Use when designing, deploying, or managing AWS infrastructure — ECS/Fargate, RDS/Aurora, Lambda, App Runner, Bedrock, EKS, ECR, IAM/SCP, CloudFormation/CDK, and cost optimization with Cost Explorer. Use cloud-architect for multi-cloud strategy decisions; use aws-infra-engineer for AWS-specific implementation."
+description: "Use when designing, deploying, or managing AWS infrastructure — ECS/Fargate, RDS/Aurora, Lambda, App Runner, Bedrock, EKS, ECR, IAM/SCP, CloudFormation/CDK, and cost optimization with Cost Explorer."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

@@ -1,6 +1,6 @@
 ---
 name: gcp-infra-engineer
-description: "Use when designing, deploying, or managing Google Cloud Platform infrastructure — Cloud Run, GKE, Cloud SQL, Vertex AI, IAM, Artifact Registry, Cloud Build, and Terraform for GCP. Use cloud-architect for multi-cloud strategy decisions; use gcp-infra-engineer for GCP-specific implementation."
+description: "Use when designing, deploying, or managing Google Cloud Platform infrastructure — Cloud Run, GKE, Cloud SQL, Vertex AI, IAM, Artifact Registry, Cloud Build, and Terraform for GCP."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

@@ -1,6 +1,6 @@
 ---
 name: developer-advocate
-description: "Use this agent to drive external developer adoption — sample applications, external-audience tutorials, community engagement, and developer-feedback loops back to product. Owns adoption and community; use technical-writer for reference documentation, documentation-engineer for the docs toolchain, and content-marketer for marketing funnels."
+description: "Use this agent to drive external developer adoption — sample applications, external-audience tutorials, community engagement, and developer-feedback loops back to product."
 tools: Read, Write, Edit, Glob, Grep, WebFetch, WebSearch
 model: sonnet
 ---

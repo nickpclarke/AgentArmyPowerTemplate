@@ -1,6 +1,6 @@
 ---
 name: feature-flag-engineer
-description: "Use this agent for feature flag and progressive delivery engineering — flag strategy, targeting and lifecycle management, kill switches, and flag-debt cleanup. Owns flag definitions, targeting, and lifecycle; use deployment-engineer for the deployment strategy (canary percentages, ring rollouts) that flags enable."
+description: "Use this agent for feature flag and progressive delivery engineering — flag strategy, targeting and lifecycle management, kill switches, and flag-debt cleanup."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

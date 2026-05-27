@@ -1,6 +1,6 @@
 ---
 name: mobile-app-developer
-description: "Use this agent when developing native iOS and Android applications or making platform-specific mobile strategy decisions. For cross-platform mobile applications using React Native or Flutter where code sharing exceeds 80%, use mobile-developer."
+description: "Use this agent when developing native iOS and Android applications or making platform-specific mobile strategy decisions."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

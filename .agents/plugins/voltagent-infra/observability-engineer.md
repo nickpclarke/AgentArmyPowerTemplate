@@ -1,6 +1,6 @@
 ---
 name: observability-engineer
-description: "Use this agent when instrumenting applications and services for telemetry — OpenTelemetry instrumentation, metrics/logs/traces pipelines, collector configuration, and Prometheus/Grafana dashboards. Owns producing observability data; use sre-engineer for SLOs and error budgets that consume it, and performance-engineer to diagnose bottlenecks from it."
+description: "Use this agent when instrumenting applications and services for telemetry — OpenTelemetry instrumentation, metrics/logs/traces pipelines, collector configuration, and Prometheus/Grafana dashboards."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

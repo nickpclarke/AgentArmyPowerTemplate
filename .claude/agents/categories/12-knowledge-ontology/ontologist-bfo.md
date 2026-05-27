@@ -1,6 +1,6 @@
 ---
 name: ontologist-bfo
-description: "Use this agent for Basic Formal Ontology (BFO 2020, ISO/IEC 21838-2) work: classifying entities as continuant vs occurrent, authoring OBO-Foundry-style ontologies with Aristotelian definitions and single inheritance, reusing RO/IAO/PATO/CCO, and producing the realist BFO/CCO interop projection (e.g. for IKW-GraphEngine). Loads the bfo-ontology skill. Use me for the BFO/realist lineage; use ontologist-ufo for UFO/OntoUML conceptual modeling; use ontologist-generalist for foundation-agnostic OWL/SHACL; use taxonomist for non-axiomatized vocabularies; use information-architect for enterprise data architecture (CDM/LDM/PDM, MDM, DAMA governance) rather than formal ontology. On failure escalates to error-coordinator; feeds learnings to knowledge-synthesizer."
+description: "Use this agent for Basic Formal Ontology (BFO 2020, ISO/IEC 21838-2) work: classifying entities as continuant vs occurrent, authoring OBO-Foundry-style ontologies with Aristotelian definitions and single inheritance, reusing RO/IAO/PATO/CCO, and producing the realist BFO/CCO interop projection (e.g. for IKW-GraphEngine). Loads the bfo-ontology skill."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: opus
 ---
