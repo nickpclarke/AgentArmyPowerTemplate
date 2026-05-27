@@ -1,6 +1,10 @@
 # Personal Claude Code settings — contains API keys and permissions
 .claude/settings.local.json
 .codex/config.local.toml
+# Codex spawns per-agent worktrees here — never meant to be tracked. Without
+# this rule, `git status --porcelain` sees them as untracked and tools that
+# enforce "clean working tree" (e.g. fleet_deploy) refuse to proceed.
+.codex/worktrees/
 
 # Obsidian vault (in-repo Labs surface): track the note content, not per-user
 # app state or the deleted-notes trash (the latter can recurse and blow MAX_PATH).
