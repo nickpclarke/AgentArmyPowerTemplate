@@ -182,7 +182,8 @@ It runs three ways: the **SessionStart hook** (dry-run, every local session), a 
 | Enterprise security (Zero Trust, FedRAMP) | `security-architect` |
 | IDP, Team Topologies, platform design | `platform-architect` |
 | FISMA, HIPAA, CMMC, SOX, CCPA | `us-regulatory-architect` |
-| Architecture Decision Records | `/ea-adr` skill |
+| Architecture Decision Records (new ADR draft) | `/ea-adr` skill → `togaf-adm-advisor` |
+| ADR review / second-opinion on existing decisions | `/ea-adr review …` → `architect-reviewer` |
 
 ### Meta-Planning & Governance (ARMY_PRINCIPLES)
 
