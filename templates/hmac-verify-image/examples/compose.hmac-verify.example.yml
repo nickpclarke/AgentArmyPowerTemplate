@@ -1,0 +1,51 @@
+# Example local compose for the AgentArmy hmac-verify sidecar.
+#
+# Two services:
+#   - hmac-verify    : the sidecar image we just built
+#   - echo-upstream  : a tiny stdlib HTTP recorder so the doctor can prove
+#                      "accepts-good-sig" actually forwarded the request.
+#                      In a real deployment, UPSTREAM_URL points at the
+#                      spoke this sidecar fronts (e.g. backend-core).
+#
+# The doctor (scripts/hmac-doctor.sh) runs against :8083 and inspects
+# :8085/last to assert proxying happened.
+services:
+  hmac-verify:
+    container_name: hmac-verify
+    build: ..
+    image: agentarmy-hmac-verify:local
+    environment:
+      PROVIDER: ${PROVIDER:-github}
+      HMAC_SECRET: ${HMAC_SECRET:-doctor-secret}
+      UPSTREAM_URL: ${UPSTREAM_URL:-http://echo-upstream:8085/webhook}
+      REPLAY_TTL_SECONDS: ${REPLAY_TTL_SECONDS:-300}
+      HMAC_PORT: "8083"
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "8083:8083"
+    depends_on:
+      echo-upstream:
+        condition: service_healthy
+    healthcheck:
+      # /livez is cheap + safe — doesn't require the upstream to be up.
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8083/livez >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 2s
+
+  echo-upstream:
+    container_name: hmac-echo-upstream
+    image: agentarmy-hmac-verify:local
+    # Reuse the same image — the echo server is stdlib-only so no extra deps.
+    command: ["python", "/opt/agentarmy/scripts/echo-upstream.py"]
+    environment:
+      ECHO_PORT: "8085"
+    ports:
+      - "8085:8085"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8085/livez >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 2s
