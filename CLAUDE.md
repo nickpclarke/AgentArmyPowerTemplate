@@ -106,89 +106,20 @@ It runs three ways: the **SessionStart hook** (dry-run, every local session), a 
 
 ### Route work to the right army first, then the right agent
 
-**Copilot army** — apply label and let automation handle it:
+**Copilot army:** apply a label and let automation handle it — `copilot-task` (Size XS/S Bug/Story) creates a branch + PR; PRs get auto-review; board questions use `@board-manager` in Copilot Chat.
 
-| Trigger | Label | Copilot does |
-|---|---|---|
-| Bug or Story, Size XS/S | `copilot-task` | Creates branch, implements, opens PR |
-| Any PR | (automatic) | Inline first-pass review |
-| Board question | `@board-manager` in Copilot Chat | Queries board, returns status |
+**Claude Code army:** delegate to the right specialist. The **full concern→agent table, cross-cutting clusters (contract / delivery-ops / knowledge / data-vault), and TOGAF EA specialist roster** live in [docs/agent-routing.md](docs/agent-routing.md) — load that doc when you need to pick an agent. The behavioral rules below are what live in this file.
 
-**Claude Code army** — delegate to the right specialist:
+**Cluster anchors** (use these when scoping a task, then pick the specific agent from agent-routing.md):
 
-| Concern | Agent |
-|---|---|
-| Requirements / user stories | `business-analyst` |
-| Architecture decisions | `architect-reviewer` |
-| Sprint / PI planning | `scrum-master` |
-| Frontend implementation | `frontend-developer` (greenfield / multi-framework), `react-specialist` (existing React optimization) |
-| Frontend: Language-level | `javascript-pro`, `typescript-pro` |
-| Frontend: Mobile/responsive | `mobile-web-specialist`, `mobile-developer` (cross-platform) |
-| Backend implementation | See **Language Specialists Routing Rules** (below) |
-| Backend: Language-level | `python-pro`, `golang-pro`, `rust-engineer`, `java-architect`, etc. (see category 02) |
-| Deep code review (large PRs, `needs-deep-review` label) | `/review-pr` skill |
-| Security audit | `security-auditor` or `/security-review` skill |
-| Agent hits decision point requiring human judgment | `hitl-coordinator` |
-| Creative/architectural divergence needs human input | `hitl-coordinator` |
-| Surfacing decision artifacts to GitHub Projects board | `hitl-coordinator` |
-| Agent governance / MECE validation | `agent-distinctiveness-advocate` (pre-merge agent onboarding, routing ambiguity diagnosis) |
-| GCP infrastructure (Cloud Run, Cloud SQL, GKE, Vertex AI, IAM, Cloud Build) | `gcp-infra-engineer` |
-| AWS infrastructure (Fargate, RDS, Bedrock, EKS, CDK/CloudFormation, IAM/SCP) | `aws-infra-engineer` |
-| Azure infrastructure (Container Apps, Bicep, Entra ID, Azure OpenAI) | `azure-infra-engineer` |
-| Vercel platform (Functions, Postgres/KV/Blob, edge middleware, monorepo, AI SDK) | `vercel-engineer` |
-| Multi-cloud strategy, provider selection, landing zone design | `cloud-architect` |
-| Cloud provider / stack choice guide | See [docs/cloud-serving.md](docs/cloud-serving.md) |
-| CI/CD system & infra automation | `devops-engineer` (builds/operates pipelines, containerization, infra automation) |
-| Release & rollout strategy (single service) | `deployment-engineer` (canary/blue-green/rollback, artifact promotion, GitOps) |
-| Cross-spoke release trains | `release-manager` (dependency-order cut & tagging, cross-repo changelog aggregation) |
-| Reliability & SLOs | `sre-engineer` (error budgets, toil reduction, reliability culture) |
-| Telemetry & instrumentation | `observability-engineer` (OpenTelemetry, metrics/logs/traces pipelines, Grafana/Prometheus) |
-| Inspect/manage operator's local docker fleet (logs, restart, build, deploy) | **untool fleet suite** — `mcp__local-fleet__fleet_*` tools (see [Cloud-agent control plane](#cloud-agent-control-plane--toolsmcp-local-fleet)). Read-only (`fleet_ps` / `fleet_inspect` / `fleet_logs`) auto-approvable; write tools (`fleet_up` / `fleet_down` / `fleet_restart` / `fleet_build` / `fleet_deploy`) require per-call approval — they execute arbitrary code in the operator's docker host. |
-| Cloud cost / FinOps | `finops-engineer` (cost visibility, unit economics, rightsizing, commitments) |
-| API gateway & edge policy | `api-gateway-engineer` (rate limiting, edge authN/Z, routing across spoke APIs) |
-| Performance | `performance-engineer` (diagnose bottlenecks across any layer) |
-| Feature flags & progressive delivery | `feature-flag-engineer` (targeting, lifecycle, kill switches, flag-debt) |
-| Event-driven messaging | `async-messaging-engineer` (Kafka/RabbitMQ/SQS-SNS/NATS, AsyncAPI schemas, DLQ) |
-| Contract testing across spokes | `contract-test-engineer` (Pact, provider verification, schema-drift) |
-| DB schema migrations | `schema-migration-engineer` (Flyway/Liquibase/Alembic, zero-downtime evolution) |
-| Data pipeline work (dlt, ELT, connectors) | `dlt-engineer` (source → destination, incremental loading, schema evolution) |
-| Data analysis & modeling | `data-analyst`, `data-scientist`, `data-engineer` |
-| Data Vault 2.1 strategy (raw vs business, hash algo, identity, materialization) | `data-vault-architect` (the "what and why" layer; loads [docs/data-vault/strategy.md](docs/data-vault/strategy.md)) |
-| Data Vault 2.1 logical model (hubs / links / sats / refs / multi-active / effectivity) | `data-vault-modeler` (the "what shape" layer; outputs YAML against `tools/data-vault/model.schema.json`) |
-| Data Vault 2.1 build & load (Datavault4dbt, hash keys/diffs, PIT/bridge, info marts) | `data-vault-engineer` (the "load and serve" layer; uses `tools/data-vault/` toolkit) |
-| Production ML lifecycle | `machine-learning-engineer` (training pipelines, serving, retraining); `mlops-engineer` (ML platform/CI-CD) |
-| UFO/OntoUML conceptual modeling (primary authoring) | `ontologist-ufo` (stereotypes, relators, anti-patterns, gUFO OWL — loads `ufo-ontology` skill) |
-| BFO 2020 / OBO / CCO realist ontology + interop projection | `ontologist-bfo` (continuant/occurrent, Aristotelian defs, BFO/CCO sidecar — loads `bfo-ontology` skill) |
-| Applied OWL/RDFS/SHACL, ontology reuse & alignment, competency questions | `ontologist-generalist` (foundation-agnostic mid-tier + cluster router) |
-| Knowledge graph construction, rules, reasoners, SPARQL, KB lifecycle | `knowledge-engineer` (operationalizes ontologies into running systems) |
-| Taxonomies, thesauri, SKOS, controlled vocabularies, facets | `taxonomist` (non-axiomatized knowledge organization) |
-| Technical spike / build-vs-buy PoC | `spike-researcher` (time-boxed, runnable PoC + recommendation) |
-| Developer adoption / DevRel | `developer-advocate` (sample apps, external tutorials, community) |
+- **Contract cluster:** `api-designer` → `contract-test-engineer` → `schema-migration-engineer`.
+- **Delivery/ops cluster:** `devops-engineer` → `deployment-engineer` → `release-manager` → `observability-engineer` → `sre-engineer` → `finops-engineer` → `api-gateway-engineer`.
+- **Knowledge/ontology cluster** (formality gradient): `taxonomist` → `ontologist-generalist` → `ontologist-ufo` / `ontologist-bfo` → `knowledge-engineer`. See [.claude/agents/categories/12-knowledge-ontology/README.md](.claude/agents/categories/12-knowledge-ontology/README.md).
+- **Data Vault cluster** (lifecycle): `data-vault-architect` → `data-vault-modeler` → `data-vault-engineer`. Anchor: [ARC-ADR-026](docs/decisions/ARC-ADR-026-data-vault-2-1-methodology.md). Strategy: [docs/data-vault/](docs/data-vault/).
 
-**Cross-cutting routing clusters** (pick by lifecycle stage, not by keyword overlap):
+**HITL escalation:** when an agent hits a creative fork or judgment call beyond its authority, route to `hitl-coordinator` (creates a Decision Artifact on the board). See HITL Decision Pattern below.
 
-- **Contract cluster:** `api-designer` (design the contract) → `contract-test-engineer` (enforce it at runtime/CI across spokes) → `schema-migration-engineer` (evolve the DB behind it safely).
-- **Delivery/ops cluster:** `devops-engineer` (build & operate CI/CD + infra) → `deployment-engineer` (release/rollout strategy for one service) → `release-manager` (coordinate release trains across spoke repos) → `observability-engineer` (produce telemetry) → `sre-engineer` (consume it for SLOs/error budgets) → `finops-engineer` (govern cost) → `api-gateway-engineer` (edge policy).
-- **Knowledge/ontology cluster** (formality gradient): `taxonomist` (SKOS/taxonomies, no axioms) → `ontologist-generalist` (applied OWL/SHACL + cluster router) → `ontologist-ufo` / `ontologist-bfo` (foundational: UFO-design vs BFO-realist, *coordinating* on the dual projection) → `knowledge-engineer` (populate, reason, query). Distinct from `information-architect` (enterprise data architecture/governance) and `knowledge-synthesizer` (agent-interaction learning). See [.claude/agents/categories/12-knowledge-ontology/README.md](.claude/agents/categories/12-knowledge-ontology/README.md).
-- **Data Vault cluster** (lifecycle): `data-vault-architect` (raw vs business placement, identity strategy, materialization choice) → `data-vault-modeler` (hubs / links / sats / refs in YAML against `tools/data-vault/model.schema.json`) → `data-vault-engineer` (Datavault4dbt loaders, hash keys via `tools/data-vault/hash.{mjs,py}`, PIT/bridge, marts). Sits *downstream* of the [canonical data model contract](docs/decisions/ARC-ADR-009-canonical-data-model-arrow.md), *upstream* of marts. Distinct from `data-engineer` (pipeline architecture), `dlt-engineer` (source ingestion), `information-architect` (enterprise data governance), and `schema-migration-engineer` (DDL evolution). Anchor decision: [ARC-ADR-026](docs/decisions/ARC-ADR-026-data-vault-2-1-methodology.md). Full strategy: [docs/data-vault/](docs/data-vault/).
-
-**Enterprise Architecture specialists** — TOGAF ADM-aligned:
-
-| Concern | Agent |
-|---|---|
-| Architecture program (all phases) | `enterprise-architect` |
-| TOGAF ADM phase guidance / artifacts | `togaf-adm-advisor` |
-| Strategic positioning, Wardley maps | `wardley-strategist` or `/wardley` |
-| Business capabilities, value streams | `business-architect` or `/capability-map` |
-| Capability investment prioritization | `capability-planner` |
-| Solution architecture, vendor selection | `solution-architect` |
-| Data / information architecture | `information-architect` |
-| API strategy, integration patterns | `integration-architect` |
-| Enterprise security (Zero Trust, FedRAMP) | `security-architect` |
-| IDP, Team Topologies, platform design | `platform-architect` |
-| FISMA, HIPAA, CMMC, SOX, CCPA | `us-regulatory-architect` |
-| Architecture Decision Records (new ADR draft) | `/ea-adr` skill → `togaf-adm-advisor` |
-| ADR review / second-opinion on existing decisions | `/ea-adr review …` → `architect-reviewer` |
+**Local docker fleet:** use the **untool fleet suite** (`mcp__local-fleet__fleet_*`). Read-only tools (`fleet_ps` / `fleet_inspect` / `fleet_logs`) are auto-approvable; write tools (`fleet_up` / `fleet_down` / `fleet_restart` / `fleet_build` / `fleet_deploy`) require per-call approval — they execute arbitrary code in the operator's docker host. See [tools/mcp-local-fleet/README.md](tools/mcp-local-fleet/README.md).
 
 ### Meta-Planning & Governance (ARMY_PRINCIPLES)
 
@@ -216,27 +147,9 @@ The agent army operates under **7 foundational principles** defined in `/plannin
 
 ### Language Specialists Routing Rules (Category 02)
 
-**The three tiers** for language work (structured for MECE distinctiveness):
+Four tiers: **Languages/** (idioms, type system, runtime), **Frameworks/web/** (app with a web framework + ORM), **Frameworks/mobile/** (React Native / Flutter), **Platforms/** (version-pinned .NET, OS-bound PowerShell). Pick **Languages** for language semantics and **Frameworks** for app-with-framework work — chain both when needed (e.g. `python-pro` design → `fastapi-developer` implementation).
 
-| Tier | When to Use | Example Agents |
-|------|---|---|
-| **Languages/** | Need language idioms, type system, performance, runtime semantics | `python-pro`, `golang-pro`, `typescript-pro`, `rust-engineer`, `java-architect` |
-| **Frameworks/web/** | Building an app WITH a web framework (conventions, libraries, ORM) | `django-developer`, `fastapi-developer`, `react-specialist`, `nextjs-developer`, `rails-expert` |
-| **Frameworks/mobile/** | Building a mobile app (React Native, Flutter) | `expo-react-native-expert`, `flutter-expert` |
-| **Platforms/** | Version-pinned (.NET versions) or OS-bound work (Windows automation) | `dotnet-core-expert`, `dotnet-framework-4.8-expert`, `powershell-7-expert` |
-
-**Quick decision rule:**
-- "Build a REST API in Python" → `python-pro` (design) → `fastapi-developer` (framework implementation)
-- "Optimize React component perf" → `react-specialist`
-- "Debug async/await issue" → `javascript-pro` or `typescript-pro`
-- "Migrate to .NET Core" → `dotnet-framework-4.8-expert` → `dotnet-core-expert`
-
-**Full routing guide & tie-breakers:** See [.claude/agents/categories/02-language-specialists/TAXONOMY.md](.claude/agents/categories/02-language-specialists/TAXONOMY.md) for:
-- 15+ concrete examples (framework vs. language decision)
-- Edge case handling (JavaScript/TypeScript, .NET versions, PowerShell, mobile)
-- Escalation patterns (when to involve multiple agents)
-
-Full roster: [docs/agents.md](docs/agents.md) | Language routing: [TAXONOMY.md](.claude/agents/categories/02-language-specialists/TAXONOMY.md) | Copilot setup: [docs/copilot.md](docs/copilot.md)
+Full tier table, 15+ concrete examples, tie-breakers, and edge cases (JS/TS, .NET versions, mobile): [.claude/agents/categories/02-language-specialists/TAXONOMY.md](.claude/agents/categories/02-language-specialists/TAXONOMY.md). Full agent roster: [docs/agents.md](docs/agents.md). Copilot setup: [docs/copilot.md](docs/copilot.md).
 
 ### Issue type conventions
 
@@ -331,57 +244,18 @@ node tools/tunnel.mjs stop                # kill agent, clear state
 
 ## Cloud-agent control plane — `tools/mcp-local-fleet/`
 
-A small MCP server that lets cloud agents (Claude.ai routines, GitHub Actions, remote API callers) **observe and — eventually — drive the local Docker fleet** without ever exposing the Docker socket directly. Read the Labs note [`Cloud Agents → Local Docker — Control Plane Plan`](obsidian/labs/AgentArmyLabs/Cloud%20Agents%20%E2%86%92%20Local%20Docker%20%E2%80%94%20Control%20Plane%20Plan.md) for the architecture rationale.
+A small MCP server that lets cloud agents (Claude.ai routines, GitHub Actions, remote API callers) **observe and drive the local Docker fleet** without exposing the Docker socket. Bound to `127.0.0.1:8765`; public access is via `mcp.untool.ai` behind **CF Access service tokens** (`CF-Access-Client-Id` + `CF-Access-Client-Secret` headers). Eight tools, snake_case: `fleet_ps` / `fleet_inspect` / `fleet_logs` (read-only, auto-approve) and `fleet_up` / `fleet_down` / `fleet_restart` / `fleet_build` / `fleet_deploy` (write, per-call approval).
 
-```bash
-node tools/mcp-local-fleet/server.mjs       # starts on 127.0.0.1:8765, first run generates+stores token in KV
-node tools/tunnel.mjs start --name mcp      # expose the server publicly so cloud agents can reach it
-node tools/tunnel.mjs url --name mcp        # → https://<random>.trycloudflare.com (give this to your cloud agent)
-```
+**Key invariants** (enforced in code, do not relax):
+- Loopback bind only; public exposure requires explicit tunnel.
+- Allowlisted service names only — no arbitrary container spawn; no shell-exec tool.
+- CF Access JWT verified server-side (defense-in-depth); legacy bearer accepted on loopback only.
+- Every call audited to `tools/logs/mcp-audit.log.YYYY-MM-DD` with redacted args + edge principal.
+- Tool names MUST match `[a-zA-Z0-9_-]` — Claude Code's MCP client silently drops dotted names (`claude mcp list` shows 0 tools).
 
-**Authentication (LIVE — CF Access edge enforcement on `mcp.untool.ai/*`):** the canonical auth for **cloud** consumers is **CF Access service tokens** — send `CF-Access-Client-Id` + `CF-Access-Client-Secret` headers. CF Access enforces auth at the Cloudflare edge; unauthenticated requests never reach the server. Service-token credentials live in KV `akv01-agentarmy` as paired secrets `cf-access-svc-<consumer>-id` / `cf-access-svc-<consumer>-secret` (one pair per cloud agent identity; revoke a single consumer by deleting its CF Access service token in the Zero Trust dashboard). Inside the server we verify the `Cf-Access-Jwt-Assertion` header CF Access injects (defense-in-depth) and attribute every call to `cfaccess-edge:service:<common-name>` in the audit log. The legacy bearer registry (KV `local-fleet-mcp-token-*` + `local-fleet-mcp-key`) is still accepted on **loopback only** — useful for local dev with `127.0.0.1:8765`; refused at the edge. One endpoint: `POST /mcp` speaking JSON-RPC 2.0. **Scope is intentionally docker-only**: the MCP exists so cloud action runners can build/run images against the local `templates/local-stack/docker-compose.yml`. Tools registered today (8 total, all real — no stubs):
+**Full reference** — server architecture, deployment target labels, full tool table, consumer-setup recipes, per-consumer service-token provisioning, and the Labs design note: [tools/mcp-local-fleet/README.md](tools/mcp-local-fleet/README.md) and [tools/mcp-local-fleet/AUTOMATION.md](tools/mcp-local-fleet/AUTOMATION.md).
 
-**Deployment target labels.** Tools are universal docker primitives; the *server instance* carries a `MCP_TARGET` label (default `local-home`) that cloud agents see in `serverInfo._meta.target` and per-tool `_meta.target`. Same code, different label → different server. Today's only instance is `local-home` (the operator's office PC, reached via `mcp.untool.ai`). Planned: `local-runner`, `dev-cloud`, `test-cloud`, `prod-edge`. See [tools/mcp-local-fleet/README.md](tools/mcp-local-fleet/README.md) for the full taxonomy.
-
-| Tool | Phase | Risk | What it does |
-|---|---|---|---|
-| `fleet_ps` | 1 | low | List allowlisted platform containers and their state |
-| `fleet_inspect` | 1 | low | Image / status / ports / env-key-names for one container (values redacted) |
-| `fleet_logs` | 1 | low | `docker logs <ctr>` for one allowlisted service. Substring grep + level filter. Refuses non-docker spoke names. |
-| `fleet_up` | 2 | med | `compose up -d --no-build <svc>` |
-| `fleet_down` | 2 | med | `compose stop` + `compose rm -f` (volumes preserved; platform tier is stateful) |
-| `fleet_restart` | 2 | med | `compose restart <svc>` |
-| `fleet_build` | 3 | high | `compose build [--no-cache] <svc>`. Single in-flight build per service (mutex). |
-| `fleet_deploy` | 4 | high | `git fetch + checkout + compose build + restart` in one call. Refuses if hub working tree is dirty. Strict refname validation (no argv flag smuggling). |
-
-> **Tool-name gotcha** for future MCP servers: tool names MUST match `[a-zA-Z0-9_-]`. Dots are allowed by the MCP spec but Claude Code's MCP client silently drops them, so `claude mcp list` shows `✓ Connected` with 0 tools. Use snake_case.
-
-**Consumer setup** — one `mcpServers` entry that works in both contexts via env-var substitution. CF Access headers are used when reaching the public edge; bearer is used on loopback.
-
-```jsonc
-"local-fleet": {
-  "type": "http",
-  "url": "${LOCAL_FLEET_MCP_URL:-http://127.0.0.1:8765/mcp}",
-  "headers": {
-    "Authorization":           "Bearer ${LOCAL_FLEET_MCP_TOKEN}",
-    "CF-Access-Client-Id":     "${CF_ACCESS_CLIENT_ID}",
-    "CF-Access-Client-Secret": "${CF_ACCESS_CLIENT_SECRET}"
-  }
-}
-```
-
-- **Cloud microVM (claude.yml / Copilot / claude.ai routine)**: bootstrap exports `LOCAL_FLEET_MCP_URL=https://mcp.untool.ai/mcp` + `CF_ACCESS_CLIENT_ID` + `CF_ACCESS_CLIENT_SECRET` from the consumer's secret store before `claude` starts. The empty `LOCAL_FLEET_MCP_TOKEN` is harmless — CF Access ignores it. Each consumer gets its OWN service-token pair so the audit log attributes calls per-identity, and revoking one consumer doesn't affect others.
-- **Local laptop**: default URL is `127.0.0.1:8765`; bearer token goes in `.claude/settings.local.json` env block (gitignored). CF Access headers are unset → ignored on loopback.
-- **Provisioning a new cloud consumer**: Zero Trust dashboard → Access → Service Auth → Create service token (1y TTL) → copy Client ID + Client Secret → `az keyvault secret set --vault-name akv01-agentarmy --name cf-access-svc-<consumer>-id --value "<id>"` (and `-secret`). Then ensure the consumer's bootstrap reads them at process start. See `tools/mcp-local-fleet/AUTOMATION.md` for the per-consumer-type recipes.
-
-**Hard rules** (enforced in code):
-- Bound to `127.0.0.1` only; never `0.0.0.0`. Public exposure requires the explicit `tunnel.mjs --name mcp` step.
-- Constant-time bearer comparison; no token in any log line ever; `--grep`/`--level` are substring matches (not regex — kills the ReDoS surface).
-- **Allowlisted service names** only — cloud agents can't ask us to spawn arbitrary containers.
-- **No shell-exec tool** — capability gaps become hub issues, not escape hatches.
-- Every call audited to `tools/logs/mcp-audit.log.YYYY-MM-DD` with audit-id, duration, redacted args, remote IP.
-
-**Platform containers are visible to `tail.mjs` too** — `node tools/tail.mjs spawn --service arcadedb` attaches to `docker logs --follow agentarmy-arcadedb` and writes the same NDJSON pipeline. So the same `query` commands work whether the service is a local Node process or a Docker container — "container console" is the OS-level fallback if everything else breaks.
+Platform containers are also visible to `tail.mjs` (`node tools/tail.mjs spawn --service arcadedb` → `docker logs --follow` into the same NDJSON pipeline).
 
 ## SAFE Workflow Summary
 
