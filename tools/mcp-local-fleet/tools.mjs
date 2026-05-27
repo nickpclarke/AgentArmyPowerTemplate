@@ -121,6 +121,27 @@ async function inspect({ service }) {
   }
 }
 
+// Batch read: inspect every platform service in one call so clients with
+// per-call permission prompts (claude.ai mobile/web) need to approve once
+// instead of N times. Per-service failures are contained — a missing
+// container becomes an `{error: ...}` entry, not a thrown exception.
+// `services` lets the caller narrow to a subset if they want.
+async function inspect_all({ services = null } = {}) {
+  const targets = (Array.isArray(services) && services.length > 0)
+    ? services
+    : Object.entries(ALLOWED_SERVICES)
+        .filter(([, svc]) => svc.tier === "platform")
+        .map(([name]) => name);
+  const results = await Promise.all(targets.map(async (name) => {
+    try {
+      return [name, await inspect({ service: name })];
+    } catch (e) {
+      return [name, { service: name, error: String(e.message || e).slice(0, 240) }];
+    }
+  }));
+  return { services: Object.fromEntries(results) };
+}
+
 async function logs({ service, since = "5m", grep = null, level = null, limit = 100 } = {}) {
   const svc = assertDockerService(service);
   const { stdout } = await execFileP("docker", [
@@ -397,6 +418,22 @@ export const TOOLS = [
     inputSchema: { type: "object", required: ["service"], properties: { service: { type: "string", description: "Allowlisted service name" } } },
     annotations: { readOnlyHint: true, idempotentHint: true, destructiveHint: false, openWorldHint: false },
     risk: "low", handler: inspect,
+  },
+  {
+    name: "fleet_inspect_all",
+    description: "Inspect every allowlisted docker platform service in one call. Returns an object keyed by service name; per-service failures are contained as {error}. Use this instead of N separate fleet_inspect calls when clients prompt for approval per-call.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        services: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional: subset of allowlisted service names. Omit for all platform services.",
+        },
+      },
+    },
+    annotations: { readOnlyHint: true, idempotentHint: true, destructiveHint: false, openWorldHint: false },
+    risk: "low", handler: inspect_all,
   },
   {
     name: "fleet_logs",
