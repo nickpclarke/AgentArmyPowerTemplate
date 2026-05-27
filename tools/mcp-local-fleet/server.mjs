@@ -1,0 +1,325 @@
+#!/usr/bin/env node
+// local-fleet MCP server (HTTP + JSON-RPC 2.0).
+//
+// One endpoint: POST /mcp — accepts a JSON-RPC request, returns a JSON-RPC
+// response. Authorization: Bearer <token> required on every call. Bound to
+// 127.0.0.1 by default — only reachable from the public web when explicitly
+// fronted by `tools/tunnel.mjs start --name mcp`.
+//
+// Supported JSON-RPC methods (subset of MCP):
+//   - initialize
+//   - tools/list
+//   - tools/call
+//   - notifications/initialized  (no response)
+//
+// Run:
+//   node tools/mcp-local-fleet/server.mjs                 # port 8765
+//   MCP_PORT=8123 node tools/mcp-local-fleet/server.mjs   # override
+
+import { createServer } from "node:http";
+import { timingSafeEqual } from "node:crypto";
+
+import { PORT, HOST, resolveBearerToken, CF_ACCESS_ISSUER } from "./config.mjs";
+import { TOOLS, findTool, INSTANCE, REGISTRY_SUMMARY } from "./registry.mjs";
+import { newAuditId, logCall, logSecurityEvent } from "./audit.mjs";
+import { verifyAccessJwt, authorizeByEmail, isCfAccessConfigured } from "./cfaccess.mjs";
+import { takeAuthed, takeAnon, takeAuthFail } from "./ratelimit.mjs";
+
+const PROTOCOL_VERSION = "2025-03-26"; // MCP protocol version we advertise
+const SERVER_INFO = { name: "agentarmy.local-fleet", version: "0.1.0" };
+
+// Resolve token once at startup. From this point it lives in memory only.
+const BEARER = resolveBearerToken();
+const BEARER_BUF = Buffer.from(`Bearer ${BEARER}`, "utf8");
+
+// ---------- auth ------------------------------------------------------------
+// Dual-auth, in priority order:
+//   1. Cloudflare Access JWT (preferred for cloud agents via claude.ai
+//      MCP connector OAuth flow). Verifies signature + iss/aud/exp/nbf,
+//      enforces email allowlist.
+//   2. Static bearer (legacy, for local-laptop Claude Code + curl tests).
+//      Constant-time compare against the KV-bootstrapped token.
+//
+// Returns { ok, principal } on success; { ok: false, reason } on failure.
+// `principal` is the verified caller identity for audit logging:
+//   - "cfaccess:<email>" for CF Access JWT
+//   - "bearer:static" for the legacy static token
+async function checkAuth(req) {
+  const hdr = req.headers["authorization"];
+  if (!hdr) return { ok: false, reason: "no authorization header" };
+
+  // Try CF Access JWT first (the OAuth-driven path). JWT tokens are much
+  // longer than our 48-char static bearer + carry a `.` separator, so we
+  // can cheaply detect them.
+  if (isCfAccessConfigured()) {
+    const m = hdr.match(/^Bearer\s+(.+)$/i);
+    if (m && m[1].includes(".") && m[1].length > 80) {
+      try {
+        const claims = await verifyAccessJwt(m[1]);
+        const email = authorizeByEmail(claims);
+        return { ok: true, principal: `cfaccess:${email}` };
+      } catch (e) {
+        // Token LOOKED like a JWT but failed verification. Fall through to
+        // static-bearer check — caller might still have a valid static token
+        // they're passing alongside a malformed JWT, though uncommon.
+        // But surface the JWT error reason in case static fails too.
+        var jwtReason = e.message || "JWT verify failed";
+      }
+    }
+  }
+
+  // Static bearer fallback (constant-time, no length leak).
+  const buf = Buffer.from(hdr, "utf8");
+  if (buf.length === BEARER_BUF.length) {
+    try {
+      if (timingSafeEqual(buf, BEARER_BUF)) {
+        return { ok: true, principal: "bearer:static" };
+      }
+    } catch { /* fall through */ }
+  }
+  return { ok: false, reason: jwtReason || "invalid bearer" };
+}
+
+// ---------- JSON-RPC --------------------------------------------------------
+function rpcResult(id, result) { return { jsonrpc: "2.0", id, result }; }
+function rpcError(id, code, message, data) {
+  return { jsonrpc: "2.0", id, error: { code, message, ...(data ? { data } : {}) } };
+}
+const JSONRPC_PARSE_ERROR     = -32700;
+const JSONRPC_INVALID_REQUEST = -32600;
+const JSONRPC_METHOD_NOT_FOUND= -32601;
+const JSONRPC_INVALID_PARAMS  = -32602;
+const JSONRPC_INTERNAL_ERROR  = -32603;
+
+// ---------- request handler --------------------------------------------------
+async function handleJsonRpc(msg, remote, principal) {
+  // Notifications (no id) get no response per spec.
+  const isNotif = msg.id === undefined;
+
+  if (msg.jsonrpc !== "2.0" || typeof msg.method !== "string") {
+    return isNotif ? null : rpcError(msg.id ?? null, JSONRPC_INVALID_REQUEST, "invalid JSON-RPC envelope");
+  }
+
+  switch (msg.method) {
+    case "initialize":
+      return rpcResult(msg.id, {
+        protocolVersion: PROTOCOL_VERSION,
+        capabilities: { tools: { listChanged: false } },
+        // _meta.target advertises this server instance's deployment label
+        // at initialize too, so cloud agents can route without listing tools.
+        serverInfo: { ...SERVER_INFO, _meta: { target: INSTANCE.target } },
+      });
+
+    case "notifications/initialized":
+      return null; // notification — no response
+
+    case "tools/list":
+      return rpcResult(msg.id, {
+        tools: TOOLS.map((t) => ({
+          name: t.name,
+          description: t.description,
+          inputSchema: t.inputSchema,
+          // _meta.target tells cloud agents which deployment environment
+          // this server instance acts on (local-home / dev-cloud / etc).
+          // _meta.risk is informational so agents can self-restrict.
+          _meta: { target: INSTANCE.target, risk: t.risk },
+        })),
+      });
+
+    case "tools/call": {
+      const { name, arguments: args } = msg.params || {};
+      const tool = findTool(name);
+      if (!tool) return rpcError(msg.id, JSONRPC_METHOD_NOT_FOUND, `unknown tool: ${name}`);
+      const auditId = newAuditId();
+      const t0 = Date.now();
+      try {
+        const result = await tool.handler(args || {});
+        logCall({ auditId, tool: name, args, result, durationMs: Date.now() - t0, remoteAddr: remote, principal });
+        // MCP tools/call result shape: { content: [{type:"text", text:"..."}], isError?: bool }
+        return rpcResult(msg.id, {
+          content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+          _meta: { audit_id: auditId, duration_ms: Date.now() - t0 },
+        });
+      } catch (e) {
+        logCall({ auditId, tool: name, args, error: e, durationMs: Date.now() - t0, remoteAddr: remote });
+        return rpcResult(msg.id, {
+          content: [{ type: "text", text: `tool error: ${e.message || String(e)}` }],
+          isError: true,
+          _meta: { audit_id: auditId, duration_ms: Date.now() - t0 },
+        });
+      }
+    }
+
+    default:
+      return isNotif ? null : rpcError(msg.id, JSONRPC_METHOD_NOT_FOUND, `unknown method: ${msg.method}`);
+  }
+}
+
+// Real client IP — prefer CF/proxy headers when present, fall back to socket.
+function clientIp(req) {
+  return req.headers["cf-connecting-ip"]
+    || req.headers["x-forwarded-for"]?.split(",")[0]?.trim()
+    || req.socket.remoteAddress;
+}
+
+// Defense-in-depth response headers. JSON API so most of CSP is irrelevant,
+// but cheap to add. Helps when a misconfigured proxy starts serving our
+// responses as HTML (browsers respect these headers).
+function setSecurityHeaders(res) {
+  res.setHeader("strict-transport-security", "max-age=63072000; includeSubDomains");
+  res.setHeader("x-content-type-options", "nosniff");
+  res.setHeader("x-frame-options", "DENY");
+  res.setHeader("referrer-policy", "no-referrer");
+  res.setHeader("content-security-policy", "default-src 'none'; frame-ancestors 'none'");
+  // Cache-control: API responses are per-request — never cache.
+  res.setHeader("cache-control", "no-store");
+}
+
+// ---------- HTTP server ------------------------------------------------------
+const server = createServer(async (req, res) => {
+  setSecurityHeaders(res);
+  const ip = clientIp(req);
+
+  // Health probe — open, returns just liveness (no fleet info). Rate-limited
+  // by IP so scrapers can't pound this endpoint enumerating it.
+  if (req.method === "GET" && req.url === "/healthz") {
+    const rl = takeAnon(ip);
+    if (!rl.allowed) {
+      res.writeHead(429, { "content-type": "application/json", "retry-after": String(Math.ceil(rl.retryAfterMs / 1000)) });
+      res.end(JSON.stringify({ error: "rate_limited" }));
+      return;
+    }
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(JSON.stringify({ ok: true, server: SERVER_INFO.name, version: SERVER_INFO.version }));
+    return;
+  }
+
+  // OAuth Protected Resource Metadata (RFC 9728 / MCP 2025-03-26).
+  // Points claude.ai's MCP connector at CF Access as the authorization server
+  // so the OAuth Authorization Code flow can begin. Open (no auth) per spec.
+  if (req.method === "GET" && req.url === "/.well-known/oauth-protected-resource") {
+    res.writeHead(200, { "content-type": "application/json", "cache-control": "public, max-age=3600" });
+    res.end(JSON.stringify({
+      resource: "https://mcp.untool.ai/mcp",
+      authorization_servers: [CF_ACCESS_ISSUER],
+      bearer_methods_supported: ["header"],
+      resource_documentation: "https://github.com/nickpclarke/AgentArmy/blob/main/tools/mcp-local-fleet/README.md",
+    }));
+    return;
+  }
+  // Also serve under /mcp/.well-known/... — some clients look there.
+  if (req.method === "GET" && req.url === "/mcp/.well-known/oauth-protected-resource") {
+    res.writeHead(200, { "content-type": "application/json", "cache-control": "public, max-age=3600" });
+    res.end(JSON.stringify({
+      resource: "https://mcp.untool.ai/mcp",
+      authorization_servers: [CF_ACCESS_ISSUER],
+      bearer_methods_supported: ["header"],
+    }));
+    return;
+  }
+
+  if (req.method !== "POST" || req.url !== "/mcp") {
+    res.writeHead(404, { "content-type": "application/json" });
+    res.end(JSON.stringify({ error: "not found", hint: "POST /mcp with JSON-RPC 2.0 body and Authorization: Bearer <token>" }));
+    return;
+  }
+
+  const auth = await checkAuth(req);
+  if (!auth.ok) {
+    // Anti-brute-force: failed auth attempts get their own (tighter) bucket
+    // keyed by IP. Hitting empty here = many bad tokens from one source =
+    // active credential-guessing attempt.
+    const rlFail = takeAuthFail(ip);
+    logSecurityEvent({
+      kind: "auth_failed",
+      ip,
+      reason: auth.reason,
+      ua: req.headers["user-agent"]?.slice(0, 200),
+      rate_limited: !rlFail.allowed,
+    });
+    if (!rlFail.allowed) {
+      res.writeHead(429, { "content-type": "application/json", "retry-after": String(Math.ceil(rlFail.retryAfterMs / 1000)) });
+      res.end(JSON.stringify({ error: "rate_limited" }));
+      return;
+    }
+    res.writeHead(401, { "content-type": "application/json", "www-authenticate": 'Bearer realm="local-fleet"' });
+    res.end(JSON.stringify({ error: "unauthorized", reason: auth.reason }));
+    return;
+  }
+
+  // Authenticated request: rate-limit per principal so a leaked token can't
+  // exfiltrate everything before rotation.
+  const rl = takeAuthed(auth.principal);
+  if (!rl.allowed) {
+    logSecurityEvent({ kind: "rate_limited", ip, principal: auth.principal });
+    res.writeHead(429, { "content-type": "application/json", "retry-after": String(Math.ceil(rl.retryAfterMs / 1000)) });
+    res.end(JSON.stringify({ error: "rate_limited", principal: auth.principal }));
+    return;
+  }
+
+  // Stash on the request so the handler can include the principal in audit.
+  req._principal = auth.principal;
+
+  // Body cap — JSON-RPC requests are tiny; 256 KB is generous, anything larger
+  // is a bug or abuse.
+  const MAX_BODY = 256 * 1024;
+  let received = 0;
+  const chunks = [];
+  let aborted = false;
+  req.on("data", (c) => {
+    received += c.length;
+    if (received > MAX_BODY) {
+      aborted = true;
+      logSecurityEvent({
+        kind: "body_too_large",
+        ip,
+        principal: req._principal,
+        bytes_seen: received,
+        cap: MAX_BODY,
+      });
+      res.writeHead(413, { "content-type": "application/json" });
+      res.end(JSON.stringify({ error: "request too large" }));
+      req.destroy();
+      return;
+    }
+    chunks.push(c);
+  });
+  req.on("end", async () => {
+    if (aborted) return;
+    let body;
+    try { body = JSON.parse(Buffer.concat(chunks).toString("utf8")); }
+    catch {
+      res.writeHead(400, { "content-type": "application/json" });
+      res.end(JSON.stringify(rpcError(null, JSONRPC_PARSE_ERROR, "parse error")));
+      return;
+    }
+    // Prefer the cf-connecting-ip header (set by Cloudflare on tunnel calls)
+    // over the raw socket address — without it, every tunneled call appears
+    // to come from 127.0.0.1 and we lose all client-IP signal.
+    const remote = req.headers["cf-connecting-ip"]
+      || req.headers["x-forwarded-for"]?.split(",")[0]?.trim()
+      || req.socket.remoteAddress;
+    const principal = req._principal;
+    try {
+      const reply = await handleJsonRpc(body, remote, principal);
+      if (reply === null) {
+        res.writeHead(204);
+        res.end();
+        return;
+      }
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify(reply));
+    } catch (e) {
+      res.writeHead(500, { "content-type": "application/json" });
+      res.end(JSON.stringify(rpcError(body?.id ?? null, JSONRPC_INTERNAL_ERROR, e.message || "internal error")));
+    }
+  });
+});
+
+server.listen(PORT, HOST, () => {
+  console.log(`local-fleet MCP listening on http://${HOST}:${PORT}/mcp`);
+  console.log(`instance target: ${INSTANCE.target}  (override with MCP_TARGET env)`);
+  console.log(`tools exposed:   ${TOOLS.length}${REGISTRY_SUMMARY.hidden_by_target ? ` (${REGISTRY_SUMMARY.hidden_by_target} hidden by availableOn)` : ""}`);
+  console.log(`expose externally: node tools/tunnel.mjs start --name mcp`);
+  console.log(`stop: Ctrl-C`);
+});

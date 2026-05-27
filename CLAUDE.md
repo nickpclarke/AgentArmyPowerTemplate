@@ -297,6 +297,79 @@ When an agent hits a creative fork, architectural divergence, or judgment call e
 | `Start date` / `Target date` | Set during sprint planning |
 | `Parent issue` | Link Stories to their parent Feature |
 
+## Local debugging — log multiplexer + tunnel
+
+End-to-end agentic loops are noisy across three processes. Use **`tools/tail.mjs`** as the single surface for live tail, on-disk NDJSON, and historical query. Logs land in `tools/logs/{service}.log.YYYY-MM-DD` (gitignored, NDJSON, daily rotation) and every invocation purges files older than 3 days.
+
+```bash
+node tools/tail.mjs spawn                 # supervise front+middle+back, capture stdout to NDJSON + terminal
+node tools/tail.mjs tail                  # follow today's files (services started elsewhere)
+node tools/tail.mjs query --since 5m --level error                # last 5 min, errors only
+node tools/tail.mjs query --grep tavily --service middle          # search across logs
+node tools/tail.mjs clean --days 1        # tighten retention
+```
+
+**Public URL (phone testing, webhooks)** — use **`tools/tunnel.mjs`**, a vendor-agnostic wrapper over cloudflared (default) / ngrok. State persists in `tools/.tunnel-state.json` so commands work across shells:
+
+```bash
+node tools/tunnel.mjs start               # cloudflared → trycloudflare.com URL
+node tools/tunnel.mjs start --vendor ngrok # if you've added a paid reserved subdomain
+node tools/tunnel.mjs url                 # just print the public URL
+node tools/tunnel.mjs status              # vendor, pid, url, since
+node tools/tunnel.mjs logs --lines 50     # tail today's tunnel log
+node tools/tunnel.mjs stop                # kill agent, clear state
+```
+
+**Tunnel policy:** the tunnel exposes **frontend only** (`:3000`). Middle (`:8100`) and backend (`:8000`) stay on localhost behind the Next.js BFF at `/api/copilotkit` — that route owns session-cookie → JWT injection (ARC-ADR-002). Exposing middle/back directly would bypass JWT injection and orphan rate-limiting, auth tiers, and billing — the slot for that is `api-gateway-engineer` (Azure APIM) when external API monetisation arrives, not a raw tunnel.
+
+**Vendor choice:** Cloudflare Tunnel (default) is free, stable, real CA-signed cert (Google Trust Services). Ngrok-free was tried and failed — its `*.ngrok-free.dev` edge had broken IPv6 TLS handshakes for our network path; phone tests got `ERR_SSL_PROTOCOL_ERROR`. Cloudflare's edge works on both IPv4 and IPv6. The ngrok authtoken is still in Key Vault (`akv01-agentarmy` secret `ngrok`) if you want to upgrade to a paid ngrok tier for a reserved subdomain.
+
+## Cloud-agent control plane — `tools/mcp-local-fleet/`
+
+A small MCP server that lets cloud agents (Claude.ai routines, GitHub Actions, remote API callers) **observe and — eventually — drive the local Docker fleet** without ever exposing the Docker socket directly. Read the Labs note [`Cloud Agents → Local Docker — Control Plane Plan`](obsidian/labs/AgentArmyLabs/Cloud%20Agents%20%E2%86%92%20Local%20Docker%20%E2%80%94%20Control%20Plane%20Plan.md) for the architecture rationale.
+
+```bash
+node tools/mcp-local-fleet/server.mjs       # starts on 127.0.0.1:8765, first run generates+stores token in KV
+node tools/tunnel.mjs start --name mcp      # expose the server publicly so cloud agents can reach it
+node tools/tunnel.mjs url --name mcp        # → https://<random>.trycloudflare.com (give this to your cloud agent)
+```
+
+Cloud agents call it with `Authorization: Bearer <token>` (token in KV `akv01-agentarmy` secret `local-fleet-mcp-key`). One endpoint: `POST /mcp` speaking JSON-RPC 2.0. **Scope is intentionally docker-only**: the MCP exists so cloud action runners can build/run images against the local `templates/local-stack/docker-compose.yml`. Tools registered today (7 total, all real — no stubs):
+
+**Deployment target labels.** Tools are universal docker primitives; the *server instance* carries a `MCP_TARGET` label (default `local-home`) that cloud agents see in `serverInfo._meta.target` and per-tool `_meta.target`. Same code, different label → different server. Today's only instance is `local-home` (the operator's office PC, reached via `mcp.untool.ai`). Planned: `local-runner`, `dev-cloud`, `test-cloud`, `prod-edge`. See [tools/mcp-local-fleet/README.md](tools/mcp-local-fleet/README.md) for the full taxonomy.
+
+| Tool | Phase | Risk | What it does |
+|---|---|---|---|
+| `fleet.ps` | 1 | low | List allowlisted platform containers and their state |
+| `fleet.inspect` | 1 | low | Image / status / ports / env-key-names for one container (values redacted) |
+| `fleet.logs` | 1 | low | `docker logs <ctr>` for one allowlisted service. Substring grep + level filter. Refuses non-docker spoke names. |
+| `fleet.up` | 2 | med | `compose up -d --no-build <svc>` |
+| `fleet.down` | 2 | med | `compose stop` + `compose rm -f` (volumes preserved; platform tier is stateful) |
+| `fleet.restart` | 2 | med | `compose restart <svc>` |
+| `fleet.build` | 3 | high | `compose build [--no-cache] <svc>`. Single in-flight build per service (mutex). |
+
+**Consumer setup** (cloud agent OR local Claude Code): one `mcpServers` entry, env-var token, no Anthropic catalog registration needed.
+
+```jsonc
+"local-fleet": {
+  "type": "http",
+  "url": "${LOCAL_FLEET_MCP_URL:-http://127.0.0.1:8765/mcp}",
+  "headers": { "Authorization": "Bearer ${LOCAL_FLEET_MCP_TOKEN}" }
+}
+```
+
+- **Cloud microVMs**: bootstrap sets `LOCAL_FLEET_MCP_URL=https://mcp.untool.ai/mcp` + `LOCAL_FLEET_MCP_TOKEN=<from their secret store>` before `claude` starts.
+- **Local laptop**: default URL is `127.0.0.1:8765`; token goes in `.claude/settings.local.json` env block (gitignored).
+
+**Hard rules** (enforced in code):
+- Bound to `127.0.0.1` only; never `0.0.0.0`. Public exposure requires the explicit `tunnel.mjs --name mcp` step.
+- Constant-time bearer comparison; no token in any log line ever; `--grep`/`--level` are substring matches (not regex — kills the ReDoS surface).
+- **Allowlisted service names** only — cloud agents can't ask us to spawn arbitrary containers.
+- **No shell-exec tool** — capability gaps become hub issues, not escape hatches.
+- Every call audited to `tools/logs/mcp-audit.log.YYYY-MM-DD` with audit-id, duration, redacted args, remote IP.
+
+**Platform containers are visible to `tail.mjs` too** — `node tools/tail.mjs spawn --service arcadedb` attaches to `docker logs --follow agentarmy-arcadedb` and writes the same NDJSON pipeline. So the same `query` commands work whether the service is a local Node process or a Docker container — "container console" is the OS-level fallback if everything else breaks.
+
 ## SAFE Workflow Summary
 
 - **PI** = Program Increment (~10 weeks / 5 sprints), tracked as a GitHub Milestone.

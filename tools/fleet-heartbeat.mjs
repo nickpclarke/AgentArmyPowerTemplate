@@ -341,6 +341,11 @@ const SLO_TARGETS = [
   // backend-core + arcadedb are internal-ingress; reachable only from inside
   // the ACA env. Add an in-env probe-runner later (or expose a minimal status
   // page via the frontend BFF) before promoting them here.
+  // local-fleet MCP control plane — proves all 3 layers up: cloudflared
+  // connector alive + tunnel routing → :8765 + MCP server process. 200
+  // = healthy; non-2xx means one of those layers needs attention.
+  { name: 'local-fleet MCP (mcp.untool.ai)', url: 'https://mcp.untool.ai/healthz', expect: [200] },
+  { name: 'untool.ai frontend (via tunnel)', url: 'https://untool.ai/', expect: [200, 301, 302, 308] },
 ];
 const sloProbes = [];
 if (SLO_PROBE) {

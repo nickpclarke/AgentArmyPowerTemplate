@@ -4,10 +4,12 @@
   "description": "A GitHub repository template for AI-powered software development using coordinated agent workflows.",
   "type": "module",
   "scripts": {
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
-    "@types/node": "^25.9.1"
+    "@types/node": "^25.9.1",
+    "husky": "^9.1.7"
   }
 }
