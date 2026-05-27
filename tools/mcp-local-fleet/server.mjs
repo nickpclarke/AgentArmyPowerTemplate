@@ -17,20 +17,27 @@
 //   MCP_PORT=8123 node tools/mcp-local-fleet/server.mjs   # override
 
 import { createServer } from "node:http";
-import { timingSafeEqual } from "node:crypto";
+// timingSafeEqual is used inside tokens.mjs now; no direct import needed here.
 
 import { PORT, HOST, resolveBearerToken, CF_ACCESS_ISSUER } from "./config.mjs";
 import { TOOLS, findTool, INSTANCE, REGISTRY_SUMMARY } from "./registry.mjs";
 import { newAuditId, logCall, logSecurityEvent } from "./audit.mjs";
 import { verifyAccessJwt, authorizeByEmail, isCfAccessConfigured } from "./cfaccess.mjs";
 import { takeAuthed, takeAnon, takeAuthFail } from "./ratelimit.mjs";
+import { loadAllTokens, verifyAgainstRegistry } from "./tokens.mjs";
 
 const PROTOCOL_VERSION = "2025-03-26"; // MCP protocol version we advertise
 const SERVER_INFO = { name: "agentarmy.local-fleet", version: "0.1.0" };
 
-// Resolve token once at startup. From this point it lives in memory only.
-const BEARER = resolveBearerToken();
-const BEARER_BUF = Buffer.from(`Bearer ${BEARER}`, "utf8");
+// Token registry — loaded once at startup. Includes the legacy
+// `local-fleet-mcp-key` (as principal "static-legacy") PLUS any per-agent
+// tokens stored under the `local-fleet-mcp-token-*` naming convention.
+// To rotate: edit the KV secrets and restart this process.
+//
+// We still call resolveBearerToken() so the legacy bootstrap (generate + print
+// on first run) keeps working for fresh installs.
+resolveBearerToken();
+const TOKEN_REGISTRY = loadAllTokens();
 
 // ---------- auth ------------------------------------------------------------
 // Dual-auth, in priority order:
@@ -68,14 +75,12 @@ async function checkAuth(req) {
     }
   }
 
-  // Static bearer fallback (constant-time, no length leak).
-  const buf = Buffer.from(hdr, "utf8");
-  if (buf.length === BEARER_BUF.length) {
-    try {
-      if (timingSafeEqual(buf, BEARER_BUF)) {
-        return { ok: true, principal: "bearer:static" };
-      }
-    } catch { /* fall through */ }
+  // Bearer fallback — try every loaded token (legacy + per-agent).
+  // Returns the matched token's principal name so audit captures WHICH
+  // cloud-agent identity authenticated. timingSafeEqual is per-compare.
+  const tokenMatch = verifyAgainstRegistry(hdr, TOKEN_REGISTRY);
+  if (tokenMatch.matched) {
+    return { ok: true, principal: tokenMatch.principal };
   }
   return { ok: false, reason: jwtReason || "invalid bearer" };
 }
@@ -320,6 +325,7 @@ server.listen(PORT, HOST, () => {
   console.log(`local-fleet MCP listening on http://${HOST}:${PORT}/mcp`);
   console.log(`instance target: ${INSTANCE.target}  (override with MCP_TARGET env)`);
   console.log(`tools exposed:   ${TOOLS.length}${REGISTRY_SUMMARY.hidden_by_target ? ` (${REGISTRY_SUMMARY.hidden_by_target} hidden by availableOn)` : ""}`);
+  console.log(`bearer tokens:   ${TOKEN_REGISTRY.size} (principals: ${[...TOKEN_REGISTRY.keys()].join(", ")})`);
   console.log(`expose externally: node tools/tunnel.mjs start --name mcp`);
   console.log(`stop: Ctrl-C`);
 });
