@@ -3,8 +3,8 @@
   "name": "agentarmy-schema-migrator",
   "kind": "single",
   "base": "python:3.12-slim",
-  "description": "Init-container function-tier image. Runs to completion before backend-core (or any other migration-consuming spoke) starts. Applies idempotent schema migrations against Postgres (DBOS system DB + app DB) and ArcadeDB (graph schema). Pairs with ARC-ADR-023's 'init container' composition pattern. Scaffolded as part of the contract-backlog PR; real implementation lands in the schema-migration-engineer agent's first work cycle.",
-  "owner": "hub template (scaffold)",
+  "description": "Init-container function-tier image. Runs to completion before backend-core (or any other migration-consuming spoke) starts. Applies idempotent schema migrations against Postgres (DBOS system DB + app DB) via Alembic and ArcadeDB (graph schema) via REST DDL with idempotency guards. Pairs with ARC-ADR-023's 'init container' composition pattern and is owned by the schema-migration-engineer agent (per ARC-ADR-027).",
+  "owner": "hub template",
   "tier": "function",
   "services": [
     {
@@ -17,20 +17,21 @@
   ],
   "shims": {
     "apt": ["curl", "ca-certificates", "postgresql-client"],
-    "pip": ["alembic", "sqlalchemy", "psycopg[binary]", "httpx"],
-    "note": "PLANNED — alembic for Postgres + DBOS migrations; HTTP-based DDL execution for ArcadeDB (its REST API takes SQL strings). dryrun mode emits the migration plan without applying."
+    "pip": ["alembic==1.14.0", "sqlalchemy==2.0.36", "psycopg[binary]==3.2.3", "httpx==0.28.1"],
+    "note": "alembic drives Postgres (DBOS system DB + app DB); the apply_arcadedb.py runner POSTs versioned DDL files to ArcadeDB's REST /api/v1/command/{db} endpoint and records applied filenames in PG's arcadedb_migration_history table so reruns are no-ops. MODE=dryrun emits the plan without applying; MODE=rollback runs `alembic downgrade -1` (ArcadeDB DDL is forward-only)."
   },
   "baked": [
-    { "path": "migrations/postgres/", "purpose": "PLANNED — alembic revision tree shared across spokes that point at the same Postgres instance." },
-    { "path": "migrations/arcadedb/", "purpose": "PLANNED — versioned ArcadeDB schema DDLs (CREATE TYPE, INDEX, etc.) with idempotency guards." },
-    { "path": "scripts/migrate.sh", "purpose": "PLANNED — connect-wait → apply → record version → exit 0; or fail fast and exit nonzero so depends_on holds." },
-    { "path": "scripts/migrator-doctor.sh", "purpose": "PLANNED — applies twice in a row; second run must be a no-op (idempotency)." }
+    { "path": "migrations/postgres/", "purpose": "Alembic revision tree shared across spokes pointing at the same Postgres instance. Initial revision creates schema_version + arcadedb_migration_history (idempotent CREATE TABLE IF NOT EXISTS)." },
+    { "path": "migrations/arcadedb/", "purpose": "Versioned ArcadeDB DDLs (CREATE TYPE, PROPERTY, INDEX...) with idempotency guards (IF NOT EXISTS where supported, runner-side already-exists error suppression otherwise)." },
+    { "path": "scripts/migrate.sh", "purpose": "Entrypoint: wait for PG (and ArcadeDB if ARCADEDB_URL set) → alembic upgrade head → apply pending ArcadeDB DDL files → exit 0. Bad MIGRATION_BAD_REV / connect timeout → nonzero so depends_on.condition: service_completed_successfully holds." },
+    { "path": "scripts/apply_arcadedb.py", "purpose": "ArcadeDB DDL runner: skips already-applied files (tracked in PG), splits each file on `;\\n`, POSTs each statement, treats well-known 'already exists' responses as idempotent success." },
+    { "path": "scripts/migrator-doctor.sh", "purpose": "3-check doctor: applies migrations → applies again (no-op proof) → forces a bad revision (fail-fast proof). Spins up its own throwaway PG (+ optional ArcadeDB) so it's runnable cold." }
   ],
   "setup": { "sh": "setup.sh", "ps1": "setup.ps1" },
   "doctor": {
     "cmd": "scripts/migrator-doctor.sh",
     "proves": ["migrations-applied", "idempotent-on-rerun", "fails-fast-on-bad-revision"],
-    "description": "PLANNED — run migrate twice → second run is a no-op; force a bad revision → exits nonzero so compose depends_on holds."
+    "description": "First run creates schema_version (PG) + migration_marker (ArcadeDB); second run exits 0 with no alembic-version drift and no new arcadedb_migration_history rows; MIGRATION_BAD_REV=fakeXYZ makes the container exit nonzero so depends_on.condition: service_completed_successfully holds. Verified locally: 7/7 PASS (3 named checks, 7 sub-asserts across PG + ArcadeDB)."
   },
   "deploy": {
     "target": "aca",
@@ -38,6 +39,6 @@
   },
   "volumes": [],
   "contract": [
-    { "service": "migrator", "type": "prose", "registry": "docs/contracts.md", "note": "No external HTTP contract — this is an init container. The 'contract' is the migration-versioning convention (alembic linear history; ArcadeDB versioned by stored procedure that records applied revisions in a meta table)." }
+    { "service": "migrator", "type": "prose", "registry": "docs/contracts.md", "note": "No external HTTP contract — this is an init container. The 'contract' is the migration-versioning convention (alembic linear history for Postgres; ArcadeDB DDL files tracked in PG's arcadedb_migration_history meta table)." }
   ]
 }

@@ -1,0 +1,63 @@
+# Example compose showing schema-migrator as an init container.
+#
+# The migrator runs to completion BEFORE the application-tier `backend` service
+# starts. `service_completed_successfully` blocks `backend` until the migrator
+# exits 0 — if the migrator fails, the backend never starts. That's the whole
+# point of putting migrations into a dedicated init container (per ARC-ADR-023).
+#
+# Bring up everything:  docker compose -f examples/compose.schema-migrator.example.yml up
+# Migrator-only smoke:  docker compose -f examples/compose.schema-migrator.example.yml run --rm migrator
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: agentarmy
+      POSTGRES_PASSWORD: agentarmy
+      POSTGRES_DB: agentarmy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentarmy"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  arcadedb:
+    image: arcadedata/arcadedb:latest
+    environment:
+      JAVA_OPTS: "-Darcadedb.server.rootPassword=playwithdata"
+    command: ["server.sh", "-Darcadedb.server.rootPassword=playwithdata"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:2480/api/v1/ready >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+      start_period: 10s
+
+  migrator:
+    container_name: schema-migrator
+    build: ..
+    image: agentarmy-schema-migrator:local
+    environment:
+      MODE: ${MODE:-migrate}
+      DATABASE_URL: postgresql://agentarmy:agentarmy@postgres:5432/agentarmy
+      ARCADEDB_URL: http://arcadedb:2480
+      ARCADEDB_DB: agentarmy
+      ARCADEDB_USER: root
+      ARCADEDB_PASSWORD: playwithdata
+      PG_WAIT_SECS: "60"
+      ARCADEDB_WAIT_SECS: "120"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      arcadedb:
+        condition: service_healthy
+
+  backend:
+    image: hashicorp/http-echo:latest
+    command: ["-text=backend started AFTER migrator completed successfully"]
+    ports:
+      - "5678:5678"
+    depends_on:
+      migrator:
+        condition: service_completed_successfully

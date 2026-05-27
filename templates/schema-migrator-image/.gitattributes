@@ -1,0 +1,6 @@
+# Container entrypoints must keep LF endings even when the working tree is on
+# Windows — CRLF makes /usr/bin/env exec fail inside the image.
+*.sh   text eol=lf
+*.py   text eol=lf
+*.mako text eol=lf
+Dockerfile text eol=lf
