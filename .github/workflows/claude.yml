@@ -40,6 +40,21 @@ jobs:
     concurrency:
       group: claude-${{ github.event.issue.number || github.event.pull_request.number }}
       cancel-in-progress: false
+    # Untool fleet suite — let the cloud microVM reach the operator's local docker
+    # via mcp.untool.ai (CF Access edge enforcement). The .mcp.json in the repo
+    # substitutes these env vars when the MCP client starts; CF Access then
+    # authenticates the call at the edge. Empty env = no fleet access (the MCP
+    # connection just fails closed; @claude still works for everything else).
+    #
+    # Provision once per repo:
+    #   gh secret set LOCAL_FLEET_MCP_URL     --body "https://mcp.untool.ai/mcp"
+    #   gh secret set CF_ACCESS_CLIENT_ID     --body "<id-from-CF-dashboard>"
+    #   gh secret set CF_ACCESS_CLIENT_SECRET --body "<secret-from-CF-dashboard>"
+    # See obsidian/labs/AgentArmyLabs/Untool Fleet Suite — Operating Manual.md
+    env:
+      LOCAL_FLEET_MCP_URL:     ${{ secrets.LOCAL_FLEET_MCP_URL }}
+      CF_ACCESS_CLIENT_ID:     ${{ secrets.CF_ACCESS_CLIENT_ID }}
+      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
