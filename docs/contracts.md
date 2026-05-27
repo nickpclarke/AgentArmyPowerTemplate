@@ -25,6 +25,17 @@ it, and the test that enforces it.
 | **Event bus** (NATS JetStream + CloudEvents v1.0) | the fleet (middle-core hosts the broker per its `ARC-ADR-001` / PR #73; bridges per ARC-ADR-022) | any subscriber across spokes (consumer per subject) | **broker live locally** (`nats:2.10-alpine -js`, `localhost:4222`); compose impl in middle-core #74 (`copilot-task`); HTTP↔NATS bridges in proposed `templates/event-bridge-image/` | [ADR-022](decisions/ARC-ADR-022-event-bus-bridges.md) | _to wire (push-consumer + GH-Actions publisher + DLQ)_ |
 | **Webhook receiver** (event-bridge inbound, `contracts/webhook-receiver.openapi.yaml`) | hub `templates/event-bridge-image/` (per ARC-ADR-022) | GitHub webhooks → HMAC verify → CloudEvents → NATS `fleet.gh.*` | **proposed** — spec + Postman mock **published** (`27f2561e…`); image doctor 3/3 PASS on a running stack | [ADR-022](decisions/ARC-ADR-022-event-bus-bridges.md) | _doctor (HMAC verify + JetStream replay)_ |
 
+### Upstream contracts (external producers we depend on)
+
+External SaaS we call from inside the fleet earn the same vendoring rigor as
+internal contracts: we capture the slice we actually consume, mock it in
+Postman so contract-tests don't bill the vendor, and detect upstream drift via
+provider verification. Producer here is the *vendor*; consumer is our spoke.
+
+| Contract | Producer | Consumers | Status | Governing ADR | Test |
+|---|---|---|---|---|---|
+| **Tavily Search & Extract** (`backend-core/contracts/tavily-upstream.openapi.yaml`) | Tavily (external SaaS) | backend-core llm-gateway (`app/llm/providers.py` `_atavily_search` / `_atavily_extract`) | **vendored** — spec captures the slice consumed (POST `/search`, POST `/extract`); Postman mock + provider-verification test pending | [ADR-021](decisions/ARC-ADR-021-llm-gateway.md) | _to wire (provider verification against vendored schema)_ |
+
 ## Who's waiting on whom
 
 - **backend-core UDA (RT6) ← middle-core (MCR-F4):** producer contract **shipped** (middle-core #47 —
@@ -59,3 +70,25 @@ can't silently age. **middle-core is not yet in the contract-test loop** — wir
 
 The hub owns this registry + the governing ADRs; the producing/consuming spokes own their side
 of each contract and its tests.
+
+## Vendoring external upstream contracts
+
+When a spoke calls an external SaaS (Tavily, OpenAI, Anthropic, etc.) treat it
+as a contract too — same vendoring rigor as internal layers:
+
+1. **Capture the slice you consume** in `<spoke>/contracts/<vendor>-upstream.openapi.yaml`.
+   Do NOT vendor the vendor's entire API — only the endpoints and fields you
+   actually send/read today. A future feature that needs more extends the spec
+   first, then the code.
+2. **Mock it in Postman** (AgentArmy workspace) so contract tests can run
+   without billing the vendor or needing a live key.
+3. **Register it under "Upstream contracts"** above — producer is the vendor,
+   consumer is your spoke.
+4. **Add a provider-verification test** — periodically validate that the live
+   upstream still matches the vendored schema. When it drifts, the test fails
+   *before* the field starts mattering in production.
+
+Why bother: when a vendor silently changes a response field, the only place
+that breaks is the live integration — usually noticed by users, not engineers.
+A vendored contract turns that into a CI signal, and makes the dependency
+surface visible to anyone reading the registry.
