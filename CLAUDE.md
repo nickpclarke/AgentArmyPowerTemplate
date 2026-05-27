@@ -143,6 +143,7 @@ It runs three ways: the **SessionStart hook** (dry-run, every local session), a 
 | Cross-spoke release trains | `release-manager` (dependency-order cut & tagging, cross-repo changelog aggregation) |
 | Reliability & SLOs | `sre-engineer` (error budgets, toil reduction, reliability culture) |
 | Telemetry & instrumentation | `observability-engineer` (OpenTelemetry, metrics/logs/traces pipelines, Grafana/Prometheus) |
+| Inspect/manage operator's local docker fleet (logs, restart, build, deploy) | **untool fleet suite** — `mcp__local-fleet__fleet_*` tools (see [Cloud-agent control plane](#cloud-agent-control-plane--toolsmcp-local-fleet)). Read-only (`fleet_ps` / `fleet_inspect` / `fleet_logs`) auto-approvable; write tools (`fleet_up` / `fleet_down` / `fleet_restart` / `fleet_build` / `fleet_deploy`) require per-call approval — they execute arbitrary code in the operator's docker host. |
 | Cloud cost / FinOps | `finops-engineer` (cost visibility, unit economics, rightsizing, commitments) |
 | API gateway & edge policy | `api-gateway-engineer` (rate limiting, edge authN/Z, routing across spoke APIs) |
 | Performance | `performance-engineer` (diagnose bottlenecks across any layer) |
@@ -334,7 +335,7 @@ node tools/tunnel.mjs start --name mcp      # expose the server publicly so clou
 node tools/tunnel.mjs url --name mcp        # → https://<random>.trycloudflare.com (give this to your cloud agent)
 ```
 
-Cloud agents call it with `Authorization: Bearer <token>` (token in KV `akv01-agentarmy` secret `local-fleet-mcp-key`). One endpoint: `POST /mcp` speaking JSON-RPC 2.0. **Scope is intentionally docker-only**: the MCP exists so cloud action runners can build/run images against the local `templates/local-stack/docker-compose.yml`. Tools registered today (7 total, all real — no stubs):
+**Authentication (LIVE — CF Access edge enforcement on `mcp.untool.ai/*`):** the canonical auth for **cloud** consumers is **CF Access service tokens** — send `CF-Access-Client-Id` + `CF-Access-Client-Secret` headers. CF Access enforces auth at the Cloudflare edge; unauthenticated requests never reach the server. Service-token credentials live in KV `akv01-agentarmy` as paired secrets `cf-access-svc-<consumer>-id` / `cf-access-svc-<consumer>-secret` (one pair per cloud agent identity; revoke a single consumer by deleting its CF Access service token in the Zero Trust dashboard). Inside the server we verify the `Cf-Access-Jwt-Assertion` header CF Access injects (defense-in-depth) and attribute every call to `cfaccess-edge:service:<common-name>` in the audit log. The legacy bearer registry (KV `local-fleet-mcp-token-*` + `local-fleet-mcp-key`) is still accepted on **loopback only** — useful for local dev with `127.0.0.1:8765`; refused at the edge. One endpoint: `POST /mcp` speaking JSON-RPC 2.0. **Scope is intentionally docker-only**: the MCP exists so cloud action runners can build/run images against the local `templates/local-stack/docker-compose.yml`. Tools registered today (8 total, all real — no stubs):
 
 **Deployment target labels.** Tools are universal docker primitives; the *server instance* carries a `MCP_TARGET` label (default `local-home`) that cloud agents see in `serverInfo._meta.target` and per-tool `_meta.target`. Same code, different label → different server. Today's only instance is `local-home` (the operator's office PC, reached via `mcp.untool.ai`). Planned: `local-runner`, `dev-cloud`, `test-cloud`, `prod-edge`. See [tools/mcp-local-fleet/README.md](tools/mcp-local-fleet/README.md) for the full taxonomy.
 
@@ -351,18 +352,23 @@ Cloud agents call it with `Authorization: Bearer <token>` (token in KV `akv01-ag
 
 > **Tool-name gotcha** for future MCP servers: tool names MUST match `[a-zA-Z0-9_-]`. Dots are allowed by the MCP spec but Claude Code's MCP client silently drops them, so `claude mcp list` shows `✓ Connected` with 0 tools. Use snake_case.
 
-**Consumer setup** (cloud agent OR local Claude Code): one `mcpServers` entry, env-var token, no Anthropic catalog registration needed.
+**Consumer setup** — one `mcpServers` entry that works in both contexts via env-var substitution. CF Access headers are used when reaching the public edge; bearer is used on loopback.
 
 ```jsonc
 "local-fleet": {
   "type": "http",
   "url": "${LOCAL_FLEET_MCP_URL:-http://127.0.0.1:8765/mcp}",
-  "headers": { "Authorization": "Bearer ${LOCAL_FLEET_MCP_TOKEN}" }
+  "headers": {
+    "Authorization":           "Bearer ${LOCAL_FLEET_MCP_TOKEN}",
+    "CF-Access-Client-Id":     "${CF_ACCESS_CLIENT_ID}",
+    "CF-Access-Client-Secret": "${CF_ACCESS_CLIENT_SECRET}"
+  }
 }
 ```
 
-- **Cloud microVMs**: bootstrap sets `LOCAL_FLEET_MCP_URL=https://mcp.untool.ai/mcp` + `LOCAL_FLEET_MCP_TOKEN=<from their secret store>` before `claude` starts.
-- **Local laptop**: default URL is `127.0.0.1:8765`; token goes in `.claude/settings.local.json` env block (gitignored).
+- **Cloud microVM (claude.yml / Copilot / claude.ai routine)**: bootstrap exports `LOCAL_FLEET_MCP_URL=https://mcp.untool.ai/mcp` + `CF_ACCESS_CLIENT_ID` + `CF_ACCESS_CLIENT_SECRET` from the consumer's secret store before `claude` starts. The empty `LOCAL_FLEET_MCP_TOKEN` is harmless — CF Access ignores it. Each consumer gets its OWN service-token pair so the audit log attributes calls per-identity, and revoking one consumer doesn't affect others.
+- **Local laptop**: default URL is `127.0.0.1:8765`; bearer token goes in `.claude/settings.local.json` env block (gitignored). CF Access headers are unset → ignored on loopback.
+- **Provisioning a new cloud consumer**: Zero Trust dashboard → Access → Service Auth → Create service token (1y TTL) → copy Client ID + Client Secret → `az keyvault secret set --vault-name akv01-agentarmy --name cf-access-svc-<consumer>-id --value "<id>"` (and `-secret`). Then ensure the consumer's bootstrap reads them at process start. See `tools/mcp-local-fleet/AUTOMATION.md` for the per-consumer-type recipes.
 
 **Hard rules** (enforced in code):
 - Bound to `127.0.0.1` only; never `0.0.0.0`. Public exposure requires the explicit `tunnel.mjs --name mcp` step.

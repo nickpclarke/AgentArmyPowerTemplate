@@ -11,7 +11,9 @@
       "type": "http",
       "url": "${LOCAL_FLEET_MCP_URL:-http://127.0.0.1:8765/mcp}",
       "headers": {
-        "Authorization": "Bearer ${LOCAL_FLEET_MCP_TOKEN}"
+        "Authorization": "Bearer ${LOCAL_FLEET_MCP_TOKEN}",
+        "CF-Access-Client-Id": "${CF_ACCESS_CLIENT_ID}",
+        "CF-Access-Client-Secret": "${CF_ACCESS_CLIENT_SECRET}"
       }
     }
   }
