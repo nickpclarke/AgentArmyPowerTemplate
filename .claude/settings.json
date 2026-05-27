@@ -69,5 +69,12 @@
   },
   "enabledPlugins": {
     "cloudflare@claude-plugins-official": true
+  },
+  "permissions": {
+    "allow": [
+      "mcp__local-fleet__fleet_ps",
+      "mcp__local-fleet__fleet_inspect",
+      "mcp__local-fleet__fleet_logs"
+    ]
   }
 }
