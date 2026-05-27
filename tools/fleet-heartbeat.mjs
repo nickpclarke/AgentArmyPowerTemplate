@@ -143,7 +143,7 @@ for (const repo of [HUB, ...SPOKES]) {
 // bundled into an Application image.json).
 const containers = { platform: [], application: [], function: [], untiered: [] };
 for (const repo of [HUB, ...SPOKES]) {
-  for (const path of repoTrees[repo].filter(isImageManifest)) {
+  for (const path of safeTree(repo).filter(isImageManifest)) {
     const raw = fetchFile(repo, path);
     if (!raw) continue;
     let manifest;
