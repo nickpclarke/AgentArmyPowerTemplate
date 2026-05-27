@@ -28,6 +28,7 @@ on:
       - ".claude/commands/**"
       - ".claude/agent-schema.json"
       - ".claude/settings.json"
+      - ".mcp.json"
       - "scripts/mempalace_hook.py"
       - "scripts/mempalace-hook.ps1"
       - "scripts/board_commands.py"

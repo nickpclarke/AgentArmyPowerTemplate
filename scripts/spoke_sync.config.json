@@ -20,6 +20,7 @@
     ".claude/agent-schema.json",
     ".claude/settings.json",
     ".claude/hooks/setup-dotnet.sh",
+    ".mcp.json",
     "scripts/mempalace_hook.py",
     "scripts/mempalace-hook.ps1",
     "scripts/board_commands.py",
