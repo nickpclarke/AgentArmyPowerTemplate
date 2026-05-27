@@ -1,0 +1,42 @@
+{
+  "$schema": "../image-schema.json",
+  "name": "agentarmy-local-embedder",
+  "kind": "single",
+  "base": "python:3.12-slim",
+  "description": "Local embedding service — function-tier image generating dense vectors for ArcadeDB RAG. Exposes the embeddings slice of the LLM-gateway contract (OpenAI-compatible /v1/embeddings) so callers swap between cloud embed and local embed transparently. Pinned at hub issue #184. Hardware targets in priority order: Intel Arc iGPU via OpenVINO (best fit on the dev box per memory `reference_local_model_serving`), CPU fallback, NVIDIA CUDA when available. Scaffolded as part of the contract-backlog PR; Dockerfile + model loader + ONNX/OpenVINO runtime selection land in the follow-up implementation issue.",
+  "owner": "hub template (scaffold)",
+  "tier": "function",
+  "services": [
+    {
+      "name": "embedder",
+      "build": ".",
+      "role": "embeddings-api",
+      "ports": ["8082:8082"],
+      "healthcheck": { "http": "/healthz", "expect": 200 },
+      "entrypointModes": ["serve"]
+    }
+  ],
+  "shims": {
+    "apt": ["curl", "ca-certificates"],
+    "pip": ["fastapi", "uvicorn[standard]", "pydantic", "numpy", "sentence-transformers"],
+    "note": "PLANNED — sentence-transformers as the portable starting point; swap to optimum-intel + OpenVINO for iGPU acceleration on the office PC. Model selection via EMBEDDER_MODEL env (default: BAAI/bge-small-en-v1.5)."
+  },
+  "baked": [
+    { "path": "scripts/serve.py", "purpose": "PLANNED — FastAPI app exposing /v1/embeddings (OpenAI-compatible) + /healthz + /livez + /readyz." },
+    { "path": "scripts/embedder-doctor.sh", "purpose": "PLANNED — POST a known input, assert vector-dim matches MODEL_DIM and L2-norm is finite." }
+  ],
+  "setup": { "sh": "setup.sh", "ps1": "setup.ps1" },
+  "doctor": {
+    "cmd": "scripts/embedder-doctor.sh",
+    "proves": ["readiness", "embed-endpoint-ok", "vector-dim-matches-model"],
+    "description": "PLANNED — /healthz 200; POST /v1/embeddings with a known sentence returns a vector of the declared dimension; L2 norm is finite + nonzero."
+  },
+  "deploy": {
+    "target": "aca",
+    "notes": "Different hardware profile from spokes (NPU / iGPU candidate) is the load-bearing ADR-023 split rationale. Co-locate near ArcadeDB to keep RAG latency low."
+  },
+  "volumes": ["embedder-model-cache"],
+  "contract": [
+    { "service": "embedder", "type": "openapi", "spec": "../../contracts/embeddings.openapi.yaml", "registry": "docs/contracts.md", "governingAdr": "ARC-ADR-021", "note": "PLANNED — embeddings.openapi.yaml is backlog row BE-4. Until the spec lands, the embedder implements the embeddings slice of contracts/llm-gateway.openapi.yaml (POST /v1/embeddings, the EmbeddingRequest/EmbeddingResponse schemas)." }
+  ]
+}

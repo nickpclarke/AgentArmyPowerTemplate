@@ -1,0 +1,42 @@
+{
+  "$schema": "../image-schema.json",
+  "name": "agentarmy-jwt-introspect",
+  "kind": "single",
+  "base": "python:3.12-slim",
+  "description": "JWT introspection sidecar — function-tier image. Verifies the user JWT forwarded across the FE → MC → BE chain per ARC-ADR-002. Provides a /introspect endpoint any spoke can call to convert a Bearer token into a verified claims object (or 401). Centralizes JWKS caching + leeway handling + revocation checks so every spoke isn't re-implementing JWT verify. Scaffolded as part of the contract-backlog PR; real implementation in a follow-up.",
+  "owner": "hub template (scaffold)",
+  "tier": "function",
+  "services": [
+    {
+      "name": "jwt-introspect",
+      "build": ".",
+      "role": "auth-sidecar",
+      "ports": ["8084:8084"],
+      "healthcheck": { "http": "/healthz", "expect": 200 },
+      "entrypointModes": ["sidecar"]
+    }
+  ],
+  "shims": {
+    "apt": ["curl", "ca-certificates"],
+    "pip": ["fastapi", "uvicorn[standard]", "pyjwt[crypto]", "httpx"],
+    "note": "PyJWT[crypto] for RS256 + JWKS; httpx for JWKS fetch with caching. Constant-time signature verify is provided by the underlying cryptography library."
+  },
+  "baked": [
+    { "path": "scripts/introspect.py", "purpose": "PLANNED — FastAPI app with POST /introspect (token in, claims out or 401), GET /healthz, GET /readyz. JWKS cached with TTL." },
+    { "path": "scripts/jwt-doctor.sh", "purpose": "PLANNED — POST /introspect with a known-valid JWT minted from a test signer -> claims; POST with tampered JWT -> 401; POST with expired -> 401 + leeway test." }
+  ],
+  "setup": { "sh": "setup.sh", "ps1": "setup.ps1" },
+  "doctor": {
+    "cmd": "scripts/jwt-doctor.sh",
+    "proves": ["readiness", "valid-token-returns-claims", "tampered-rejected", "expired-rejected", "leeway-honored"],
+    "description": "PLANNED — /healthz 200; verify a freshly-minted JWT returns its claims; tampered token -> 401; expired -> 401 unless within leeway."
+  },
+  "deploy": {
+    "target": "aca",
+    "notes": "Sidecar to any spoke that needs to verify a forwarded JWT. Internal-only ingress; the spoke calls 127.0.0.1:8084 inside the same network namespace."
+  },
+  "volumes": [],
+  "contract": [
+    { "service": "jwt-introspect", "type": "prose", "registry": "docs/contracts.md", "governingAdr": "ARC-ADR-002", "note": "Realizes the verify-once-in-each-spoke half of ARC-ADR-002 (JWT-forwarding auth contract). No new external contract — the OAuth/OIDC issuer's JWKS is the only upstream." }
+  ]
+}

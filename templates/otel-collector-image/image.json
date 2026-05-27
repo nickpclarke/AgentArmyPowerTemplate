@@ -1,0 +1,40 @@
+{
+  "$schema": "../image-schema.json",
+  "name": "agentarmy-otel-collector",
+  "kind": "single",
+  "base": "otel/opentelemetry-collector-contrib:latest",
+  "description": "OpenTelemetry Collector function-tier image — sidecar to every spoke + standalone fleet collector. Receives OTLP (gRPC :4317, HTTP :4318) from spokes, batches, redacts PII, and exports to one or more backends (Grafana Tempo, Honeycomb, Tempo+Loki, or a local file). Realizes ARC-ADR-010 (observability standard) and the OTel-init remediation track from ARC-ADR-024 (platform maturity audit). Scaffolded as part of the contract-backlog PR; Dockerfile + collector-config.yaml land in the follow-up implementation issue.",
+  "owner": "hub template (scaffold)",
+  "tier": "function",
+  "services": [
+    {
+      "name": "otel-collector",
+      "build": ".",
+      "role": "telemetry-collector",
+      "ports": ["4317:4317", "4318:4318", "8888:8888", "13133:13133"],
+      "healthcheck": { "http": "http://localhost:13133/", "expect": 200 },
+      "entrypointModes": ["sidecar", "standalone"]
+    }
+  ],
+  "shims": {
+    "note": "Base image already contains the collector + contrib processors/exporters. No additional package installs needed; configuration is mounted at runtime via OTELCOL_CONFIG_PATH env or baked at /etc/otelcol-contrib/config.yaml."
+  },
+  "baked": [
+    { "path": "config/sidecar.yaml", "purpose": "PLANNED — sidecar collector config: OTLP receivers + batch processor + per-backend exporter blocks (env-gated)." },
+    { "path": "config/standalone.yaml", "purpose": "PLANNED — fleet collector config: same shape, plus tail-sampler for cost control." }
+  ],
+  "setup": { "sh": "setup.sh", "ps1": "setup.ps1" },
+  "doctor": {
+    "cmd": "scripts/otel-doctor.sh",
+    "proves": ["readiness", "otlp-accepts-grpc", "otlp-accepts-http", "exports-to-configured-backend"],
+    "description": "PLANNED — /:13133 health 200; gRPC OTLP send on :4317 returns OK; HTTP OTLP send on :4318 returns 200; configured backend exporter receives the span (verified per-backend)."
+  },
+  "deploy": {
+    "target": "aca",
+    "notes": "Two deployment modes: (a) sidecar — co-deployed with each spoke, no public ingress; (b) standalone fleet collector — public ingress for cross-cloud span aggregation."
+  },
+  "volumes": [],
+  "contract": [
+    { "service": "otel-collector", "type": "prose", "registry": "docs/contracts.md", "governingAdr": "ARC-ADR-010", "note": "OTel trace-context contract (XC-2 in backlog). The collector itself is config-driven; the contract is the W3C trace-context propagation + OTLP wire format it consumes." }
+  ]
+}

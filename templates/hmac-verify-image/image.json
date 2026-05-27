@@ -1,0 +1,42 @@
+{
+  "$schema": "../image-schema.json",
+  "name": "agentarmy-hmac-verify",
+  "kind": "single",
+  "base": "python:3.12-slim",
+  "description": "HMAC-signature verification sidecar — extracts a reusable function-tier pattern out of templates/event-bridge-image/ where it lives today. Sits as an ingress sidecar in front of any spoke that accepts signed webhooks (GitHub, Stripe, Postmark, custom). Verifies `X-*-Signature*` constant-time using a shared secret resolved from Azure Key Vault, then forwards the verified request to the spoke. Scaffolded as part of the contract-backlog PR; real implementation lifts the constant-time verifier from event-bridge.",
+  "owner": "hub template (scaffold)",
+  "tier": "function",
+  "services": [
+    {
+      "name": "hmac-verify",
+      "build": ".",
+      "role": "ingress-sidecar",
+      "ports": ["8083:8083"],
+      "healthcheck": { "http": "/healthz", "expect": 200 },
+      "entrypointModes": ["sidecar"]
+    }
+  ],
+  "shims": {
+    "apt": ["curl", "ca-certificates"],
+    "pip": ["fastapi", "uvicorn[standard]", "cryptography", "httpx"],
+    "note": "stdlib hmac.compare_digest is the load-bearing primitive (constant-time, secure-by-default). cryptography pulled for KV-resolved secrets only. Mirrors the security posture of event-bridge."
+  },
+  "baked": [
+    { "path": "scripts/verify-sidecar.py", "purpose": "PLANNED — FastAPI app that verifies HMAC headers per provider config (github | stripe | postmark | custom), then proxies the verified request to UPSTREAM_URL." },
+    { "path": "scripts/hmac-doctor.sh", "purpose": "PLANNED — POST with wrong sig -> 401; POST with right sig -> 200 + upstream reached; replay-detector test (same delivery-id twice -> second is 409)." }
+  ],
+  "setup": { "sh": "setup.sh", "ps1": "setup.ps1" },
+  "doctor": {
+    "cmd": "scripts/hmac-doctor.sh",
+    "proves": ["readiness", "rejects-bad-sig", "accepts-good-sig", "replay-protection"],
+    "description": "PLANNED — /healthz 200; bad sig -> 401; good sig -> 200 + forwarded to upstream; replay of same delivery-id within TTL -> 409."
+  },
+  "deploy": {
+    "target": "aca",
+    "notes": "Deployed as a sidecar in front of any spoke that accepts signed webhooks. The webhook-receiver spec (contracts/webhook-receiver.openapi.yaml) is the GitHub-specific consumer; this image generalizes."
+  },
+  "volumes": [],
+  "contract": [
+    { "service": "hmac-verify", "type": "prose", "registry": "docs/contracts.md", "governingAdr": "ARC-ADR-022", "note": "No new contract — this image realizes the verification half of the webhook-receiver contract for any signed-webhook source." }
+  ]
+}

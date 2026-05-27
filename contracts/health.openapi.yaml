@@ -1,0 +1,208 @@
+openapi: 3.1.0
+info:
+  title: AgentArmy Health & Readiness
+  version: 0.1.0
+  description: >-
+    Cross-cutting health-probe contract. Every spoke (and every function-tier
+    image) exposes the same three endpoints so load balancers, Kubernetes
+    probes, the fleet heartbeat, and the OTel collector sidecar can reason
+    about service state uniformly. Without this, each spoke rolls its own
+    `/health` / `/api/health` / `/_status` / `/ping` ad-hoc, and uptime
+    automation has to special-case every layer.
+
+    The three endpoints answer different questions:
+
+    - `GET /livez` — *is the process alive?* Returns 200 if the HTTP server can
+      respond. **No dependency checks.** This is the loop-detector probe used by
+      Kubernetes' `livenessProbe` to decide whether to restart the container.
+      Should ALWAYS return 200 unless the process is genuinely wedged.
+
+    - `GET /readyz` — *can this instance accept new requests?* Returns 200 only
+      when every critical dependency is reachable AND warm-up is complete.
+      Returns 503 + Problem Details (RFC 7807 / `contracts/problem-details.openapi.yaml`)
+      with a per-dependency status if any required upstream is failing. This is
+      the gate for `readinessProbe` and for LB traffic shifting.
+
+    - `GET /healthz` — *full diagnostic snapshot for humans + dashboards.* A
+      superset of `/readyz`: same 200/503 semantics, but the 200 body carries
+      richer detail (version, commit, deploy id, dependency latencies). This is
+      what the fleet heartbeat consumes; not appropriate for high-frequency
+      probes because the response body is expensive to build.
+
+    All three endpoints are **unauthenticated** by design — auth-checking the
+    health endpoint creates a circular dependency (the LB needs to probe before
+    it can route auth headers). Don't put PII or secrets in the responses.
+
+    Realizes the health-probe slice of [ARC-ADR-010 — observability standard]
+    and [ARC-ADR-024 — platform maturity audit].
+  contact:
+    name: AgentArmy hub
+    url: https://github.com/nickpclarke/AgentArmy
+  license:
+    name: MIT
+servers:
+  - url: "{SERVICE_BASE_URL}"
+    description: Any spoke base URL (no /api/v1 prefix — health endpoints live at root).
+    variables:
+      SERVICE_BASE_URL:
+        default: http://localhost:8000
+
+paths:
+  /livez:
+    get:
+      operationId: getLiveness
+      summary: Liveness probe (process alive?)
+      description: >-
+        Returns 200 if the HTTP server can respond. No dependency checks.
+        Should be cheap (sub-ms) and never block on I/O.
+      responses:
+        '200':
+          description: Process is alive.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LivenessResponse'
+
+  /readyz:
+    get:
+      operationId: getReadiness
+      summary: Readiness probe (accepting traffic?)
+      description: >-
+        Returns 200 when every critical dependency is reachable and the
+        instance has finished warmup. Returns 503 with a Problem Details body
+        listing which dependency failed when not ready.
+      responses:
+        '200':
+          description: Ready to accept new requests.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+        '503':
+          description: Not ready — at least one critical dependency is failing.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ReadinessProblem'
+
+  /healthz:
+    get:
+      operationId: getHealth
+      summary: Diagnostic snapshot (humans + dashboards)
+      description: >-
+        Full diagnostic body — version, commit, dependency status, latencies.
+        200/503 semantics same as /readyz. Not for high-frequency probing.
+      responses:
+        '200':
+          description: Healthy snapshot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Unhealthy — see body for which dependency failed.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ReadinessProblem'
+
+components:
+  schemas:
+    LivenessResponse:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+          const: true
+          description: Always true when the process is alive enough to respond.
+        ts:
+          type: string
+          format: date-time
+          description: Server timestamp in RFC 3339.
+
+    ReadinessResponse:
+      type: object
+      required: [ok, ts]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        ts:
+          type: string
+          format: date-time
+        dependencies:
+          type: array
+          description: Per-dependency readiness checks that all passed.
+          items:
+            $ref: '#/components/schemas/DependencyStatus'
+
+    HealthResponse:
+      allOf:
+        - $ref: '#/components/schemas/ReadinessResponse'
+        - type: object
+          properties:
+            service:
+              type: string
+              description: Service / image name (matches image.json `name`).
+              example: backend-core
+            version:
+              type: string
+              description: SemVer or commit SHA.
+              example: 0.4.2
+            commit:
+              type: string
+              description: Full git commit SHA the binary was built from.
+              example: 996037ee9f1b
+            deploy_id:
+              type: string
+              description: Deploy identifier (release train, Cloud Run revision, etc).
+            tier:
+              type: string
+              enum: [platform, application, function]
+              description: ARC-ADR-023 tier label.
+
+    DependencyStatus:
+      type: object
+      required: [name, ok]
+      properties:
+        name:
+          type: string
+          description: Symbolic dependency name (e.g. `arcadedb`, `postgres`, `nats`, `llm-gateway`).
+        ok:
+          type: boolean
+        latency_ms:
+          type: number
+          description: Measured probe latency in milliseconds.
+        message:
+          type: string
+          description: Optional human-readable detail.
+
+    ReadinessProblem:
+      description: >-
+        RFC 7807 Problem Details body used when /readyz or /healthz returns 503.
+        References `contracts/problem-details.openapi.yaml` for the base shape
+        plus a `dependencies` extension field listing per-dependency state.
+      type: object
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+          format: uri
+          example: "https://github.com/nickpclarke/AgentArmy/contracts/problems/not-ready"
+        title:
+          type: string
+          example: "Service not ready"
+        status:
+          type: integer
+          example: 503
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+        dependencies:
+          type: array
+          description: Per-dependency status snapshot at the time of failure.
+          items:
+            $ref: '#/components/schemas/DependencyStatus'

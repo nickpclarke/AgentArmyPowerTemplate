@@ -1,0 +1,43 @@
+{
+  "$schema": "../image-schema.json",
+  "name": "agentarmy-schema-migrator",
+  "kind": "single",
+  "base": "python:3.12-slim",
+  "description": "Init-container function-tier image. Runs to completion before backend-core (or any other migration-consuming spoke) starts. Applies idempotent schema migrations against Postgres (DBOS system DB + app DB) and ArcadeDB (graph schema). Pairs with ARC-ADR-023's 'init container' composition pattern. Scaffolded as part of the contract-backlog PR; real implementation lands in the schema-migration-engineer agent's first work cycle.",
+  "owner": "hub template (scaffold)",
+  "tier": "function",
+  "services": [
+    {
+      "name": "migrator",
+      "build": ".",
+      "role": "init-container",
+      "ports": [],
+      "entrypointModes": ["migrate", "rollback", "dryrun"]
+    }
+  ],
+  "shims": {
+    "apt": ["curl", "ca-certificates", "postgresql-client"],
+    "pip": ["alembic", "sqlalchemy", "psycopg[binary]", "httpx"],
+    "note": "PLANNED — alembic for Postgres + DBOS migrations; HTTP-based DDL execution for ArcadeDB (its REST API takes SQL strings). dryrun mode emits the migration plan without applying."
+  },
+  "baked": [
+    { "path": "migrations/postgres/", "purpose": "PLANNED — alembic revision tree shared across spokes that point at the same Postgres instance." },
+    { "path": "migrations/arcadedb/", "purpose": "PLANNED — versioned ArcadeDB schema DDLs (CREATE TYPE, INDEX, etc.) with idempotency guards." },
+    { "path": "scripts/migrate.sh", "purpose": "PLANNED — connect-wait → apply → record version → exit 0; or fail fast and exit nonzero so depends_on holds." },
+    { "path": "scripts/migrator-doctor.sh", "purpose": "PLANNED — applies twice in a row; second run must be a no-op (idempotency)." }
+  ],
+  "setup": { "sh": "setup.sh", "ps1": "setup.ps1" },
+  "doctor": {
+    "cmd": "scripts/migrator-doctor.sh",
+    "proves": ["migrations-applied", "idempotent-on-rerun", "fails-fast-on-bad-revision"],
+    "description": "PLANNED — run migrate twice → second run is a no-op; force a bad revision → exits nonzero so compose depends_on holds."
+  },
+  "deploy": {
+    "target": "aca",
+    "notes": "Deployed as a Container Apps Job (run-to-completion) before the depending spoke. Locally composed via `depends_on.condition: service_completed_successfully` against the application-tier container."
+  },
+  "volumes": [],
+  "contract": [
+    { "service": "migrator", "type": "prose", "registry": "docs/contracts.md", "note": "No external HTTP contract — this is an init container. The 'contract' is the migration-versioning convention (alembic linear history; ArcadeDB versioned by stored procedure that records applied revisions in a meta table)." }
+  ]
+}

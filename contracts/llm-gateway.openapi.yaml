@@ -29,6 +29,33 @@ info:
     is the `ChatCompletionChunk` schema below. Distinct from the higher-level
     AG-UI agent-run stream (agui-stream.asyncapi.yaml, ARC-ADR-007).
 
+    SSE event taxonomy (when `stream: true`):
+
+    1. **Content chunks** — `data: <ChatCompletionChunk>` lines carrying token
+       deltas via `choices[].delta.content` (incremental assistant text).
+    2. **Tool-call deltas** — same `ChatCompletionChunk` shape, but
+       `choices[].delta.tool_calls[]` is populated with index + id + name +
+       arguments-fragment. OpenAI streams tool-call arguments token-by-token,
+       so consumers must JSON-string-concat across deltas before parsing.
+    3. **Usage event (terminal)** — emitted iff
+       `request.stream_options.include_usage = true`. A `ChatCompletionChunk`
+       with `choices: []` and a populated `usage` object. Sent BEFORE `[DONE]`
+       so consumers see token accounting even when streams are cancelled at
+       the network boundary.
+    4. **Error event (terminal)** — for mid-stream provider failures the
+       gateway emits a single `data: <StreamError>` (problem-details-shaped)
+       and closes the stream WITHOUT sending `[DONE]`. Consumers MUST treat
+       any `data:` line whose JSON contains a `type` field starting with
+       `https://github.com/nickpclarke/AgentArmy/contracts/problems/` as a
+       fatal stream error.
+    5. **Stream terminator** — `data: [DONE]` (literal). The only line that
+       isn't parseable as JSON.
+
+    Error envelope: all 4xx/5xx responses use
+    `application/problem+json` referencing
+    `contracts/problem-details.openapi.yaml`. Mid-stream errors use the same
+    shape inline in the SSE.
+
     STATUS: proposed (ARC-ADR-021). Producer/placement TBD by that ADR; on
     acceptance this spec relocates to the chosen producer repo and the server
     URL is finalized.
@@ -130,6 +157,17 @@ components:
           type: array
           items: { $ref: "#/components/schemas/ChatMessage" }
         stream: { type: boolean, default: false, description: "true → SSE stream of ChatCompletionChunk." }
+        stream_options:
+          type: object
+          description: Streaming-only options. Ignored when `stream: false`.
+          properties:
+            include_usage:
+              type: boolean
+              default: false
+              description: >-
+                When true, the gateway emits one terminal `ChatCompletionChunk`
+                with `choices: []` and a populated `usage` object right BEFORE
+                the `[DONE]` terminator. Required to bill streaming requests.
         temperature: { type: number, minimum: 0, maximum: 2 }
         max_tokens: { type: integer, minimum: 1 }
         top_p: { type: number }
@@ -162,20 +200,51 @@ components:
           type: array
           items: { $ref: "#/components/schemas/Choice" }
         usage: { $ref: "#/components/schemas/Usage" }
+    ToolCallDelta:
+      type: object
+      description: >-
+        One tool-call streamed across many deltas. `id` and `function.name`
+        appear once (in the first delta); `function.arguments` is a JSON
+        string FRAGMENT that consumers concat across deltas by `index` before
+        parsing.
+      properties:
+        index: { type: integer, description: "Position in the tool_calls array; deltas with the same index belong to the same call." }
+        id: { type: string }
+        type: { type: string, enum: [function] }
+        function:
+          type: object
+          properties:
+            name: { type: string }
+            arguments: { type: string, description: "JSON string fragment; concat across deltas of the same index before parsing." }
     Delta:
       type: object
+      description: Partial assistant message delta carried by one ChatCompletionChunk choice.
       properties:
         role: { type: string }
-        content: { type: string }
+        content: { type: string, description: "Token / text fragment to append to assistant content." }
+        tool_calls:
+          type: array
+          description: Streamed tool-call fragments — see ToolCallDelta.
+          items: { $ref: "#/components/schemas/ToolCallDelta" }
     ChunkChoice:
       type: object
       properties:
         index: { type: integer }
         delta: { $ref: "#/components/schemas/Delta" }
-        finish_reason: { type: string, nullable: true }
+        finish_reason:
+          type: string
+          nullable: true
+          enum: [stop, length, content_filter, tool_calls, null]
     ChatCompletionChunk:
       type: object
-      description: One SSE event payload when stream=true.
+      description: >-
+        One SSE event payload when stream=true. Three event-shapes share this
+        schema (see SSE event taxonomy in info.description):
+        (a) content/tool-call delta — `choices` populated, `usage` absent;
+        (b) terminal usage event — `choices: []`, `usage` populated, emitted
+        only when `request.stream_options.include_usage = true`;
+        (c) the `[DONE]` line is NOT a ChatCompletionChunk — it's the literal
+        string `[DONE]` and ends the stream.
       required: [id, object, choices]
       properties:
         id: { type: string }
@@ -185,6 +254,25 @@ components:
         choices:
           type: array
           items: { $ref: "#/components/schemas/ChunkChoice" }
+        usage:
+          $ref: "#/components/schemas/Usage"
+    StreamError:
+      type: object
+      description: >-
+        Mid-stream error event. Shaped as RFC 7807 Problem Details
+        (contracts/problem-details.openapi.yaml). When a consumer sees a
+        `data: …` line whose JSON has a `type` URI matching the
+        agentarmy/contracts/problems/ namespace, it MUST treat the stream as
+        terminated abnormally and surface this error. The gateway closes the
+        connection without emitting `[DONE]` after a StreamError.
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        code: { type: string }
+        trace_id: { type: string }
     EmbeddingRequest:
       type: object
       required: [model, input]
