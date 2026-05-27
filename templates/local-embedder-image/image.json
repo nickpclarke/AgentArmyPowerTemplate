@@ -3,8 +3,8 @@
   "name": "agentarmy-local-embedder",
   "kind": "single",
   "base": "python:3.12-slim",
-  "description": "Local embedding service — function-tier image generating dense vectors for ArcadeDB RAG. Exposes the embeddings slice of the LLM-gateway contract (OpenAI-compatible /v1/embeddings) so callers swap between cloud embed and local embed transparently. Pinned at hub issue #184. Hardware targets in priority order: Intel Arc iGPU via OpenVINO (best fit on the dev box per memory `reference_local_model_serving`), CPU fallback, NVIDIA CUDA when available. Scaffolded as part of the contract-backlog PR; Dockerfile + model loader + ONNX/OpenVINO runtime selection land in the follow-up implementation issue.",
-  "owner": "hub template (scaffold)",
+  "description": "Local embedding service — function-tier image generating dense vectors for ArcadeDB RAG. Exposes the embeddings slice of the LLM-gateway contract (OpenAI-compatible POST /v1/embeddings) so callers swap between cloud embed and local embed transparently. CPU baseline via sentence-transformers + BAAI/bge-small-en-v1.5 (384-d, L2-normalized). OpenVINO / Intel Arc iGPU acceleration is a follow-up — the CPU path works on any architecture sentence-transformers supports. Hub issue #184 is the model-serving pin.",
+  "owner": "hub template",
   "tier": "function",
   "services": [
     {
@@ -18,18 +18,18 @@
   ],
   "shims": {
     "apt": ["curl", "ca-certificates"],
-    "pip": ["fastapi", "uvicorn[standard]", "pydantic", "numpy", "sentence-transformers"],
-    "note": "PLANNED — sentence-transformers as the portable starting point; swap to optimum-intel + OpenVINO for iGPU acceleration on the office PC. Model selection via EMBEDDER_MODEL env (default: BAAI/bge-small-en-v1.5)."
+    "pip": ["fastapi==0.117.0", "uvicorn[standard]==0.36.0", "pydantic==2.11.7", "sentence-transformers==3.3.1", "torch==2.5.1+cpu"],
+    "note": "torch CPU wheel pulled from download.pytorch.org/whl/cpu. Model selection via EMBEDDER_MODEL env (default: BAAI/bge-small-en-v1.5, 384-d). HF cache pre-created with embedder-user ownership so the named volume mount preserves write access (Docker initializes named volumes by seeding from the image's existing path content + ownership)."
   },
   "baked": [
-    { "path": "scripts/serve.py", "purpose": "PLANNED — FastAPI app exposing /v1/embeddings (OpenAI-compatible) + /healthz + /livez + /readyz." },
-    { "path": "scripts/embedder-doctor.sh", "purpose": "PLANNED — POST a known input, assert vector-dim matches MODEL_DIM and L2-norm is finite." }
+    { "path": "scripts/serve.py", "purpose": "FastAPI app: POST /v1/embeddings (OpenAI-compatible) + /livez + /readyz + /healthz. Lazy-loads the model on first request; sync .encode() runs in the default executor so the event loop stays unblocked." },
+    { "path": "scripts/embedder-doctor.sh", "purpose": "5-check doctor: warmup triggers lazy load; /healthz surfaces model_loaded:true; POST returns embedding; vector dim matches MODEL_DIM; L2 norm finite + non-zero." }
   ],
   "setup": { "sh": "setup.sh", "ps1": "setup.ps1" },
   "doctor": {
     "cmd": "scripts/embedder-doctor.sh",
     "proves": ["readiness", "embed-endpoint-ok", "vector-dim-matches-model"],
-    "description": "PLANNED — /healthz 200; POST /v1/embeddings with a known sentence returns a vector of the declared dimension; L2 norm is finite + nonzero."
+    "description": "Warmup POST triggers lazy model load; /healthz reports model_loaded=true with declared embedding_dim; POST /v1/embeddings returns a vector of that dim with finite, non-zero L2 norm. Verified locally: 5/5 PASS with BAAI/bge-small-en-v1.5 (dim=384, L2=1.0 normalized)."
   },
   "deploy": {
     "target": "aca",
