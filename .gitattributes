@@ -1,2 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Shell scripts and git hooks must stay LF — Windows CRLF checkout breaks
+# `#!/usr/bin/env sh` execution (git's CreateProcess returns Exec format error).
+*.sh text eol=lf
+.husky/* text eol=lf

@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 # Husky pre-commit — no-op scaffold.
 #
 # Add real checks here when ready. Candidates for the AgentArmy hub:
