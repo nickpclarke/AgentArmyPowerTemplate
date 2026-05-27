@@ -19,10 +19,9 @@
 import { createServer } from "node:http";
 // timingSafeEqual is used inside tokens.mjs now; no direct import needed here.
 
-import { PORT, HOST, resolveBearerToken, CF_ACCESS_ISSUER } from "./config.mjs";
+import { PORT, HOST, resolveBearerToken } from "./config.mjs";
 import { TOOLS, findTool, INSTANCE, REGISTRY_SUMMARY } from "./registry.mjs";
 import { newAuditId, logCall, logSecurityEvent } from "./audit.mjs";
-import { verifyAccessJwt, authorizeByEmail, isCfAccessConfigured } from "./cfaccess.mjs";
 import { verifyEdgeJwt, resolveEdgePrincipal, isEdgeConfigured } from "./cfaccess-edge.mjs";
 import { takeAuthed, takeAnon, takeAuthFail } from "./ratelimit.mjs";
 import { loadAllTokens, verifyAgainstRegistry } from "./tokens.mjs";
@@ -41,17 +40,21 @@ resolveBearerToken();
 const TOKEN_REGISTRY = loadAllTokens();
 
 // ---------- auth ------------------------------------------------------------
-// Triple-auth, in priority order:
+// Two auth paths, in priority order:
 //   1. CF Access EDGE JWT (`Cf-Access-Jwt-Assertion` header) — preferred
 //      for ANY request that came through CF Access enforcement. Injected
-//      by CF Access after it verified user/service-token auth at the edge.
-//      Carries identity (email for users, common_name for service tokens).
-//   2. CF Access SaaS JWT (`Authorization: Bearer <jwt>`) — legacy path
-//      for claude.ai MCP custom connector OAuth flow.
-//   3. Static bearer registry (`Authorization: Bearer <token>`) — local
+//      by CF Access after it verified user / service-token / managed-OAuth
+//      auth at the edge. Carries identity (email for users, common_name for
+//      service tokens). This is the only path that fires on `mcp.untool.ai`.
+//   2. Static bearer registry (`Authorization: Bearer <token>`) — local
 //      laptop debug + cloud agents using KV-stored tokens. Falling back
-//      here means request did NOT go through CF Access (i.e. localhost
-//      direct, or a future scenario).
+//      here means the request did NOT go through CF Access (loopback
+//      direct, or a future non-CF deployment target).
+//
+// The legacy CF Access SaaS-OIDC JWT path was removed once Managed OAuth
+// on the Self-Hosted app replaced it (claude.ai web-UI Connector now
+// authenticates at the edge → arrives with a `Cf-Access-Jwt-Assertion`
+// header verified by path 1). See memory: cf-managed-oauth-for-mcp.
 //
 // Returns { ok, principal } on success; { ok: false, reason } on failure.
 async function checkAuth(req) {
@@ -76,33 +79,14 @@ async function checkAuth(req) {
   const hdr = req.headers["authorization"];
   if (!hdr) return { ok: false, reason: "no authorization header" };
 
-  // 2) CF Access SaaS JWT (the OAuth-driven path for claude.ai). JWT
-  // tokens are much longer than our 48-char static bearer + carry a `.`
-  // separator, so we can cheaply detect them.
-  if (isCfAccessConfigured()) {
-    const m = hdr.match(/^Bearer\s+(.+)$/i);
-    if (m && m[1].includes(".") && m[1].length > 80) {
-      try {
-        const claims = await verifyAccessJwt(m[1]);
-        const email = authorizeByEmail(claims);
-        return { ok: true, principal: `cfaccess:${email}` };
-      } catch (e) {
-        // Token LOOKED like a JWT but failed verification. Fall through to
-        // static-bearer check — caller might still have a valid static token
-        // they're passing alongside a malformed JWT, though uncommon.
-        var jwtReason = e.message || "JWT verify failed";
-      }
-    }
-  }
-
-  // 3) Bearer fallback — try every loaded token (legacy + per-agent).
+  // 2) Bearer fallback — try every loaded token (legacy + per-agent).
   // Returns the matched token's principal name so audit captures WHICH
   // cloud-agent identity authenticated. timingSafeEqual is per-compare.
   const tokenMatch = verifyAgainstRegistry(hdr, TOKEN_REGISTRY);
   if (tokenMatch.matched) {
     return { ok: true, principal: tokenMatch.principal };
   }
-  return { ok: false, reason: jwtReason || "invalid bearer" };
+  return { ok: false, reason: "invalid bearer" };
 }
 
 // ---------- JSON-RPC --------------------------------------------------------
@@ -144,6 +128,10 @@ async function handleJsonRpc(msg, remote, principal) {
           name: t.name,
           description: t.description,
           inputSchema: t.inputSchema,
+          // MCP-2025-03-26 tool annotations let clients auto-approve safe
+          // reads (readOnlyHint:true) and gate writes (destructiveHint:true).
+          // claude.ai + Claude Code both honor these hints.
+          ...(t.annotations ? { annotations: t.annotations } : {}),
           // _meta.target tells cloud agents which deployment environment
           // this server instance acts on (local-home / dev-cloud / etc).
           // _meta.risk is informational so agents can self-restrict.
@@ -219,29 +207,12 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  // OAuth Protected Resource Metadata (RFC 9728 / MCP 2025-03-26).
-  // Points claude.ai's MCP connector at CF Access as the authorization server
-  // so the OAuth Authorization Code flow can begin. Open (no auth) per spec.
-  if (req.method === "GET" && req.url === "/.well-known/oauth-protected-resource") {
-    res.writeHead(200, { "content-type": "application/json", "cache-control": "public, max-age=3600" });
-    res.end(JSON.stringify({
-      resource: "https://mcp.untool.ai/mcp",
-      authorization_servers: [CF_ACCESS_ISSUER],
-      bearer_methods_supported: ["header"],
-      resource_documentation: "https://github.com/nickpclarke/AgentArmy/blob/main/tools/mcp-local-fleet/README.md",
-    }));
-    return;
-  }
-  // Also serve under /mcp/.well-known/... — some clients look there.
-  if (req.method === "GET" && req.url === "/mcp/.well-known/oauth-protected-resource") {
-    res.writeHead(200, { "content-type": "application/json", "cache-control": "public, max-age=3600" });
-    res.end(JSON.stringify({
-      resource: "https://mcp.untool.ai/mcp",
-      authorization_servers: [CF_ACCESS_ISSUER],
-      bearer_methods_supported: ["header"],
-    }));
-    return;
-  }
+  // NOTE: We previously served `/.well-known/oauth-protected-resource` here
+  // to advertise CF Access as the authorization server for the SaaS-OIDC
+  // claude.ai connector flow. With Managed OAuth now enabled on the
+  // Self-Hosted Access application (`Local Fleet MCP API`), CF Access
+  // intercepts and rewrites that response at the edge, so the in-server
+  // handler became dead code. Removed.
 
   if (req.method !== "POST" || req.url !== "/mcp") {
     res.writeHead(404, { "content-type": "application/json" });

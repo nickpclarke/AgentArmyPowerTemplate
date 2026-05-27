@@ -36,43 +36,38 @@ export const SECRET_NAME = process.env.MCP_SECRET_NAME || "local-fleet-mcp-key";
 // to refuse to be exposed for other instance targets. Default = any.
 export const INSTANCE_TARGET = process.env.MCP_TARGET || "local-home";
 
-// ---- Cloudflare Access OIDC (preferred auth for cloud agents) -----------
-// When set, the server accepts JWTs signed by this CF Access SaaS app
-// alongside the legacy static bearer token. claude.ai's MCP custom connector
-// drives users through CF's OAuth Authorization Code flow and presents the
-// resulting access token as `Authorization: Bearer <jwt>` on every call.
+// ---- Cloudflare Access edge enforcement (Self-Hosted Application) -------
+// CF Access is configured as an Access Application gating mcp.untool.ai/*.
+// It enforces auth at the edge — user (email PIN or Managed OAuth via
+// claude.ai Connector), service token (CF-Access-Client-Id/Secret headers
+// for cloud microVMs), or cloudflared access curl. After it authenticates
+// the principal, it injects `Cf-Access-Jwt-Assertion` on forwarded
+// requests, which we verify in cfaccess-edge.mjs for defense-in-depth +
+// identity attribution.
 //
-// Hardcoded defaults below correspond to the "Local Fleet MCP" CF Access
-// SaaS app on the untool.cloudflareaccess.com team. Override per-instance
-// with CF_ACCESS_ISSUER / CF_ACCESS_AUDIENCE / CF_ACCESS_EMAIL_ALLOWLIST envs.
-export const CF_ACCESS_ISSUER = process.env.CF_ACCESS_ISSUER
-  || "https://untool.cloudflareaccess.com/cdn-cgi/access/sso/oidc/dce8d3bc779a4c2fc3eaf015f3fdd339a4d0f34613ade8234d967839bacc7190";
-// Audience (claude.ai sends OIDC client_id as aud). Leave empty until you've
-// created the connector and have its client_id — then export it as env.
-export const CF_ACCESS_AUDIENCE = process.env.CF_ACCESS_AUDIENCE || "";
-// Comma-separated emails permitted to invoke tools via CF Access JWT.
-export const CF_ACCESS_EMAIL_ALLOWLIST = (
-  process.env.CF_ACCESS_EMAIL_ALLOWLIST || "nick@livecreative.com"
-).split(",").map((s) => s.trim()).filter(Boolean);
-
-// ---- Cloudflare Access EDGE enforcement (Self-Hosted Application) -------
-// Different from the SaaS-app OIDC above. Here CF Access is configured as
-// an Access Application gating mcp.untool.ai/* — it enforces auth at the
-// edge and injects `Cf-Access-Jwt-Assertion` headers on forwarded requests.
-// We verify those JWTs in cfaccess-edge.mjs for defense-in-depth + identity.
-//
-// To enable:
+// Setup steps:
 //   1. CF Zero Trust → Access → Applications → Add → Self-hosted
 //   2. Domain: mcp.untool.ai (or mcp.untool.ai/mcp* path-scoped)
-//   3. Note the application's AUD tag — set as CF_ACCESS_EDGE_APP_AUD env
-//      (or paste into the default below)
-//   4. Team domain is the same `untool.cloudflareaccess.com`
+//   3. (For claude.ai web-UI Connector) Advanced settings →
+//      oauth_configuration.enabled + dynamic_client_registration with
+//      allowed_uris: ["https://claude.ai/*"]. Memory:
+//      cf-managed-oauth-for-mcp.
+//   4. Note the application's AUD tag — set as CF_ACCESS_EDGE_APP_AUD env
+//   5. Team domain is `untool.cloudflareaccess.com`
 export const CF_ACCESS_EDGE_TEAM_DOMAIN = process.env.CF_ACCESS_EDGE_TEAM_DOMAIN
   || "untool.cloudflareaccess.com";
 // MUST be set before edge enforcement is meaningful — without it, any CF
 // Access user on the team domain could call us. Empty by default to keep
 // existing behavior while the CF dashboard side is being set up.
 export const CF_ACCESS_EDGE_APP_AUD = process.env.CF_ACCESS_EDGE_APP_AUD || "";
+
+// Defense-in-depth email allowlist applied by cfaccess-edge.mjs after JWT
+// signature + issuer + audience verification pass. CF Access already
+// enforces email policy at the edge, so this is the second wall — useful
+// if an operator misconfigures the CF Access policy. Comma-separated.
+export const CF_ACCESS_EMAIL_ALLOWLIST = (
+  process.env.CF_ACCESS_EMAIL_ALLOWLIST || "nick@livecreative.com"
+).split(",").map((s) => s.trim()).filter(Boolean);
 
 // Azure CLI on Windows is `az.cmd` (a batch wrapper). Node 18+ refuses to
 // spawn .cmd/.bat directly (CVE-2024-27980); the workaround is to route

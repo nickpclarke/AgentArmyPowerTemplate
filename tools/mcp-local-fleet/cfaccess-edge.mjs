@@ -1,9 +1,11 @@
 // Cloudflare Access *Self-Hosted Application* edge-enforcement support.
 //
-// Different from cfaccess.mjs (which handles SaaS-app OIDC for claude.ai).
-// Here we sit BEHIND a CF Access Application configured for mcp.untool.ai/*
-// — CF Access enforces auth at the edge and injects a `Cf-Access-Jwt-
-// Assertion` header on every forwarded request. We verify that JWT.
+// We sit BEHIND a CF Access Application configured for mcp.untool.ai/*.
+// CF Access authenticates the principal at the edge — user (email PIN or
+// Managed OAuth via claude.ai Connector), service token (header-based for
+// cloud microVMs), or `cloudflared access curl` — then injects a
+// `Cf-Access-Jwt-Assertion` header on every forwarded request. We verify
+// that JWT here (the only auth path that fires on mcp.untool.ai).
 //
 // Why bother verifying if CF Access already did? Defense in depth:
 //   - If cloudflared / CF edge is ever bypassed (e.g. someone exposes our

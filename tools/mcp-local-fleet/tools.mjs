@@ -388,12 +388,14 @@ export const TOOLS = [
     name: "fleet_ps",
     description: "List allowlisted docker platform services with their current state (image, status, ports).",
     inputSchema: { type: "object", properties: {} },
+    annotations: { readOnlyHint: true, idempotentHint: true, destructiveHint: false, openWorldHint: false },
     risk: "low", handler: ps,
   },
   {
     name: "fleet_inspect",
     description: "Inspect one docker platform service: image, status, ports, env KEY names (values redacted).",
     inputSchema: { type: "object", required: ["service"], properties: { service: { type: "string", description: "Allowlisted service name" } } },
+    annotations: { readOnlyHint: true, idempotentHint: true, destructiveHint: false, openWorldHint: false },
     risk: "low", handler: inspect,
   },
   {
@@ -409,6 +411,7 @@ export const TOOLS = [
         limit:   { type: "integer", default: 100 },
       },
     },
+    annotations: { readOnlyHint: true, idempotentHint: true, destructiveHint: false, openWorldHint: false },
     risk: "low", handler: logs,
   },
 
@@ -417,18 +420,21 @@ export const TOOLS = [
     name: "fleet_up",
     description: "Bring up (start) an allowlisted docker compose service if not running. Idempotent. Does not rebuild images.",
     inputSchema: { type: "object", required: ["service"], properties: { service: { type: "string" } } },
+    annotations: { readOnlyHint: false, idempotentHint: true, destructiveHint: false, openWorldHint: false },
     risk: "med", handler: up,
   },
   {
     name: "fleet_down",
     description: "Stop and remove the container for an allowlisted service (keeps volumes — platform tier is stateful).",
     inputSchema: { type: "object", required: ["service"], properties: { service: { type: "string" } } },
+    annotations: { readOnlyHint: false, idempotentHint: true, destructiveHint: true, openWorldHint: false },
     risk: "med", handler: down,
   },
   {
     name: "fleet_restart",
     description: "Restart an allowlisted docker compose service in place.",
     inputSchema: { type: "object", required: ["service"], properties: { service: { type: "string" } } },
+    annotations: { readOnlyHint: false, idempotentHint: false, destructiveHint: true, openWorldHint: false },
     risk: "med", handler: restart,
   },
 
@@ -443,6 +449,7 @@ export const TOOLS = [
         no_cache: { type: "boolean", default: false },
       },
     },
+    annotations: { readOnlyHint: false, idempotentHint: false, destructiveHint: true, openWorldHint: false },
     risk: "high", handler: build,
   },
 
@@ -471,6 +478,7 @@ export const TOOLS = [
         no_restart: { type: "boolean", description: "Skip the post-build restart step", default: false },
       },
     },
+    annotations: { readOnlyHint: false, idempotentHint: false, destructiveHint: true, openWorldHint: true },
     risk: "high", handler: deploy,
   },
 ];
