@@ -1,6 +1,6 @@
 # Agent Roster
 
-Complete glossary of 177 AI specialist agents organized by expertise.
+Complete glossary of 180 AI specialist agents organized by expertise.
 
 !!! note "Documents as Code"
     These agent definitions are auto-generated from source files in `.claude/agents/categories/`.
@@ -12,7 +12,7 @@ Complete glossary of 177 AI specialist agents organized by expertise.
 pieLand
     "Business Product": 13
     "Core Development": 13
-    "Data Ai": 14
+    "Data Ai": 17
     "Developer Experience": 15
     "Enterprise Architecture": 11
     "Infrastructure": 22
@@ -65,6 +65,9 @@ pieLand
 - **data-analyst** — Use when you need to extract insights from business data, create dashboards and reports, or perform statistical analysis to support decision-making.
 - **data-engineer** — Use this agent when you need to design, build, or optimize data pipelines, ETL/ELT processes, and data infrastructure. Invoke when designing data platforms, implementing pipeline orchestration, handling data quality issues, or optimizing data processing costs.
 - **data-scientist** — Use this agent when you need to analyze data patterns, build predictive models, or extract statistical insights from datasets. Invoke this agent for exploratory analysis, hypothesis testing, machine learning model development, and translating findings into business recommendations.
+- **data-vault-architect** — Use this agent for Data Vault 2.1 strategy and governance decisions: choosing what belongs in raw vs business vault, mapping source systems to hubs, designing the same-as / identity-resolution strategy across sources, deciding materialize-vs-virtualize for business vault constructs, planning DV adoption roadmaps, and writing DV-specific ADRs. The 'what and why' layer of the DV team. Distinct from data-vault-modeler (which picks hub vs link vs satellite shapes) and data-vault-engineer (which builds the loaders, marts, and CI).
+- **data-vault-engineer** — Use this agent to build, load, and serve a Data Vault 2.1 implementation: generating DDL and dbt models from the model spec, implementing hash keys and hash diffs with the canonical tools/data-vault/hash library, wiring Datavault4dbt loaders, building PIT and bridge tables, projecting information marts (star, snowflake, OBT, graph), writing schema and idempotency tests, and integrating the vault into CI. The 'build and load and serve' layer of the DV team. Distinct from data-vault-architect (strategy) and data-vault-modeler (logical shape).
+- **data-vault-modeler** — Use this agent for Data Vault 2.1 logical modeling: deciding hub vs link vs satellite, designing business-key composition, splitting satellites by source and by sensitivity, choosing standard vs multi-active vs effectivity satellites, naming, and detecting modeling anti-patterns. The 'what shape' layer of the DV team. Outputs YAML model specs that conform to tools/data-vault/model.schema.json. Distinct from data-vault-architect (strategy and raw/business split) and data-vault-engineer (loaders, marts, build).
 - **database-optimizer** — Use this agent when you need to analyze slow queries, optimize database performance across multiple database systems, or implement indexing strategies to improve query execution.
 - **dlt-engineer** — Use this agent when building, debugging, or optimizing data pipelines with dlt (data load tool). Invoke for source connector development, incremental loading strategies, schema evolution, destination configuration (DuckDB, BigQuery, Snowflake, Postgres, filesystem), pipeline orchestration with Airflow/Prefect/GitHub Actions, and transforming raw API/file/database sources into analytics-ready datasets. Also the right agent for SEC EDGAR extraction, REST API pipelines, and any source → destination ELT work in this repo.
 - **llm-architect** — Use when designing LLM systems for production, implementing fine-tuning or RAG architectures, optimizing inference serving infrastructure, or managing multi-model deployments.

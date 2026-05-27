@@ -1,6 +1,6 @@
 # Agent Counts by Category
 
-Auto-generated agent inventory. Last updated: 2026-05-26 21:18:29 UTC
+Auto-generated agent inventory. Last updated: 2026-05-27 15:01:01 UTC
 
 | # | Category | Count |
 |---|----------|-------|
@@ -8,7 +8,7 @@ Auto-generated agent inventory. Last updated: 2026-05-26 21:18:29 UTC
 | 2 | Language Specialists           | 30 |
 | 3 | Infrastructure                 | 22 |
 | 4 | Quality Security               | 17 |
-| 5 | Data Ai                        | 14 |
+| 5 | Data Ai                        | 17 |
 | 6 | Developer Experience           | 15 |
 | 7 | Specialized Domains            | 14 |
 | 8 | Business Product               | 13 |
@@ -16,7 +16,7 @@ Auto-generated agent inventory. Last updated: 2026-05-26 21:18:29 UTC
 | 10 | Research Analysis              | 9 |
 | 11 | Enterprise Architecture        | 11 |
 | 12 | Knowledge Ontology             | 5 |
-|  | **TOTAL** | **177** |
+|  | **TOTAL** | **180** |
 
 ---
 

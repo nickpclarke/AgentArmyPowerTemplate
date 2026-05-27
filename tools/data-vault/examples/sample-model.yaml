@@ -1,0 +1,70 @@
+# Sample Data Vault 2.1 model spec.
+# Validate:  node tools/data-vault/model-generator.mjs --spec tools/data-vault/examples/sample-model.yaml --validate
+# Generate:  node tools/data-vault/model-generator.mjs --spec tools/data-vault/examples/sample-model.yaml --out  tools/data-vault/examples/build --target dbt
+
+model:
+  name: customer_360
+  version: 1
+  dialect: snowflake
+  hash_algorithm: sha256
+  separator: "||"
+  null_sentinel: "^^"
+  case_fold: upper
+  trim: true
+  unicode_form: NFC
+  description: >
+    Minimal Customer-360 raw vault: one customer hub, two source-specific satellites,
+    one order hub, one customer-order link, and a country reference. Used by the
+    data-vault toolkit's self-tests.
+
+hubs:
+  - name: hub_customer
+    business_keys: [customer_id]
+    record_source: crm.salesforce.contact
+    description: A unique business customer, cross-source.
+
+  - name: hub_order
+    business_keys: [order_id]
+    record_source: billing.invoice
+    description: A unique order placed by a customer.
+
+links:
+  - name: lnk_customer_order
+    hubs: [hub_customer, hub_order]
+    record_source: billing.invoice
+    description: Customer placed order.
+
+satellites:
+  - name: sat_customer_crm
+    parent: hub_customer
+    record_source: crm.salesforce.contact
+    sensitivity: pii
+    attributes:
+      - { name: first_name, type: "VARCHAR(100)" }
+      - { name: last_name,  type: "VARCHAR(100)" }
+      - { name: email,      type: "VARCHAR(255)" }
+      - { name: phone,      type: "VARCHAR(50)"  }
+
+  - name: sat_customer_billing
+    parent: hub_customer
+    record_source: billing.account
+    attributes:
+      - { name: billing_address, type: "VARCHAR(500)" }
+      - { name: payment_method,  type: "VARCHAR(50)"  }
+      - { name: credit_rating,   type: "INTEGER"      }
+
+  - name: sat_order_header
+    parent: hub_order
+    record_source: billing.invoice
+    attributes:
+      - { name: order_date,  type: "TIMESTAMP" }
+      - { name: total_value, type: "DECIMAL(18,2)" }
+      - { name: currency,    type: "VARCHAR(3)" }
+
+references:
+  - name: ref_country
+    kind: flat
+    business_keys: [country_code]
+    attributes:
+      - { name: country_name, type: "VARCHAR(100)" }
+      - { name: region,       type: "VARCHAR(50)"  }

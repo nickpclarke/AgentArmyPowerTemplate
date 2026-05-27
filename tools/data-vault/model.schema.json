@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentarmy.dev/schemas/data-vault/model.schema.json",
+  "title": "Data Vault 2.1 Model Spec",
+  "description": "Single source of truth for a Data Vault model. Rendered to DDL + dbt stubs by tools/data-vault/model-generator.mjs.",
+  "type": "object",
+  "required": ["model", "hubs"],
+  "additionalProperties": false,
+  "properties": {
+    "model": {
+      "type": "object",
+      "required": ["name", "version", "dialect"],
+      "additionalProperties": false,
+      "properties": {
+        "name":            { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "version":         { "type": "integer", "minimum": 1 },
+        "dialect":         { "enum": ["snowflake", "postgres", "bigquery", "databricks"] },
+        "hash_algorithm":  { "enum": ["sha256"], "default": "sha256" },
+        "separator":       { "type": "string", "default": "||" },
+        "null_sentinel":   { "type": "string", "default": "^^" },
+        "case_fold":       { "enum": ["upper", "lower", "none"], "default": "upper" },
+        "trim":            { "type": "boolean", "default": true },
+        "unicode_form":    { "enum": ["NFC", "NFD", "NFKC", "NFKD", "none"], "default": "NFC" },
+        "load_date_column":     { "type": "string", "default": "load_date" },
+        "record_source_column": { "type": "string", "default": "record_source" },
+        "hk_suffix":            { "type": "string", "default": "_hk" },
+        "hd_suffix":            { "type": "string", "default": "_hd" },
+        "bv_suffix":            { "type": "string", "default": "_bv" },
+        "description":          { "type": "string" }
+      }
+    },
+    "hubs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/hub" }
+    },
+    "links": {
+      "type": "array",
+      "default": [],
+      "items": { "$ref": "#/$defs/link" }
+    },
+    "satellites": {
+      "type": "array",
+      "default": [],
+      "items": { "$ref": "#/$defs/satellite" }
+    },
+    "references": {
+      "type": "array",
+      "default": [],
+      "items": { "$ref": "#/$defs/reference" }
+    }
+  },
+  "$defs": {
+    "hub": {
+      "type": "object",
+      "required": ["name", "business_keys", "record_source"],
+      "additionalProperties": false,
+      "properties": {
+        "name":          { "type": "string", "pattern": "^hub_[a-z][a-z0-9_]*$" },
+        "business_keys": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/businessKey" }
+        },
+        "record_source": { "type": "string", "minLength": 1 },
+        "description":   { "type": "string" },
+        "business_vault": { "type": "boolean", "default": false }
+      }
+    },
+    "businessKey": {
+      "oneOf": [
+        { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        {
+          "type": "object",
+          "required": ["name"],
+          "additionalProperties": false,
+          "properties": {
+            "name":        { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+            "type":        { "type": "string", "default": "VARCHAR(255)" },
+            "case_sensitive": { "type": "boolean", "default": false }
+          }
+        }
+      ]
+    },
+    "link": {
+      "type": "object",
+      "required": ["name", "hubs"],
+      "additionalProperties": false,
+      "properties": {
+        "name":          { "type": "string", "pattern": "^lnk_[a-z][a-z0-9_]*$" },
+        "hubs": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "oneOf": [
+              { "type": "string", "pattern": "^hub_[a-z][a-z0-9_]*$" },
+              {
+                "type": "object",
+                "required": ["hub", "role"],
+                "additionalProperties": false,
+                "properties": {
+                  "hub":  { "type": "string", "pattern": "^hub_[a-z][a-z0-9_]*$" },
+                  "role": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }
+                }
+              }
+            ]
+          }
+        },
+        "record_source": { "type": "string" },
+        "description":   { "type": "string" },
+        "business_vault":{ "type": "boolean", "default": false },
+        "same_as":       { "type": "boolean", "default": false }
+      }
+    },
+    "satellite": {
+      "type": "object",
+      "required": ["name", "parent", "record_source", "attributes"],
+      "additionalProperties": false,
+      "properties": {
+        "name":          { "type": "string", "pattern": "^(sat|eff_sat)_[a-z][a-z0-9_]*$" },
+        "parent":        { "type": "string", "pattern": "^(hub|lnk)_[a-z][a-z0-9_]*$" },
+        "record_source": { "type": "string", "minLength": 1 },
+        "attributes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/attribute" }
+        },
+        "multi_active":  { "type": "boolean", "default": false },
+        "sub_sequence_column": { "type": "string", "default": "sub_seq" },
+        "effectivity":   { "type": "boolean", "default": false },
+        "driving_key":   { "type": "string" },
+        "sensitivity":   { "enum": ["public", "internal", "pii", "restricted"], "default": "internal" },
+        "business_vault":{ "type": "boolean", "default": false },
+        "description":   { "type": "string" }
+      }
+    },
+    "attribute": {
+      "type": "object",
+      "required": ["name", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "name":          { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "type":          { "type": "string", "minLength": 1 },
+        "nullable":      { "type": "boolean", "default": true },
+        "description":   { "type": "string" }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "required": ["name", "business_keys"],
+      "additionalProperties": false,
+      "properties": {
+        "name":          { "type": "string", "pattern": "^ref_[a-z][a-z0-9_]*$" },
+        "kind":          { "enum": ["flat", "hub_sat"], "default": "flat" },
+        "business_keys": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/businessKey" }
+        },
+        "attributes": {
+          "type": "array",
+          "default": [],
+          "items": { "$ref": "#/$defs/attribute" }
+        },
+        "description":   { "type": "string" }
+      }
+    }
+  }
+}

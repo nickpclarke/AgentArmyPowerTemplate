@@ -1,0 +1,143 @@
+{
+  "_comment": "Canonical hash test vectors. Node (hash.mjs) and Python (hash.py) MUST produce these exact SHA-256 hex digests for the given inputs. Update only with an ADR.",
+  "config": {
+    "hash_algorithm": "sha256",
+    "separator": "||",
+    "null_sentinel": "^^",
+    "case_fold": "upper",
+    "trim": true,
+    "unicode_form": "NFC"
+  },
+  "hub_keys": [
+    {
+      "name": "simple single key",
+      "business_keys": [
+        "customer_id"
+      ],
+      "values": {
+        "customer_id": "C-12345"
+      },
+      "case_sensitive": {},
+      "expected_normalized": "C-12345",
+      "expected_hash": "c1b63ad4c9dd7825fabf0672fca9dca5968018a9ebd32c2b18fc06c0ce0482fe"
+    },
+    {
+      "name": "lowercase input gets upper-cased",
+      "business_keys": [
+        "customer_id"
+      ],
+      "values": {
+        "customer_id": "c-12345"
+      },
+      "case_sensitive": {},
+      "expected_normalized": "C-12345",
+      "expected_hash": "c1b63ad4c9dd7825fabf0672fca9dca5968018a9ebd32c2b18fc06c0ce0482fe"
+    },
+    {
+      "name": "whitespace trimmed",
+      "business_keys": [
+        "customer_id"
+      ],
+      "values": {
+        "customer_id": "  c-12345  "
+      },
+      "case_sensitive": {},
+      "expected_normalized": "C-12345",
+      "expected_hash": "c1b63ad4c9dd7825fabf0672fca9dca5968018a9ebd32c2b18fc06c0ce0482fe"
+    },
+    {
+      "name": "composite key, alpha order",
+      "business_keys": [
+        "order_id",
+        "line_no"
+      ],
+      "values": {
+        "order_id": "O-99",
+        "line_no": "3"
+      },
+      "case_sensitive": {},
+      "expected_normalized": "O-99||3",
+      "expected_hash": "5e558f1ebddd995930aff83fd95543fbc0a51c6f146d0739ba9f15828bda5c36"
+    },
+    {
+      "name": "null business key uses sentinel",
+      "business_keys": [
+        "customer_id",
+        "tenant_id"
+      ],
+      "values": {
+        "customer_id": "C-12345",
+        "tenant_id": null
+      },
+      "case_sensitive": {},
+      "expected_normalized": "C-12345||^^",
+      "expected_hash": "ed05af3c3a302db33dbf70b374aabce5cad3d7309fbac7253231d45306a540f8"
+    },
+    {
+      "name": "unicode NFC normalization (é vs e+combining)",
+      "business_keys": [
+        "customer_id"
+      ],
+      "values": {
+        "customer_id": "café"
+      },
+      "case_sensitive": {
+        "customer_id": true
+      },
+      "expected_normalized": "café",
+      "expected_hash": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e"
+    },
+    {
+      "name": "case-sensitive key preserves case",
+      "business_keys": [
+        "url_hash"
+      ],
+      "values": {
+        "url_hash": "aBcDeF123"
+      },
+      "case_sensitive": {
+        "url_hash": true
+      },
+      "expected_normalized": "aBcDeF123",
+      "expected_hash": "bf5ccab203981353bc9f7e3060ef83cafb077eddbd89170ea4ec86bae5b103b8"
+    }
+  ],
+  "sat_hash_diffs": [
+    {
+      "name": "ordered alphabetically",
+      "attributes": {
+        "first_name": "Ada",
+        "last_name": "Lovelace",
+        "email": "ada@example.com",
+        "phone": null
+      },
+      "expected_normalized": "ada@example.com||Ada||Lovelace||^^",
+      "expected_hash": "65febfc94d4285b73575e42a0e1aa3be27b2b5e133c49ff1849b7bfbb1d5384f"
+    },
+    {
+      "name": "single attribute",
+      "attributes": {
+        "status": "ACTIVE"
+      },
+      "expected_normalized": "ACTIVE",
+      "expected_hash": "630c2f1c0ee1b8d7da57cf8936ae7e78274aba0bfd765fe10a20dfe580f9eecc"
+    },
+    {
+      "name": "all null",
+      "attributes": {
+        "a": null,
+        "b": null
+      },
+      "expected_normalized": "^^||^^",
+      "expected_hash": "d5e0110fa962ea146450f370c04123a3c2f5f0b4f8f42fd60f24207599fb5879"
+    },
+    {
+      "name": "preserves case in descriptive attributes",
+      "attributes": {
+        "first_name": "Ada"
+      },
+      "expected_normalized": "Ada",
+      "expected_hash": "99a563ab2f6e21e96998f9fddd2a2bab82b70ac019579502b8d7fc0032ff62bb"
+    }
+  ]
+}

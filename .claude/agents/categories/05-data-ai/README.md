@@ -36,6 +36,21 @@ Data science practitioner combining statistics, machine learning, and domain exp
 
 **Use when:** Building predictive models, conducting experiments, performing advanced analytics, developing ML algorithms, or solving complex data problems.
 
+### [**data-vault-architect**](data-vault-architect.md) - Data Vault 2.1 strategy lead
+DV 2.1 strategist who owns the "what and why" layer of the warehouse: raw vs business vault placement, identity-resolution strategy, materialize-vs-virtualize choices, hash-key configuration, streaming vs batch, mart projection shape, PII placement. Anchored by [ARC-ADR-026](../../../docs/decisions/ARC-ADR-026-data-vault-2-1-methodology.md) and [docs/data-vault/strategy.md](../../../docs/data-vault/strategy.md).
+
+**Use when:** Deciding where in the vault something belongs, planning DV adoption, writing DV-specific ADRs, or arbitrating modeling boundaries across spokes. Distinct from `data-vault-modeler` (shape) and `data-vault-engineer` (build/load).
+
+### [**data-vault-modeler**](data-vault-modeler.md) - Data Vault 2.1 logical modeler
+DV 2.1 modeler who decides the *shape*: hub vs link vs satellite vs reference, multi-active vs standard sats, effectivity placement, naming. Outputs YAML model specs validated against `tools/data-vault/model.schema.json`.
+
+**Use when:** Translating a source system or business concept into hubs/links/sats, reviewing an existing model for anti-patterns, or designing business-key composition.
+
+### [**data-vault-engineer**](data-vault-engineer.md) - Data Vault 2.1 build & load engineer
+DV 2.1 builder who turns the model spec into a working, tested, idempotent warehouse. Generates DDL + Datavault4dbt stubs via `tools/data-vault/model-generator.mjs`, uses the canonical `tools/data-vault/hash.{mjs,py}` library, wires CI, builds PIT/bridge/marts.
+
+**Use when:** Implementing the vault loaders, projecting an information mart, writing schema/idempotency tests, or integrating the vault into CI.
+
 ### [**database-optimizer**](database-optimizer.md) - Database performance specialist
 Database performance expert ensuring queries run at lightning speed. Masters indexing strategies, query optimization, and database tuning. Makes databases perform at their peak.
 
