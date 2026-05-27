@@ -10,6 +10,8 @@ related:
 
 # Cloud Agents → Local Docker — Control Plane Plan
 
+> **Historical context (2026-05-27):** this note used the tool-prefix `local_fleet.<action>` before the design landed. The shipped tools live under the `fleet_<action>` prefix (snake_case) and the system is branded **untool fleet suite**. The architecture in this note is still the basis of what's deployed; only the names changed. See `tools/mcp-local-fleet/README.md` for current authoritative tool list.
+
 ## North-star
 
 > A cloud agent (Claude.ai routine, GitHub Actions runner, a remote OpenAI/Claude API caller, another human's laptop) can **build, test, deploy, observe, and iterate on agents that live in our local Docker** — using the same tunnel surface we just stood up for the frontend.

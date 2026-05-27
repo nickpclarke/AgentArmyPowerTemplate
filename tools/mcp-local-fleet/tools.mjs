@@ -8,7 +8,7 @@
 //   - Allowlisted compose service names ONLY (`ALLOWED_SERVICES` in config.mjs)
 //   - No free-form shell. Every tool shells out to `docker` (or `docker
 //     compose`) with whitelisted args
-//   - `fleet.logs` refuses spoke processes — docker-only scope
+//   - `fleet_logs` refuses spoke processes — docker-only scope
 //   - Single in-flight build per service (mutex) to avoid corrupting layer
 //     cache or burning duplicate cycles
 //   - Substring filtering (not regex) on caller-supplied input — kills ReDoS

@@ -7,6 +7,8 @@ related:
 
 # Session 2026-05-27 — Dev Tunnel, Log Multiplexer, Catalog Gap
 
+> **Snapshot at time of writing (early in 2026-05-27 session)**: tool names were `fleet.<action>` with dots, count was 10 including 6 stubs. Later in the same session: renamed to `fleet_<action>` (snake_case — Claude Code's MCP client silently drops dot-named tools), stubs promoted to real (8 tools as of merge), and the system branded as the **untool fleet suite**. See `tools/mcp-local-fleet/README.md` for current state.
+
 ## Headline
 
 - 🟢 **Cloudflare Tunnel running**, frontend reachable from phone at a real HTTPS URL.

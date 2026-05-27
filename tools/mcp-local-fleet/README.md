@@ -86,7 +86,7 @@ curl -X POST http://127.0.0.1:8765/mcp \
   -H 'content-type: application/json' \
   -H "Authorization: Bearer $TOKEN" \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call",
-       "params":{"name":"fleet.logs",
+       "params":{"name":"fleet_logs",
                  "arguments":{"service":"arcadedb","since":"5m","limit":50}}}'
 ```
 
@@ -122,7 +122,7 @@ local-home and only calls servers it's been routed to for dev-cloud work.
 | `prod-edge` | Edge nodes, very narrow tool surface (build/deploy only — never restart/down). |
 
 If a specific tool should NOT be exposed against certain targets (e.g.
-`fleet.build` is dangerous on prod-edge), declare `availableOn: ["local-home", "dev-cloud"]`
+`fleet_build` is dangerous on prod-edge), declare `availableOn: ["local-home", "dev-cloud"]`
 in its registry entry and the server will hide it for other instances.
 
 ## Files
@@ -137,20 +137,30 @@ in its registry entry and the server will hide it for other instances.
 
 ## Tools (current — scoped to Docker / CI-CD only)
 
+**Product name:** the `untool fleet suite` — the umbrella for the local-fleet
+MCP control plane, the `mcp.untool.ai` tunnel, the audit chain, the dev tunnel
++ log multiplexer, and the husky scaffold. This server is one piece of it.
+
+> **Tool-name gotcha** for future MCP servers in this fleet: tool names MUST
+> match `[a-zA-Z0-9_-]`. Dots are allowed by the MCP spec but Claude Code's
+> MCP client silently drops them — `claude mcp list` shows `✓ Connected`
+> with 0 callable tools. Use snake_case. (We hit this earlier and renamed
+> `fleet.X` → `fleet_X` across the registry.)
+
 | Tool | Phase | Risk | What |
 |---|---|---|---|
-| `fleet.ps`      | 1 | low  | List allowlisted platform containers + state |
-| `fleet.inspect` | 1 | low  | Image / status / ports / env KEY names for one container (values redacted) |
-| `fleet.logs`    | 1 | low  | Tail `docker logs <container>` for one allowlisted service. Refuses non-docker spoke names. |
-| `fleet.up`      | 2 | med  | `docker compose -f templates/local-stack/docker-compose.yml up -d --no-build <svc>` |
-| `fleet.down`    | 2 | med  | `compose stop <svc>` + `compose rm -f <svc>` (volumes preserved — platform tier is stateful) |
-| `fleet.restart` | 2 | med  | `compose restart <svc>` |
-| `fleet.build`   | 3 | high | `compose build [--no-cache] <svc>`. Single in-flight build per service (mutex). |
+| `fleet_ps`      | 1 | low  | List allowlisted platform containers + state |
+| `fleet_inspect` | 1 | low  | Image / status / ports / env KEY names for one container (values redacted) |
+| `fleet_logs`    | 1 | low  | Tail `docker logs <container>` for one allowlisted service. Refuses non-docker spoke names. |
+| `fleet_up`      | 2 | med  | `docker compose -f templates/local-stack/docker-compose.yml up -d --no-build <svc>` |
+| `fleet_down`    | 2 | med  | `compose stop <svc>` + `compose rm -f <svc>` (volumes preserved — platform tier is stateful) |
+| `fleet_restart` | 2 | med  | `compose restart <svc>` |
+| `fleet_build`   | 3 | high | `compose build [--no-cache] <svc>`. Single in-flight build per service (mutex). |
+| `fleet_deploy`  | 4 | high | `git fetch + checkout + compose build + restart` — the headline cloud-agent workflow. Refuses if hub working tree is dirty. Strict refname validation (no argv flag smuggling). |
 
 **Removed** (originally Phase 1/4, descoped to match the operator's "docker only" decision):
-- `fleet.tunnel_url` — not docker-related; tunnel state is queried via `tools/tunnel.mjs status`
-- `fleet.deploy` — git-pull-and-redeploy is out of MVP scope
-- `fleet.test` — test runners can be invoked by the cloud-agent's own CI; not a docker concern
+- `fleet_tunnel_url` — not docker-related; tunnel state is queried via `tools/tunnel.mjs status`
+- `fleet_test` — test runners can be invoked by the cloud-agent's own CI; not a docker concern
 
 This roster is the minimum viable set for cloud action runners building images
 and managing the local Docker compose stack.

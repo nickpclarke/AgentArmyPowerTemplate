@@ -340,13 +340,16 @@ Cloud agents call it with `Authorization: Bearer <token>` (token in KV `akv01-ag
 
 | Tool | Phase | Risk | What it does |
 |---|---|---|---|
-| `fleet.ps` | 1 | low | List allowlisted platform containers and their state |
-| `fleet.inspect` | 1 | low | Image / status / ports / env-key-names for one container (values redacted) |
-| `fleet.logs` | 1 | low | `docker logs <ctr>` for one allowlisted service. Substring grep + level filter. Refuses non-docker spoke names. |
-| `fleet.up` | 2 | med | `compose up -d --no-build <svc>` |
-| `fleet.down` | 2 | med | `compose stop` + `compose rm -f` (volumes preserved; platform tier is stateful) |
-| `fleet.restart` | 2 | med | `compose restart <svc>` |
-| `fleet.build` | 3 | high | `compose build [--no-cache] <svc>`. Single in-flight build per service (mutex). |
+| `fleet_ps` | 1 | low | List allowlisted platform containers and their state |
+| `fleet_inspect` | 1 | low | Image / status / ports / env-key-names for one container (values redacted) |
+| `fleet_logs` | 1 | low | `docker logs <ctr>` for one allowlisted service. Substring grep + level filter. Refuses non-docker spoke names. |
+| `fleet_up` | 2 | med | `compose up -d --no-build <svc>` |
+| `fleet_down` | 2 | med | `compose stop` + `compose rm -f` (volumes preserved; platform tier is stateful) |
+| `fleet_restart` | 2 | med | `compose restart <svc>` |
+| `fleet_build` | 3 | high | `compose build [--no-cache] <svc>`. Single in-flight build per service (mutex). |
+| `fleet_deploy` | 4 | high | `git fetch + checkout + compose build + restart` in one call. Refuses if hub working tree is dirty. Strict refname validation (no argv flag smuggling). |
+
+> **Tool-name gotcha** for future MCP servers: tool names MUST match `[a-zA-Z0-9_-]`. Dots are allowed by the MCP spec but Claude Code's MCP client silently drops them, so `claude mcp list` shows `✓ Connected` with 0 tools. Use snake_case.
 
 **Consumer setup** (cloud agent OR local Claude Code): one `mcpServers` entry, env-var token, no Anthropic catalog registration needed.
 
