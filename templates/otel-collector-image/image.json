@@ -3,8 +3,8 @@
   "name": "agentarmy-otel-collector",
   "kind": "single",
   "base": "otel/opentelemetry-collector-contrib:latest",
-  "description": "OpenTelemetry Collector function-tier image — sidecar to every spoke + standalone fleet collector. Receives OTLP (gRPC :4317, HTTP :4318) from spokes, batches, redacts PII, and exports to one or more backends (Grafana Tempo, Honeycomb, Tempo+Loki, or a local file). Realizes ARC-ADR-010 (observability standard) and the OTel-init remediation track from ARC-ADR-024 (platform maturity audit). Scaffolded as part of the contract-backlog PR; Dockerfile + collector-config.yaml land in the follow-up implementation issue.",
-  "owner": "hub template (scaffold)",
+  "description": "OpenTelemetry Collector function-tier image — sidecar to every spoke + standalone fleet collector. Receives OTLP (gRPC :4317, HTTP :4318) from spokes, batches, redacts PII at the sidecar boundary, and exports to one or more backends (file (default), Tempo via OTLP/gRPC, Honeycomb via OTLP/HTTP). Standalone mode adds tail sampling for cost control. Realizes ARC-ADR-010 (observability standard) and the OTel-init remediation track from ARC-ADR-024 (platform maturity audit).",
+  "owner": "hub template",
   "tier": "function",
   "services": [
     {
@@ -17,17 +17,18 @@
     }
   ],
   "shims": {
-    "note": "Base image already contains the collector + contrib processors/exporters. No additional package installs needed; configuration is mounted at runtime via OTELCOL_CONFIG_PATH env or baked at /etc/otelcol-contrib/config.yaml."
+    "note": "Base image otel/opentelemetry-collector-contrib already contains the collector binary + every processor/exporter we use (batch, tail_sampling, otlp, otlphttp, file, debug, health_check). No additional package installs."
   },
   "baked": [
-    { "path": "config/sidecar.yaml", "purpose": "PLANNED — sidecar collector config: OTLP receivers + batch processor + per-backend exporter blocks (env-gated)." },
-    { "path": "config/standalone.yaml", "purpose": "PLANNED — fleet collector config: same shape, plus tail-sampler for cost control." }
+    { "path": "config/sidecar.yaml", "purpose": "Sidecar mode: OTLP receivers + batch + resource attrs + attribute redaction + OTLP forward to OTEL_DOWNSTREAM_ENDPOINT." },
+    { "path": "config/standalone.yaml", "purpose": "Standalone mode: same receivers + tail-sampler (keep errors + probabilistic) + file/tempo/honeycomb exporter selection via OTEL_EXPORTER env." },
+    { "path": "entrypoint.sh", "purpose": "Selects config file based on OTELCOL_MODE (sidecar | standalone, default standalone)." }
   ],
   "setup": { "sh": "setup.sh", "ps1": "setup.ps1" },
   "doctor": {
     "cmd": "scripts/otel-doctor.sh",
     "proves": ["readiness", "otlp-accepts-grpc", "otlp-accepts-http", "exports-to-configured-backend"],
-    "description": "PLANNED — /:13133 health 200; gRPC OTLP send on :4317 returns OK; HTTP OTLP send on :4318 returns 200; configured backend exporter receives the span (verified per-backend)."
+    "description": "/:13133 returns 200; OTLP HTTP POST on :4318/v1/traces returns 200/202; TCP :4317 (gRPC) accepts connections; span emitted by doctor appears in the file exporter output (default) — when host can't see the file, checks inside the container via docker exec."
   },
   "deploy": {
     "target": "aca",

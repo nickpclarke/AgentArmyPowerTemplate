@@ -1,0 +1,93 @@
+# OTel Collector sidecar config — minimal pass-through.
+#
+# Sidecar mode: co-deployed with a spoke. Receives OTLP from the spoke on
+# loopback (because both share the pod / compose network), batches, and
+# forwards to the standalone fleet collector via OTLP.
+#
+# Config variables (env-substituted at startup):
+#   OTEL_DOWNSTREAM_ENDPOINT   — fleet collector OTLP endpoint (gRPC).
+#                                Default points at the standalone service
+#                                in the same compose network.
+#
+# Why no per-backend exporter here: the sidecar's only job is collect-and-
+# forward. The fleet collector (standalone.yaml) is the only place that
+# knows about Tempo / Honeycomb / Loki, so we don't smear that config across
+# every spoke.
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # Batch before forwarding — fewer, larger gRPC roundtrips to the fleet
+  # collector. timeout: 1s keeps tail latency bounded for development.
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+
+  # Attach standard resource attrs so the fleet collector knows where the
+  # spans came from without each spoke having to configure them.
+  resource/sidecar:
+    attributes:
+      - key: telemetry.sdk.collector.mode
+        value: sidecar
+        action: upsert
+
+  # Drop common high-cardinality keys at the sidecar boundary before they
+  # cross the wire. The fleet collector can re-attach approximate equivalents.
+  attributes/redact:
+    actions:
+      - key: http.url
+        action: delete
+      - key: http.request.body
+        action: delete
+
+exporters:
+  # OTEL_DOWNSTREAM_ENDPOINT MUST be set in the runtime env (compose / k8s).
+  # The collector's env substitution does NOT support shell :-defaults.
+  otlp/forward:
+    endpoint: ${env:OTEL_DOWNSTREAM_ENDPOINT}
+    tls:
+      insecure: true   # in-cluster traffic; flip to false + cert path in prod
+    sending_queue:
+      enabled: true
+      num_consumers: 4
+      queue_size: 1000
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 5m
+
+  # Health-check + debug logging into the collector's own stderr (useful in
+  # local compose). Quiet in prod (verbosity: basic).
+  debug:
+    verbosity: basic
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch, resource/sidecar, attributes/redact]
+      exporters: [otlp/forward, debug]
+    metrics:
+      receivers: [otlp]
+      processors: [batch, resource/sidecar]
+      exporters: [otlp/forward]
+    logs:
+      receivers: [otlp]
+      processors: [batch, resource/sidecar, attributes/redact]
+      exporters: [otlp/forward]
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
