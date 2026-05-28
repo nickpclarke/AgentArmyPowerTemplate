@@ -13,6 +13,12 @@
 
 import { execFileSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join, resolve } from "node:path";
+
+// Repo root, resolved from this file's location (cwd-independent).
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 export const PORT = parseInt(process.env.MCP_PORT || "8765", 10);
 export const HOST = process.env.MCP_HOST || "127.0.0.1"; // never bind 0.0.0.0; tunnel exposes
@@ -81,19 +87,82 @@ function runAz(args, opts = {}) {
   return execFileSync(process.env.AZ_BIN || "az", args, opts);
 }
 
+// ---- Allowlist (auto-enrolling) --------------------------------------------
 // Two service tiers — see ARC-ADR-023 (container tiering). Platform services
 // run in docker (logs via `docker logs <name>`); spoke processes are local
 // node/python (logs via `tools/tail.mjs query --service <name>`).
-export const ALLOWED_SERVICES = {
-  // Spokes (local processes; backed by tail.mjs NDJSON)
+//
+// The allowlist AUTO-DERIVES from the fleet's own declared roster so a NEW
+// fleet member gets access the moment its manifest merges — no edit here:
+//   1. templates/local-stack/docker-compose.yml — authoritative for runnable
+//      platform services (real service + container names; build/up-capable).
+//   2. templates/*/image.json — the full fleet roster (adds function-tier
+//      images not in local-stack: forge, hmac-verify, jwt-introspect, ...).
+//   3. SPOKES — local node/python processes (no image.json).
+// SECURITY: this is NOT caller input — it's the repo's own code-reviewed
+// manifests + compose, so the invariant "allowlist = fleet-declared services
+// only" holds exactly as before; we've only removed the duplicate hand-edit.
+// CORE_FALLBACK guarantees the original platform set always resolves even if
+// discovery hiccups (a parse error can never *remove* access).
+
+const SPOKES = {
   frontend: { tier: "spoke", logSource: "tail" },
   middle:   { tier: "spoke", logSource: "tail" },
   back:     { tier: "spoke", logSource: "tail" },
-  // Platform containers (backed by docker logs)
-  arcadedb:      { tier: "platform", logSource: "docker", container: "agentarmy-arcadedb" },
-  postgres:      { tier: "platform", logSource: "docker", container: "agentarmy-postgres" },
-  nats:          { tier: "platform", logSource: "docker", container: "agentarmy-nats" },
-  "event-bridge":{ tier: "platform", logSource: "docker", container: "agentarmy-event-bridge" },
+};
+
+const CORE_FALLBACK = {
+  arcadedb:       { tier: "platform", logSource: "docker", container: "agentarmy-arcadedb" },
+  postgres:       { tier: "platform", logSource: "docker", container: "agentarmy-postgres" },
+  nats:           { tier: "platform", logSource: "docker", container: "agentarmy-nats" },
+  "event-bridge": { tier: "platform", logSource: "docker", container: "agentarmy-event-bridge" },
+};
+
+// image.json short-name → compose service name, where the repo disagrees.
+const COMPOSE_ALIAS = { "fuseki-ontology": "fuseki" };
+
+function discoverFleetServices() {
+  const svc = {};
+
+  // 1. local-stack compose — authoritative service + container names.
+  try {
+    const compose = readFileSync(
+      join(REPO_ROOT, "templates", "local-stack", "docker-compose.yml"), "utf8");
+    let cur = null;
+    for (const line of compose.split("\n")) {
+      const s = line.match(/^ {2}([a-z][a-z0-9-]+):\s*$/);
+      if (s) { cur = s[1]; continue; }
+      const c = line.match(/^\s+container_name:\s*(\S+)/);
+      if (c && cur) svc[cur] = { tier: "platform", logSource: "docker", container: c[1] };
+    }
+  } catch { /* compose optional — CORE_FALLBACK covers the platform set */ }
+
+  // 2. templates/*/image.json — auto-enroll every declared image.
+  try {
+    const tdir = join(REPO_ROOT, "templates");
+    for (const e of readdirSync(tdir, { withFileTypes: true })) {
+      if (!e.isDirectory()) continue;
+      const mf = join(tdir, e.name, "image.json");
+      if (!existsSync(mf)) continue;
+      let m; try { m = JSON.parse(readFileSync(mf, "utf8")); } catch { continue; }
+      let key = String(m.name || e.name).replace(/^agentarmy-/, "");
+      key = COMPOSE_ALIAS[key] || key;
+      if (svc[key]) continue; // compose already defined it (authoritative)
+      svc[key] = {
+        tier: m.tier || "function",
+        logSource: "docker",
+        container: m.name || `agentarmy-${key}`,
+      };
+    }
+  } catch { /* templates optional */ }
+
+  return svc;
+}
+
+export const ALLOWED_SERVICES = {
+  ...CORE_FALLBACK,
+  ...discoverFleetServices(),
+  ...SPOKES,
 };
 
 export function resolveBearerToken() {

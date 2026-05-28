@@ -170,8 +170,16 @@ and managing the local Docker compose stack.
 1. **No Docker socket exposure, ever.** All Docker interactions go through
    `execFile("docker", [...whitelisted args...])`. The MCP server is the only
    code that talks to docker.
-2. **Allowlisted service names only.** See `ALLOWED_SERVICES` in `config.mjs`.
-   Adding a new service is a code change here.
+2. **Allowlisted service names only — but the allowlist auto-enrolls fleet
+   members.** `ALLOWED_SERVICES` in `config.mjs` is *derived* from the fleet's
+   own declared roster: `templates/local-stack/docker-compose.yml` (runnable
+   platform services) + every `templates/*/image.json` (the full image roster)
+   + the local spoke processes. A new fleet member is recognized the moment its
+   `image.json` merges — **no edit here**. The security property is unchanged:
+   the inputs are the repo's own code-reviewed manifests (never caller input),
+   so "allowlist = fleet-declared services only" still holds, and unknown names
+   are still refused. A `CORE_FALLBACK` guarantees the platform set resolves
+   even if discovery fails (a parse error can't *remove* access).
 3. **No shell-exec tool.** Capability gaps become hub issues, not escape
    hatches.
 4. **Constant-time bearer comparison.** Length pre-check to avoid leaks via
