@@ -18,6 +18,8 @@
     },
     "twilio": {
       "enabled": false,
+      "channel": "sms",
+      "_channel_note": "'sms' (metered; US delivery needs A2P 10DLC registration) or 'whatsapp' (Twilio WhatsApp sandbox/sender — no carrier registration; recipient must first join the sandbox; 'from' is the sandbox number, e.g. +14155238886).",
       "criticalOnly": true,
       "accountSid": "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
       "from": "+1XXXXXXXXXX",

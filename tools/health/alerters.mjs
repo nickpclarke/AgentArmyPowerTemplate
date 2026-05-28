@@ -105,7 +105,12 @@ const twilioSink = {
             'Content-Type': 'application/x-www-form-urlencoded',
             Authorization: `Basic ${auth}`,
           },
-          body: new URLSearchParams({ To: cfg.to, From: cfg.from, Body: body }),
+          // channel 'whatsapp' prefixes the addresses (sandbox/sender); default 'sms'.
+          body: new URLSearchParams({
+            To: (cfg.channel === 'whatsapp' ? 'whatsapp:' : '') + cfg.to,
+            From: (cfg.channel === 'whatsapp' ? 'whatsapp:' : '') + cfg.from,
+            Body: body,
+          }),
           signal: ctrl.signal,
         },
       );
