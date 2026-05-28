@@ -91,7 +91,7 @@ Contracts the fleet logically needs but hasn't shipped yet. Each row becomes a d
 | XC-8 | **Image-standard schema** (`templates/image-schema.json`) | hub → every image author | JSON-Schema | **near** | Already exists; just *register* it as a contract |
 | XC-9 | **Spoke-layer manifest** (`templates/spoke-layer-manifest.example.json`) | hub → every spoke | JSON-Schema | mid | Spoke-level manifest format; schema not yet published |
 | XC-10 | **Business-object catalog** (`templates/business-object-catalog.example.json`) | producing spoke → consumer spokes | JSON | later | Shared business-object registry (existing example, no schema yet) |
-| XC-11 | **Forge control API** (`contracts/forge-control.openapi.yaml`) | hub `templates/forge-image/` → backend-core (webhook source), operators (on-demand) | OpenAPI | **near** | `POST /webhook` (HMAC-verified ontology-change), `POST /generate` (on-demand `{source, target, options}`), `GET /healthz`. Governed by [ADR-029](decisions/ARC-ADR-029-agentarmy-forge-codegen-container.md); scaffolded alongside `templates/forge-image/` in this PR |
+| XC-11 | **Forge control API** (`contracts/forge-control.openapi.yaml`) | hub `templates/forge-image/` → backend-core (webhook source), operators (on-demand) | OpenAPI | **producer-shipped** | `POST /webhook` (HMAC `X-Hub-Signature-256`), `POST /generate` (on-demand `{source, target, out, consumer_repo, branch, if_none_match}`), `GET /healthz`. Endpoints shipped in PR #295; OpenAPI spec landed; **mock pending**. Governed by [ADR-029](decisions/ARC-ADR-029-agentarmy-forge-codegen-container.md) |
 
 ### Upstream vendored
 

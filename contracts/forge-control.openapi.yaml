@@ -1,0 +1,282 @@
+openapi: 3.1.0
+info:
+  title: AgentArmy Forge Control API
+  version: 0.1.0
+  description: >-
+    Control surface for **agentarmy-forge** (XC-11) — the function-tier code
+    generator that turns one ontology/model into many source-code projections
+    (C# / TypeScript / Python). Governed by
+    [ARC-ADR-029](../docs/decisions/ARC-ADR-029-agentarmy-forge-codegen-container.md).
+
+    Forge runs in two modes, both exposed here:
+
+    - `POST /webhook` — the **event-driven** path. backend-core's ontology
+      ingest (BE-8) writes to the Fuseki store and emits a
+      `fleet.ontology.changed` signal; an HMAC-signed webhook fires at forge,
+      which fetches the deterministic snapshot (BE-7) and regenerates. Signed
+      with a GitHub-style `X-Hub-Signature-256: sha256=<hex>` header over the
+      raw body and verified in constant time (CWE-208), identical to
+      `templates/hmac-verify-image`'s sidecar.
+
+    - `POST /generate` — the **on-demand** path for operators and agents who
+      want to force a regeneration from an explicit source URI without waiting
+      for an ontology-change event. Body mirrors the forge CLI arguments.
+
+    The liveness/readiness/health probes (`/livez`, `/readyz`, `/healthz`) are
+    the cross-cutting fleet probes defined in
+    [`contracts/health.openapi.yaml`](./health.openapi.yaml); `/healthz` is
+    repeated here only because it returns a forge-specific diagnostic snapshot.
+
+    **Tier:** function (bursty, stateless codegen — kept off the steady-state
+    runtimes). **Not externally exposed** — reached by backend-core (webhook)
+    and operators/agents (on-demand) on the internal network only.
+  contact:
+    name: AgentArmy hub
+    url: https://github.com/nickpclarke/AgentArmy
+
+servers:
+  - url: http://forge:8086
+    description: In-cluster service address (default FORGE_PORT=8086)
+  - url: http://localhost:8086
+    description: Local dev
+
+tags:
+  - name: control
+    description: Trigger generation (event-driven + on-demand)
+  - name: health
+    description: Forge-specific diagnostic snapshot
+
+paths:
+  /webhook:
+    post:
+      tags: [control]
+      operationId: webhookTrigger
+      summary: HMAC-verified ontology-change trigger (event-driven)
+      description: >-
+        Invoked by backend-core when the ontology changes. The raw request body
+        MUST be signed with HMAC-SHA256 under the shared `WEBHOOK_HMAC_SECRET`
+        and presented as `X-Hub-Signature-256: sha256=<hex>`. Forge fetches the
+        snapshot named in `snapshot_url` (or falls back to
+        `FORGE_DEFAULT_UPSTREAM`), regenerates all targets, and — if a consumer
+        repo is configured — opens PRs against the consumer spokes. Fails closed:
+        if no secret is configured the endpoint returns 500 rather than accept
+        unsigned input.
+      parameters:
+        - name: X-Hub-Signature-256
+          in: header
+          required: true
+          description: "`sha256=` + lowercase hex of HMAC-SHA256(body, WEBHOOK_HMAC_SECRET)."
+          schema:
+            type: string
+            pattern: '^sha256=[0-9a-f]{64}$'
+            example: sha256=2b4c1f9e0a...c7
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookPayload'
+      responses:
+        '200':
+          description: Accepted and regenerated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateResponse'
+        '400':
+          description: No `snapshot_url` in payload and `FORGE_DEFAULT_UPSTREAM` unset.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '401':
+          description: Missing or invalid `X-Hub-Signature-256`.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '422':
+          description: Body is not a valid WebhookPayload.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '500':
+          description: >-
+            `WEBHOOK_HMAC_SECRET` not configured (fail-closed) or generation
+            failed.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+
+  /generate:
+    post:
+      tags: [control]
+      operationId: generateOnDemand
+      summary: On-demand generation from an explicit source (no signature)
+      description: >-
+        Regenerate from a source URI without waiting for an ontology-change
+        event. `target` selects one emitter or `all`. If `consumer_repo` is set,
+        forge opens a PR against `owner/repo` (or `local:/path/to/bare`) on the
+        given `branch`. `if_none_match` lets the caller pass an etag so forge can
+        short-circuit when the snapshot content hash is unchanged.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateRequest'
+      responses:
+        '200':
+          description: Generated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateResponse'
+        '422':
+          description: '`target` is not one of csharp / typescript / python / all.'
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '500':
+          description: Generation failed (fetch / parse / emit / pr-open error).
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+
+  /healthz:
+    get:
+      tags: [health]
+      operationId: healthz
+      summary: Forge diagnostic snapshot
+      description: >-
+        Returns a forge-specific snapshot — configured upstream, output dir,
+        whether the webhook secret is loaded, and the available emit targets.
+        For load-balancer/Kubernetes probing use `/livez` and `/readyz` from the
+        shared health contract instead.
+      responses:
+        '200':
+          description: Diagnostic snapshot (always 200 if the process is up).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthSnapshot'
+
+components:
+  schemas:
+    WebhookPayload:
+      type: object
+      required: [event]
+      properties:
+        event:
+          type: string
+          description: Event name, e.g. `ontology.changed`.
+          example: ontology.changed
+        version:
+          type: [string, "null"]
+          description: Snapshot version / timestamp the event refers to.
+          example: '2026-05-27T13:00:00Z'
+        etag:
+          type: [string, "null"]
+          description: Snapshot etag — forwarded as `If-None-Match` to short-circuit re-gen.
+          example: 'W/"abc123"'
+        snapshot_url:
+          type: [string, "null"]
+          format: uri
+          description: >-
+            Where to fetch the deterministic snapshot (BE-7). Defaults to
+            `FORGE_DEFAULT_UPSTREAM` when omitted.
+          example: http://backend-core:8000/ontology/snapshot
+
+    GenerateRequest:
+      type: object
+      required: [source]
+      properties:
+        source:
+          type: string
+          format: uri
+          description: Source URI — `file://`, `http(s)://`, or `azureblob://`.
+          example: http://backend-core:8000/ontology/snapshot?version=2026-05-27T13:00:00Z
+        target:
+          type: string
+          enum: [csharp, typescript, python, all]
+          default: all
+          description: Which emitter(s) to run.
+        out:
+          type: [string, "null"]
+          description: Output directory; defaults to `FORGE_OUT_DIR`.
+          example: /tmp/forge-out
+        consumer_repo:
+          type: [string, "null"]
+          description: >-
+            If set, open a PR against `owner/repo` or `local:/path/to/bare`.
+          example: nickpclarke/backend-core
+        branch:
+          type: [string, "null"]
+          description: Branch to open the PR from; default chosen by forge.
+        if_none_match:
+          type: [string, "null"]
+          description: Etag for conditional generation (skip when unchanged).
+          example: 'W/"abc123"'
+
+    GenerateResponse:
+      type: object
+      required: [ok, result]
+      properties:
+        ok:
+          type: boolean
+          example: true
+        result:
+          type: object
+          description: >-
+            Generator result — emitted files per target, snapshot version used,
+            whether generation was skipped (etag match), and any PR URLs opened.
+          additionalProperties: true
+          example:
+            skipped: false
+            version: '2026-05-27T13:00:00Z'
+            targets:
+              csharp: ['DataPlatformContracts.g.cs']
+              typescript: ['contracts.g.ts']
+              python: ['contracts_g.py']
+            prs: ['https://github.com/nickpclarke/backend-core/pull/130']
+
+    HealthSnapshot:
+      type: object
+      required: [ok, ts, service, version, tier]
+      properties:
+        ok: { type: boolean, example: true }
+        ts: { type: string, example: '2026-05-28T04:30:00Z' }
+        service: { type: string, example: agentarmy-forge }
+        version: { type: string, example: 0.3.0 }
+        tier: { type: string, example: function }
+        default_upstream:
+          type: [string, "null"]
+          example: http://backend-core:8000/ontology/snapshot
+        out_dir: { type: string, example: /tmp/forge-out }
+        webhook_secret_configured: { type: boolean, example: true }
+        targets_available:
+          type: array
+          items: { type: string }
+          example: [csharp, typescript, python, all]
+        dependencies:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              ok: { type: boolean }
+              message: { type: string }
+
+    ProblemDetails:
+      description: >-
+        RFC 7807 problem object. Conforms to
+        `contracts/problem-details.openapi.yaml`.
+      type: object
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+      example:
+        type: https://github.com/nickpclarke/AgentArmy/contracts/problems/bad-signature
+        title: bad signature
+        status: 401
+        detail: X-Hub-Signature-256 did not match
