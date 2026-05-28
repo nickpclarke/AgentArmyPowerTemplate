@@ -1,0 +1,3 @@
+# Per-machine config (thresholds + webhook URL) and runtime alert/cooldown state.
+config.json
+.state.json

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test:e2e": "playwright test",
+    "health": "node tools/health/monitor.mjs",
     "prepare": "husky"
   },
   "devDependencies": {

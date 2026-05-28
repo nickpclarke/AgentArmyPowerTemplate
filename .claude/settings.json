@@ -40,6 +40,16 @@
             "statusMessage": "Fleet heartbeat — contract drift + health..."
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/tools/health/monitor.mjs\" --session",
+            "timeout": 20,
+            "statusMessage": "WSL/Docker storage + health check..."
+          }
+        ]
       }
     ],
     "Stop": [

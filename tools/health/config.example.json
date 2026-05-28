@@ -1,0 +1,27 @@
+{
+  "_comment": "Copy this to tools/health/config.json (gitignored) and tune. The webhook URL may also be supplied via $AGENTARMY_HEALTH_WEBHOOK_URL so it never lands in git.",
+  "drives": ["C"],
+  "thresholds": {
+    "hostDiskFreeGB": { "warn": 25, "critical": 10 },
+    "hostDiskUsedPct": { "warn": 85, "critical": 93 },
+    "dockerTotalGB": { "warn": 40, "critical": 60 },
+    "dockerReclaimableGB": { "warn": 15, "critical": 30 },
+    "wslVhdxGB": { "warn": 60, "critical": 100 },
+    "containerRestarts": { "warn": 3, "critical": 10 }
+  },
+  "alerters": {
+    "ndjson": { "enabled": true },
+    "webhook": {
+      "enabled": true,
+      "format": "ntfy",
+      "url": "https://ntfy.sh/CHANGE-ME-agentarmy-health"
+    }
+  },
+  "remediation": {
+    "autoPruneOnCritical": true,
+    "cooldownMinutes": 60,
+    "allow": ["docker-prune-safe"]
+  },
+  "alertCooldownMinutes": 30,
+  "timeoutMs": 8000
+}
