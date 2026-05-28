@@ -72,9 +72,58 @@ const webhookSink = {
   },
 };
 
-// NDJSON + webhook are the persistent/push channels. Console output is the
-// engine's own responsibility (it doubles as a status view), so it isn't a sink.
-export const SINKS = [ndjsonSink, webhookSink];
+// ---- Twilio SMS ------------------------------------------------------------
+// SMS is metered (costs per message), so default to CRITICAL-only — warns stay
+// on the free channels (ntfy/NDJSON). Auth token comes from the env var
+// (sourced from KV secret `Twilio`) or cfg.authToken (gitignored config.json);
+// accountSid + from + to live in config. Sink stays disabled until all present.
+const twilioSink = {
+  id: 'twilio',
+  enabled: (cfg) => Boolean(
+    cfg?.enabled && cfg.accountSid && cfg.from && cfg.to &&
+    (process.env.AGENTARMY_TWILIO_AUTH_TOKEN || cfg.authToken)
+  ),
+  async send(alert, cfg) {
+    if (cfg.criticalOnly !== false && alert.status !== 'critical') return;
+    const token = process.env.AGENTARMY_TWILIO_AUTH_TOKEN || cfg.authToken;
+    const trip = alert.readings
+      .filter((r) => r.status !== 'ok')
+      .map((r) => r.message)
+      .slice(0, 3)
+      .join('; ');
+    // SMS segments cost money — keep it terse + single-ish segment.
+    const body = `AgentArmy ${alert.status.toUpperCase()} @ ${alert.host}: ${trip || alert.summary || ''}`.slice(0, 320);
+    const auth = Buffer.from(`${cfg.accountSid}:${token}`).toString('base64');
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 8000);
+    try {
+      const res = await fetch(
+        `https://api.twilio.com/2010-04-01/Accounts/${cfg.accountSid}/Messages.json`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Authorization: `Basic ${auth}`,
+          },
+          body: new URLSearchParams({ To: cfg.to, From: cfg.from, Body: body }),
+          signal: ctrl.signal,
+        },
+      );
+      if (!res.ok) {
+        const t = await res.text().catch(() => '');
+        process.stderr.write(`health twilio → HTTP ${res.status} ${t.slice(0, 120)}\n`);
+      }
+    } catch (e) {
+      process.stderr.write(`health twilio failed: ${e.message}\n`);
+    } finally {
+      clearTimeout(timer);
+    }
+  },
+};
+
+// NDJSON + webhook + Twilio are the persistent/push channels. Console output is
+// the engine's own responsibility (it doubles as a status view), so it isn't a sink.
+export const SINKS = [ndjsonSink, webhookSink, twilioSink];
 
 // Fan an alert out to every enabled sink.
 export async function dispatch(alert, alertersCfg = {}) {

@@ -54,6 +54,11 @@ spam you (`alertCooldownMinutes`, default 30; an *escalation* always fires):
 
 - **ntfy / webhook** — POST to a URL. `format`: `ntfy` (phone push, default),
   `slack`, `discord`, or `json`. Critical → max ntfy priority.
+- **Twilio SMS** — `alerters.twilio` (`{ enabled, accountSid, from, to }`).
+  Auth token via `$AGENTARMY_TWILIO_AUTH_TOKEN` (sourced from KV secret `Twilio`)
+  or `authToken` in the gitignored `config.json`. **`criticalOnly: true` by
+  default** — SMS is metered, so warns stay on the free channels and only
+  critical alerts text you. Sends via the Twilio Messages REST API (Basic auth).
 - **NDJSON log** — `tools/logs/health.log.YYYY-MM-DD`, queryable with the
   existing multiplexer: `node tools/tail.mjs query --grep health`.
 - **console** — the monitor's own output (status view; one-liner in `--quiet`).
