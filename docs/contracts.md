@@ -74,6 +74,8 @@ Contracts the fleet logically needs but hasn't shipped yet. Each row becomes a d
 | BE-4 | **Embeddings API** (`backend-core/contracts/embeddings.openapi.yaml`) | backend-core (or local-embedder fn-tier) → consumers | OpenAPI | mid | Vector dim, model name, retrieval params. Pairs with local-embedder image (#184) |
 | BE-5 | **Ingest contract clarification** (extend `backend-core.openapi.json`) | backend-core → middle-core agents | OpenAPI | **near** | Resolves MC#44 (URI-ingest vs multipart). Decision artifact needed first |
 | BE-6 | **Pagination contract** (`contracts/pagination.openapi.yaml`) | cross-cutting | OpenAPI | mid | Cursor vs offset, page-size limits; referenced by every list endpoint |
+| BE-7 | **Ontology snapshot read API** (`backend-core/contracts/ontology-snapshot.openapi.yaml`) | backend-core (Fuseki-backed) → `agentarmy-forge` | OpenAPI | **near** | `GET /ontology/snapshot?version=…` returning deterministic RDF (Turtle / JSON-LD / N-Triples) with etag/version headers so forge can short-circuit re-gen. Governed by [ADR-029](decisions/ARC-ADR-029-agentarmy-forge-codegen-container.md); upstream consumer of [ADR-019](decisions/ARC-ADR-019-ontology-reasoning-layer.md) Fuseki store |
+| BE-8 | **Ontology ingest API** (`backend-core/contracts/ontology-ingest.openapi.yaml`) | backend-core → operators + agents | OpenAPI (multipart + JSON) | **near** | `POST /ontology/ingest` — accept RDF file → SHACL/ShEx shape validation → write to Fuseki + emit `fleet.ontology.changed` event (forge webhook fires off this). Completes the ingest → store → snapshot → generate loop. Governed by [ADR-029](decisions/ARC-ADR-029-agentarmy-forge-codegen-container.md), [ADR-019](decisions/ARC-ADR-019-ontology-reasoning-layer.md) |
 
 ### Cross-cutting
 
@@ -89,6 +91,7 @@ Contracts the fleet logically needs but hasn't shipped yet. Each row becomes a d
 | XC-8 | **Image-standard schema** (`templates/image-schema.json`) | hub → every image author | JSON-Schema | **near** | Already exists; just *register* it as a contract |
 | XC-9 | **Spoke-layer manifest** (`templates/spoke-layer-manifest.example.json`) | hub → every spoke | JSON-Schema | mid | Spoke-level manifest format; schema not yet published |
 | XC-10 | **Business-object catalog** (`templates/business-object-catalog.example.json`) | producing spoke → consumer spokes | JSON | later | Shared business-object registry (existing example, no schema yet) |
+| XC-11 | **Forge control API** (`contracts/forge-control.openapi.yaml`) | hub `templates/forge-image/` → backend-core (webhook source), operators (on-demand) | OpenAPI | **near** | `POST /webhook` (HMAC-verified ontology-change), `POST /generate` (on-demand `{source, target, options}`), `GET /healthz`. Governed by [ADR-029](decisions/ARC-ADR-029-agentarmy-forge-codegen-container.md); scaffolded alongside `templates/forge-image/` in this PR |
 
 ### Upstream vendored
 
