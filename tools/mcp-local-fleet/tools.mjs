@@ -158,9 +158,10 @@ async function logs({ service, since = "5m", grep = null, level = null, limit = 
   ], { maxBuffer: 4 * 1024 * 1024, timeout: TIMEOUT_FAST_MS });
   let lines = stdout.split("\n").filter(Boolean);
   // Drop healthcheck probes from the default view. Keep them when the caller
-  // opts in, or when their grep clearly targets a probe (so debugging the
-  // healthcheck itself still surfaces the lines).
-  const grepTargetsProbe = grep != null && /heal|live|ready|ping/i.test(String(grep));
+  // opts in, or when their grep clearly targets a probe path (so debugging the
+  // healthcheck itself still surfaces the lines). Anchored on whole tokens so an
+  // incidental substring (e.g. "shipping", "alive") doesn't disable the filter.
+  const grepTargetsProbe = grep != null && /\b(?:healthz?|livez|readyz|ping)\b/i.test(String(grep));
   let hidden_healthcheck_lines = 0;
   if (!include_healthchecks && !grepTargetsProbe) {
     const before = lines.length;

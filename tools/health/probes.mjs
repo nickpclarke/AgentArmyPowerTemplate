@@ -150,11 +150,13 @@ function containersProbe(ctx) {
     // CI runners that recycle per job it climbs without indicating any problem,
     // so it does NOT drive severity. The real, unambiguous signals are: Docker
     // actively backing off a failing container (state=restarting), a failing
-    // healthcheck (unhealthy), or a non-clean exit (exited with a nonzero code,
-    // e.g. an OOM kill = 137). Restart count is kept as informational evidence.
+    // healthcheck (unhealthy), or an *unexpected* exit. Exits 0 (clean) and 143
+    // (128+SIGTERM = a graceful `docker stop`) are intentional and ignored;
+    // everything else is surfaced — app crashes, and SIGKILL/137 (an OOM kill or
+    // a forced stop). Restart count is kept as informational evidence.
     let status = 'ok';
     if (state === 'restarting' || health === 'unhealthy') status = 'critical';
-    else if (state === 'exited' && Number.isFinite(exitCode) && exitCode !== 0) status = 'critical';
+    else if (state === 'exited' && Number.isFinite(exitCode) && exitCode !== 0 && exitCode !== 143) status = 'critical';
     if (status === 'ok') continue; // only surface containers that need attention
     const exitNote = (state === 'exited' && Number.isFinite(exitCode)) ? ` exit=${exitCode}` : '';
     out.push(reading({
