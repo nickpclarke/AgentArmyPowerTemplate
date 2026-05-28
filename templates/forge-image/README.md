@@ -1,5 +1,7 @@
 # agentarmy-forge
 
+> ⚠️ **RELOCATED — active source now lives at [`nickpclarke/agentarmy-forge`](https://github.com/nickpclarke/agentarmy-forge).** Per **ARC-ADR-029 Option 1b**, the forge moved to its own repo so the generation loop iterates in isolation. **This directory is a frozen mirror** kept only so the hub's image-doctor + image-security-scan keep passing; the hub retains the ADR + container-tiering governance (this `image.json`). Do **not** edit the source here — open PRs against the standalone repo. Full removal of this mirror (and the matching `local-docker-smoke.yml` / `image-security-scan.yml` matrix entries) is tracked in [#304](https://github.com/nickpclarke/AgentArmy/issues/304) P2.
+
 **Status:** v0 + v1 + v2 implemented. **Governing decision:** [ARC-ADR-029 — agentarmy-forge: Extract Code Generator into a Function-Tier Container with Ontology-Driven Multi-Target Emit](../../docs/decisions/ARC-ADR-029-agentarmy-forge-codegen-container.md).
 
 Closes hub issue #294 (forge v0) and supersedes the scaffold-only [PR #292](../../docs/decisions/ARC-ADR-029-agentarmy-forge-codegen-container.md).
