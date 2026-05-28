@@ -1,14 +1,14 @@
-# probe-windows.ps1 — Windows-side data collector for the AgentArmy health monitor.
+# probe-windows.ps1 - Windows-side data collector for the AgentArmy health monitor.
 #
 # Emits a single compressed JSON object on stdout describing:
-#   - fixed drives (free / size / used%)         → the thing that actually halts the PC
-#   - WSL distros (state + ext4.vhdx size)        → the files that silently grow on C:
+#   - fixed drives (free / size / used%)         -> the thing that actually halts the PC
+#   - WSL distros (state + ext4.vhdx size)        -> the files that silently grow on C:
 #
 # Designed to be piped to powershell.exe via `-Command -` from node, so it works
 # identically when invoked from native Windows OR from inside WSL (interop). It
 # never throws: every section is wrapped so a partial failure still yields JSON.
 #
-# Docker stats are NOT collected here — the docker CLI is cross-platform, so the
+# Docker stats are NOT collected here - the docker CLI is cross-platform, so the
 # node side queries `docker system df` / `docker ps` directly.
 
 $ErrorActionPreference = 'SilentlyContinue'
@@ -47,7 +47,7 @@ try {
     if ($cols.Count -ge 2) { $states[$cols[0]] = $cols[1] }
   }
 
-  # Registry holds each distro's on-disk BasePath → locate its ext4.vhdx.
+  # Registry holds each distro's on-disk BasePath -> locate its ext4.vhdx.
   $lxss = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss'
   $distros = @()
   Get-ChildItem $lxss 2>$null | ForEach-Object {

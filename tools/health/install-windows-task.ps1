@@ -1,4 +1,4 @@
-# install-windows-task.ps1 — register (or remove) the AgentArmy health monitor
+# install-windows-task.ps1 - register (or remove) the AgentArmy health monitor
 # as a Windows Scheduled Task so the PC is protected continuously, even when no
 # Claude Code session is open. Runs the monitor every N minutes while you're
 # logged on (Docker Desktop only runs while logged on anyway).
@@ -7,7 +7,7 @@
 #   Custom:    ... -IntervalMinutes 10 -RepoRoot C:\path\to\AgentArmy
 #   Remove:    ... -Uninstall
 #
-# Run from a normal (non-elevated) PowerShell — the task runs as the current
+# Run from a normal (non-elevated) PowerShell - the task runs as the current
 # user, which is what gives the toast/webhook a session and reads the vhdx.
 
 param(
@@ -34,7 +34,7 @@ if (-not $RepoRoot) {
   $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot '..\..')
 }
 $monitor = Join-Path $RepoRoot 'tools\health\monitor.mjs'
-if (-not (Test-Path $monitor)) { throw "monitor.mjs not found at $monitor — pass -RepoRoot." }
+if (-not (Test-Path $monitor)) { throw "monitor.mjs not found at $monitor - pass -RepoRoot." }
 
 # Locate node.
 $node = (Get-Command node -ErrorAction SilentlyContinue).Source
@@ -51,7 +51,7 @@ $action = New-ScheduledTaskAction -Execute $node -Argument "`"$monitor`" --quiet
 $trigger = New-ScheduledTaskTrigger -AtLogOn
 $trigger.Repetition = (New-ScheduledTaskTrigger -Once -At (Get-Date) `
   -RepetitionInterval (New-TimeSpan -Minutes $IntervalMinutes) `
-  -RepetitionDuration ([TimeSpan]::MaxValue)).Repetition
+  -RepetitionDuration (New-TimeSpan -Days 3650)).Repetition  # ~10y; TimeSpan.MaxValue serializes out-of-range for Task Scheduler
 
 $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries `
   -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Minutes 5)
