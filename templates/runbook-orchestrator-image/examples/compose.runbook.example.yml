@@ -1,0 +1,43 @@
+# Local dev compose for the AgentArmy runbook-orchestrator + a NATS JetStream broker.
+# Run via setup.sh / setup.ps1 — builds, waits healthy, runs the doctor.
+# The orchestrator's ONLY required input is the mounted ./runbooks directory.
+services:
+  nats:
+    image: nats:2.10-alpine
+    container_name: runbook-nats
+    command: ["-js", "-sd", "/data", "-m", "8222"]
+    volumes:
+      - nats-data:/data
+    # No host port publish: the orchestrator AND the doctor reach NATS over the
+    # compose network (nats://nats:4222), so nothing here needs host access.
+    # Publishing 4222/8222 collides with the platform stack's agentarmy-nats when
+    # both run on the same host (the normal case in this fleet).
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:8222/healthz || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+  orchestrator:
+    build:
+      context: ..
+    image: agentarmy-runbook-orchestrator:local
+    environment:
+      NATS_URL: nats://nats:4222
+      STREAM_NAME: FLEET
+      STREAM_SUBJECTS: fleet.>
+      RUNBOOK_DIR: /runbooks
+      PORT: "8080"
+    volumes:
+      # Drop your own .bpmn / .cacao.json files here — no rebuild needed.
+      - ../runbooks:/runbooks:ro
+    depends_on:
+      nats:
+        condition: service_healthy
+    ports:
+      # Host 8088 → container 8080: the platform stack's agentarmy-event-bridge
+      # owns host 8080, so the example publishes on 8088. setup.sh points the
+      # doctor at it via ORCH_URL; in-container the orchestrator still listens on 8080.
+      - "8088:8080"
+volumes:
+  nats-data:
