@@ -142,12 +142,31 @@ async function inspect_all({ services = null } = {}) {
   return { services: Object.fromEntries(results) };
 }
 
-async function logs({ service, since = "5m", grep = null, level = null, limit = 100 } = {}) {
+// Liveness/readiness probe access-log lines (e.g. `"GET /healthz HTTP/1.1" 200`).
+// Anchored on the quoted request token so it never matches a log *message* that
+// merely mentions a probe path. Fixed pattern on our own log output — not caller
+// input — so it is not a ReDoS surface. Hidden from the default view (#77).
+const HEALTHCHECK_RE = /"(?:GET|HEAD)\s+\/(?:healthz|health|livez|readyz|ping)\b/i;
+
+async function logs({ service, since = "5m", grep = null, level = null, limit = 100, include_healthchecks = false } = {}) {
   const svc = assertDockerService(service);
+  // Probe lines can fill the whole tail budget and drown real traffic, so when
+  // we are about to drop them, oversample first and re-cap to `limit` below.
+  const fetchTail = include_healthchecks ? limit : Math.min(limit * 5, 2000);
   const { stdout } = await execFileP("docker", [
-    "logs", "--since", since, "--tail", String(limit), svc.container,
+    "logs", "--since", since, "--tail", String(fetchTail), svc.container,
   ], { maxBuffer: 4 * 1024 * 1024, timeout: TIMEOUT_FAST_MS });
   let lines = stdout.split("\n").filter(Boolean);
+  // Drop healthcheck probes from the default view. Keep them when the caller
+  // opts in, or when their grep clearly targets a probe (so debugging the
+  // healthcheck itself still surfaces the lines).
+  const grepTargetsProbe = grep != null && /heal|live|ready|ping/i.test(String(grep));
+  let hidden_healthcheck_lines = 0;
+  if (!include_healthchecks && !grepTargetsProbe) {
+    const before = lines.length;
+    lines = lines.filter((l) => !HEALTHCHECK_RE.test(l));
+    hidden_healthcheck_lines = before - lines.length;
+  }
   // Substring matching only — caller input is never a regex (ReDoS surface).
   if (grep) {
     const needle = String(grep).slice(0, 200).toLowerCase();
@@ -157,7 +176,10 @@ async function logs({ service, since = "5m", grep = null, level = null, limit = 
     const needle = String(level).slice(0, 32).toLowerCase();
     lines = lines.filter((l) => l.toLowerCase().includes(needle));
   }
-  return { service, container: svc.container, lines: lines.slice(-limit) };
+  return {
+    service, container: svc.container, lines: lines.slice(-limit),
+    ...(hidden_healthcheck_lines ? { hidden_healthcheck_lines } : {}),
+  };
 }
 
 // ---------- build (mutating) -------------------------------------------------
@@ -437,7 +459,7 @@ export const TOOLS = [
   },
   {
     name: "fleet_logs",
-    description: "Tail logs of a docker platform service via `docker logs`. since='5m'/'1h'/'1d', grep is substring (not regex), level is substring (e.g. 'ERROR'), limit caps output lines.",
+    description: "Tail logs of a docker platform service via `docker logs`. since='5m'/'1h'/'1d', grep is substring (not regex), level is substring (e.g. 'ERROR'), limit caps output lines. Liveness/readiness probe access logs (GET /healthz etc.) are hidden from the default view so real traffic is visible; set include_healthchecks=true (or grep for a probe path) to see them. When probes were hidden the response carries a hidden_healthcheck_lines count.",
     inputSchema: {
       type: "object", required: ["service"],
       properties: {
@@ -446,6 +468,7 @@ export const TOOLS = [
         grep:    { type: "string" },
         level:   { type: "string" },
         limit:   { type: "integer", default: 100 },
+        include_healthchecks: { type: "boolean", default: false },
       },
     },
     annotations: { readOnlyHint: true, idempotentHint: true, destructiveHint: false, openWorldHint: false },
