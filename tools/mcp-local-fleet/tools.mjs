@@ -55,8 +55,8 @@ function assertDockerService(service) {
   if (!service) throw new Error("'service' is required");
   const svc = ALLOWED_SERVICES[service];
   if (!svc) throw new Error(`'${service}' not in allowlist (${Object.keys(ALLOWED_SERVICES).join(", ")})`);
-  if (svc.tier !== "platform") {
-    throw new Error(`'${service}' is not a docker-tier service (tier='${svc.tier}'). MCP is docker-only.`);
+  if (svc.logSource !== "docker") {
+    throw new Error(`'${service}' is not a docker-backed service (tier='${svc.tier}', logSource='${svc.logSource}'). MCP docker tools cover platform + function containers, not local spoke processes.`);
   }
   return svc;
 }
@@ -76,7 +76,7 @@ async function dockerCompose(args, timeoutMs = TIMEOUT_FAST_MS) {
 async function ps() {
   const out = [];
   for (const [name, svc] of Object.entries(ALLOWED_SERVICES)) {
-    if (svc.tier !== "platform") continue;
+    if (svc.logSource !== "docker") continue;
     try {
       const { stdout } = await execFileP("docker", [
         "ps", "-a",
@@ -130,7 +130,7 @@ async function inspect_all({ services = null } = {}) {
   const targets = (Array.isArray(services) && services.length > 0)
     ? services
     : Object.entries(ALLOWED_SERVICES)
-        .filter(([, svc]) => svc.tier === "platform")
+        .filter(([, svc]) => svc.logSource === "docker")
         .map(([name]) => name);
   const results = await Promise.all(targets.map(async (name) => {
     try {
