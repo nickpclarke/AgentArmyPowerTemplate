@@ -1,0 +1,22 @@
+{
+  "fragment_id": "frag-conformant-001",
+  "source": { "doc": "risk-control.txt", "span": [0, 300] },
+  "entities": [
+    { "id": "Risk", "label": "Risk", "gufo": "Kind", "bfo": "GenericallyDependentContinuant", "spans": [[2, 6]] },
+    { "id": "Control", "label": "Control", "gufo": "Kind", "bfo": "IndependentContinuant", "spans": [[62, 69]] },
+    { "id": "RiskOwner", "label": "Risk Owner", "gufo": "Role", "bfo": "Role", "spans": [[233, 243]] }
+  ],
+  "relations": [
+    {
+      "id": "MitigationCase",
+      "label": "mitigates",
+      "gufo": "Relator",
+      "bfo": "SpecificallyDependentContinuant",
+      "roles": [
+        { "role": "mitigatedRisk", "filler": "Risk" },
+        { "role": "mitigatingControl", "filler": "Control" }
+      ],
+      "spans": [[150, 210]]
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentarmy.dev/ontology-sift/ir-fragment.schema.json",
+  "title": "Ontology IR Fragment (ARC-ADR-032)",
+  "description": "The structured shape a proposer (Cerebras) must emit. L1 of the sift ladder. Schema-valid does NOT mean ontology-conformant — that is what L2-L4 + the Fuseki gate decide.",
+  "type": "object",
+  "required": ["fragment_id", "source", "entities", "relations"],
+  "additionalProperties": false,
+  "properties": {
+    "fragment_id": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object",
+      "required": ["doc", "span"],
+      "additionalProperties": false,
+      "properties": {
+        "doc": { "type": "string", "minLength": 1 },
+        "span": { "$ref": "#/$defs/span" }
+      }
+    },
+    "entities": { "type": "array", "items": { "$ref": "#/$defs/entity" } },
+    "relations": { "type": "array", "items": { "$ref": "#/$defs/relation" } }
+  },
+  "$defs": {
+    "span": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0 },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "gufoStereotype": {
+      "enum": ["Kind", "SubKind", "Role", "Phase", "Category", "Mixin", "Relator", "Quality", "Mode", "Event", "Situation"]
+    },
+    "bfoClass": {
+      "enum": ["IndependentContinuant", "SpecificallyDependentContinuant", "GenericallyDependentContinuant", "Quality", "Role", "Disposition", "Process"]
+    },
+    "entity": {
+      "type": "object",
+      "required": ["id", "label", "gufo", "bfo", "spans"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]*$" },
+        "label": { "type": "string" },
+        "gufo": { "$ref": "#/$defs/gufoStereotype" },
+        "bfo": { "$ref": "#/$defs/bfoClass" },
+        "spans": { "type": "array", "items": { "$ref": "#/$defs/span" }, "minItems": 1 }
+      }
+    },
+    "relation": {
+      "type": "object",
+      "description": "An n-ary relation, reified as a gufo:Relator (OntoUML). 'roles' deliberately has no minItems here — under-mediation is an ONTOLOGY error caught at L4 (SHACL), not a schema error.",
+      "required": ["id", "label", "gufo", "bfo", "roles", "spans"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]*$" },
+        "label": { "type": "string" },
+        "gufo": { "const": "Relator" },
+        "bfo": { "$ref": "#/$defs/bfoClass" },
+        "roles": { "type": "array", "items": { "$ref": "#/$defs/role" } },
+        "spans": { "type": "array", "items": { "$ref": "#/$defs/span" }, "minItems": 1 }
+      }
+    },
+    "role": {
+      "type": "object",
+      "required": ["role", "filler"],
+      "additionalProperties": false,
+      "properties": {
+        "role": { "type": "string", "minLength": 1 },
+        "filler": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]*$" }
+      }
+    }
+  }
+}

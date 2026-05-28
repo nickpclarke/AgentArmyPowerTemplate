@@ -1,0 +1,20 @@
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix gufo: <http://purl.org/nemo/gufo#> .
+@prefix ex:   <https://agentarmy.dev/ontology-sift/shapes#> .
+
+# L4 closed-world conformance shapes (pyshacl in the hot loop; the authoritative
+# run is the Fuseki sieve, sieve.sh). ARC-ADR-032. This is one canonical OntoUML
+# rule; the full shape set is authored by ontologist-ufo / ontologist-bfo.
+
+# A relator must REIFY an n-ary relation: it has to mediate two or more DISTINCT
+# participants. minCount counts distinct value-nodes, so a relator that points at
+# one filler (or the same filler twice) fails — exactly the "dangling relator"
+# anti-pattern an LLM happily proposes.
+ex:RelatorMediatesShape a sh:NodeShape ;
+    sh:targetClass gufo:Relator ;
+    sh:property [
+        sh:path gufo:mediates ;
+        sh:minCount 2 ;
+        sh:message "A gufo:Relator must mediate at least two distinct participants — reify the n-ary relation with two or more role bindings (OntoUML relator pattern)." ;
+        sh:severity sh:Violation ;
+    ] .

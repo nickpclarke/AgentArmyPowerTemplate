@@ -8,6 +8,11 @@ track: vision
 
 > **One-line thesis** — Treat the ontology as a **source model that compiles into many projections** (semantic, constraint, runtime, persistence, verification, provenance) rather than a single ontology-to-code script. The same model that humans and agents edit drives every generated surface, and an AI agent consumes the result over a stable API without ever touching generated code.
 
+> [!note] How the source model gets populated — the sift-sort authoring loop
+> This page is the **compiler** (ontology → projections). The **authoring front-end** that
+> turns source documents *into* the conceptual model is [ARC-ADR-032](https://github.com/nickpclarke/AgentArmy/blob/main/docs/decisions/ARC-ADR-032-ontology-sift-sort-authoring-loop.md)
+> (reference + offline proof in `tools/ontology-sift/`, refining ADR-030 i3): **Cerebras proposes, the formal layer disposes** — every candidate is classified under *both* gUFO and BFO, validated (schema → anti-pattern → reasoner → SHACL → Fuseki sieve), and **snapped** to canonical only when *proven*, with PROV-O lineage to the source span. Unprovable candidates sit in a **holographic-graph quarantine state**, never auto-promoted. "Snapped, not plausible": acceptance is a proof, not LLM confidence.
+
 ## Core principle: a multi-representation compiler, congruence-first
 
 The source of truth is an **OntoUML / UFO / gUFO-aligned conceptual model**. "Congruence-first" means the machine representation must stay aligned with external reality: we keep semantics and proofs in a dedicated control plane, and let the database be the fast, practical persistence layer — not the arbiter of meaning.

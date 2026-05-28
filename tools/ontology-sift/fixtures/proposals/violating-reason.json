@@ -1,0 +1,8 @@
+{
+  "fragment_id": "frag-violating-reason-001",
+  "source": { "doc": "risk-control.txt", "span": [0, 300] },
+  "entities": [
+    { "id": "RiskAssessment", "label": "Risk Assessment", "gufo": "Event", "bfo": "IndependentContinuant", "spans": [[246, 261]] }
+  ],
+  "relations": []
+}
