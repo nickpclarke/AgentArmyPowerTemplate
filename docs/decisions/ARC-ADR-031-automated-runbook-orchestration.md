@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | ID | ARC-ADR-031 |
-| Status | Proposed |
+| Status | Accepted |
 | Date | 2026-05-28 |
-| Deciders | Hub owner (Nicky Clarke) |
+| Deciders | Hub owner (Nicky Clarke) — accepted 2026-05-28 (v1 scope; live doctor 4/4) |
 | Supersedes | — |
 | Superseded by | — |
 | Tags | runbooks, playbooks, bpmn, cacao, soar, function-tier, container, event-bus, security, hitl |
@@ -63,7 +63,7 @@ No executable layer; every response is hand-driven. Fails the originating requir
 
 ## Decision Outcome
 
-**Proposed: Option A**, with the **safe-orchestrator** command posture as the shipped v1 default (hub owner direction, 2026-05-28).
+**Accepted: Option A**, with the **safe-orchestrator** command posture as the shipped v1 default (hub owner decision, 2026-05-28). Real exec / timers / JWS remain open questions for a later version.
 
 The implementation lands as `templates/runbook-orchestrator-image/` (function-tier, `agentarmy-runbook-orchestrator`): one IR, one kernel, two parsers, structural validators, a serve-mode control API + JetStream trigger dispatcher, three bundled fixtures, and an external doctor that proves a bus event fires a runbook end-to-end.
 
