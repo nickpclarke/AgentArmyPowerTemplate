@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | ID | ARC-ADR-029 |
-| Status | Proposed |
+| Status | Accepted |
 | Date | 2026-05-27 |
-| Deciders | Hub owner (pending) |
+| Deciders | Hub owner (Nicky Clarke) — accepted 2026-05-28 |
 | Supersedes | — |
 | Superseded by | — |
 | Tags | codegen, forge, function-tier, container, ontology, rdf, backend-core, middle-core, frontend-core, generator-first |
