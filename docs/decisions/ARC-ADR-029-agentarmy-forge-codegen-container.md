@@ -45,15 +45,25 @@ The decision: **What is the right architectural home and input model for the fle
 
 ## Considered Options
 
-### Option 1 — Extract into `agentarmy-forge` function-tier image; ontology input from backend-core HTTP / file / blob; multi-target source emit; direct-to-main PRs (recommended)
+### Option 1 — Extract into `agentarmy-forge` function-tier image hosted in the hub (`templates/forge-image/`); ontology input from backend-core HTTP / file / blob; multi-target source emit; direct-to-main PRs
 
-A new function-tier image (`templates/forge-image/`, container `agentarmy-forge`) hosts the generator. Inputs:
+A new function-tier image (`templates/forge-image/`, container `agentarmy-forge`) hosts the generator, with its source living in the hub repo. Inputs:
 
 - **HTTP:** `GET /ontology/snapshot?version=…` on backend-core (new contract)
 - **File:** local `.ttl` / `.jsonld` / `.nt` / `.yaml` (back-compat for existing middle-core model)
 - **Blob:** Azure Blob storage URI (with managed-identity auth)
 
-Outputs: source files for any combination of frontend-core / middle-core / backend-core, opened as PRs against each spoke's `main`.
+Outputs: source files for any combination of frontend-core / middle-core / backend-core, opened as PRs against each spoke's `main`. Generation and delivery are coupled in one container — forge holds write/PR access to every consumer spoke.
+
+### Option 1b — `agentarmy-forge` as a standalone repo; generation isolated from delivery; flag-gated adoption (recommended)
+
+Same function-tier container as Option 1, but the forge's source lives in its **own repository** (`nickpclarke/agentarmy-forge`) rather than `templates/forge-image/` in the hub. Two structural changes follow from the split:
+
+1. **The repo's CI _is_ the generation loop.** Push → run goldens (byte-identical `.g.cs` / `.g.ts` / `.g.py` diffs) → multi-target smoke-compile (`tsc --noEmit`, Pydantic import, optional `dotnet build`). None of the hub's other gates (Codex/Antigravity sync, glossary regen, fleet-heartbeat) sit in the way, so the iterate-until-it-compiles loop is fast and focused. Input is verifiable (SHACL/ShEx shape validation on the ontology) and output is verifiable (compile + golden) — the forge is a pure function with both ends checkable in isolation.
+
+2. **Generation is decoupled from delivery.** Forge **emits + publishes** verified generated source as a *versioned artifact* (tagged release / package keyed by `ontology@<sha>`) instead of opening direct-to-main PRs. Each app-tier spoke then **adopts** a pinned forge output version **behind a feature flag** — the flag gates "this spoke is on contract vN," giving independent per-spoke rollout and a one-flip rollback. The exact publish + adopt mechanism is an open question (see below); `feature-flag-engineer` owns the flag/rollout half once chosen.
+
+This reverses Option 1's D6/D7 posture: forge no longer needs write access to consumer repos, and the blast radius of a bad emit is "an unadopted artifact version," not "a merged PR on `main`."
 
 ### Option 2 — Leave the generator inside middle-core, add ontology input + multi-target emit there
 
@@ -69,18 +79,23 @@ Three small generators, one per consumer language, each living inside its consum
 
 ## Decision Outcome
 
-**Proposed: Option 1.** The HITL framing: the hub owner decides, because this is a fleet-wide architectural extraction touching all three application-tier spokes plus backend-core's contract surface.
+**Accepted: Option 1b.** The HITL framing: the hub owner decides, because this is a fleet-wide architectural extraction touching all three application-tier spokes plus backend-core's contract surface.
+
+**Hub owner decision (2026-05-28): Option 1b.** The forge moves to its own repo (`nickpclarke/agentarmy-forge`) so the generation loop can be iterated in isolation against verifiable input/output, and delivery into the app tier is flag-gated rather than direct-PR. The v0/v1/v2 implementation already merged on the hub (`templates/forge-image/`, PR #295) becomes the seed that relocates into the standalone repo; the hub retains the ADR + tiering governance. The architectural home is **decided** — the v2.5 repo extraction and the publish/adopt delivery mechanism (Open Question 6) are tracked implementation follow-ups, not blockers to the decision.
 
 ### Recommendation note (not a decision)
 
-Lean **Option 1**, phased so the cost is paid incrementally:
+Lean **Option 1b**, phased so the cost is paid incrementally:
 
 | Phase | Scope | Risk |
 |---|---|---|
-| **v0** | Lift-and-shift middle-core `modelgen` into the new container unchanged. Same YAML in, same C# out. Doctor proves byte-identical output vs current generated files. | Low — pure relocation. |
+| **v0** | Lift-and-shift middle-core `modelgen` into the new container unchanged. Same YAML in, same C# out. Doctor proves byte-identical output vs current generated files. *(Done on hub in PR #295 against a frozen golden; relocates to the standalone repo.)* | Low — pure relocation. |
 | **v1** | Add ontology input adapters (backend-core HTTP / file / blob). Webhook trigger from backend-core. CLI / MCP-control-plane on-demand. Still C#-only emit. | Medium — new contract on backend-core (see Open Questions). |
-| **v2** | Add TypeScript emitter (frontend-core types) + Python emitter (backend-core Pydantic models). Multi-language smoke-compile inside the container. Open PRs to all three spokes per ontology change. | Medium — multi-toolchain image, version-pinning discipline. |
+| **v2** | Add TypeScript emitter (frontend-core types) + Python emitter (backend-core Pydantic models). Multi-language smoke-compile inside the container. | Medium — multi-toolchain image, version-pinning discipline. |
+| **v2.5** | **Repo extraction + delivery seam.** Move forge source into `nickpclarke/agentarmy-forge`; its CI runs the golden + smoke-compile loop. Replace direct-to-main PRs with publish-a-versioned-artifact, and stand up flag-gated adoption in each consumer spoke (`feature-flag-engineer`). | Medium — cross-repo coordination + delivery-mechanism choice (Open Question 6). |
 | **v3** *(deferred, may never)* | Binary builds / artifact publishing / deployment orchestration. **Default = don't.** Only revisit if cross-language version coherence requires a single build-time chokepoint. | High — swallows existing owners' responsibilities. |
+
+Avoid **Option 1** (hub-hosted, direct-PR) — it couples the generation loop to the hub's full CI gate set and forces forge to hold write access to every spoke; the iterate-until-compiles loop and the rollout-control loop both get slower and riskier than the split buys.
 
 Avoid **Option 2** — it violates D2 (no scale-curve / release-cadence separation) and forces middle-core's runtime image to ship .NET + Python + Node toolchains it doesn't otherwise need.
 
@@ -94,11 +109,12 @@ Avoid **Option 4** — frontend-core and backend-core already hand-maintain type
 
 | Layer | Repo | Impact |
 |---|---|---|
-| (infra) | hub | New `templates/forge-image/` function-tier scaffold; ADR-029 + contracts.md backlog rows; new fleet image |
+| (infra) | hub | ADR-029 + contracts.md backlog rows + tiering governance stay here. The v0/v1/v2 seed in `templates/forge-image/` (PR #295) relocates to the standalone repo at v2.5; a thin pointer/README stub may remain |
+| forge | nickpclarke/agentarmy-forge *(new)* | Standalone repo home for the generator. Owns the generation loop CI (goldens + multi-target smoke-compile) and publishes versioned generated-source artifacts keyed by `ontology@<sha>` |
 | backend-core | nickpclarke/backend-core | New `GET /ontology/snapshot` endpoint (forge upstream); new `POST /ontology/ingest` endpoint (file → SHACL/ShEx shape → validate → Fuseki); two new OpenAPI contracts; webhook emitter on ontology change |
-| middle-core | nickpclarke/middle-core | `modelgen` lifted into forge; the in-repo generator code remains until v0 proves byte-identical output, then deleted. Generated `*.g.cs` files keep their existing on-disk locations — only the producer changes |
-| frontend-core | nickpclarke/frontend-core | New generated TS types directory (v2); type imports replace hand-maintained types |
-| (cross-cutting) | docs/contracts.md | Two new backlog rows (`ontology-snapshot`, `ontology-ingest`) promoted to Registry as endpoints land |
+| middle-core | nickpclarke/middle-core | `modelgen` lifted into forge; the in-repo generator code remains until v0 proves byte-identical output, then deleted. Generated `*.g.cs` files keep their existing on-disk locations — only the producer changes. Adopts forge artifacts behind a feature flag (v2.5) |
+| frontend-core | nickpclarke/frontend-core | New generated TS types directory (v2); type imports replace hand-maintained types. Adopts forge artifacts behind a feature flag (v2.5) |
+| (cross-cutting) | docs/contracts.md | Two new backlog rows (`ontology-snapshot`, `ontology-ingest`) promoted to Registry as endpoints land; a third (`forge-artifact` publish surface) added if the delivery seam needs a contract |
 
 ---
 
@@ -145,6 +161,8 @@ Avoid **Option 4** — frontend-core and backend-core already hand-maintain type
 3. **Generated-file location convention.** Does forge own a top-level `generated/` directory per spoke, or does each generated file live next to its consumer? Lean per-spoke `generated/` dir — easy to gitignore patterns, easy to grep "what does forge produce here?"
 4. **PR titling convention.** `chore(generated): forge sync — ontology@<sha>`? Need to be greppable + auto-mergeable but distinguishable from human PRs in PR history.
 5. **What happens when the ontology shrinks?** If an object type is removed from the ontology, forge has to delete the corresponding `.g.cs` / `.g.ts` / `.g.py` — that's a destructive PR. Acceptable, but the doctor / consumer CI must catch downstream callers of the removed type before merge.
+6. **Delivery seam — publish + adopt mechanism (Option 1b).** What is the artifact and how does a spoke pin + adopt it? Candidates: (a) tagged GitHub release per spoke with generated source attached; (b) language-native packages (NuGet for C#, npm for TS, PyPI/index for Python); (c) a generated-contracts branch/repo each spoke vendors. And which flag system gates adoption — `feature-flag-engineer`'s existing setup, or a simple pinned-version env var per spoke? The publish side may itself need a `forge-artifact` contract row. Pick the smallest mechanism that gives independent per-spoke rollout + one-flip rollback before building v2.5.
+7. **Upstream of forge — data → ontology pipeline (out of scope here, but adjacent).** Forge assumes a validated ontology already exists. *Producing* that ontology from structured (DB rows, CSV, OpenAPI) and unstructured (docs, prose, transcripts) sources is a separate, larger problem — ingestion → extraction/lifting → identity resolution → SHACL/ShEx shape validation → Fuseki population. That belongs to the knowledge/ontology + data-engineering clusters (`dlt-engineer` / `data-engineer` ingestion → `knowledge-engineer` population → `ontologist-ufo`/`ontologist-bfo` shaping), and likely warrants its own ADR. `POST /ontology/ingest` (above) is only the file-drop entry point, not the full pipeline.
 
 ---
 
@@ -165,3 +183,4 @@ Avoid **Option 4** — frontend-core and backend-core already hand-maintain type
 | Version | Date | Author | Change |
 |---|---|---|---|
 | 0.1 | 2026-05-27 | Claude Code (assisted) | Initial Proposed stub from interactive design session with hub owner |
+| 0.2 | 2026-05-28 | Claude Code (assisted) | Added Option 1b (standalone `agentarmy-forge` repo + generation/delivery decoupling + flag-gated adoption) per hub owner direction; recommendation moved Option 1 → 1b; added v2.5 phase; updated Affected Layers; added Open Questions 6 (delivery seam) and 7 (data→ontology pipeline as adjacent out-of-scope challenge) |
