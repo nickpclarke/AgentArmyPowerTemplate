@@ -133,27 +133,35 @@ function containersProbe(ctx) {
       status: 'ok', message: 'no containers' })];
   }
   const idList = ids.out.split(/\r?\n/).filter(Boolean);
-  // One batched inspect for name / restart count / health / state.
-  const fmt = '{{.Name}}|{{.RestartCount}}|{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}|{{.State.Status}}';
+  // One batched inspect for name / restart count / health / state / exit code.
+  const fmt = '{{.Name}}|{{.RestartCount}}|{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}|{{.State.Status}}|{{.State.ExitCode}}';
   const insp = docker(['inspect', '--format', fmt, ...idList], ctx.timeoutMs);
   if (!insp.ok) {
     return [reading({ id: 'containers', component: 'containers', label: 'containers',
       status: 'warn', message: 'could not inspect containers' })];
   }
-  const t = ctx.config.thresholds;
   const out = [];
   for (const line of insp.out.split(/\r?\n/).filter(Boolean)) {
-    const [rawName, restartStr, health, state] = line.split('|');
+    const [rawName, restartStr, health, state, exitStr] = line.split('|');
     const name = (rawName || '').replace(/^\//, '');
     const restarts = parseInt(restartStr, 10) || 0;
-    let status = grade(restarts, t.containerRestarts, 'high');
-    if (health === 'unhealthy' || state === 'restarting') status = 'critical';
+    const exitCode = parseInt(exitStr, 10);
+    // RestartCount is cumulative over the container's whole life — for ephemeral
+    // CI runners that recycle per job it climbs without indicating any problem,
+    // so it does NOT drive severity. The real, unambiguous signals are: Docker
+    // actively backing off a failing container (state=restarting), a failing
+    // healthcheck (unhealthy), or a non-clean exit (exited with a nonzero code,
+    // e.g. an OOM kill = 137). Restart count is kept as informational evidence.
+    let status = 'ok';
+    if (state === 'restarting' || health === 'unhealthy') status = 'critical';
+    else if (state === 'exited' && Number.isFinite(exitCode) && exitCode !== 0) status = 'critical';
     if (status === 'ok') continue; // only surface containers that need attention
+    const exitNote = (state === 'exited' && Number.isFinite(exitCode)) ? ` exit=${exitCode}` : '';
     out.push(reading({
       id: `containers.${name}`, component: 'containers', label: name,
       value: restarts, unit: 'restarts', status,
-      message: `${name}: state=${state} health=${health} restarts=${restarts}`,
-      evidence: { state, health, restarts },
+      message: `${name}: state=${state} health=${health} restarts=${restarts}${exitNote}`,
+      evidence: { state, health, restarts, exitCode: Number.isFinite(exitCode) ? exitCode : null },
     }));
   }
   if (!out.length) {

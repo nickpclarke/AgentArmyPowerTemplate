@@ -45,7 +45,6 @@ const DEFAULT_CONFIG = {
     dockerTotalGB: { warn: 40, critical: 60 },
     dockerReclaimableGB: { warn: 15, critical: 30 },
     wslVhdxGB: { warn: 60, critical: 100 },
-    containerRestarts: { warn: 3, critical: 10 },
   },
   alerters: {
     ndjson: { enabled: true },
