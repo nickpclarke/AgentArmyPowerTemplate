@@ -12,6 +12,8 @@ track: vision
 > This page is the **compiler** (ontology → projections). The **authoring front-end** that
 > turns source documents *into* the conceptual model is [ARC-ADR-032](https://github.com/nickpclarke/AgentArmy/blob/main/docs/decisions/ARC-ADR-032-ontology-sift-sort-authoring-loop.md)
 > (reference + offline proof in `tools/ontology-sift/`, refining ADR-030 i3): **Cerebras proposes, the formal layer disposes** — every candidate is classified under *both* gUFO and BFO, validated (schema → anti-pattern → reasoner → SHACL → Fuseki sieve), and **snapped** to canonical only when *proven*, with PROV-O lineage to the source span. Unprovable candidates sit in a **holographic-graph quarantine state**, never auto-promoted. "Snapped, not plausible": acceptance is a proof, not LLM confidence.
+>
+> → **Now implemented + graduated to `docs/`:** [docs/ontology-pipeline.md](https://github.com/nickpclarke/AgentArmy/blob/main/docs/ontology-pipeline.md) — the live four-substrate pipeline (vector index + holographic LPG + canonical RDF + mid-level map), the embedding-cosine **mid-level mapper** with cited escalation, and the **F# provable core** (`tools/ontology-sift/fsharp`, ARC-ADR-033). Proven end-to-end on a real document.
 
 ## Core principle: a multi-representation compiler, congruence-first
 
