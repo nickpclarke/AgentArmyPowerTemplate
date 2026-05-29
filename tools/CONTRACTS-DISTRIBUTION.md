@@ -60,6 +60,20 @@ cosign verify ghcr.io/nickpclarke/contracts:0.1.0 \
 ```
 Pin the version as a literal in the spoke's workflow/lockfile — bumping it is a reviewable PR.
 
+## Drift-guard — a new contract can't silently escape the bundle
+`node tools/contracts-package.mjs --check` enumerates contract files under the manifest's
+`scan` roots (across hub + spokes, by `scanTypes`), subtracts what's **bundled** (`artifacts`)
+and **deliberately not bundled** (`exclude` — vendored copies, derived collections, `proposed/`
+drafts, tests), and **exits non-zero** on any leftover (and on a manifest row whose file
+vanished). So a freshly-minted contract dropped in a standard location fails the check until
+it's either added to the bundle or explicitly excluded — turning "forgot to register it" from
+silent rot into a loud CI signal. Add a gate to CI:
+```yaml
+  - run: node tools/contracts-package.mjs --check   # (checks out the spokes first, as in publish)
+```
+The `exclude` list is how intentional non-bundled files (e.g. the hub's `llm-gateway.openapi.yaml`
+copy — backend-core is the producer; frontend's vendored copies) stay quiet.
+
 ## Heartbeat (follow-on)
 `tools/fleet-heartbeat.mjs`'s vendoring check flips from "is this copy stale?" to "is the
 spoke pinned to the latest `contracts` tag?" once spokes declare a pin (e.g. a
