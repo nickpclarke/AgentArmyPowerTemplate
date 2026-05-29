@@ -1,0 +1,25 @@
+{
+  "$comment": "Declarative registry of MCP capabilities served via the untool tunnel for BOTH cloud and local Claudes. Add a server entry + run `node tools/mcp-serve.mjs reconcile` to make a new capability live: it ensures the tunnel ingress path, a persistent AgentArmy-* logon task, and emits the .mcp.json block. Reuses the existing mcp.untool.ai CF Access app + service tokens — never a new subdomain/app. See memory feedback_serve_capabilities_via_mcp.",
+  "hostname": "mcp.untool.ai",
+  "servers": [
+    {
+      "name": "local-fleet",
+      "port": 8765,
+      "default": true,
+      "auth": "bearer",
+      "tokenSecret": "local-fleet-mcp-key",
+      "taskName": "AgentArmy-LocalFleetMCP",
+      "launcher": "${HOME}/.agentarmy/serve-local-fleet-mcp.cmd",
+      "description": "untool docker/build control plane (fleet_ps/inspect/logs/up/down/restart/build/deploy) — the host default route + /healthz."
+    },
+    {
+      "name": "abstraction",
+      "port": 8181,
+      "path": "/abstract",
+      "auth": "none",
+      "taskName": "AgentArmy-AbstractionMCP",
+      "launcher": "${HOME}/.agentarmy/serve-abstraction-mcp.cmd",
+      "description": "abstraction meta-service MCP (abstract_schemas, build_adapter) — ARC-ADR-036."
+    }
+  ]
+}
