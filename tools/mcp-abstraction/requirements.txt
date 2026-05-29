@@ -1,0 +1,4 @@
+# Abstraction meta-service MCP server (ARC-ADR-036). Deliberately tiny — it only
+# proxies backend-core's /abstract, so no engine/embedder deps here.
+mcp>=1.0
+httpx>=0.27
