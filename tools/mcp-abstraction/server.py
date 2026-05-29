@@ -20,7 +20,13 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # so `import cli
 import client  # noqa: E402
 from mcp.server.fastmcp import FastMCP  # noqa: E402
 
-mcp = FastMCP("agentarmy-abstraction")
+# Port defaults to 8181 (the URL middle-core's .mcp.json points at) — NOT 8000,
+# which backend-core owns. Overridable via MCP_HOST / MCP_PORT.
+mcp = FastMCP(
+    "agentarmy-abstraction",
+    host=os.environ.get("MCP_HOST", "127.0.0.1"),
+    port=int(os.environ.get("MCP_PORT", "8181")),
+)
 
 
 @mcp.tool()
