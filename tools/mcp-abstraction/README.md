@@ -47,13 +47,36 @@ Same server, `ABSTRACTION_API_URL=http://127.0.0.1:8000` (or the in-cluster
 backend-core URL) and `ABSTRACTION_TOKEN_FILE` pointing at a mounted token. middle-core
 points its agent-runtime MCP config at this command.
 
-## Hosted (external, no local spawn)
-`MCP_TRANSPORT=sse python server.py` and front it behind the **CF Access** edge pattern
-([tools/mcp-local-fleet](../mcp-local-fleet/README.md)) on its own hostname; external
-agents connect to the remote URL with a CF Access service token. (Follow-up: the edge
-wiring + hostname.)
+## Hosted (external, no local spawn) — LIVE at `https://mcp.untool.ai/abstract`
+Run it streamable-http on `:8181` and let the existing `untool-tunnel` route it:
+
+```bash
+MCP_TRANSPORT=streamable-http \
+ABSTRACTION_API_URL=http://127.0.0.1:8000 \
+ABSTRACTION_TOKEN_FILE=/abs/path/token \
+python server.py            # serves /abstract on 127.0.0.1:8181
+```
+
+It is served at path **`/abstract`** (not the FastMCP default `/mcp`) so it sits **under
+the existing `mcp.untool.ai` CF Access app** — no new subdomain, no new Access app, no new
+DNS. The tunnel has a path rule `mcp.untool.ai ^/abstract → http://localhost:8181` ahead of
+the `mcp.untool.ai → :8765` (ops-fleet) rule. The same two CF Access service tokens
+(`claude-routine-1`, `claude-yml-hub`) authorize it.
+
+> **DNS-rebinding note:** the MCP SDK 421s any non-localhost `Host`. We keep the protection
+> on but allowlist the public host via `TransportSecuritySettings` (see `MCP_PUBLIC_HOST`).
+
+Connect (external agent or a Claude.ai custom connector):
+```jsonc
+{ "type": "http", "url": "https://mcp.untool.ai/abstract",
+  "headers": { "CF-Access-Client-Id": "<id>", "CF-Access-Client-Secret": "<secret>" } }
+```
 
 ## Env
 - `ABSTRACTION_API_URL` — backend-core base (default `http://127.0.0.1:8000`).
 - `ABSTRACTION_TOKEN_FILE` (preferred, rotatable) or `ABSTRACTION_TOKEN` — bearer.
 - `MCP_TRANSPORT` — `stdio` (default) | `sse` | `streamable-http`.
+- `MCP_PATH` — HTTP mount path (default `/abstract`). *Avoid setting via Git Bash env —
+  MSYS rewrites a leading-`/` value into a Windows path; pass it from a non-MSYS shell or
+  rely on the default.*
+- `MCP_PUBLIC_HOST` — host allowlisted for DNS-rebinding protection (default `mcp.untool.ai`).

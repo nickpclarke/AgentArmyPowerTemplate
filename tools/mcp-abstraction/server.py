@@ -5,10 +5,16 @@ Deliberately NOT part of the untool fleet (ops) MCP: this server exposes exactly
 clean tools and proxies to backend-core's ``/abstract`` (keys stay server-side).
 
     stdio (a local/internal agent spawns it):   python tools/mcp-abstraction/server.py
-    sse   (host behind CF Access for externals): MCP_TRANSPORT=sse python tools/mcp-abstraction/server.py
+    http  (host behind CF Access for externals): MCP_TRANSPORT=streamable-http python tools/mcp-abstraction/server.py
+
+The HTTP endpoint is served at path ``/abstract`` (not the FastMCP default ``/mcp``), so
+it slots cleanly under the existing ``mcp.untool.ai`` CF Access app as
+``https://mcp.untool.ai/abstract`` — no new subdomain, no new Access app. Locally that is
+``http://127.0.0.1:8181/abstract``.
 
 Config (env): ABSTRACTION_API_URL (default http://127.0.0.1:8000),
-              ABSTRACTION_TOKEN_FILE or ABSTRACTION_TOKEN (bearer for backend-core).
+              ABSTRACTION_TOKEN_FILE or ABSTRACTION_TOKEN (bearer for backend-core),
+              MCP_PATH (default /abstract), MCP_HOST (127.0.0.1), MCP_PORT (8181).
 """
 from __future__ import annotations
 
@@ -19,13 +25,28 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # so `import cli
 
 import client  # noqa: E402
 from mcp.server.fastmcp import FastMCP  # noqa: E402
+from mcp.server.transport_security import TransportSecuritySettings  # noqa: E402
+
+# DNS-rebinding protection stays ON. FastMCP's localhost default only trusts
+# localhost Host/Origin, so when fronted by the CF tunnel (which forwards
+# Host: mcp.untool.ai) the SDK would 421 "Invalid Host header". We explicitly
+# allowlist the public host alongside localhost rather than disabling the check.
+_public = os.environ.get("MCP_PUBLIC_HOST", "mcp.untool.ai")
+_security = TransportSecuritySettings(
+    enable_dns_rebinding_protection=True,
+    allowed_hosts=[_public, "127.0.0.1:*", "localhost:*", "[::1]:*"],
+    allowed_origins=[f"https://{_public}", "http://127.0.0.1:*", "http://localhost:*"],
+)
 
 # Port defaults to 8181 (the URL middle-core's .mcp.json points at) — NOT 8000,
-# which backend-core owns. Overridable via MCP_HOST / MCP_PORT.
+# which backend-core owns. Served at path /abstract so it sits under the existing
+# mcp.untool.ai CF Access app. Overridable via MCP_HOST / MCP_PORT / MCP_PATH.
 mcp = FastMCP(
     "agentarmy-abstraction",
     host=os.environ.get("MCP_HOST", "127.0.0.1"),
     port=int(os.environ.get("MCP_PORT", "8181")),
+    streamable_http_path=os.environ.get("MCP_PATH", "/abstract"),
+    transport_security=_security,
 )
 
 
