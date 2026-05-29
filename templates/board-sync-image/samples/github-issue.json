@@ -1,0 +1,15 @@
+{
+  "id": "PVTI_lADOAbc123",
+  "number": 142,
+  "title": "Token refresh drops the session on Safari",
+  "body": "Repro: log in on Safari, wait for token expiry; the session is lost instead of refreshing.",
+  "status": "In Progress",
+  "state": "OPEN",
+  "labels": ["bug", "auth"],
+  "assignees": ["nicky"],
+  "milestone": "v1.2",
+  "iteration": "Iteration 7",
+  "url": "https://github.com/nickpclarke/frontend-core/issues/142",
+  "createdAt": "2026-05-20T14:02:00Z",
+  "updatedAt": "2026-05-29T09:11:00Z"
+}

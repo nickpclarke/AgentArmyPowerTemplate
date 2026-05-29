@@ -1,0 +1,15 @@
+{
+  "identifier": "ENG-142",
+  "title": "Token refresh drops the session on Safari",
+  "description": "Repro: log in on Safari, wait for token expiry, the session is lost instead of refreshing.",
+  "state": "In Progress",
+  "assignee": "nicky",
+  "labels": ["bug", "auth"],
+  "priority": 2,
+  "estimate": 3,
+  "cycle": "Cycle 7",
+  "project": "Auth Hardening",
+  "url": "https://linear.app/agentarmy/issue/ENG-142",
+  "createdAt": "2026-05-20T14:02:00Z",
+  "updatedAt": "2026-05-29T09:11:00Z"
+}

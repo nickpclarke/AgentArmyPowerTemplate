@@ -1,0 +1,64 @@
+{
+  "source": "github",
+  "canonical_type": "WorkItem",
+  "snapped": false,
+  "map": {
+    "Identifier": "id",
+    "Status": "status",
+    "Sprint": "iteration",
+    "Title": "title",
+    "Description": "body",
+    "Labels": "labels",
+    "Assignee": "assignees",
+    "Milestone": "milestone",
+    "Url": "url",
+    "Created At": "createdAt",
+    "Updated At": "updatedAt"
+  },
+  "evidence": {
+    "Identifier": {
+      "cosine": 0.452,
+      "method": "escalated:gateway"
+    },
+    "Status": {
+      "cosine": 0.5556,
+      "method": "embedding-cosine"
+    },
+    "Sprint": {
+      "cosine": 0.6751,
+      "method": "embedding-cosine"
+    },
+    "Title": {
+      "cosine": 0.6368,
+      "method": "embedding-cosine"
+    },
+    "Description": {
+      "cosine": 0.4995,
+      "method": "escalated:gateway"
+    },
+    "Labels": {
+      "cosine": 0.6178,
+      "method": "embedding-cosine"
+    },
+    "Assignee": {
+      "cosine": 0.6858,
+      "method": "embedding-cosine"
+    },
+    "Milestone": {
+      "cosine": 0.6445,
+      "method": "embedding-cosine"
+    },
+    "Url": {
+      "cosine": 0.7075,
+      "method": "embedding-cosine"
+    },
+    "Created At": {
+      "cosine": 0.6591,
+      "method": "embedding-cosine"
+    },
+    "Updated At": {
+      "cosine": 0.6944,
+      "method": "embedding-cosine"
+    }
+  }
+}
