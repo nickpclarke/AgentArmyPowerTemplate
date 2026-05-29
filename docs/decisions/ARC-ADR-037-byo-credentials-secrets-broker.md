@@ -5,7 +5,7 @@
 | ID | ARC-ADR-037 |
 | Status | Accepted |
 | Date | 2026-05-29 |
-| Deciders | Hub owner (Nicky Clarke) — **accepted 2026-05-29 via HITL selector** (chose Option A, Infisical CE) |
+| Deciders | Hub owner (Nicky Clarke) — accepted 2026-05-29 via HITL selector (chose Option A, Infisical CE) → **revised same day to Option C (Azure Key Vault) on self-host friction** |
 | Supersedes | — (enables [ARC-ADR-036](ARC-ADR-036-abstraction-validation-distribution-service.md) at multi-system / multi-user scale) |
 | Tags | secrets, credentials, byo-keys, secrets-broker, anti-corruption-layer, security, multi-tenant, openbao, infisical, azure-key-vault |
 
@@ -53,17 +53,19 @@ Keep secrets in Key Vault (one vault per tenant, or `{userId}/{system}/` naming)
 
 ## Decision Outcome
 
-**Chosen: Option A — Infisical CE** (accepted 2026-05-29 via HITL selector). It is the fastest route to the onboarding surface the platform actually needs now, is MIT-licensed and fits the fleet, and its RBAC/path isolation is **good enough for the current solo/trusted stage**. We keep raw keys server-side behind a thin backend-core broker and hand tools scoped references. **Documented upgrade path:** migrate to **OpenBao (Option B)** when the platform onboards *untrusted* multi-tenant users and cryptographic namespace isolation becomes a catastrophic-risk requirement. This honors velocity + "don't over-engineer for the horizon" + "don't hand-roll security."
+**Chosen: Option C — Azure Key Vault + a thin broker** (revised 2026-05-29). Option A (Infisical CE) was selected first via the HITL selector, but its self-host reality — a Postgres+Redis+app container plus an admin/project/machine-identity/client-secret bootstrap, compounded by a flaky local Docker engine — was real operational friction. We switched to **Azure Key Vault**: the broker API and the "raw keys stay server-side, inject server-side" contract are **identical** (only the storage backend changed), and it reuses the box's existing `DefaultAzureCredential` + `AZURE_KEYVAULT_URL` (the `akv:` resolver machinery) — **no container, no new dependency, no extra credentials**. Per-user keys are name-prefixed secrets (`cred-{user}-{system}`) in `akv01-agentarmy`.
+
+Option C's original caveat ("you build all the broker code") proved minor here because the broker was already built backend-agnostic; only `store.py` swapped. **Tradeoffs accepted for the solo/trusted stage** ([[threat-model-no-forks]]): flat namespace + one shared vault (co-mingled with operator secrets), no per-user RBAC boundary. **Documented upgrade path** (unchanged): a dedicated per-tenant vault, then **OpenBao (Option B)** for cryptographic namespace isolation when *untrusted* multi-tenancy arrives. This honors velocity + "don't over-engineer for the horizon" + "don't hand-roll security."
 
 ## Consequences
 
 - **Positive:** a real BYO-keys surface; tools receive scoped, short-lived credentials and never hold raw third-party keys; rotation + audit become first-class; the abstraction tools can finally call *real* producers per-user, not just mocks.
 - **Negative / cost:** a new platform-tier service to run (Infisical: Postgres + Redis + app); isolation is RBAC/path-based until/unless we move to OpenBao; a backend-core broker layer to build (thin) + an onboarding endpoint.
 
-## Implementation sketch (for the recommended option)
+## Implementation sketch (as built)
 
-1. Deploy Infisical as a **platform-tier** image (ARC-ADR-023) — Docker locally, ACA later; Postgres + Redis companions.
-2. backend-core gains a thin **broker + onboarding** layer (`/api/v1/credentials/*`): user authenticates (Entra/OIDC), registers a `{system}` key; the key is written to Infisical under a per-user path; the raw key never returns to the client.
-3. Tools request a **scoped reference** from the broker at call time; backend-core resolves it server-side and calls the real producer. Tools never see the raw key (extends the abstraction-MCP proxy pattern).
-4. Audit every issuance; wire rotation hooks per system.
-5. Register the broker surface as a contract in [docs/contracts.md](../contracts.md); serve any agent-facing piece via the MCP registry ([[serve-capabilities-via-mcp]]).
+1. **No store to deploy** — reuse Azure Key Vault (`akv01-agentarmy`) via `DefaultAzureCredential` + `AZURE_KEYVAULT_URL`, the same machinery as `app/secrets.py`'s `akv:` resolver.
+2. backend-core `/api/v1/credentials/*` (`app/credentials/`): a user registers a `{system}` key (auth via `require_roles`); it is stored as the KV secret `cred-{user}-{system}`; the raw key never returns to the client. `GET` lists registered system names (never values); `DELETE` removes.
+3. `store.resolve(user, system)` is **server-side only** — backend-core injects the secret into the outbound call (option A). There is **no endpoint that returns a raw secret**.
+4. Audit every register/delete (`audit.emit`); rotation = a new KV secret version. **Live-verified** end-to-end against `akv01-agentarmy` (put/list/resolve/delete).
+5. The store is **backend-agnostic** — swapping to a dedicated vault or OpenBao later changes only `store.py`. Dev input surface (a small console UI / `/_dev` helper) is a follow-up as we iterate.

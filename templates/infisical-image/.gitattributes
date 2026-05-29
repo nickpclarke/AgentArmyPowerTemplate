@@ -1,3 +1,0 @@
-# Shell scripts must stay LF — a CRLF setup.sh fails in the container/Git-Bash on Windows
-# (the lesson from the .husky CRLF incident, ARC ref PR #290).
-*.sh text eol=lf

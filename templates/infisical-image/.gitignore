@@ -1,2 +1,0 @@
-# The real .env holds generated Infisical secrets (ENCRYPTION_KEY / AUTH_SECRET / db pw) — never commit it.
-.env
