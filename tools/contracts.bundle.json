@@ -1,0 +1,35 @@
+{
+  "$comment": "Manifest for the versioned fleet contract bundle (ARC-ADR-034). The single source of truth for what spokes pin + codegen from. `node tools/contracts-package.mjs` gathers each artifact FROM ITS PRODUCER repo (hub or a sibling spoke), packages them as ONE OCI artifact, and pushes it to GHCR (cosign-signed) via ORAS. This bundle REPLACES the hand-copied vendoring (e.g. backend-core.openapi.json copied into frontend-core, agui-stream duplicated, fleet-interface/ vendored 3×) — consumers pull one pinned version instead. Mirrors the 'shipped' rows of docs/contracts.md; add a row as each backlog contract ships. siblingRoot: where the spoke checkouts live relative to the hub (default = the hub's parent dir; CI checks the spokes out there or uses the ARC-ADR-034 read token).",
+  "registry": "ghcr.io/nickpclarke/contracts",
+  "version": "0.1.0",
+  "artifactType": "application/vnd.agentarmy.contracts.bundle.v1+json",
+  "siblingRoot": "..",
+  "artifacts": [
+    { "repo": "hub", "path": "contracts/health.openapi.yaml", "mediaType": "application/vnd.oai.openapi+yaml" },
+    { "repo": "hub", "path": "contracts/problem-details.openapi.yaml", "mediaType": "application/vnd.oai.openapi+yaml" },
+    { "repo": "hub", "path": "contracts/forge-control.openapi.yaml", "mediaType": "application/vnd.oai.openapi+yaml" },
+    { "repo": "hub", "path": "contracts/webhook-receiver.openapi.yaml", "mediaType": "application/vnd.oai.openapi+yaml" },
+    { "repo": "hub", "path": "contracts/runbook-orchestrator.openapi.yaml", "mediaType": "application/vnd.oai.openapi+yaml" },
+    { "repo": "hub", "path": "templates/ontology-project/ontology.ir.schema.json", "mediaType": "application/schema+json" },
+    { "repo": "hub", "path": "templates/ontology-project/constraints/model.shacl.ttl", "mediaType": "text/turtle" },
+    { "repo": "hub", "path": "templates/ontology-project/semantic/model.gufo.ttl", "mediaType": "text/turtle" },
+    { "repo": "hub", "path": "templates/ontology-project/semantic/model.bfo-cco.ttl", "mediaType": "text/turtle" },
+
+    { "repo": "backend-core", "path": "contracts/backend-core.openapi.json", "mediaType": "application/vnd.oai.openapi+json" },
+    { "repo": "backend-core", "path": "contracts/agentarmy-platform.openapi.yaml", "mediaType": "application/vnd.oai.openapi+yaml" },
+    { "repo": "backend-core", "path": "contracts/agent-gateway.openapi.yaml", "mediaType": "application/vnd.oai.openapi+yaml" },
+    { "repo": "backend-core", "path": "contracts/llm-gateway.openapi.yaml", "mediaType": "application/vnd.oai.openapi+yaml" },
+    { "repo": "backend-core", "path": "contracts/tavily-upstream.openapi.yaml", "mediaType": "application/vnd.oai.openapi+yaml" },
+    { "repo": "backend-core", "path": "app/ontology/discipline/midlevel/api-interface.ttl", "mediaType": "text/turtle" },
+    { "repo": "backend-core", "path": "app/ontology/discipline/midlevel/board.ttl", "mediaType": "text/turtle" },
+    { "repo": "backend-core", "path": "app/ontology/discipline/midlevel/business-mid.ttl", "mediaType": "text/turtle" },
+    { "repo": "backend-core", "path": "app/ontology/discipline/midlevel/workitem-fields.ttl", "mediaType": "text/turtle" },
+
+    { "repo": "middle-core", "path": "contracts/agui-stream.asyncapi.yaml", "mediaType": "application/vnd.aai.asyncapi+yaml" },
+    { "repo": "middle-core", "path": "contracts/proposed/mcr-f4-projection.openapi.yaml", "mediaType": "application/vnd.oai.openapi+yaml" },
+
+    { "repo": "frontend-core", "path": "contract/frontend-bff.openapi.json", "mediaType": "application/vnd.oai.openapi+json" },
+    { "repo": "frontend-core", "path": "contract/design-tokens.json", "mediaType": "application/json" },
+    { "repo": "frontend-core", "path": "contract/design-tokens.schema.json", "mediaType": "application/schema+json" }
+  ]
+}
