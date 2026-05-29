@@ -1,0 +1,42 @@
+{
+  "$schema": "../image-schema.json",
+  "name": "agentarmy-infisical",
+  "kind": "multi-service",
+  "base": "infisical/infisical:v0.160.7",
+  "description": "Infisical (ARC-ADR-037) — the BYO-credentials secrets STORE. Platform tier (ARC-ADR-023): users register their per-system keys here; backend-core's broker layer keeps raw keys server-side and hands tools scoped/short-lived references. Self-hosted as the Infisical backend + Postgres + Redis. Chosen over Vault (BSL) / OpenBao (heavier ops) for fastest adoption at the current solo/trusted stage, with a documented upgrade path to OpenBao for untrusted multi-tenancy.",
+  "owner": "hub template",
+  "tier": "platform",
+  "services": [
+    {
+      "name": "infisical-backend",
+      "image": "infisical/infisical:v0.160.7",
+      "role": "api",
+      "ports": ["8333:8080"],
+      "healthcheck": { "http": "http://localhost:8333/api/status", "expect": 200 }
+    },
+    { "name": "infisical-db", "image": "postgres:14-alpine", "role": "db", "healthcheck": { "cmd": "pg_isready -U infisical" } },
+    { "name": "infisical-redis", "image": "redis:7-alpine", "role": "cache" }
+  ],
+  "secrets": [
+    { "name": "encryption_key", "env": "ENCRYPTION_KEY", "description": "Infisical data-encryption key (32 hex). Rolled by setup.sh into the gitignored .env — never committed." },
+    { "name": "auth_secret", "env": "AUTH_SECRET", "description": "Infisical JWT/auth secret (base64). Rolled by setup.sh." },
+    { "name": "postgres_password", "env": "POSTGRES_PASSWORD", "description": "Infisical Postgres password. Rolled by setup.sh." }
+  ],
+  "shims": {
+    "note": "Pulls upstream images (infisical/infisical:v0.160.7, postgres:14-alpine, redis:7-alpine) — nothing built. setup.sh generates the gitignored .env (secrets + DB/Redis URIs + SITE_URL); the backend runs DB migrations on first boot."
+  },
+  "setup": { "sh": "setup.sh" },
+  "doctor": {
+    "cmd": "python doctor.py",
+    "proves": ["readiness", "api-status-ok"],
+    "description": "GET http://localhost:8333/api/status returns 200 — the Infisical backend is up, migrated, and reachable behind Postgres + Redis."
+  },
+  "deploy": {
+    "target": "aca",
+    "notes": "Platform tier. Locally via setup.sh (docker compose). On ACA: run the backend as a container app backed by Azure Database for PostgreSQL Flexible Server + Azure Cache for Redis, secrets from Key Vault, fronted by CF Access. Only backend-core's broker talks to it; tools never reach it directly."
+  },
+  "volumes": ["infisical-db-data"],
+  "contract": [
+    { "service": "infisical-backend", "type": "prose", "registry": "docs/contracts.md", "governingAdr": "ARC-ADR-037", "note": "The secrets store behind the BYO-credentials broker. backend-core's /api/v1/credentials/* layer is its only client; it keeps raw keys server-side and issues tools scoped references." }
+  ]
+}
