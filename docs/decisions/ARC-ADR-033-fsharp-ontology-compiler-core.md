@@ -78,7 +78,7 @@ Maximal purity and category-theory ergonomics, but introduces a brand-new toolch
 
 | Layer | Repo | Impact |
 |---|---|---|
-| middle-core | nickpclarke/middle-core | New F# project in the .NET solution for the IR datatype + projection functions; the C# host/runtime consumes it. Migration is incremental (one projection at a time), not a rewrite. |
+| middle-core | nickpclarke/middle-core | The existing Python multi-language generator (`generate_middle_core.py` — emits C#/JS/Rust/SHACL/OWL) is **not** migrated. Instead: (1) F# is an **output target** of that generator (state machines → discriminated unions, #112); (2) F# for **new hand-authored** surfaces (the IR datatype + the sift-loop/projection work). The C# host consumes the F# lib. |
 | forge | nickpclarke/agentarmy-forge | The deterministic emitters become F# catamorphisms (golden tests unchanged). |
 | hub | nickpclarke/AgentArmy | The F# spikes + this ADR; CI gains an F# build lane (the .NET SDK is already present — `dotnet fsi`). |
 | (agents) | hub `.claude/agents/` | No dedicated F# specialist yet — OQ below. |
@@ -107,3 +107,4 @@ Maximal purity and category-theory ergonomics, but introduces a brand-new toolch
 | Version | Date | Author | Change |
 |---|---|---|---|
 | 0.1 | 2026-05-28 | Claude Code (assisted) | Accepted on hub-owner "F# yes" — F# for the IR→projections compiler core, on .NET alongside middle-core C#; category-theory framing + two runnable F# spikes as evidence |
+| 0.2 | 2026-05-28 | Hub owner | Scope clarified: do **not** migrate the working Python generator to F#. F# is (a) an **output target** of the generator — state machines as discriminated unions (middle-core #112) — and (b) the language for **new** hand-authored surfaces (sift-loop discipline, IR→SHACL spikes). Supersedes the "migrate projections incrementally" framing in 0.1. |

@@ -17,20 +17,26 @@ Examples:
 /ea-adr review ARC-ADR-021 — should we extract llm-gateway to its own repo?
 ```
 
-## What to do (explicit dispatch)
+## What to do
 
-Pick **one** sub-agent based on what the user actually asked for, then invoke
-it via the **Agent** tool — do not draft the ADR yourself:
+**Default: draft the ADR directly** in MADR v4.0 form (sections below), in the
+main context. The fleet's ADRs are pragmatic engineering decisions — keep them
+lean, specific, and grounded in the actual code/contracts. **Do NOT reflexively
+funnel every ADR through the TOGAF advisor**; most decisions don't need ADM
+ceremony, and the direct, code-anchored ADRs (e.g. ARC-ADR-032/033) are the house
+style.
 
-| User intent | Sub-agent | Why |
-|---|---|---|
-| Draft a NEW ADR for a decision that's not yet recorded | `togaf-adm-advisor` | Knows MADR v4.0 structure cold, anchors the doc in the right TOGAF ADM phase, and pulls in the correct artifact templates (Statement of Architecture Work, Architecture Definition Document, etc.). |
-| Review an EXISTING ADR, propose changes, or evaluate trade-offs against decision drivers | `architect-reviewer` | Trained on macro-level architectural patterns + technology choices and gives a structured second-opinion read against the existing ADRs and decision drivers. |
-| Orchestrate a multi-ADR program (multiple cross-cutting decisions in flight, full ADM phase coordination) | `enterprise-architect` | Senior orchestrator — only when scope clearly exceeds a single ADR. |
+Escalate to a sub-agent via the **Agent** tool **only when the scope genuinely
+calls for it**:
 
-When the user's phrasing is ambiguous between "new" and "review," ask one
-clarifying question before dispatching. Don't guess and dispatch to the
-wrong specialist.
+| Escalate when… | Sub-agent |
+|---|---|
+| The user explicitly wants a formal **TOGAF ADM deliverable** (Statement of Architecture Work, ADM-phase artifact) with that rigor | `togaf-adm-advisor` |
+| The user asked to **review** an existing ADR / get a structured second opinion against decision drivers | `architect-reviewer` |
+| A **multi-ADR program** is in flight (several cross-cutting decisions, full ADM-phase coordination) | `enterprise-architect` |
+
+If the phrasing is ambiguous, **just draft it directly** — don't dispatch to a
+specialist on a guess.
 
 ### Prompt to pass to the sub-agent
 
