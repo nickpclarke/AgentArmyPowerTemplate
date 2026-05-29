@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | ID | ARC-ADR-036 |
-| Status | Proposed |
+| Status | Accepted |
 | Date | 2026-05-29 |
-| Deciders | Hub owner (Nicky Clarke) — pending acceptance |
+| Deciders | Hub owner (Nicky Clarke) — accepted 2026-05-29 |
 | Supersedes | — (extends [ARC-ADR-034](ARC-ADR-034-fleet-cross-repo-access-and-contract-distribution.md) vending; builds on [ARC-ADR-032](ARC-ADR-032-ontology-sift-sort-authoring-loop.md)) |
 | Tags | abstraction, anti-corruption-layer, canonical-model, mcp, vending, contract-distribution, validation, adapters, meta-service, ontology |
 
@@ -56,6 +56,8 @@ The **proven** canonical artifacts + adapters become versioned, pull-able output
 ## Implementation status (incremental)
 
 - ✅ Abstract: concept-level + field-level (`schema_abstract.py`, `/api/v1/ontology/abstract`), bottom-up proposals.
-- ◻ Validate: the adapter gates (coverage / confidence / type / round-trip / no-collision) — **next**.
+- ✅ Validate: the adapter gates (`adapter_validate.py` — coverage / confidence-floor / collision / round-trip) **+ the escalate→re-validate→snap loop** (`escalate_below`, method-aware validation). Proven: Linear work-item adapter snaps; GitHub precisely quarantined.
+- ◻ Wire validation+escalation into the `/abstract` route (field-level mode) — **next**.
 - ◻ Vend: versioned artifact pull via the MCP tool.
 - ◻ MCP tool surface + self-host packaging.
+- ◻ `board-sync` runtime consumer + container (applies a proven adapter to live GitHub v2 / Linear).
