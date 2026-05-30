@@ -23,14 +23,14 @@ Today this is ad-hoc and operator-only: secrets live in Azure Key Vault `akv01-a
 
 - **Keys stay server-side** — the broker issues scoped/short-lived credentials; tools proxy and never hold raw keys (extends the pattern the abstraction MCP already uses).
 - **Fast to adopt** — the capability/tool cadence is aggressive ([[serve-capabilities-via-mcp]]); the credential surface must not be a multi-day yak-shave.
-- **Open-source / self-hostable** preferred; must fit the Docker fleet + Azure (ACA, Entra, Key Vault).
+- **Managed + supported + indemnified** — a vendor-run, SLA-backed service with **Microsoft IP indemnification** is preferred over self-hosting OSS and owning its operational + legal risk; it must fit the existing Azure footprint (Entra, ACA, Key Vault) and be evolvable there. (Self-hostable OSS was the initial lean; managed Azure won — see Decision Outcome.)
 - **Onboarding UX** — a real surface where a user registers a key for a system.
-- **Don't hand-roll security** — prefer a battle-tested secrets platform over custom token/rotation/audit code (secure-by-default).
+- **Don't hand-roll security** — prefer a battle-tested store over custom crypto/rotation/audit code (secure-by-default).
 - **Multi-tenant isolation** — a driver, but weighted for the *horizon*, not the solo/trusted present.
 
 ## Considered Options
 
-### Option A — Infisical Community Edition (MIT)  ← recommended
+### Option A — Infisical Community Edition (MIT)  *(initially selected, then revised — see Decision Outcome)*
 Self-hosted secrets platform: single Docker stack (Postgres + Redis + app), first-class Python SDK (`infisicalsdk` 1.x), REST API ideal for a thin registration endpoint, Org→Project→Environment→Path hierarchy that maps to per-user/per-system scoping, RBAC + audit in CE, Azure auth method.
 - **Pros:** fastest to a working broker (an afternoon); MIT core; clean fit with the fleet's Docker/ACA pattern; the onboarding surface is a thin wrapper over its API so users never touch the vault; active project (weekly releases).
 - **Cons:** tenant isolation is **RBAC/path-based, not cryptographic-namespace**; dynamic-secret engines are fewer than Vault/OpenBao (third-party API-key rotation is partly hand-coded); SSO (SAML/SCIM) is Enterprise-tier.
@@ -40,10 +40,10 @@ The truly-OSS fork of Vault. Hard multi-tenant **namespaces**, 50+ dynamic-secre
 - **Pros:** the "do it right" multi-tenant answer; cryptographic namespace isolation; dynamic secrets + leasing out of the box; no brokering logic to write; clean license (no Vault BSL trap).
 - **Cons:** **operational weight** — HA Raft clustering, an unseal ceremony, namespace administration (~1–2 days setup + runbooks); `hvac` is Vault-branded (works, but won't track OpenBao-specific features); must run ≥2.5.4 to avoid the May-2026 cross-namespace CVEs.
 
-### Option C — Azure Key Vault + a thin custom broker
-Keep secrets in Key Vault (one vault per tenant, or `{userId}/{system}/` naming) and build a FastAPI broker that authenticates users, stores keys, and issues scoped short-lived tokens.
-- **Pros:** zero new infra; native to the existing Azure/Entra footprint; fully managed store.
-- **Cons:** you **own all the security-sensitive code** — token issuance, revocation, rotation, audit, onboarding UI. Research finding: this accumulates to roughly the same scope as deploying Infisical, but **without the community battle-testing** — i.e. the riskiest path per secure-by-default. No dynamic secrets (you implement leasing).
+### Option C — Azure Key Vault + a thin broker  ← chosen
+Store per-user keys in Azure Key Vault (`cred-{user}-{system}` naming); a thin backend-core broker authenticates users and **injects** the resolved secret server-side. Reuses the box's `DefaultAzureCredential` + `AZURE_KEYVAULT_URL` (the `akv:` resolver machinery).
+- **Pros:** **zero new infra / no container / no bootstrap**; native to the existing Azure + Entra footprint; **fully managed, SLA-backed, with Microsoft IP indemnification** — lean on MS rather than own self-host ops + OSS legal exposure; reuses the existing `azure-*` deps + auth so **no new dependency and no extra runtime creds**; clear evolution path on Azure (dedicated per-tenant vaults → RBAC → Managed HSM).
+- **Cons:** flat namespace + one shared vault (per-user keys are name-prefixed, **co-mingled with operator secrets**), no per-user RBAC boundary, no dynamic-secret leasing. The earlier "you own all the broker code" worry proved **minor** — the broker was built backend-agnostic, so only `store.py` is KV-specific. Isolation is the real residual, accepted for the solo/trusted stage.
 
 ### Ruled out
 - **HashiCorp Vault** — BSL 1.1 since 2023 (IBM-owned); the "no competing product" clause is a legal trap if credential-brokering ever becomes a sold feature. OpenBao removes this.
@@ -55,7 +55,7 @@ Keep secrets in Key Vault (one vault per tenant, or `{userId}/{system}/` naming)
 
 **Chosen: Option C — Azure Key Vault + a thin broker** (revised 2026-05-29). Option A (Infisical CE) was selected first via the HITL selector, but its self-host reality — a Postgres+Redis+app container plus an admin/project/machine-identity/client-secret bootstrap, compounded by a flaky local Docker engine — was real operational friction. We switched to **Azure Key Vault**: the broker API and the "raw keys stay server-side, inject server-side" contract are **identical** (only the storage backend changed), and it reuses the box's existing `DefaultAzureCredential` + `AZURE_KEYVAULT_URL` (the `akv:` resolver machinery) — **no container, no new dependency, no extra credentials**. Per-user keys are name-prefixed secrets (`cred-{user}-{system}`) in `akv01-agentarmy`.
 
-Option C's original caveat ("you build all the broker code") proved minor here because the broker was already built backend-agnostic; only `store.py` swapped. **Tradeoffs accepted for the solo/trusted stage** ([[threat-model-no-forks]]): flat namespace + one shared vault (co-mingled with operator secrets), no per-user RBAC boundary. **Documented upgrade path** (unchanged): a dedicated per-tenant vault, then **OpenBao (Option B)** for cryptographic namespace isolation when *untrusted* multi-tenancy arrives. This honors velocity + "don't over-engineer for the horizon" + "don't hand-roll security."
+Option C's original caveat ("you build all the broker code") proved minor here because the broker was already built backend-agnostic; only `store.py` swapped. We **lean on Microsoft** for the hard part — a managed, SLA-backed, IP-indemnified secrets store — rather than owning self-host operations + OSS legal/operational risk, and we can **evolve on Azure** (dedicated per-tenant vaults → RBAC → Managed HSM). **Tradeoffs accepted for the solo/trusted stage** ([[threat-model-no-forks]]): flat namespace + one shared vault (co-mingled with operator secrets), no per-user RBAC boundary. **Documented upgrade path:** a dedicated per-tenant vault, then **OpenBao (Option B)** for cryptographic namespace isolation only if *untrusted* multi-tenancy demands it. This honors velocity + "don't over-engineer for the horizon" + "don't hand-roll security."
 
 ## Consequences
 
