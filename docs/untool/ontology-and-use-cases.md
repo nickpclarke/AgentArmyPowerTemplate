@@ -102,7 +102,7 @@ nodes. So it is at once a **whole** (a thing you can name, evidence, and query) 
 itself be a member of a further hyperedge — *nested reification*). A concept that is simultaneously
 whole and part is a **holon**; the nesting of holons is a **holarchy**. The object model is therefore
 not merely a hypergraph of *data* but a holarchy of *capability* — the basis for how the swarm
-acquires skills (§3.4).
+acquires skills (§1.6, §3.4).
 
 A holon lives in the **authoring (UFO) Perspective** (§1.1): it *is* the Relator. The realist (BFO)
 Perspective has no native kind for a reified relation, so a holon is reconciled through the divergence
@@ -133,11 +133,37 @@ These terms are pervasive and non-negotiable in the product language:
 - **cosine** — the embedding similarity that drives every snap (concept → canonical, JSON field →
   fragment, surface concept → canonical). Confidence is always shown, never hidden.
 - **presence-only secrets** — secret *values* never cross the wire; only `present` + `source`.
-- **holon** — a concept that is at once a *whole* and a *part*: a reified relation (Relator) has its
-  own identity yet can be a member of a further relation. **Skills are holons** — each carries an
-  affordance, so a capability is a *face* of a domain object, not a hand-written pack. **holarchy** —
-  the nesting of holons (a relator playing a role in another relator); a capability composed from its
-  participants' capabilities along role-bindings.
+- **holon / holarchy** — capability modeled as a *face* of a reified object (a Relator), composing
+  along nested reification. The platform's model of skill — expanded in §1.6.
+
+### 1.6 Holons — capability is a face of an object
+
+The reified relations of §1.3 don't just enrich the data; they change what a *capability* is. A
+**holon** is a concept that is at once a *whole* and a *part* — a Relator with its own identity that
+can play a role in a further Relator. Three consequences make this the platform's model of skill:
+
+- **A skill is a face of an object, not a file.** Each holon carries an *affordance* — what you can do
+  with it. So "what can an agent do?" is answered by the **graph** (which holons are in scope for the
+  purpose), not by a hand-curated pack. Adding a capability = a holon entering the derived ontology.
+- **Acquisition is a projection, evaluated at request time.** The same projection that emits `SKILL.md`
+  / MCP tools from the model at *build* time, run *lazily* over the live hypergraph, lets an agent
+  **acquire** the capability-holons relevant to a purpose for that turn. One functor
+  `P : Holarchy → CapabilitySurface`; only *when* it runs changes (build-time catalog vs request-time
+  acquisition). This extends *Skills as a Projection* from a static artifact to a live capability.
+- **Capabilities compose because their holons compose.** Nested reification makes the object model a
+  **holarchy**; a relator-holon's affordance is composed from its participants' affordances along
+  role-bindings — so new abilities *emerge* from the graph's shape, with no new code. The soundness
+  law worth enforcing is `P(compose(h₁, h₂)) ≅ compose(P h₁, P h₂)` — acquiring a composite's skill
+  equals composing the skills of its parts; nothing the graph didn't license can appear.
+
+This is the difference between a skills *catalog* and a **fountain of domain expertise**: the swarm
+(§3.4) grows more capable as the derived ontology grows richer — not as someone writes more packs.
+
+> **Honest status.** The projection is proven end-to-end on a *seed* holarchy today — an agent queries
+> a `/holons` projection, acquires the offerings, and streams them as provenance before acting. The
+> fountain widens as the canonical graph fills; *executing* an acquired affordance and the
+> **governance gate** that decides which affordances may act (acquisition must be *monotone in
+> authority* — acquiring never escalates) are the named frontier. See the platform brief's ledger.
 
 ---
 
