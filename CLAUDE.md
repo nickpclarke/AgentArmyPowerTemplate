@@ -43,6 +43,18 @@ planning/
 
 ## Working in This Repo
 
+### Maintain a live task list — always (constitutional)
+
+**Standing rule, not a suggestion — this OVERRIDES default behavior.** The operator is highly tangent‑driven: within a single session, work hops across layers (Factory, broker, MCP/auth, infra, docs) and across reboots. A persistent in‑session task list is the through‑line that keeps both sides oriented and stops threads from being silently dropped.
+
+- **Create a TODO list (`TaskCreate`) at the start of any work spanning more than ~2 steps or likely to outlive one turn — proactively, without being asked.** Use the task panel, not just prose.
+- **Keep it live:** set a task `in_progress` *before* starting it and `completed` the moment it's truly done (tests passing, not "probably"). Never batch‑complete at the end.
+- **Capture tangents as tasks.** When the operator pivots mid‑stream, add the new ask as its own task and leave the prior thread's tasks intact, then resurface the board — adding the tangent *is* the first step of handling it, so nothing is abandoned.
+- **Wire `blockedBy` dependencies** so ordering is explicit; work tasks in ID order; use the list to pick the next unblocked item.
+- **Reconcile on resume / after compaction:** restate the open task board early so the through‑line survives context loss.
+
+This is the **session task panel** (`TaskCreate`/`TaskUpdate`) — working memory for the current effort. It complements, and does not replace, the **GitHub Projects board** below (cross‑session, cross‑army work tracking).
+
 ### GitHub Projects is the task backbone
 
 **Default — check Issues AND the PRs that reference them FIRST, always.** Before starting work, creating/closing/duplicating an issue, or opening a PR, do BOTH: (a) list open Issues (the board in the hub; `gh issue list` in a spoke) and pick up / align with an existing one; (b) **list open PRs that reference candidate issues** (`gh pr list --search "linked:issue/N"` or read PR bodies for `Closes #N`/`supersedes #M`) BEFORE marking duplicate / closing. A PR in flight against an issue is the strongest "not a duplicate" signal — two issues with one open PR each are two architectural *tracks*, not duplicates. Create a new issue only if no Issue and no in-flight PR covers the work.
