@@ -166,6 +166,9 @@ nav:
     - Pipeline Architecture: dlt-pipelines.md
     - Source Connectors: dlt-sources.md
     - Incremental Loading: dlt-incremental.md
+  - Untool.ai Platform:
+    - Platform Architecture: untool-platform.md
+    - Ontology & Use Cases: untool/ontology-and-use-cases.md
   - Enterprise Architecture:
     - Wardley Maps: wardley-maps-examples.md
     - Wardley Mapping Guide: wardley.md
@@ -186,13 +189,34 @@ nav:
       - ARC-ADR-011 Secret Resolution + Workload Identity: decisions/ARC-ADR-011-runtime-secret-resolution-workload-identity.md
       - ARC-ADR-012 Read-Query Caching: decisions/ARC-ADR-012-read-query-caching-invalidation.md
       - ARC-ADR-013 Per-Connection RBAC: decisions/ARC-ADR-013-per-connection-rbac-role-taxonomy.md
-      - ARC-ADR-019 Ontology + Reasoning Layer (proposed): decisions/ARC-ADR-019-ontology-reasoning-layer.md
-      - ARC-ADR-021 LLM Gateway (backend-core, guardrails): decisions/ARC-ADR-021-llm-gateway.md
-      - ARC-ADR-022 Event Bus Bridges (proposed): decisions/ARC-ADR-022-event-bus-bridges.md
+      - ARC-ADR-016 Ontology Representation (Reification & Hyperedges): decisions/ARC-ADR-016-ontology-representation-reification-hyperedges.md
+      - ARC-ADR-018 Async Job Execution Model: decisions/ARC-ADR-018-async-job-execution-model.md
+      - ARC-ADR-019 Ontology + Reasoning Layer: decisions/ARC-ADR-019-ontology-reasoning-layer.md
+      - ARC-ADR-020 Self-Hosted Runner Trust Isolation: decisions/ARC-ADR-020-self-hosted-runner-trust-isolation.md
+      - ARC-ADR-021 LLM Gateway: decisions/ARC-ADR-021-llm-gateway.md
+      - ARC-ADR-022 Event Bus Bridges: decisions/ARC-ADR-022-event-bus-bridges.md
       - ARC-ADR-023 Container Tiering Strategy: decisions/ARC-ADR-023-container-tiering-strategy.md
       - ARC-ADR-024 Platform Maturity Audit: decisions/ARC-ADR-024-platform-maturity-audit.md
-      - ARC-ADR-025 GCP Scope (proposed): decisions/ARC-ADR-025-gcp-scope-narrowing.md
-      - ARC-ADR-038 Unified Process & Time (proposed): decisions/ARC-ADR-038-unified-process-and-time-architecture.md
+      - ARC-ADR-025 GCP Scope Narrowing: decisions/ARC-ADR-025-gcp-scope-narrowing.md
+      - ARC-ADR-026 Data Vault 2.1 Methodology: decisions/ARC-ADR-026-data-vault-2-1-methodology.md
+      - ARC-ADR-027 Contract Backlog Discipline: decisions/ARC-ADR-027-contract-backlog-discipline.md
+      - ARC-ADR-028 Agent Gateway (A2A/MCP): decisions/ARC-ADR-028-agent-gateway-a2a-mcp.md
+      - ARC-ADR-029 AgentArmy Forge Codegen Container: decisions/ARC-ADR-029-agentarmy-forge-codegen-container.md
+      - ARC-ADR-030 Data→Ontology Ingestion Pipeline: decisions/ARC-ADR-030-data-to-ontology-ingestion-pipeline.md
+      - ARC-ADR-031 Automated Runbook Orchestration: decisions/ARC-ADR-031-automated-runbook-orchestration.md
+      - ARC-ADR-032 Ontology Sift/Sort Authoring Loop: decisions/ARC-ADR-032-ontology-sift-sort-authoring-loop.md
+      - ARC-ADR-033 F# Ontology Compiler Core: decisions/ARC-ADR-033-fsharp-ontology-compiler-core.md
+      - ARC-ADR-034 Fleet Cross-Repo Access & Contract Distribution: decisions/ARC-ADR-034-fleet-cross-repo-access-and-contract-distribution.md
+      - ARC-ADR-035 Holonic Unified Board Architecture: decisions/ARC-ADR-035-holonic-unified-board-architecture.md
+      - ARC-ADR-036 Abstraction Validation & Distribution Service: decisions/ARC-ADR-036-abstraction-validation-distribution-service.md
+      - ARC-ADR-037 BYO-Credentials Secrets Broker: decisions/ARC-ADR-037-byo-credentials-secrets-broker.md
+      - ARC-ADR-038 Unified Process & Time: decisions/ARC-ADR-038-unified-process-and-time-architecture.md
+      - ARC-ADR-039 Foundations as Perspectives: decisions/ARC-ADR-039-foundations-as-perspectives.md
+      - ARC-ADR-040 Graph Visualization Component Selection: decisions/ARC-ADR-040-graph-visualization-component-selection.md
+      - ARC-ADR-041 Pace-Layered Projection & Graduation: decisions/ARC-ADR-041-pace-layered-projection-and-graduation.md
+      - ARC-ADR-042 Temporal Persistence (Stamp-First): decisions/ARC-ADR-042-temporal-persistence-stamp-first-store-by-access-pattern.md
+      - ARC-ADR-043 Generative Programming Pipeline (the Factory): decisions/ARC-ADR-043-ontology-driven-generative-programming-pipeline.md
+      - ARC-ADR-044 Untool Ontology-Orchestrated Swarm Intelligence: decisions/ARC-ADR-044-untool-ontology-orchestrated-swarm-intelligence.md
   - Resources:
     - Memory Palace System: mempalace.md
     - FAQ: faq.md
