@@ -115,6 +115,13 @@ Either way: apply routing labels `copilot-task` (bounded) or `agent-army-task`
 
 ## Agent Routing
 
+> **Routing index — load this first.** [`.agent/subagent-roster.md`](.agent/subagent-roster.md)
+> is a compact one-line-per-agent index of all specialist agents, grouped by category.
+> Load *it* as your routing context — **not** the full agent definitions. When you need to
+> act as a specific agent, open only its full definition on demand: `.codex/agents/<name>.toml`
+> (Codex) or `.claude/agents/categories/<category>/<name>.md` (source). Loading all 180 full
+> definitions at once will blow your context budget (this is why Codex sessions stall).
+
 | Task type | Route to |
 |---|---|
 | XS/S bugs, well-scoped stories | Copilot (`copilot-task` label) |

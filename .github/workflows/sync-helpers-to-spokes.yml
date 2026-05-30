@@ -34,6 +34,7 @@ on:
       - "ontology/platform-self-model/generated/lexicon.yaml"
       - ".agent/hub.json"
       - ".agent/environments.json"
+      - ".agent/subagent-roster.md"
       - ".github/ISSUE_TEMPLATE/epic-handoff.md"
       - ".github/workflows/notify-hub.yml"
       - ".github/workflows/notify-hub-artifacts.yml"

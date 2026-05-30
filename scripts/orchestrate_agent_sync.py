@@ -93,6 +93,17 @@ class AgentSyncOrchestrator:
 
         return success, result
 
+    def generate_roster(self) -> Tuple[bool, Dict]:
+        """Regenerate the compact subagent roster (the routing index coders load
+        instead of all 180 full agent definitions)."""
+        print("🔄 Generating subagent roster...")
+        success, output = self.run_command(
+            [sys.executable, 'scripts/generate_subagent_roster.py'],
+            'Roster generation'
+        )
+        print(f"   {'✅' if success else '❌'} {output.strip()[:120]}")
+        return success, {'platform': 'Roster', 'success': success, 'output': output.strip()}
+
     def sync_antigravity(self, use_global: bool = False) -> Tuple[bool, Dict]:
         """Synchronize agents to Antigravity CLI."""
         location = "global (~/.gemini/antigravity-cli/plugins)" if use_global else "workspace (.agents/plugins)"
@@ -237,6 +248,10 @@ class AgentSyncOrchestrator:
 
         # Run syncs
         success_codex, _ = self.sync_codex()
+
+        # Roster derives from the same agent source — regenerate it alongside the packs
+        # so the routing index can't drift from the agent set.
+        self.generate_roster()
 
         success_antigravity, _ = self.sync_antigravity(use_global=use_global)
 
