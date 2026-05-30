@@ -11,6 +11,12 @@
 obsidian/**/.obsidian/
 obsidian/**/.trash/
 
+# Synced spoke platform docs — populated at build time by scripts/sync-spoke-docs.sh
+# (each spoke is the source of truth; we don't commit copies). Keep index.md + .pages.
+docs/platform/frontend-core/
+docs/platform/backend-core/
+docs/platform/middle-core/
+
 # Environment variables — contains Azure/API credentials
 .env
 extensions/board-manager/.env

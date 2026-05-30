@@ -2,6 +2,11 @@
 mkdocs>=1.5.0
 mkdocs-material>=9.4.0
 
+# Auto-nav for synced spoke docs under docs/platform/ (anti-drift): a directory
+# nav entry expands from the file tree, so newly-synced spoke pages appear without
+# hand-editing nav. Also lets each spoke control ordering via its own .pages file.
+mkdocs-awesome-pages-plugin>=2.9.0
+
 # Markdown extensions and features
 pymdown-extensions>=10.0
 markdown>=3.4.0

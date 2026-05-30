@@ -44,6 +44,16 @@ jobs:
           echo "Generating agent glossary from source definitions..."
           python scripts/generate_agent_docs.py
 
+      - name: Sync spoke platform docs (frontend/backend/middle → docs/platform/)
+        env:
+          # Read access to the private spoke repos. PROJECT_TOKEN is a classic PAT with
+          # repo scope already used across the fleet. Graceful: a missing token or an
+          # unavailable spoke is skipped with a warning, never fails the docs build.
+          SPOKE_SYNC_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+        run: |
+          chmod +x scripts/sync-spoke-docs.sh
+          ./scripts/sync-spoke-docs.sh
+
       - name: Build documentation
         run: mkdocs build
 

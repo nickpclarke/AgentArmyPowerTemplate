@@ -58,6 +58,9 @@ plugins:
   - search:
       lang: en
       separator: '[\\s\\-,:!=\\[\\]()"/]+|(?<!\\w)(?=\\w)|(?!\\w)(?=\\w)'
+  # Expands the `platform/` directory nav entry (synced spoke docs) from the file
+  # tree, so newly-synced spoke pages appear with no hand-editing of nav.
+  - awesome-pages
 
 markdown_extensions:
   - admonition
@@ -169,6 +172,10 @@ nav:
   - Untool.ai Platform:
     - Platform Architecture: untool-platform.md
     - Ontology & Use Cases: untool/ontology-and-use-cases.md
+    # Per-layer platform docs are SYNCED from each spoke repo into docs/platform/<spoke>/
+    # at build time (see .github/workflows/deploy-docs.yml). awesome-pages expands this
+    # directory from the file tree, so synced pages appear without editing nav.
+    - Platform Layers: platform
   - Enterprise Architecture:
     - Wardley Maps: wardley-maps-examples.md
     - Wardley Mapping Guide: wardley.md
@@ -217,6 +224,7 @@ nav:
       - ARC-ADR-042 Temporal Persistence (Stamp-First): decisions/ARC-ADR-042-temporal-persistence-stamp-first-store-by-access-pattern.md
       - ARC-ADR-043 Generative Programming Pipeline (the Factory): decisions/ARC-ADR-043-ontology-driven-generative-programming-pipeline.md
       - ARC-ADR-044 Untool Ontology-Orchestrated Swarm Intelligence: decisions/ARC-ADR-044-untool-ontology-orchestrated-swarm-intelligence.md
+      - ARC-ADR-045 Unified untool.ai Docs Site: decisions/ARC-ADR-045-unified-untool-docs-site.md
   - Resources:
     - Memory Palace System: mempalace.md
     - FAQ: faq.md
