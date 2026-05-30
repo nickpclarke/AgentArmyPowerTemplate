@@ -27,7 +27,8 @@
   "baked": [
     { "path": "entrypoint.sh", "purpose": "serve-inbound (default, uvicorn) | relay-outbound | <cmd>." },
     { "path": "scripts/webhook_receiver.py", "purpose": "FastAPI inbound receiver: HMAC verify -> replay dedup -> CloudEvents v1.0 envelope -> JetStream publish (auto-creates FLEET stream on boot)." },
-    { "path": "scripts/nats-relay.py", "purpose": "JetStream push-consumer that POSTs each event to SINK_URL; acks on 2xx, naks on non-2xx (JS redeliver -> DLQ in Phase 1)." }
+    { "path": "scripts/nats-relay.py", "purpose": "JetStream push-consumer that POSTs each event to SINK_URL; acks on 2xx, naks on non-2xx (JS redeliver -> DLQ in Phase 1). Emits the cross-cluster clock-skew SLI on each receive (ARC-ADR-038 §5)." },
+    { "path": "scripts/clock_skew.py", "purpose": "Clock-skew SLI: parses the temporal-envelope HLC from each received CloudEvent and prints an NDJSON fleet.clock.skew_ms metric (ARC-ADR-038 §5, ARC-ADR-010). Stdlib-only; graceful no-op for events without an hlc." }
   ],
   "setup": { "sh": "setup.sh", "ps1": "setup.ps1" },
   "doctor": {

@@ -22,7 +22,7 @@ from .ir import Model, validate as validate_ir
 from .parsers import rdf_parser, yaml_parser
 from .sources import load as load_source
 
-TARGETS = ("csharp", "typescript", "python", "all")
+TARGETS = ("csharp", "typescript", "python", "bpmn", "cacao", "all")
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -197,6 +197,14 @@ def _emitter_for(target: str):
         from .emitters import python
 
         return python
+    if target == "bpmn":
+        from .emitters import bpmn
+
+        return bpmn
+    if target == "cacao":
+        from .emitters import cacao
+
+        return cacao
     raise ValueError(f"unknown target: {target!r}")
 
 

@@ -16,11 +16,14 @@ Environment:
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 import sys
 
 import httpx
 import nats
+
+from clock_skew import emit_skew
 
 NATS_URL = os.environ.get("NATS_URL", "nats://nats:4222")
 SUBJECT_FILTER = os.environ.get("SUBJECT_FILTER", "fleet.>")
@@ -49,6 +52,11 @@ async def main() -> None:
                 msg = await sub.next_msg(timeout=30)
             except Exception:
                 continue
+            # Cross-cluster clock-skew SLI (ARC-ADR-038 §5): best-effort, never blocks the relay.
+            try:
+                emit_skew(json.loads(msg.data))
+            except Exception:
+                pass
             try:
                 r = await client.post(SINK_URL, content=msg.data, headers=headers)
                 if 200 <= r.status_code < 300:

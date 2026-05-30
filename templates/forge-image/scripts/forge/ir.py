@@ -75,6 +75,44 @@ class ObjectType:
         return dict(self.annotations)
 
 
+@dataclass(frozen=True)
+class ProcessStep:
+    """One activity in a Process. `kind` selects the BPMN element the emitter writes:
+        service     → serviceTask (invokes the Agent Gateway; `agent` = slug)
+        emit-event  → serviceTask that publishes a CloudEvent on `subject`
+        manual      → userTask (HITL ack)
+        wait        → intermediateCatchEvent (timer if `timeout`, else a message wait)
+        decision    → exclusiveGateway (first `next` carries `condition`, last is default)
+        parallel    → parallelGateway (fans out to every `next`)
+        call        → callActivity (`calls` = sub-process id; recursive nesting)
+        end         → endEvent
+    `next` lists successor step names; empty = fall through to the next declared step.
+    """
+
+    name: str
+    kind: str
+    agent: Optional[str] = None
+    calls: Optional[str] = None
+    subject: Optional[str] = None
+    timeout: Optional[str] = None
+    condition: Optional[str] = None
+    next: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class Process:
+    """A perdurant (UFO «event»/«situation») that transforms endurants over time.
+    Compiles to a BPMN/CACAO artifact the runbook-orchestrator kernel executes
+    (ARC-ADR-031 Q5 / ARC-ADR-038). `trigger_kind` is message|timer|signal|manual|none."""
+
+    id: str
+    name: str = ""
+    trigger_kind: str = "none"
+    trigger_subject: Optional[str] = None
+    trigger_schedule: Optional[str] = None
+    steps: tuple[ProcessStep, ...] = ()
+
+
 @dataclass
 class Model:
     """The whole input bundle. version + namespace control emitter output paths."""
@@ -82,6 +120,7 @@ class Model:
     version: str
     namespace: str
     object_types: list[ObjectType] = field(default_factory=list)
+    processes: list[Process] = field(default_factory=list)
     source_uri: Optional[str] = None
     """Where this model was loaded from (file URI / http URL / blob URI).
     Threaded into emitter file-headers for provenance."""
@@ -105,6 +144,9 @@ ALLOWED_SCALARS = frozenset(
     {"string", "int", "long", "float", "bool", "datetime", "uuid", "json"}
 )
 ALLOWED_CARDINALITIES = frozenset({"one", "many"})
+ALLOWED_STEP_KINDS = frozenset(
+    {"service", "emit-event", "manual", "wait", "decision", "parallel", "call", "end"}
+)
 
 
 def validate(model: Model) -> list[str]:
@@ -150,5 +192,27 @@ def validate(model: Model) -> list[str]:
                     f"ObjectType {ot.name!r} Relation {r.name!r}: "
                     f"target {r.target!r} not declared in model"
                 )
+
+    proc_ids = [p.id for p in model.processes]
+    if len(set(proc_ids)) != len(proc_ids):
+        errors.append("duplicate Process ids")
+    for p in model.processes:
+        if not p.steps:
+            errors.append(f"Process {p.id!r}: must declare at least one step")
+        step_names = {s.name for s in p.steps}
+        for s in p.steps:
+            if s.kind not in ALLOWED_STEP_KINDS:
+                errors.append(
+                    f"Process {p.id!r} step {s.name!r}: kind {s.kind!r} "
+                    f"not in {sorted(ALLOWED_STEP_KINDS)}"
+                )
+            if s.kind == "call" and not s.calls:
+                errors.append(f"Process {p.id!r} step {s.name!r}: call step requires 'calls'")
+            for nxt in s.next:
+                if nxt not in step_names:
+                    errors.append(
+                        f"Process {p.id!r} step {s.name!r}: next {nxt!r} "
+                        f"is not a step in this process"
+                    )
 
     return errors

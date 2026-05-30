@@ -192,6 +192,7 @@ nav:
       - ARC-ADR-023 Container Tiering Strategy: decisions/ARC-ADR-023-container-tiering-strategy.md
       - ARC-ADR-024 Platform Maturity Audit: decisions/ARC-ADR-024-platform-maturity-audit.md
       - ARC-ADR-025 GCP Scope (proposed): decisions/ARC-ADR-025-gcp-scope-narrowing.md
+      - ARC-ADR-038 Unified Process & Time (proposed): decisions/ARC-ADR-038-unified-process-and-time-architecture.md
   - Resources:
     - Memory Palace System: mempalace.md
     - FAQ: faq.md
