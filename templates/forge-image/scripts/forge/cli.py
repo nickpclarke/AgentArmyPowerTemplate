@@ -2,7 +2,7 @@
 
 Usage:
     forge generate --source <file://… | http://… | azureblob://…>
-                   --target <csharp|typescript|python|all>
+                   --target <csharp|typescript|python|rust|all>
                    --out <dir>
                    [--consumer-repo owner/repo]   # if set, opens a PR via pr_opener
 
@@ -22,7 +22,7 @@ from .ir import Model, validate as validate_ir
 from .parsers import rdf_parser, yaml_parser
 from .sources import load as load_source
 
-TARGETS = ("csharp", "typescript", "python", "bpmn", "cacao", "all")
+TARGETS = ("csharp", "typescript", "python", "rust", "bpmn", "cacao", "all")
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -130,7 +130,7 @@ def generate(
     if errors:
         raise ValueError("invalid model: " + "; ".join(errors))
 
-    targets = [target] if target != "all" else ["csharp", "typescript", "python"]
+    targets = [target] if target != "all" else ["csharp", "typescript", "python", "rust"]
     written: dict[str, list[str]] = {}
     for t in targets:
         em = _emitter_for(t)
@@ -197,6 +197,10 @@ def _emitter_for(target: str):
         from .emitters import python
 
         return python
+    if target == "rust":
+        from .emitters import rust
+
+        return rust
     if target == "bpmn":
         from .emitters import bpmn
 

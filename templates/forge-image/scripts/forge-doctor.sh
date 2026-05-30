@@ -222,6 +222,34 @@ else
   fail "no generated file at $GEN (response: $RESP)"
 fi
 
+# 5b. rust-emit-byte-identical — same frozen YAML, target=rust, vs reference.g.rs
+RESP="$(curl -sS --max-time 30 -H 'Content-Type: application/json' -X POST \
+  -d '{"source":"'"${DETERMINISTIC_SOURCE}"'","target":"rust","out":"'"${WORKDIR}/out-golden-rs"'"}' \
+  "${BASE}/generate" 2>/dev/null || echo '{}')"
+GEN_RS="${WORKDIR}/out-golden-rs/data_platform_contracts.g.rs"
+if [ -f "$GEN_RS" ]; then
+  if "$PYTHON_BIN" -c "
+import sys
+a = open(sys.argv[1], 'rb').read()
+b = open(sys.argv[2], 'rb').read()
+if a == b:
+    print('match')
+else:
+    import difflib
+    al = a.decode('utf-8', errors='replace').splitlines()
+    bl = b.decode('utf-8', errors='replace').splitlines()
+    sys.stderr.write('\\n'.join(difflib.unified_diff(bl, al, fromfile='golden', tofile='generated', n=2)[:40]) + '\\n')
+    print('mismatch')
+" "$GEN_RS" "${GOLDEN_DIR}/reference.g.rs" 2>"${WORKDIR}/diff-rs.log" | grep -q '^match$'; then
+    ok "generated data_platform_contracts.g.rs == golden reference.g.rs (byte-identical)"
+  else
+    fail "Rust emit differs from golden (see workdir/diff-rs.log for unified diff)"
+    cat "${WORKDIR}/diff-rs.log" 2>/dev/null || true
+  fi
+else
+  fail "no generated Rust file at $GEN_RS (response: $RESP)"
+fi
+
 # ---------------------------------------------------------------------------
 # 6. smoke-compile-passes — TS via tsc --noEmit; Python via import probe.
 # ---------------------------------------------------------------------------

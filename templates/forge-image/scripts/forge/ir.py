@@ -42,6 +42,9 @@ class Field:
     type: str
     optional: bool = False
     default: Optional[str] = None
+    is_list: bool = False
+    """A repeated scalar (e.g. `string[]` -> Rust `Vec<String>`, with `#[serde(default)]`).
+    Distinct from a Relation (which links ObjectTypes); a list-scalar holds primitives."""
 
 
 @dataclass(frozen=True)
@@ -69,6 +72,12 @@ class ObjectType:
     relations: tuple[Relation, ...] = ()
     annotations: tuple[tuple[str, str], ...] = ()
     """Tuple-of-tuples (sorted by key) so the dataclass stays frozen+hashable."""
+    state_property: Optional[str] = None
+    """Name of the field that carries this object's lifecycle state (e.g. "state"/"status").
+    When set with `states`, emitters render that field as a typed enum (`{Name}State`)."""
+    states: tuple[str, ...] = ()
+    """Ordered lifecycle states (wire form, e.g. "in-progress"); emitters render an enum
+    `{Name}State` with PascalCase variants. Order is the declared workflow order, not sorted."""
 
     @property
     def annotation_map(self) -> dict[str, str]:
