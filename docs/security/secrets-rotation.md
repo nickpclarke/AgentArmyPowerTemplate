@@ -49,6 +49,23 @@ All ACA containers consume secrets via the `*_FILE` env pattern documented in th
 
 The KV-versioning-plus-ACA-revision pattern is what makes rotation safe — no in-place secret swap that could be observed mid-update.
 
+### ArcadeDB root password — concrete consumer map & caveats (verified 2026-05-30)
+
+The "*_FILE refresh" mechanism above assumes the **thin** `agentarmy-arcadedb` image. The **live** shared ArcadeDB is the **upstream** image driven by `JAVA_OPTS`, so its rotation differs — full pattern in [`docs/arcadedb-secret-hardening.md`](../arcadedb-secret-hardening.md#shared-arcadedb-aca-app-rg-arcade-platform--root-password-must-not-be-a-plaintext-env). Rotating the **root** password means updating **all** of these to the new value, in lockstep:
+
+| Consumer | Store | Note |
+|---|---|---|
+| KV `arcadedb-root-password` | Key Vault (canonical) | bare password; `sync.py` derives local `.secrets/` files |
+| `arcadedb` app secret `arcadedb-server-opts` | ACA secret (KV-ref target) | full `-Darcadedb.server.rootPassword=<pw> -Darcadedb.txWalFlush=2`; restart the app |
+| `backend-core` app secret `arcadedb-root-password` | ACA secret | `ARCADEDB_PASSWORD` env → `secretRef`; **restart backend-core** (secret value is read at container start) |
+| `selfmodel-loader` job secret `arcadedb-password` | ACA job secret | picked up on next job run |
+| `backend-core` Actions secret `ARCADEDB_ROOT_PASSWORD` | GitHub Actions | used by `rust-api-v2-live.yml` (user `root`) |
+
+Caveats learned the hard way:
+- **Password policy:** ArcadeDB rejects a root password that lacks complexity (needs upper+lower+digit+special). Also avoid `: [ ] { }` (defaultDatabases delimiters). An all-alphanumeric password crash-loops the server ("User/Password not valid").
+- **Re-init lever:** `config/` is *not* persisted on the live app, so `root` is re-created from the setting on every (re)start — rotation = update secret(s) + restart. The `databases/` Azure Files share (knowledge/selfmodel) persists and is untouched.
+- **Single writer:** keep `minReplicas=1/maxReplicas=1`. Scale-to-zero + a revision swap let two replicas co-mount the share and **deadlock on the ArcadeDB database lock** (the new revision can't start because the old one holds the lock; ACA keeps the old one alive as failover). Recover by deactivating the stale revision so the lock frees.
+
 ## Dual-key vs cutover
 
 - **Dual-key (with overlap)** — JWT signing, ArcadeDB user passwords, webhook HMAC. The verifier accepts both `current` and `previous` for the overlap window so existing sessions don't break.

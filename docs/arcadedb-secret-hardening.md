@@ -72,6 +72,60 @@ For Azure Dev workload containers:
 
 If the platform uses an internal ArcadeDB Container App, run authenticated smoke tests from a trusted network path: a self-hosted runner on the same network, an Azure Container Apps job in the same environment, or a controlled backend smoke endpoint. Publicly exposing ArcadeDB just to make CI easier is not the standard.
 
+### Shared ArcadeDB ACA app (`rg-arcade-platform`) — root password MUST NOT be a plaintext env
+
+The fleet's shared ArcadeDB runs as the `arcadedb` Container App in `rg-arcade-platform` /
+`cae-arcade-platform`, built from the **upstream** `arcadedata/arcadedb` image (not the thin
+`agentarmy-arcadedb` image). The upstream image takes the root password as a JVM `-D` argument
+via `JAVA_OPTS`.
+
+**Banned:** a plaintext compound env var, e.g.
+
+```text
+# DO NOT DO THIS — readable by anyone with RG Reader via `az containerapp show`
+JAVA_OPTS = -Darcadedb.server.rootPassword=<plaintext> -Darcadedb.txWalFlush=2
+```
+
+Anyone with `Reader` on the resource group can read that value with a single
+`az containerapp show`, and it leaks into any log/transcript that captures the command output.
+
+**Required:** the whole `JAVA_OPTS` value is sourced from a secret, so the control plane shows
+only a `secretRef` (no value). Because an ACA `secretRef` substitutes the *entire* env var (you
+cannot interpolate a secret into the middle of a string), the secret holds the full opts string:
+
+```text
+# secret (Key Vault reference preferred; managed identity + Key Vault Secrets User)
+arcadedb-server-opts = -Darcadedb.server.rootPassword=<password> -Darcadedb.txWalFlush=2
+
+# env on the container
+JAVA_OPTS -> secretRef: arcadedb-server-opts        # no plaintext on the control plane
+```
+
+The bare root password is **also** kept in Key Vault as `arcadedb-root-password` (the canonical
+value the *other* consumers read — `backend-core`, the `selfmodel-loader` job, the
+`ARCADEDB_ROOT_PASSWORD` GitHub Actions secret). Keep the two in lockstep: rotation writes the new
+value to `arcadedb-root-password` **and** rebuilds `arcadedb-server-opts` from it in the same step
+(see the rotation runbook). The longer-term convergence is to adopt the thin
+`agentarmy-arcadedb` image, which reads a *bare* `ARCADEDB_ROOT_PASSWORD` secret directly and takes
+`txWalFlush` via `ARCADEDB_EXTRA_SETTINGS` — eliminating the second secret. Tracked as a follow-up.
+
+**First-init-only caveat (the rotation lever).** `arcadedb.server.rootPassword` is applied only
+when the server has no `root` user yet — it lives in `config/server-users.jsonl`
+([ArcadeDB #2058](https://github.com/ArcadeData/arcadedb/issues/2058)). On this app only
+`/home/arcadedb/databases` is mounted (Azure Files share `arcadedb`); `config/` is **ephemeral**,
+so each container (re)start re-initialises `root` from the setting. That makes rotation a restart:
+update the secret(s), activate a new revision, and the next cold start adopts the new password — no
+volume surgery or `security.json` reset needed. (If `config/` were ever persisted, you would instead
+have to reset the credential via ArcadeDB Studio → Security or by clearing the persisted
+`server-users.jsonl`.) The env var form `arcadedb_server_rootPassword` is **not** a reliable
+substitute on this image — verified locally: with no `JAVA_OPTS` the server blocks waiting for a
+root password on stdin ([ArcadeDB #561](https://github.com/ArcadeData/arcadedb/issues/561)).
+
+Reproducible IaC for this app lives at
+[`deploy/arcadedb-aca-platform.bicep`](../../templates/arcadedb-image/deploy/arcadedb-aca-platform.bicep);
+do not re-create or re-`update` the app with an ad-hoc `az containerapp` command carrying a
+plaintext `JAVA_OPTS` — that is what drifted the live app away from the secure template.
+
 ## Postman
 
 Postman environments may include variable names such as `arcadedb_url`, but committed examples must use placeholders. Real passwords belong in local current/secret values, not exported collection files.
