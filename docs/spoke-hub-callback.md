@@ -15,9 +15,11 @@ spoke: PR merged / issue closed / PR-issue comment (non-bot)
 ```
 
 - **Spoke side** (`notify-hub.yml`, synced via `spoke_sync.config.json`): fires a `spoke-update`
-  `repository_dispatch` to the hub on a **merged PR**, a **closed issue**, or a **comment** on a
-  PR/issue, with `{repo, kind, number, title, url, author, snippet}`. Guards keep it sane:
-  it **skips bot comments** (so Gemini's quota notices don't flood the hub) and **skips the hub
+  `repository_dispatch` to the hub on a PR **merged into the default branch** (`main`), a
+  **closed issue**, or a **comment** on a PR/issue, with
+  `{repo, kind, number, title, url, author, snippet}`. Guards keep it sane: it reports **only
+  default-branch merges** (a merge into a release/hotfix/feature branch isn't "shipped"), it
+  **skips bot comments** (so Gemini's quota notices don't flood the hub), and it **skips the hub
   repo itself** (which would otherwise loop on the Spoke Activity Log). Needs **`PROJECT_TOKEN`**
   in the spoke's secrets; if absent the step **skips** (never fails the spoke's CI).
 - **Hub side** (`spoke-callback.yml`): listens for `repository_dispatch: [spoke-update]` and
@@ -25,7 +27,10 @@ spoke: PR merged / issue closed / PR-issue comment (non-bot)
   using the built-in `GITHUB_TOKEN`.
 
 Untrusted `client_payload` is read through `env:` vars and used only as quoted shell variables
-— never interpolated into the `run:` script (GitHub Actions injection-safety).
+— never interpolated into the `run:` script (GitHub Actions injection-safety). The receiver also
+**neutralizes `@mentions`** (inserts a zero-width space after each `@`) and **flattens newlines**
+in the spoke-supplied fields before posting them, so a spoke PR/issue/comment can't spam-mention
+hub users or teams via the Spoke Activity Log.
 
 ## "Both" mechanisms
 

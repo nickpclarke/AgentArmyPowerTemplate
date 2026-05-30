@@ -25,11 +25,13 @@ jobs:
   notify-hub:
     # Guards: (1) never run in the hub itself — it has no upstream and would loop on the
     # Spoke Activity Log; (2) only merged PRs / closed issues / NON-BOT comments (bot
-    # comments like Gemini's quota notices would flood the hub otherwise).
+    # comments like Gemini's quota notices would flood the hub otherwise); (3) for PRs,
+    # only merges into the spoke's default branch (main) count as "shipped" — a merge into
+    # a release/hotfix/feature branch must not report upstream as spoke activity.
     if: >-
       github.repository != 'nickpclarke/AgentArmy' &&
       (
-        (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
+        (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == github.event.repository.default_branch) ||
         github.event_name == 'issues' ||
         (github.event_name == 'issue_comment' && github.event.comment.user.type != 'Bot')
       )

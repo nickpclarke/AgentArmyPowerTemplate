@@ -36,10 +36,22 @@ jobs:
     steps:
       - name: Record spoke update on the hub
         run: |
+          # client_payload is untrusted: a spoke PR/issue/comment title or body can carry
+          # @mentions or newlines. Posting it raw into a hub issue comment would spam-mention
+          # users/teams and could mangle the markdown line. Neutralize @ (insert a zero-width
+          # space, U+200B, after it) and flatten whitespace before composing the log line.
+          # $P_NUMBER and $P_URL are controlled github.com values, left intact so the link
+          # stays clickable.
+          zwsp=$(printf '\342\200\213')
+          sanitize() { printf '%s' "$1" | tr '\r\n\t' '   ' | sed "s/@/@${zwsp}/g"; }
+          repo=$(sanitize "$P_REPO")
+          author=$(sanitize "$P_AUTHOR")
+          title=$(sanitize "$P_TITLE")
+          snippet=$(sanitize "$P_SNIPPET")
           if [ "$P_KIND" = "comment" ]; then
-            line="**$P_REPO** comment by $P_AUTHOR on #$P_NUMBER — $P_SNIPPET ($P_URL)"
+            line="**$repo** comment by $author on #$P_NUMBER — $snippet ($P_URL)"
           else
-            line="**$P_REPO** $P_KIND #$P_NUMBER: $P_TITLE ($P_URL)"
+            line="**$repo** $P_KIND #$P_NUMBER: $title ($P_URL)"
           fi
           echo "$line" >> "$GITHUB_STEP_SUMMARY"
           # Find the tracker by exact title via the REST list (not `--search`, whose index
@@ -51,5 +63,9 @@ jobs:
             url=$(gh issue create --repo "$GITHUB_REPOSITORY" --title "Spoke Activity Log" \
               --body "Auto-updated by the spoke-callback workflow. Each comment is a spoke event reported back to the hub.")
             tracker="${url##*/}"
+          fi
+          if [ -z "$tracker" ]; then
+            echo "::error::Could not resolve the Spoke Activity Log tracker issue number; aborting." >&2
+            exit 1
           fi
           gh issue comment "$tracker" --repo "$GITHUB_REPOSITORY" --body "$line"

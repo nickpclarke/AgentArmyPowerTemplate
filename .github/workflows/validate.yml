@@ -6,11 +6,13 @@ on:
       - ".claude/agents/**"
       - "scripts/**"
       - ".github/workflows/validate.yml"
+      - ".github/workflows/sync-helpers-to-spokes.yml"
   push:
     branches: [main]
     paths:
       - ".claude/agents/**"
       - "scripts/**"
+      - ".github/workflows/sync-helpers-to-spokes.yml"
   workflow_dispatch:
 
 jobs:
@@ -28,6 +30,9 @@ jobs:
 
       - name: Validate agent definitions
         run: python scripts/validate_agents.py
+
+      - name: Check spoke-sync path drift (manifest <-> trigger)
+        run: python scripts/check_sync_path_drift.py
 
       - name: Agent docs generator runs cleanly
         run: python scripts/generate_agent_docs.py

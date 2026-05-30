@@ -22,12 +22,23 @@ on:
         default: false
   push:
     branches: [main]
+    # This list MUST mirror the `paths` array in scripts/spoke_sync.config.json — that JSON is
+    # the source of truth for WHAT syncs, but GitHub Actions can't read it at trigger-eval time,
+    # so the paths that should TRIGGER a sync are duplicated here by hand. If they drift, an edit
+    # to a synced file lands on the hub but never opens spoke sync PRs (the bug #368 fixed).
+    # Keep the two lists in lockstep; the last two entries are the sync machinery itself.
     paths:
       - "AGENTS.md"
+      - ".agent/hub.json"
+      - ".agent/environments.json"
+      - ".github/ISSUE_TEMPLATE/epic-handoff.md"
+      - ".github/workflows/notify-hub.yml"
+      - ".github/workflows/notify-hub-artifacts.yml"
       - ".claude/agents/**"
       - ".claude/commands/**"
       - ".claude/agent-schema.json"
       - ".claude/settings.json"
+      - ".claude/hooks/setup-dotnet.sh"
       - ".mcp.json"
       - "scripts/mempalace_hook.py"
       - "scripts/mempalace-hook.ps1"
