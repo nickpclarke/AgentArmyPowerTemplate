@@ -2,6 +2,20 @@
 
 AI assistant guidance for the AgentArmy template repository.
 
+## ⚖️ Supreme law — read [CONSTITUTION.md](CONSTITUTION.md) first
+
+The fleet's behavioral law lives in **[CONSTITUTION.md](CONSTITUTION.md)** and overrides
+everything below except a direct operator instruction. In short:
+
+- **Never offer a "this or that" choice as prose.** A genuine fork → the `AskUserQuestion`
+  selector UI (buttons, one tap). Typing "should I do X or Y?" is banned.
+- **"Both / All" is the default and usually the recommended first option** — ~90% of forks
+  are false dichotomies; assume *both* until two options genuinely can't coexist.
+- **Even yes/no prefers a two-button helper** — but don't *manufacture* choices: if a
+  sensible default or the "both" path is obvious, just do it and say what you did.
+- **Capture tangents in [TANGENTS.md](TANGENTS.md)** — log the operator's threads/side-quests
+  so none are lost between sessions; graduate them to board issues when they become real work.
+
 ## What This Repo Is
 
 AgentArmy is a starter template for AI-powered software development. It coordinates two autonomous AI armies and a shared planning surface:

@@ -9,6 +9,22 @@ this repo's `CLAUDE.md`, not here. The hub is a template (no app code); each spo
 real layer implementation with code to build and ship. Everything below applies to all
 of them.
 
+## ⚖️ Supreme law — the Constitution
+
+Every agent in the fleet obeys the **Constitution** (in the hub:
+[`CONSTITUTION.md`](https://github.com/nickpclarke/AgentArmy/blob/main/CONSTITUTION.md)).
+It overrides all other guidance except a direct operator instruction. The two laws:
+
+- **No prose dichotomies.** A genuine fork is presented through a **selector UI** (buttons,
+  one tap) — never typed out as "should I do X or Y?". Use `multiSelect` ("pick one, the
+  other, or both") whenever options can combine.
+- **"Both / All" is the default.** ~90% of either/or choices are false dichotomies — assume
+  *both* until two options genuinely can't coexist; offer "Both" as the recommended first
+  option. Don't manufacture choices: if a default or the both-path is obvious, just do it.
+
+The operator's tangents/side-quests are captured in the hub's `TANGENTS.md` ledger so threads
+aren't lost between sessions; they graduate to board issues when they become real work.
+
 ## Orientation keys
 
 Two links anchor every agent — **start here, bookmark both:**
