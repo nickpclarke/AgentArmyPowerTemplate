@@ -62,18 +62,11 @@ export const INSTANCE_TARGET = process.env.MCP_TARGET || "local-home";
 //   5. Team domain is `untool.cloudflareaccess.com`
 export const CF_ACCESS_EDGE_TEAM_DOMAIN = process.env.CF_ACCESS_EDGE_TEAM_DOMAIN
   || "untool.cloudflareaccess.com";
-// MUST be set before edge enforcement is meaningful — without it, any CF
-// Access user on the team domain could call us. Empty by default to keep
-// existing behavior while the CF dashboard side is being set up.
-export const CF_ACCESS_EDGE_APP_AUD = process.env.CF_ACCESS_EDGE_APP_AUD || "";
-
-// Defense-in-depth email allowlist applied by cfaccess-edge.mjs after JWT
-// signature + issuer + audience verification pass. CF Access already
-// enforces email policy at the edge, so this is the second wall — useful
-// if an operator misconfigures the CF Access policy. Comma-separated.
-export const CF_ACCESS_EMAIL_ALLOWLIST = (
-  process.env.CF_ACCESS_EMAIL_ALLOWLIST || "nick@livecreative.com"
-).split(",").map((s) => s.trim()).filter(Boolean);
+// CF_ACCESS_EDGE_APP_AUD and CF_ACCESS_EMAIL_ALLOWLIST are resolved BELOW,
+// after runAz() is defined, so they can fall back to Key Vault (env → KV →
+// default). See the "Edge config: env → Key Vault → default" block that
+// follows runAz(). This keeps the server durable across restarts without
+// re-exporting env vars — the operator stores the AUD once in KV.
 
 // Azure CLI on Windows is `az.cmd` (a batch wrapper). Node 18+ refuses to
 // spawn .cmd/.bat directly (CVE-2024-27980); the workaround is to route
@@ -86,6 +79,41 @@ function runAz(args, opts = {}) {
   }
   return execFileSync(process.env.AZ_BIN || "az", args, opts);
 }
+
+// ---- Edge config: env → Key Vault → default --------------------------------
+// The CF Access AUD + email allowlist can live in Key Vault so the server is
+// durable across restarts without re-exporting env vars. Env var still wins
+// (CI / one-off overrides); KV is the persistent source; then a built-in
+// default. Reads happen once at startup — same `az` dependency as the bearer
+// token bootstrap (operator must be `az login`'d).
+function kvSecretOrEmpty(name) {
+  try {
+    const out = runAz([
+      "keyvault", "secret", "show", "--vault-name", VAULT,
+      "--name", name, "--query", "value", "-o", "tsv",
+    ], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+    return out || "";
+  } catch {
+    return ""; // secret missing / az not logged in → caller falls back
+  }
+}
+
+// MUST resolve to a non-empty value before edge enforcement is meaningful —
+// without it isEdgeConfigured() stays false and CF Access edge JWTs are
+// ignored (every Connector request then falls to bearer → "no authorization
+// header"). Stored in KV as `cf-access-edge-app-aud`.
+export const CF_ACCESS_EDGE_APP_AUD =
+  process.env.CF_ACCESS_EDGE_APP_AUD || kvSecretOrEmpty("cf-access-edge-app-aud");
+
+// Defense-in-depth email allowlist applied by cfaccess-edge.mjs after JWT
+// signature + issuer + audience verification pass. CF Access already enforces
+// email policy at the edge; this is the second wall. Comma-separated. Falls
+// back to KV secret `cf-access-email-allowlist`, then the operator default.
+export const CF_ACCESS_EMAIL_ALLOWLIST = (
+  process.env.CF_ACCESS_EMAIL_ALLOWLIST
+  || kvSecretOrEmpty("cf-access-email-allowlist")
+  || "nick@livecreative.com"
+).split(",").map((s) => s.trim()).filter(Boolean);
 
 // ---- Allowlist (auto-enrolling) --------------------------------------------
 // Two service tiers — see ARC-ADR-023 (container tiering). Platform services
