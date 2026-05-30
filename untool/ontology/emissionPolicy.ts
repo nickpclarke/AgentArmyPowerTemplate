@@ -196,3 +196,17 @@ export const defaultEmissionPolicy: EmissionPolicy = {
 // 5. Hallucination quarantine pattern: an emission with no upstream tool-call
 //    trigger should default to trustGrade = 'unverified' regardless of emitter.
 //    That's pure model claim; downstream consumers need to know.
+//
+// 6. CONVICTION vs TRUST (CSI / Rosenberg lineage — see
+//    obsidian/labs/AgentArmyLabs/Conversational-Swarm-Intelligence-Mapping.md):
+//    when conviction-weighted aggregation lands, the Emission interface will
+//    gain a separate `conviction: Conviction` field. Trust = how much I believe
+//    the source. Conviction = how strongly the source itself feels. A high-trust
+//    agent saying "maybe X" deserves different weight than the same agent saying
+//    "definitely X." The aggregation curve (linear / sigmoid / quadratic) lives
+//    in a separate policy interface — ARC-ADR-044 Open Decision D.
+//
+// 7. SYNTHESIS emissions are first-class — when a `synthesis-role` agent emits,
+//    its trigger chain references ALL upstream emissions it synthesized (not just
+//    the most recent). The chainFingerprint default below must handle the many-
+//    parent case correctly; it's not a one-parent chain.

@@ -30,6 +30,7 @@ We need a single architectural commitment that names the orchestrator, the objec
 - **"Don't have to think about it" UX** — capabilities surface invisibly when needed; no tool-picker, no auth nag mid-flow, no schema-bloat overflow.
 - **Sync + async unified** — one runtime for live chat, durable async swarms, and mixed-mode collaboration.
 - **Right-sizing** — minimize cost × time × risk subject to the goal; not maximalist multi-agent.
+- **Alignment with Conversational Swarm Intelligence (Rosenberg, Unanimous AI)** — nested deliberation, conviction-weighted aggregation, synthesis-as-action, cross-talk between peer subswarms, and escalation of stuck decisions must be expressible without architectural change. See `obsidian/labs/AgentArmyLabs/Conversational-Swarm-Intelligence-Mapping.md` for the concept map.
 
 ## Considered Options
 
@@ -77,6 +78,7 @@ The full architectural detail and rationale is captured in the labs synthesis no
 6. **The emission DAG IS the conversation** — sync, async, individual, group, mixed-mode collapse to scope policies over one substrate.
 7. **Right-sized team composition is set cover with cost + trust constraints** over the typed holon graph; the JIT-attach matcher is the special case of team size 1.
 8. **Trust is a Mode that propagates along the emission DAG** — claims from unverified sources inherit low trust; downstream agents see it and mark their own emissions accordingly. Hallucination quarantine falls out: an emission with no upstream tool-call trigger is a pure model claim.
+9. **Nested swarm dynamics per CSI lineage (Rosenberg)** — subswarms `partOf` parent swarms; `Conviction` is a Mode distinct from `Trust` (strength of position vs. trust in source); `Synthesis` and `DeliberationRound` are Event Kinds; `CrossTalk` reifies peer-subswarm interaction as `{subswarmA, subswarmB, sharedHolons, scopeBridge}`; `SwarmEscalation` is a Decision Artifact Subkind. The team composer recurses to produce tree-of-subswarm structures for multi-subgoal goals; the flat composer (size 2–5) and JIT-attach matcher (size 1) become special cases. Full concept map in `Conversational-Swarm-Intelligence-Mapping.md`.
 
 ## Open Decisions (escalated as separate Decision Artifacts on the board)
 
@@ -103,6 +105,14 @@ The full architectural detail and rationale is captured in the labs synthesis no
 - **C3.** Group-sync (multiple humans + multiple agents in one shared conversation)
 
 *Stakes: order of work; C1 backloads collab UX, C2 lights up emission-DAG-as-state, C3 is the wow but operationally hardest. Escalate as Decision Artifact.*
+
+### Decision D — Conviction weighting curve *(CSI)*
+
+- **D1.** Linear — balanced; the parent emission is the conviction-weighted mean of children. Neutral default.
+- **D2.** Sigmoid — biases toward strong-conviction minority positions; a single highly-convicted "block this" subswarm can dominate.
+- **D3.** Quadratic — favors broad mild conviction over narrow strong conviction; consensus-seeking.
+
+*Stakes: shapes whether swarm dynamics converge to consensus or amplify polarization. The same swarm produces different decisions under different curves. Product-defining; not a tuning knob. Escalate as Decision Artifact.*
 
 ## Consequences
 
@@ -140,6 +150,7 @@ A spike outcome of "feels right with minor weight tuning" green-lights the ADR f
 ## Links
 
 - Labs synthesis: `obsidian/labs/AgentArmyLabs/Untool-Ontology-Orchestrated-Swarm-Intelligence.md`
+- CSI concept mapping: `obsidian/labs/AgentArmyLabs/Conversational-Swarm-Intelligence-Mapping.md`
 - Spike plan: `obsidian/labs/AgentArmyLabs/Untool-Team-Composer-Spike.md`
 - Emission policy starter: `untool/ontology/emissionPolicy.ts`
 - ARC-ADR-016 — ontology representation (reification + hyperedges)
@@ -150,3 +161,9 @@ A spike outcome of "feels right with minor weight tuning" green-lights the ADR f
 - [[Ontology-Pipeline]]
 - [[Reification-and-Hyperedges]]
 - [[Factory-Loop-Test-Infrastructure]]
+- [[Agentic Loop Primitives]]
+- [[Evidence-Backed Aggregates]]
+
+## External references
+
+- **Louis Rosenberg, PhD** — Stanford; founder of Unanimous AI (2014); platforms UNU, ENSO, Hyperchat. CSI as a research field is his lineage; this ADR encodes his vocabulary in our ontology, but the conviction-weighted swarm-aggregation pattern is original to him.

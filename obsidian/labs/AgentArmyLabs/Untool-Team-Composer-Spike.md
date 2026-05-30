@@ -24,9 +24,12 @@ This is the cheapest experiment that can kill the design or green-light ARC-ADR-
 
 **H3.** The model expresses every constraint we need. If we hit a goal scenario where the ontology *can't represent* what we want, that's a stronger signal than performance — it forces us to revise the Kind/Relator inventory.
 
+**H4 (stretch — CSI).** Given a multi-subgoal goal G, the composer can **recurse** to produce a tree-of-subswarms structure with one `synthesis-role` agent per parent node. Validates ARC-ADR-044 Core Commitment 9 (nested swarm dynamics per Rosenberg's CSI lineage).
+
 If H1 fails: weights are tuneable, no architectural problem.
 If H2 fails: the model is opaque; we need richer explanation surface before build.
 If H3 fails: the data model is wrong; revise before any production code touches it.
+If H4 fails: H1–H3 still green-light v1; H4 informs v2 scope. The recursive composer is not blocking for first ship.
 
 ---
 
@@ -98,6 +101,15 @@ Required caps: `deploy`, `monitor`, `incident-response`, `rollback`
 **Stretch — "Research a question using only high-trust sources (trust ≥ 0.8), summarize, and cite."**
 Required caps: `web-search`, `summarize`, `cite-source` with `min-trust = 0.8`
 *Expected team:* `a:researcher` only. The composer must REJECT `t:public-mcp-foo` and `t:public-mcp-bar` despite them satisfying capability — trust filter binds.
+
+**Stretch H4 — "Review PR #370 end-to-end (security, architecture, ops)."** *(CSI)*
+Required caps (multi-subgoal): `{ code-review, security-scan }` + `{ design, decision-tree }` + `{ deploy, monitor, incident-response, rollback }`
+*Expected team (tree-of-subswarms):*
+- Parent `Swarm` with one parent `synthesis-role` agent
+- Child `Subswarm: Security` — `a:code-reviewer` + subswarm-local `synthesis-role`
+- Child `Subswarm: Architecture` — `a:architect` + subswarm-local `synthesis-role`
+- Child `Subswarm: Ops` — `a:ops` + subswarm-local `synthesis-role`
+The composer must produce the tree, not flatten to a 5-agent team. Validates H4.
 
 ---
 
