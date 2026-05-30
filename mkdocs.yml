@@ -17,19 +17,24 @@ theme:
     repo: fontawesome/brands/github
     edit: material/pencil
     view: material/eye
+  # untool.ai brand: warm paper/ink, ONE blue accent. Exact tokens come from
+  # docs/stylesheets/untool.css (sourced from frontend-core fleet.css + brand manifesto).
+  # palette = custom so Material applies our CSS vars, not its stock indigo.
   palette:
     - scheme: default
-      primary: indigo
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
-      primary: indigo
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+  # Brand uses a system type stack (one type family, no fonts of intimidation).
+  font: false
   features:
     - navigation.instant
     - navigation.instant.prefetch
@@ -84,6 +89,9 @@ markdown_extensions:
   - attr_list
   - footnotes
   - md_in_html
+
+extra_css:
+  - stylesheets/untool.css
 
 extra:
   social:

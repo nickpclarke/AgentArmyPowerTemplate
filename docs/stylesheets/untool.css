@@ -1,0 +1,65 @@
+/* untool.ai brand theme for MkDocs Material.
+ *
+ * Source of truth: frontend-core/app/fleet/fleet.css (the platform palette) +
+ * docs/brand/UNTOOL.md (the manifesto: one type family, ONE accent color, calm
+ * chrome, high data-ink). We deliberately do NOT paint the header a loud colour —
+ * the top bar is warm paper with ink text; the single blue accent is reserved for
+ * links and active state only. Tokens map Material's CSS variables → untool tokens.
+ */
+
+/* ---- Light (paper) ------------------------------------------------------- */
+[data-md-color-scheme="default"] {
+  --md-default-bg-color:        #f3f0e8; /* paper */
+  --md-default-fg-color:        #1b1a16; /* ink */
+  --md-default-fg-color--light: #5b584d; /* ink-muted */
+  --md-default-fg-color--lighter: #908b7d; /* ink-quiet */
+  --md-default-fg-color--lightest: #d8d3c7;
+
+  /* Header / nav: calm paper surface, ink text — no celebratory chrome. */
+  --md-primary-fg-color:        #fbf9f3; /* surface */
+  --md-primary-fg-color--light: #f3f0e8;
+  --md-primary-fg-color--dark:  #ece9e1;
+  --md-primary-bg-color:        #1b1a16; /* ink text on header */
+  --md-primary-bg-color--light: #5b584d;
+
+  /* The one accent. Links + active state only. */
+  --md-accent-fg-color:         #2f6fc6;
+  --md-accent-fg-color--transparent: #2f6fc61a;
+  --md-typeset-a-color:         #2f6fc6;
+
+  --md-code-bg-color:           #ece9e1;
+  --md-code-fg-color:           #1b1a16;
+  --md-footer-bg-color:         #ece9e1;
+  --md-footer-fg-color:         #1b1a16;
+}
+
+/* ---- Dark (ink) ---------------------------------------------------------- */
+[data-md-color-scheme="slate"] {
+  --md-default-bg-color:        #0c0c0b; /* near-black warm */
+  --md-default-fg-color:        #ece9e1; /* ink */
+  --md-default-fg-color--light: #9b978b; /* ink-muted */
+  --md-default-fg-color--lighter: #67645b; /* ink-quiet */
+  --md-default-fg-color--lightest: #2a2925;
+
+  --md-primary-fg-color:        #141413; /* surface */
+  --md-primary-fg-color--light: #1b1a18;
+  --md-primary-fg-color--dark:  #0c0c0b;
+  --md-primary-bg-color:        #ece9e1; /* ink text on header */
+  --md-primary-bg-color--light: #9b978b;
+
+  --md-accent-fg-color:         #5ba7ff;
+  --md-accent-fg-color--transparent: #5ba7ff1a;
+  --md-typeset-a-color:         #5ba7ff;
+
+  --md-code-bg-color:           #141413;
+  --md-code-fg-color:           #ece9e1;
+  --md-footer-bg-color:         #141413;
+  --md-footer-fg-color:         #ece9e1;
+}
+
+/* Quieter header border instead of a shadow — depth is rarely earned (Tufte). */
+.md-header { box-shadow: none; border-bottom: 1px solid var(--md-default-fg-color--lightest); }
+.md-tabs   { border-bottom: 1px solid var(--md-default-fg-color--lightest); }
+
+/* Wordmark discipline (docs/brand/UNTOOL.md): un=400, tool=600, .ai muted. */
+.md-header__title .md-ellipsis { font-weight: 400; letter-spacing: -0.01em; }
