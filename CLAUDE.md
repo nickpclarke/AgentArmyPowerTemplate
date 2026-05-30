@@ -151,6 +151,26 @@ Four tiers: **Languages/** (idioms, type system, runtime), **Frameworks/web/** (
 
 Full tier table, 15+ concrete examples, tie-breakers, and edge cases (JS/TS, .NET versions, mobile): [.claude/agents/categories/02-language-specialists/TAXONOMY.md](.claude/agents/categories/02-language-specialists/TAXONOMY.md). Full agent roster: [docs/agents.md](docs/agents.md). Copilot setup: [docs/copilot.md](docs/copilot.md).
 
+### Design system (frontend-core is the source of truth)
+
+All UI, visual, and **graph / data-viz** work pulls from the shipped frontend-core design
+system — **never invent a palette or ad-hoc colors.** Source of truth:
+
+- **`frontend-core/app/theme.css`** — canonical light/dark token set (WCAG-AA audited):
+  `--color-bg / -surface / -text / -muted / -border / -primary / -accent / …`. Dark is the
+  default; light/dark switch via the `[data-theme="dark"]` attribute.
+- **`frontend-core/app/untool.css`** — the **data-viz bridge** (`--ut-ink`, `--ut-accent`,
+  `--ut-ok`, `--ut-warn`, `--ut-data-up/-down`). Use these for charts and graph node coloring.
+- **`frontend-core/contract/design-tokens.json`** — W3C DTCG tokens (brand primary `#0066ff`,
+  purple `#7c3aed`); this is the **FE-1 design-tokens contract** ([docs/contracts.md](docs/contracts.md)),
+  vendored to consumers. `frontend-core/app/tailwind.css` + `components.json` wire shadcn/ui (OKLch).
+- Richer design material (handoffs, prototypes) lives under `frontend-core/design_handoff_*/`.
+
+In spirit: Tailwind **slate** base (`#0f172a`/`#1e293b`/`#e2e8f0`), **blue/cyan** primary
+(`#60a5fa`/`#38bdf8`), brand **purple**, semantic green/amber/red. Route visual work to
+**`ui-designer`** (design direction) → **`frontend-developer`** (implementation). Worked example
+that consumes these tokens: the self-model graph viewer (`ontology/platform-self-model/viz/`).
+
 ### Issue type conventions
 
 Label every issue with its SAFE type:

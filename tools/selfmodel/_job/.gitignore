@@ -1,0 +1,5 @@
+# Build-time copies — sourced from ../load.py and ../../../ontology/platform-self-model/.
+# Only the Dockerfile is tracked; `az acr build` consumes the copies assembled at build time.
+load.py
+fragments.json
+arcadedb-schema.sql

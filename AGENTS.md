@@ -28,6 +28,18 @@ sandboxed spoke agent usually can't reach) the hub board directly. You also neve
 by hand: the `notify-hub` workflow reports your merged PRs, closed issues, and comments to the
 hub automatically. Just do the work and close your issues — the hub reconciles the rest.
 
+## Design system — one source of truth
+
+Any UI, visual, or **graph / data-viz** work binds to the shipped **frontend-core** design
+system — **never invent a palette.** Source of truth: `frontend-core/app/theme.css` (light/dark
+token set, WCAG-AA; dark default, `[data-theme="dark"]` to switch), `frontend-core/app/untool.css`
+(the `--ut-*` **data-viz bridge** for charts / graph node colors), and
+`frontend-core/contract/design-tokens.json` (W3C DTCG tokens; brand `#0066ff` / `#7c3aed`) —
+published as the **FE-1 design-tokens contract** (see the [Contracts](https://nickpclarke.github.io/AgentArmy/contracts/)
+page) and vendored to consumers; shadcn/ui (OKLch) via `tailwind.css` + `components.json`. In spirit:
+Tailwind slate base, blue/cyan primary, brand purple, semantic green/amber/red. Design direction →
+`ui-designer`; implementation → `frontend-developer`.
+
 ## Task Backbone — depends on where you are
 
 > **Default — check Issues FIRST, and the PRs that reference them.** Before you start work,
