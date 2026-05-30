@@ -4,9 +4,11 @@
 //   node tools/data-vault/adr-scaffold.mjs --topic "raw-vs-business for customer-segment" --category placement
 //
 // Categories: placement | hash-algo | identity | streaming | materialization | mart-shape | pii | generic
-// Auto-numbers as ARC-ADR-NNN by scanning docs/decisions/.
+// Outputs docs/decisions/ARC-ADR-DRAFT-<slug>.md — the number is assigned at merge
+// by .github/workflows/adr-assign-numbers.yml (never hand-picked; that races across
+// parallel sessions). See docs/decisions/README.md.
 
-import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
+import { writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -143,25 +145,17 @@ Usage:
   --status <s>                    Proposed (default) | Accepted | Rejected
   --help
 
-Output: writes docs/decisions/ARC-ADR-NNN-<slug>.md and prints the path.
+Output: writes docs/decisions/ARC-ADR-DRAFT-<slug>.md and prints the path.
+The number is assigned automatically when the draft merges to main
+(see docs/decisions/README.md). Do not hand-pick a number.
 `;
-}
-
-function nextAdrNumber() {
-  const files = readdirSync(DECISIONS_DIR).filter((f) => /^ARC-ADR-\d+/.test(f));
-  let max = 0;
-  for (const f of files) {
-    const m = f.match(/^ARC-ADR-(\d+)/);
-    if (m) max = Math.max(max, parseInt(m[1], 10));
-  }
-  return String(max + 1).padStart(3, '0');
 }
 
 function slugify(s) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
 }
 
-function render(num, topic, category, status) {
+function render(topic, category, status) {
   const block = CATEGORY_BLOCKS[category] || CATEGORY_BLOCKS.generic;
   const title = `${block.title} ${topic}`;
   const today = new Date().toISOString().slice(0, 10);
@@ -172,11 +166,13 @@ function render(num, topic, category, status) {
     `### Option — ${o[0]}\n\n**Pros:**\n- TODO\n\n**Cons:**\n- TODO\n`
   )).join('\n---\n\n');
 
-  return `# ARC-ADR-${num} — ${title}
+  // ARC-ADR-DRAFT is a placeholder token; the merge-time assigner rewrites the
+  // title heading and the ID field to the allocated number on push to main.
+  return `# ARC-ADR-DRAFT — ${title}
 
 | Field      | Value                                          |
 |------------|------------------------------------------------|
-| ID         | ARC-ADR-${num}                                 |
+| ID         | ARC-ADR-DRAFT                                  |
 | Status     | ${status || 'Proposed'}                        |
 | Date       | ${today}                                       |
 | Deciders   | Architecture Review                            |
@@ -256,15 +252,19 @@ function main() {
     return 2;
   }
 
-  const num = nextAdrNumber();
   const slug = slugify(args.topic);
-  const path = join(DECISIONS_DIR, `ARC-ADR-${num}-${slug}.md`);
+  if (!slug) {
+    console.error(`--topic "${args.topic}" produced an empty slug; use a more descriptive topic.`);
+    return 2;
+  }
+  const path = join(DECISIONS_DIR, `ARC-ADR-DRAFT-${slug}.md`);
   if (existsSync(path)) {
     console.error(`Refusing to overwrite ${path}`);
     return 1;
   }
-  writeFileSync(path, render(num, args.topic, args.category, args.status));
+  writeFileSync(path, render(args.topic, args.category, args.status));
   console.log(path);
+  console.log('Number is assigned automatically when this draft merges to main.');
   return 0;
 }
 

@@ -199,6 +199,16 @@ PR body must contain `Closes #N`, `Fixes #N`, or `Resolves #N` to trigger the `a
 
 > Open question: whether a `@copilot` mention can pin a specific model (Copilot model selection, e.g. Opus 4.6) for the review — Copilot's automated PR review may use a fixed model regardless. Test before relying on per-mention model pinning.
 
+## ADR numbering — never hand-pick a number
+
+ADRs live in `docs/decisions/ARC-ADR-NNN-<slug>.md`. **Do not choose `NNN` yourself.** Picking "highest existing number + 1" is a read-modify-write race that collides when sessions run in parallel — it bit ARC-ADR-038/040 twice. Instead:
+
+- **Author** new ADRs as `docs/decisions/ARC-ADR-DRAFT-<slug>.md`, using the literal token `ARC-ADR-DRAFT` wherever the number would go (title heading + `ID` field). Inside the draft's own file the bare token is fine; to link the draft *from another file*, use its full `ARC-ADR-DRAFT-<slug>` stem (only full-stem refs are rewritten repo-wide — a bare token elsewhere is left dangling). Scaffold with `node tools/data-vault/adr-scaffold.mjs --topic "..." --category <cat>` or `/ea-adr` — both emit a draft.
+- **Merge-time assigner** (`.github/workflows/adr-assign-numbers.yml`) allocates the next integer on push to `main`, renames the file, and rewrites the token + cross-references. Allocation is serialized (one run at a time), so it cannot collide.
+- **PR guard** (`.github/workflows/adr-number-guard.yml`) fails any PR where two decision files share an `ARC-ADR-NNN` prefix — the backstop for accidental hand-numbering.
+
+Full reference: [docs/decisions/README.md](docs/decisions/README.md).
+
 ## HITL Decision Pattern
 
 When an agent hits a creative fork, architectural divergence, or judgment call exceeding its authority, it escalates to `hitl-coordinator` which creates a **Decision Artifact** issue on the board.

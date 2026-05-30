@@ -43,8 +43,10 @@ specialist on a guess.
 Hand the sub-agent enough to work independently:
 
 - The full decision title/topic from `/ea-adr [...]`
-- File path the ADR should land at: `docs/decisions/ARC-ADR-[NNN]-[kebab-title].md`
-  where `[NNN]` is the next available number under `docs/decisions/`
+- File path the ADR should land at: `docs/decisions/ARC-ADR-DRAFT-[kebab-title].md`
+  — **do not pick a number.** Use the literal token `ARC-ADR-DRAFT` wherever the
+  number would go; the merge-time assigner allocates the integer on push to `main`
+  (see `docs/decisions/README.md`). Hand-picking "next number" races across sessions.
 - Status to start in: **Proposed** (unless the user said otherwise)
 - Repo conventions: link related ADRs by file name, MADR v4.0 sections required
   (Context, Decision Drivers, Considered Options, Decision Outcome, Pros and
@@ -64,10 +66,12 @@ The sub-agent must produce all of these:
 
 ## Document convention
 
-ADRs are stored as:
+New ADRs are authored as drafts; **the number is assigned automatically at merge**
+— never hand-picked, because "highest + 1" races across parallel sessions. See
+[docs/decisions/README.md](../../docs/decisions/README.md).
 
 ```
-docs/decisions/ARC-ADR-[NNN]-[kebab-title].md
+docs/decisions/ARC-ADR-DRAFT-[kebab-title].md   # → renamed to ARC-ADR-NNN-… at merge
 ```
 
 Status flow: **Proposed → Accepted → Deprecated → Superseded**

@@ -1,0 +1,53 @@
+name: Assign ADR Numbers
+
+# The structural fix for ADR-number collisions: authors never pick a number.
+# New ADRs land as docs/decisions/ARC-ADR-DRAFT-<slug>.md; this workflow runs on
+# push to main, allocates the next free integer, renames the file, and rewrites
+# the ARC-ADR-DRAFT token + cross-references. The concurrency group serializes
+# runs so two near-simultaneous merges cannot be assigned the same number.
+# See docs/decisions/README.md.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/decisions/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: adr-number-assignment
+  cancel-in-progress: false
+
+jobs:
+  assign:
+    # Don't re-trigger on our own numbering push. GitHub honors [skip ci] in the
+    # commit message for push events, but guard explicitly too in case an org
+    # setting disables that behavior.
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # PROJECT_TOKEN (classic PAT) lets the push to main bypass branch
+          # protection, mirroring update-agent-counts.yml. Falls back to the
+          # built-in token where protection allows it.
+          token: ${{ secrets.PROJECT_TOKEN || github.token }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Assign numbers to merged draft ADRs
+        run: node tools/adr-numbers.mjs assign
+      - name: Commit and push if changed
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "docs(adr): assign number(s) to merged draft ADR(s) [skip ci]"
+            git push
+          else
+            echo "No draft ADRs to number."
+          fi
