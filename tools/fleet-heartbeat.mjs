@@ -25,7 +25,19 @@ import { readFileSync, existsSync, statfsSync } from 'node:fs';
 
 const OWNER = 'nickpclarke';
 const HUB = 'AgentArmy';
-const SPOKES = ['frontend-core', 'backend-core', 'middle-core'];
+// Canonical spoke registry — ONE source of truth. The dressing routine's
+// `spokes` list in scripts/spoke_sync.config.json IS the registry; the heartbeat
+// reads it so "what is a spoke" can never drift between the sync and the health
+// checks (the bug that let agentarmy-forge be dressed but unwatched). Falls back
+// to the known set only if the config can't be read (e.g. run outside hub root).
+const readSpokeRegistry = () => {
+  try {
+    const cfg = JSON.parse(readFileSync('scripts/spoke_sync.config.json', 'utf8'));
+    if (Array.isArray(cfg.spokes) && cfg.spokes.length) return cfg.spokes;
+  } catch { /* fall through to the static default */ }
+  return ['frontend-core', 'backend-core', 'middle-core'];
+};
+const SPOKES = readSpokeRegistry();
 const APPLY = process.argv.includes('--apply');
 const AUTO = process.argv.includes('--auto');
 const JSON_OUT = process.argv.includes('--json');
@@ -108,13 +120,27 @@ const postmanNote = SPOKES.flatMap((s) => safeTree(s).filter(isContract)).length
   ? 'Verify each contract has a published Postman spec + mock (run locally with Key Vault creds — not checkable from the heartbeat).'
   : null;
 
-// ---- 2. Agent / skills pack drift (hub-authoritative, one-way hub→spoke) ----
-const hubAgents = safeTree(HUB).filter((p) => p.startsWith('.claude/agents/') && p.endsWith('.md'));
+// ---- 2. Coder-pack drift (hub-authoritative, one-way hub→spoke dressing) ----
+// The dressing sync (scripts/spoke_sync.config.json / docs/spoke-sync.md) ships
+// THREE coder packs into every spoke: Claude (.claude/agents), OpenAI Codex
+// (.codex/agents), Gemini Antigravity (.agents/plugins). A spoke is "hydrated"
+// when each pack is present at >=50% of the hub's count; below that means the
+// dressing sync never ran (or a spoke .gitignore silently dropped it).
+const PACKS = [
+  { name: 'Claude', match: (p) => p.startsWith('.claude/agents/') && p.endsWith('.md') },
+  { name: 'Codex', match: (p) => p.startsWith('.codex/agents/') && p.endsWith('.toml') },
+  { name: 'Antigravity', match: (p) => p.startsWith('.agents/plugins/') && p.endsWith('.md') },
+];
+const hubPackCount = Object.fromEntries(PACKS.map((pk) => [pk.name, safeTree(HUB).filter(pk.match).length]));
 for (const spoke of SPOKES) {
-  const spokeAgents = safeTree(spoke).filter((p) => p.startsWith('.claude/agents/') && p.endsWith('.md'));
-  if (hubAgents.length && spokeAgents.length < Math.floor(hubAgents.length * 0.5)) {
-    add(spoke, 'warn', 'agent-pack-drift',
-      `agent pack out of sync: hub has ${hubAgents.length} agent files, ${spoke} has ${spokeAgents.length}. Re-run the hub→spoke sync.`);
+  if (treeFetchFailed.has(spoke)) continue; // a phantom-empty tree would false-positive every pack
+  for (const pk of PACKS) {
+    const hubN = hubPackCount[pk.name];
+    const spokeN = safeTree(spoke).filter(pk.match).length;
+    if (hubN && spokeN < Math.floor(hubN * 0.5)) {
+      add(spoke, 'warn', 'coder-pack-drift',
+        `${pk.name} pack out of sync: hub has ${hubN} files, ${spoke} has ${spokeN}. Re-run the dressing sync (python scripts/sync_helpers_to_spokes.py --spoke ${spoke}).`);
+    }
   }
 }
 

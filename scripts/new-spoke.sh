@@ -243,6 +243,23 @@ cat > "$OUT/README.md" <<MD
 
 $SYSTEM/$LAYER spoke. Scaffolded by [\`scripts/new-spoke.sh\`](../AgentArmy/scripts/new-spoke.sh) from the hub.
 
+## Mission
+
+<!-- TODO: one or two sentences — what this layer does and who consumes it.
+     This is the repo's purpose statement; keep it sharp. -->
+
+## Repository map
+
+The few directories a newcomer (human or agent) needs to get oriented:
+
+| Path | What's here |
+|---|---|
+| \`./\` | \`image.json\` (container manifest), \`Dockerfile\`, \`.agent/\` (layer + promotion manifests) |
+| \`contracts/\` | OpenAPI/AsyncAPI this layer produces or vendors (contract-first) |
+| \`scripts/\` | \`${NAME}-doctor.sh\` + repo tooling |
+| \`AGENTS.md\` / \`CLAUDE.md\` | shared fleet law (synced from hub) / this repo's agent guidance |
+<!-- TODO: add this layer's real source dirs (e.g. \`src/\`, \`app/\`, \`tests/\`). -->
+
 ## Conventions
 
 - **Tier:** \`application\` ([ARC-ADR-023](https://github.com/nickpclarke/AgentArmy/blob/main/docs/decisions/ARC-ADR-023-container-tiering-strategy.md)) — one container per spoke; platform databases live in the hub and this service connects via env.
@@ -270,7 +287,7 @@ $SYSTEM/$LAYER spoke. Scaffolded by [\`scripts/new-spoke.sh\`](../AgentArmy/scri
    \`\`\`bash
    node ../AgentArmy/tools/agentarmy-doctor.mjs image .
    \`\`\`
-5. **Add the repo to the hub's spoke list** in \`scripts/spoke_sync.config.json\` so the agent pack + workflows sync here automatically.
+5. **Register + dress this spoke** — add the repo to \`scripts/spoke_sync.config.json\` in the hub, then run \`python scripts/sync_helpers_to_spokes.py --spoke $NAME\`. This hydrates the repo with the Claude / Codex / Antigravity agent packs and the shared law. See the full lifecycle: [docs/spoke-lifecycle.md](https://github.com/nickpclarke/AgentArmy/blob/main/docs/spoke-lifecycle.md).
 
 ## What's NOT scaffolded (intentionally)
 
@@ -279,7 +296,7 @@ $SYSTEM/$LAYER spoke. Scaffolded by [\`scripts/new-spoke.sh\`](../AgentArmy/scri
 - Tests — wire your test runner; update \`agentarmy.services.json\` \`test\` field.
 - Deploy lane — copy from \`templates/${TARGET}-dev/\` when you're ready to deploy.
 
-See [docs/agent-onboarding.md](https://github.com/nickpclarke/AgentArmy/blob/main/docs/agent-onboarding.md) in the hub for the agent-pack sync flow.
+See [docs/spoke-lifecycle.md](https://github.com/nickpclarke/AgentArmy/blob/main/docs/spoke-lifecycle.md) in the hub for the full scaffold → register → dress → watch flow, and [docs/agent-onboarding.md](https://github.com/nickpclarke/AgentArmy/blob/main/docs/agent-onboarding.md) for orientation as an agent running inside this spoke.
 MD
 
 # ---- next-step checklist ---------------------------------------------------
@@ -307,11 +324,13 @@ cat <<EOF
     - CLAUDE_CODE_OAUTH_TOKEN    (for @claude PR loop)
     - AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID (OIDC; $CLOUD)
 
-  Once pushed:
-    1. Add the repo to scripts/spoke_sync.config.json in the hub
-    2. cp -r templates/${TARGET}-dev/ to the new spoke's deploy/ dir
-    3. node tools/agentarmy-doctor.mjs image . (from the spoke) to verify
+  Once pushed (spoke lifecycle stages 2-4 — see docs/spoke-lifecycle.md):
+    1. REGISTER: add the repo to scripts/spoke_sync.config.json in the hub
+    2. DRESS:    python scripts/sync_helpers_to_spokes.py --spoke $NAME
+    3. WATCH:    node tools/fleet-heartbeat.mjs  (confirm no coder-pack-drift)
+    4. cp -r templates/${TARGET}-dev/ to the new spoke's deploy/ dir
+    5. node tools/agentarmy-doctor.mjs image . (from the spoke) to verify
 
-  See $OUT/README.md for the full checklist.
+  Full map: docs/spoke-lifecycle.md   ·   This spoke: $OUT/README.md
 ══════════════════════════════════════════════════════════════════════════
 EOF

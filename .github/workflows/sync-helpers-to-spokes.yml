@@ -1,8 +1,9 @@
 name: sync helpers to spokes
 
-# One-way sync of the Claude Code microVM helper surface (agents, commands,
-# settings, hooks scripts) from this hub to the spoke repos. Opens/updates a PR
-# in each spoke — never merges automatically. Source of truth is this repo.
+# One-way sync of the multi-coder agent helper surface (Claude Code, OpenAI Codex,
+# Gemini Antigravity packs + shared CONSTITUTION.md/AGENTS.md) from this hub to the
+# spoke repos — the "dressing" routine. Opens/updates a PR in each spoke. Source of
+# truth is this repo. See docs/spoke-lifecycle.md.
 #
 # Auth: uses PROJECT_TOKEN (classic PAT, already scoped for this org's repos).
 # The built-in GITHUB_TOKEN cannot write to other repositories, so it is NOT used.
@@ -29,6 +30,7 @@ on:
     # Keep the two lists in lockstep; the last two entries are the sync machinery itself.
     paths:
       - "AGENTS.md"
+      - "CONSTITUTION.md"
       - "ontology/platform-self-model/generated/lexicon.yaml"
       - ".agent/hub.json"
       - ".agent/environments.json"
@@ -40,11 +42,17 @@ on:
       - ".claude/agent-schema.json"
       - ".claude/settings.json"
       - ".claude/hooks/setup-dotnet.sh"
+      - ".codex/agents/**"
+      - ".codex/config.toml"
+      - ".codex/hooks.json"
+      - ".agents/plugins/**"
       - ".mcp.json"
       - "scripts/mempalace_hook.py"
       - "scripts/mempalace-hook.ps1"
       - "scripts/board_commands.py"
       - "scripts/onboarding-check.ps1"
+      - "scripts/sync_agents_to_codex.py"
+      - "scripts/sync_agents_to_antigravity.py"
       - "tools/status.mjs"
       - "tools/fleet-heartbeat.mjs"
       - "scripts/spoke_sync.config.json"

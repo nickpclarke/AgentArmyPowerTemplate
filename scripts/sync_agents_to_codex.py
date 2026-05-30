@@ -4,10 +4,43 @@ Sync Claude agent definitions (.claude/agents/categories/)
 to Codex custom agents (.codex/agents/) as TOML profiles.
 """
 
-import os
 import re
 from pathlib import Path
-import yaml
+
+# PyYAML is preferred, but this script is SYNCED into spoke repos and run by the Codex
+# SessionStart hook (.codex/hooks.json). A fresh Codex microVM / spoke may not have
+# PyYAML installed — a hard `import yaml` would crash the startup hook. So we degrade to
+# a tiny stdlib parser that reads the only two frontmatter fields we need (name,
+# description). The static .codex/agents/*.toml are already shipped by the dressing sync,
+# so the hook is a refresh, not a hard dependency.
+try:
+    import yaml  # type: ignore
+except ModuleNotFoundError:
+    yaml = None  # type: ignore
+
+
+def _parse_frontmatter(block: str) -> dict:
+    """Parse a YAML frontmatter block. Uses PyYAML when present; otherwise a minimal
+    stdlib fallback sufficient for agent frontmatter (top-level `key: value`, with
+    quoted values and indented continuation lines)."""
+    if yaml is not None:
+        data = yaml.safe_load(block)  # type: ignore[union-attr]
+        return data if isinstance(data, dict) else {}
+    meta: dict = {}
+    key = None
+    for line in block.splitlines():
+        if not line.strip() or line.lstrip().startswith('#'):
+            continue
+        m = re.match(r'^([A-Za-z0-9_-]+):\s*(.*)$', line)
+        if m:
+            key, val = m.group(1), m.group(2).strip()
+            if len(val) >= 2 and val[0] in "\"'" and val[-1] == val[0]:
+                val = val[1:-1]
+            meta[key] = val
+        elif key and line[:1] in (' ', '\t'):  # folded continuation of the previous value
+            meta[key] = (str(meta.get(key, '')) + ' ' + line.strip()).strip()
+    return meta
+
 
 def parse_agent_file(file_path: Path):
     try:
@@ -21,7 +54,7 @@ def parse_agent_file(file_path: Path):
         if len(parts) < 3:
             return None
 
-        meta = yaml.safe_load(parts[1])
+        meta = _parse_frontmatter(parts[1])
         instructions = parts[2].strip()
 
         return {

@@ -1,15 +1,18 @@
 {
-  "$comment": "One-way sync: hub (AgentArmy) -> spoke repos. Hub is the source of truth for the Claude Code microVM helper surface. Edit `spokes` to add a repo. Edit `paths` to change what syncs. `deny` is a hard safety net enforced even if a path is added by mistake.",
+  "$comment": "One-way sync: hub (AgentArmy) -> spoke repos. Hub is the source of truth for the multi-coder agent helper surface (Claude Code + OpenAI Codex + Gemini Antigravity). This is the 'dressing' routine: it makes a bare spoke a fully-dressed AgentArmy template for every supported agentic coder. EASY TO ADD TO AND RUN: add a repo to `spokes`, add a file/dir to `paths`, then `python scripts/sync_helpers_to_spokes.py`. `deny` is a hard safety net enforced even if a path is added by mistake. See docs/spoke-sync.md.",
   "owner": "nickpclarke",
   "source_repo": "nickpclarke/AgentArmy",
   "branch": "chore/agentarmy-helper-sync",
   "spokes": [
     "frontend-core",
     "backend-core",
-    "middle-core"
+    "middle-core",
+    "agentarmy-forge"
   ],
+  "$pack_note": "`paths` is grouped by coder: shared (AGENTS.md + CONSTITUTION.md), Claude Code (.claude/*), OpenAI Codex (.codex/* — AGENTS.md is also Codex's primary instruction file), Gemini Antigravity (.agents/plugins). The two sync_agents_to_* scripts ride along so a spoke can regenerate its Codex/Antigravity packs from .claude/agents/categories/, and .codex/hooks.json stays self-consistent. To dress for a NEW coder: add its pack dir(s) here under a new group.",
   "paths": [
     "AGENTS.md",
+    "CONSTITUTION.md",
     "ontology/platform-self-model/generated/lexicon.yaml",
     ".agent/hub.json",
     ".agent/environments.json",
@@ -21,11 +24,17 @@
     ".claude/agent-schema.json",
     ".claude/settings.json",
     ".claude/hooks/setup-dotnet.sh",
+    ".codex/agents",
+    ".codex/config.toml",
+    ".codex/hooks.json",
+    ".agents/plugins",
     ".mcp.json",
     "scripts/mempalace_hook.py",
     "scripts/mempalace-hook.ps1",
     "scripts/board_commands.py",
     "scripts/onboarding-check.ps1",
+    "scripts/sync_agents_to_codex.py",
+    "scripts/sync_agents_to_antigravity.py",
     "tools/status.mjs",
     "tools/fleet-heartbeat.mjs"
   ],
