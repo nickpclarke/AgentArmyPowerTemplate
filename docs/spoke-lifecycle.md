@@ -61,6 +61,7 @@ What lands (grouped by coder — see [spoke-sync.md](spoke-sync.md) for the full
 | Claude Code | `.claude/agents`, `.claude/commands`, settings, hooks | Claude Code |
 | OpenAI Codex | `.codex/agents` (TOML), `.codex/config.toml`, `.codex/hooks.json` | Codex |
 | Gemini Antigravity | `.agents/plugins` | Antigravity |
+| Review automation | `.github/workflows/claude.yml`, `copilot-review.yml`, `review-loop.yml` (hub-authoritative, portable) | all — needs each spoke's secrets to *run* |
 | Helpers | `.mcp.json`, `tools/status.mjs`, `tools/fleet-heartbeat.mjs`, board scripts | all |
 
 **How a spoke proves how it got hydrated:** every dressing run writes a provenance

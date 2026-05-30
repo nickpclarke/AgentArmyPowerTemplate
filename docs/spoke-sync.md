@@ -42,9 +42,24 @@ grouped by coder:
 **Gemini Antigravity**
 - `.agents/plugins/` (per-category agent plugins) + `scripts/sync_agents_to_antigravity.py`.
 
+**PR-event automation (hub-authoritative)**
+- `.github/workflows/claude.yml` (@claude responder), `copilot-review.yml`
+  (auto-request Copilot review), `review-loop.yml` (autonomous review-fix loop). These
+  are **portable** (`${{ github.repository }}` / `${{ github.repository_owner }}`), so the hub
+  version runs verbatim in any spoke — every spoke gets the same review automation.
+- Dressing also **seeds the `review-loop` bootstrap labels** (`review-loop`,
+  `review-loop:done`, `review-loop:escalated`) in each spoke. The synced `review-loop.yml`
+  only self-creates these from inside its own label-gated job, so a fresh spoke couldn't
+  otherwise opt in (you can't add a label that doesn't exist). `sync_helpers_to_spokes.py`
+  creates them up front (`ensure_review_loop_labels`).
+- ⚠️ **Files synced ≠ functioning.** Each spoke still needs its own secrets set for
+  these to run: `CLAUDE_CODE_OAUTH_TOKEN`, `PROJECT_TOKEN`, and (optional, for fleet MCP)
+  `LOCAL_FLEET_MCP_URL` / `CF_ACCESS_CLIENT_ID` / `CF_ACCESS_CLIENT_SECRET`. The fleet
+  heartbeat checks file *presence* (`pr-subscription-missing`), not secrets.
+
 **Other helpers**
 - `scripts/board_commands.py`, `scripts/onboarding-check.ps1`, `tools/status.mjs`,
-  `tools/fleet-heartbeat.mjs`, `.mcp.json`, `.agent/*`, hub-callback workflows.
+  `tools/fleet-heartbeat.mjs`, `.mcp.json`, `.agent/*`, `notify-hub*.yml` (PR artifacts → hub).
 
 Directories are **mirrored** (deletions in the hub propagate), and synced paths are
 **force-added** so a spoke's `.gitignore` can never silently drop them. A provenance

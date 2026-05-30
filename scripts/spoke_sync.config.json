@@ -10,6 +10,7 @@
     "agentarmy-forge"
   ],
   "$pack_note": "`paths` is grouped by coder: shared (AGENTS.md + CONSTITUTION.md), Claude Code (.claude/*), OpenAI Codex (.codex/* — AGENTS.md is also Codex's primary instruction file), Gemini Antigravity (.agents/plugins). The two sync_agents_to_* scripts ride along so a spoke can regenerate its Codex/Antigravity packs from .claude/agents/categories/, and .codex/hooks.json stays self-consistent. To dress for a NEW coder: add its pack dir(s) here under a new group.",
+  "$automation_note": "The PR-event workflows (claude.yml, copilot-review.yml, review-loop.yml) are HUB-AUTHORITATIVE and synced so every spoke runs the same review automation; they are portable (use ${{ github.repository }} / ${{ github.repository_owner }}), so the hub version works verbatim in any spoke. notify-hub*.yml report a spoke's PR artifacts back to the hub. These are file-present checks in the fleet heartbeat (pr-subscription-missing); the workflows still need each spoke's own secrets set to FUNCTION (CLAUDE_CODE_OAUTH_TOKEN, PROJECT_TOKEN, and optional LOCAL_FLEET_MCP_URL / CF_ACCESS_* for fleet MCP).",
   "paths": [
     "AGENTS.md",
     "CONSTITUTION.md",
@@ -19,6 +20,9 @@
     ".github/ISSUE_TEMPLATE/epic-handoff.md",
     ".github/workflows/notify-hub.yml",
     ".github/workflows/notify-hub-artifacts.yml",
+    ".github/workflows/claude.yml",
+    ".github/workflows/copilot-review.yml",
+    ".github/workflows/review-loop.yml",
     ".claude/agents",
     ".claude/commands",
     ".claude/agent-schema.json",

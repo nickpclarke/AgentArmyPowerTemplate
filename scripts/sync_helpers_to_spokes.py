@@ -43,6 +43,17 @@ STAMP_REL = ".claude/.agentarmy-sync.json"
 # Always-ignored when copying a directory tree, regardless of config.
 COPY_IGNORE = [".git", "__pycache__", "node_modules", "*.local.json", "worktrees"]
 
+# Labels the review-loop automation needs to BOOTSTRAP. review-loop.yml creates these,
+# but only from inside its own label-gated job — so a freshly-dressed spoke that has
+# never had the `review-loop` label can't opt in (you can't add a label that doesn't
+# exist). Dressing therefore creates them up front. Keep in lockstep with the
+# "Ensure loop labels exist" step in .github/workflows/review-loop.yml.
+REVIEW_LOOP_LABELS = [
+    ("review-loop", "1f6feb", "Run the autonomous Claude review-fix loop on this PR"),
+    ("review-loop:done", "0e8a16", "Review loop converged — no actionable bot comments remain"),
+    ("review-loop:escalated", "e11d48", "Review loop hit the round cap — Decision artifact opened"),
+]
+
 # Seeded into a spoke ONLY if it has no CLAUDE.md, so we never clobber a spoke's
 # own guidance. {spoke} is the repo name. The @AGENTS.md line imports the shared,
 # fleet-wide agent guidance that the sync delivers; the spoke owns everything else.
@@ -172,10 +183,26 @@ def write_stamp(dest_root: Path, cfg: dict, hub_sha: str, paths: list[str]) -> N
     stamp_path.write_text(json.dumps(stamp, indent=2) + "\n", encoding="utf-8")
 
 
+def ensure_review_loop_labels(repo: str, dry_run: bool) -> None:
+    """Create the review-loop bootstrap labels in the spoke (idempotent, --force).
+    Part of dressing: the synced review-loop.yml can only self-create these once the
+    `review-loop` label already exists, so a fresh spoke needs them seeded here."""
+    if dry_run:
+        print(f"  [dry-run] would ensure {len(REVIEW_LOOP_LABELS)} review-loop label(s) exist")
+        return
+    for name, color, desc in REVIEW_LOOP_LABELS:
+        # check=False: a transient label hiccup must not abort the spoke's file sync.
+        run(["gh", "label", "create", name, "--repo", repo,
+             "--color", color, "--description", desc, "--force"], check=False)
+
+
 def sync_spoke(spoke: str, cfg: dict, paths: list[str], hub_sha: str, dry_run: bool, merge: bool) -> str:
     repo = f'{cfg["owner"]}/{spoke}'
     branch = cfg.get("branch", "chore/agentarmy-helper-sync")
     print(f"\n=== {repo} ===")
+    # Seed the review-loop labels regardless of whether files changed — the workflow
+    # files are useless for opt-in until the `review-loop` label exists in the repo.
+    ensure_review_loop_labels(repo, dry_run)
     with tempfile.TemporaryDirectory() as tmp:
         dest = Path(tmp) / spoke
         base = default_branch(repo)
