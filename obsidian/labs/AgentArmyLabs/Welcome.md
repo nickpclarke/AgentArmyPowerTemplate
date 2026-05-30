@@ -22,6 +22,7 @@ updated: 2026-05-25
 ### The vision
 - [[Model-Driven Platform]] — MOC for the model-driven bet
   - [[One Model, Many Projections]] · [[Skills as a Projection]] · [[Codegen vs Interpreted]] · [[Evidence as a Primitive]] · [[Scenarios as Agent Tools]] · [[Governance in the Model]] · [[Prior Art]] · [[Open Questions and Risks]]
+- [[Pace-Layering and the Dreaming Ontology]] — slow ontology / fast LPG; a drift-sensing operational frontier; the reasoner as an annealing, dreaming, re-sparsifying consolidation (→ ARC-ADR-038)
 
 ### Middle-Core ontology
 - [[Middle-Core]] — MOC for the business objects
