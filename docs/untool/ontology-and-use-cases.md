@@ -30,23 +30,36 @@ Everything downstream — the conversational swarm, the fleet ops — consumes t
 
 ## 1 · The ontology we derived (the terminology)
 
-### 1.1 Foundations (the upper grounding)
+### 1.1 Foundations are Perspectives, not a dual-label
 
-Every concept is grounded twice — once in **BFO** (realist upper ontology; ISO/IEC 21838) and once
-in **gUFO** (the OWL form of UFO). This dual grounding is load-bearing: the `MidLevelMapper` reads
-both `mid:bfoUpper` and `mid:gufoArchetype`, so the same mid-level pack re-grounds onto whichever
-foundation a tenant chooses.
+A concept is **not** "grounded twice" as if BFO and UFO were interchangeable coordinates. **BFO**
+(realist reference ontology; ISO/IEC 21838 — *what exists*, for scientific interop) and **UFO / gUFO**
+(a conceptual-modeling foundation — *how we conceptualize*) carve reality differently and are **not
+trivially inter-mappable**: there is no turnkey UFO↔BFO mapper, and foundational alignment is an open
+research problem (naively equating even superficially-identical top categories is logically unsatisfiable).
 
-| Foundation | Roots we use |
+Each foundation is therefore held as a **Perspective** (DSRP — Distinctions · Systems · Relationships ·
+Perspectives): **UFO is the authoring Perspective, BFO the realist-interop projection**. The
+`MidLevelMapper` reads `mid:bfoUpper` and `mid:gufoArchetype` as **two Perspectives reconciled by
+explicit per-concept commitments + a divergence registry** — where they genuinely differ (e.g.
+UFO «role» ≠ BFO role; a UFO relator has no native BFO kind), the divergence is *recorded*, not forced.
+See [ARC-ADR-038 — Foundations as Perspectives](../decisions/ARC-ADR-038-foundations-as-perspectives.md).
+
+| Perspective | Roots / carving |
 |---|---|
-| **BFO** | IndependentContinuant · GenericallyDependentContinuant · SpecificallyDependentContinuant · Occurrent |
-| **gUFO** | Kind · Role · Relator · Mode · Event |
+| **BFO** — realist projection | IndependentContinuant · GenericallyDependentContinuant · SpecificallyDependentContinuant · Occurrent |
+| **UFO / gUFO** — authoring | Kind · Role · Relator · Mode · Event — carved by rigidity / sortality / identity (no BFO counterpart) |
 
 ### 1.2 Mid-level packs — the canonical concepts (the integration vocabulary)
 
-Concepts cluster into **packs**. Each concept carries a label, a BFO upper, and a gUFO archetype.
+Concepts cluster into **packs**. Each concept carries a label and **two Perspectives** — a BFO projection and a UFO/gUFO archetype.
 These are the canonical targets every API surface maps onto (so `InvokeRequest`, `runAgentInput`,
 and `ChatCompletionRequest` all resolve to the same concept).
+
+> **Two Perspectives, not a 1:1 map.** The `BFO upper` and `gUFO archetype` columns below are two
+> *Perspectives* on each concept, not interchangeable coordinates. Clean rows are correspondences that
+> hold; irreducible differences (e.g. UFO «role» vs BFO role) live in the **divergence registry** —
+> see §1.1 and [ARC-ADR-038](../decisions/ARC-ADR-038-foundations-as-perspectives.md).
 
 | Pack | Concept | BFO upper | gUFO archetype |
 |---|---|---|---|
@@ -90,6 +103,11 @@ itself be a member of a further hyperedge — *nested reification*). A concept t
 whole and part is a **holon**; the nesting of holons is a **holarchy**. The object model is therefore
 not merely a hypergraph of *data* but a holarchy of *capability* — the basis for how the swarm
 acquires skills (§3.4).
+
+A holon lives in the **authoring (UFO) Perspective** (§1.1): it *is* the Relator. The realist (BFO)
+Perspective has no native kind for a reified relation, so a holon is reconciled through the divergence
+registry — *recorded*, not forced into a BFO category. The holarchy is thus a UFO-side structure that
+the BFO projection observes but does not own.
 
 ### 1.4 DSLs (compatibility-gated by the packs present)
 
