@@ -1,0 +1,139 @@
+@prefix : <http://voc.neo4j.com/datamodel#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://voc.neo4j.com/datamodel> a owl:Ontology .
+
+:agentId a owl:DatatypeProperty ;
+    rdfs:domain :Agent ;
+    rdfs:range xsd:string .
+
+:applicationcontainerId a owl:DatatypeProperty ;
+    rdfs:domain :ApplicationContainer ;
+    rdfs:range xsd:string .
+
+:architecturaldecisionId a owl:DatatypeProperty ;
+    rdfs:domain :ArchitecturalDecision ;
+    rdfs:range xsd:string .
+
+:armyId a owl:DatatypeProperty ;
+    rdfs:domain :Army ;
+    rdfs:range xsd:string .
+
+:capabilityId a owl:DatatypeProperty ;
+    rdfs:domain :Capability ;
+    rdfs:range xsd:string .
+
+:capability_realizationId a owl:DatatypeProperty ;
+    rdfs:domain :capability_realization ;
+    rdfs:range xsd:string .
+
+:containerId a owl:DatatypeProperty ;
+    rdfs:domain :Container ;
+    rdfs:range xsd:string .
+
+:contractId a owl:DatatypeProperty ;
+    rdfs:domain :Contract ;
+    rdfs:range xsd:string .
+
+:contract_bindingId a owl:DatatypeProperty ;
+    rdfs:domain :contract_binding ;
+    rdfs:range xsd:string .
+
+:deploymentId a owl:DatatypeProperty ;
+    rdfs:domain :deployment ;
+    rdfs:range xsd:string .
+
+:externalorganizationId a owl:DatatypeProperty ;
+    rdfs:domain :ExternalOrganization ;
+    rdfs:range xsd:string .
+
+:functioncontainerId a owl:DatatypeProperty ;
+    rdfs:domain :FunctionContainer ;
+    rdfs:range xsd:string .
+
+:governed_by_decisionId a owl:DatatypeProperty ;
+    rdfs:domain :governed_by_decision ;
+    rdfs:range xsd:string .
+
+:hubrepositoryId a owl:DatatypeProperty ;
+    rdfs:domain :HubRepository ;
+    rdfs:range xsd:string .
+
+:partner_engagementId a owl:DatatypeProperty ;
+    rdfs:domain :partner_engagement ;
+    rdfs:range xsd:string .
+
+:platformId a owl:DatatypeProperty ;
+    rdfs:domain :Platform ;
+    rdfs:range xsd:string .
+
+:platformcontainerId a owl:DatatypeProperty ;
+    rdfs:domain :PlatformContainer ;
+    rdfs:range xsd:string .
+
+:release_deliveryId a owl:DatatypeProperty ;
+    rdfs:domain :release_delivery ;
+    rdfs:range xsd:string .
+
+:releasetrainId a owl:DatatypeProperty ;
+    rdfs:domain :ReleaseTrain ;
+    rdfs:range xsd:string .
+
+:repositoryId a owl:DatatypeProperty ;
+    rdfs:domain :Repository ;
+    rdfs:range xsd:string .
+
+:spokerepositoryId a owl:DatatypeProperty ;
+    rdfs:domain :SpokeRepository ;
+    rdfs:range xsd:string .
+
+:systemcomponentId a owl:DatatypeProperty ;
+    rdfs:domain :SystemComponent ;
+    rdfs:range xsd:string .
+
+:Agent a owl:Class .
+
+:ApplicationContainer a owl:Class .
+
+:ArchitecturalDecision a owl:Class .
+
+:Army a owl:Class .
+
+:Capability a owl:Class .
+
+:Container a owl:Class .
+
+:Contract a owl:Class .
+
+:ExternalOrganization a owl:Class .
+
+:FunctionContainer a owl:Class .
+
+:HubRepository a owl:Class .
+
+:Platform a owl:Class .
+
+:PlatformContainer a owl:Class .
+
+:ReleaseTrain a owl:Class .
+
+:Repository a owl:Class .
+
+:SpokeRepository a owl:Class .
+
+:SystemComponent a owl:Class .
+
+:capability_realization a owl:Class .
+
+:contract_binding a owl:Class .
+
+:deployment a owl:Class .
+
+:governed_by_decision a owl:Class .
+
+:partner_engagement a owl:Class .
+
+:release_delivery a owl:Class .
+

@@ -23,15 +23,20 @@ are intentionally excluded; revisit if home-lab hardware changes.
 
 ```powershell
 docker mcp profile create --name agentarmy-devsecops --connect gordon
-# profile id => agentarmy-devsecops
+docker mcp profile ls    # confirm the ID — it is slugified: agentarmy-devsecops -> agentarmy_devsecops
 ```
+
+> ⚠️ **Verified gotcha:** `docker mcp` slugifies the profile **name** (dashes) into an **id**
+> (underscores). `profile server add` and `gateway run --profile` take the **id**
+> (`agentarmy_devsecops`), NOT the dashed name — passing the dashed name fails with
+> "profile not found". The commands below use the underscore id form.
 
 ## Step 2 — Tier 1: zero-secret, low-risk (enable immediately)
 
 One command adds all five:
 
 ```powershell
-docker mcp profile server add agentarmy-devsecops `
+docker mcp profile server add agentarmy_devsecops `
   --server catalog://mcp/docker-mcp-catalog/npm-sentinel+ramparts+inspektor-gadget+node-code-sandbox+neo4j-data-modeling
 ```
 
@@ -52,22 +57,22 @@ Set the secret (keychain), then add the server. Run only the rows you want.
 ```powershell
 # SonarQube — SAST + quality gate (Community edition can self-host as a container in local-stack)
 "<sonarqube-token>" | docker mcp secret set SONARQUBE_TOKEN
-docker mcp profile server add agentarmy-devsecops --server catalog://mcp/docker-mcp-catalog/sonarqube
+docker mcp profile server add agentarmy_devsecops --server catalog://mcp/docker-mcp-catalog/sonarqube
 
 # Vuln NIST / NVD — CVE intelligence for /security-review
 "<nvd-api-key>" | docker mcp secret set MCP_API_KEY
-docker mcp profile server add agentarmy-devsecops --server catalog://mcp/docker-mcp-catalog/vuln-nist-mcp-server
+docker mcp profile server add agentarmy_devsecops --server catalog://mcp/docker-mcp-catalog/vuln-nist-mcp-server
 
 # Docker Hub — image hardening for our 17 image.json builds (dockerHardenedImages, tag/repo scan)
 "<dockerhub-pat>" | docker mcp secret set HUB_PAT_TOKEN
-docker mcp profile server add agentarmy-devsecops --server catalog://mcp/docker-mcp-catalog/dockerhub
+docker mcp profile server add agentarmy_devsecops --server catalog://mcp/docker-mcp-catalog/dockerhub
 
 # StackHawk — DAST against the tunnel'd frontend (:3000). Needs a StackHawk SaaS account.
 "<stackhawk-api-key>" | docker mcp secret set STACKHAWK_API_KEY
-docker mcp profile server add agentarmy-devsecops --server catalog://mcp/docker-mcp-catalog/stackhawk
+docker mcp profile server add agentarmy_devsecops --server catalog://mcp/docker-mcp-catalog/stackhawk
 
 # AWS Terraform — Checkov IaC scan (RunCheckovScan; Checkov itself is cloud-agnostic). No secret.
-docker mcp profile server add agentarmy-devsecops --server catalog://mcp/docker-mcp-catalog/aws-terraform
+docker mcp profile server add agentarmy_devsecops --server catalog://mcp/docker-mcp-catalog/aws-terraform
 ```
 
 ## Step 4 — Verify
@@ -75,7 +80,7 @@ docker mcp profile server add agentarmy-devsecops --server catalog://mcp/docker-
 ```powershell
 docker mcp profile server ls
 docker mcp secret ls
-docker mcp gateway run --profile agentarmy-devsecops   # gateway Gordon talks to (MUST name the profile; bare `run` uses `default`)
+docker mcp gateway run --profile agentarmy_devsecops   # gateway Gordon talks to (MUST name the profile; bare `run` uses `default`)
 ```
 
 ---
@@ -106,9 +111,15 @@ by broker creds) is fine and is the intended pattern.
 
 `neo4j-data-modeling` (Tier 1) stays the upstream bridge regardless of backend: author a
 property-graph model → `validate_data_model` → project to `export_to_owl_turtle` (Fuseki /
-ontology side), `export_to_pydantic_models` (typed clients), and
-`get_node_cypher_ingest_query` (Cypher that runs against **ArcadeDB or a BYO Neo4j** alike,
-both openCypher). Squarely on the RDF↔LPG track ([ARC-ADR-041](../docs/decisions/ARC-ADR-041-pace-layered-projection-and-graduation.md)), `12-knowledge-ontology`.
+ontology side), `export_to_pydantic_models` (typed clients), and the Cypher ingest queries.
+Squarely on the RDF↔LPG track ([ARC-ADR-041](../docs/decisions/ARC-ADR-041-pace-layered-projection-and-graduation.md)), `12-knowledge-ontology`.
+
+**Validated dialect caveat** (see [`tools/selfmodel/validate-neo4j-modeling.mjs`](selfmodel/validate-neo4j-modeling.mjs)
++ [the validation report](selfmodel/NEO4J-MODELING-VALIDATION.md)): the **node-ingest** Cypher
+(`UNWIND $records … MERGE`) is portable openCypher and runs on ArcadeDB. The **constraint** DDL
+it emits (`CREATE CONSTRAINT … IS NODE KEY`) is **Neo4j-5 dialect** that ArcadeDB does *not*
+implement — projecting to ArcadeDB needs a constraint→`CREATE INDEX`/type-schema shim. Don't
+assume the whole Cypher bundle is ArcadeDB-portable.
 
 ## Step 5 — Tier 3: BYO graph connectors (opt-in, OFF by default)
 
@@ -138,15 +149,15 @@ docker mcp profile create --name agentarmy-byo-neo4j --connect gordon
 
 # Self-hosted / external Neo4j (operator's own local-dev secret -> local keychain)
 "<users-neo4j-password>" | docker mcp secret set NEO4J_PASSWORD
-docker mcp profile server add agentarmy-byo-neo4j `
+docker mcp profile server add agentarmy_byo_neo4j `
   --server catalog://mcp/docker-mcp-catalog/neo4j+neo4j-cypher+neo4j-memory
 
 # Neo4j Aura (managed cloud) — instance lifecycle + data
 "<users-aura-client-secret>" | docker mcp secret set NEO4J_AURA_CLIENT_SECRET
-docker mcp profile server add agentarmy-byo-neo4j `
+docker mcp profile server add agentarmy_byo_neo4j `
   --server catalog://mcp/docker-mcp-catalog/neo4j-cloud-aura-api
 
-docker mcp gateway run --profile agentarmy-byo-neo4j
+docker mcp gateway run --profile agentarmy_byo_neo4j
 ```
 
 > Consider a **separate profile** (e.g. `agentarmy-byo-neo4j`) per user/spoke so BYO creds
