@@ -27,7 +27,7 @@ secrets, and logs; your container is just leased compute. One persistent runner 
 3. From this folder:
    ```bash
    export GH_PAT=ghp_your_token            # or: cp .env.example .env  &&  edit .env
-   docker compose up -d                    # default: 2 ephemeral runners/repo (8 total)
+   docker compose up -d                    # default: 1 ephemeral runner/repo (4 total)
    docker compose logs -f
    ```
 4. Confirm they're online: `gh api repos/nickpclarke/<repo>/actions/runners`.
@@ -46,8 +46,9 @@ docker compose up -d --scale runner-middle=12   # crank one repo
 
 **Sizing — RAM is the cap, not cores.** A CI job wants ~2 GB; concurrency ≈ RAM ÷ 2 GB.
 On a **32 GB** box, keep total runners ≤ ~12 (≈24 GB) so the OS + Docker Desktop + your other
-work have headroom — heavy docker-build/browser jobs spike higher, so the default 2/repo (8)
-is the safe starting point. Cores (you have plenty) let them all run at once; they don't raise
+work have headroom — heavy docker-build/browser jobs spike higher, so the default 1/repo (4)
+is a conservative starting point (bump to `LOCAL_RUNNERS_PER_REPO=2` → 8 total for more
+parallelism). Cores (you have plenty) let them all run at once; they don't raise
 the ceiling. **The NPU is not used by CI at all.**
 
 ## Using the runners

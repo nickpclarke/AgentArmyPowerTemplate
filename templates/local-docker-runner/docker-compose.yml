@@ -9,7 +9,7 @@
 #
 # Prereqs: Docker Desktop running. A classic GitHub PAT with `repo` scope (private repos).
 #
-# Start (default 2 runners/repo = 8 total):
+# Start (default 1 runner/repo = 4 total — one per repo, the original layout):
 #   export GH_PAT=ghp_xxx          # do NOT commit; or copy .env.example -> .env
 #   docker compose up -d
 #
@@ -79,7 +79,7 @@ services:
   runner-hub:
     <<: *runner
     deploy:
-      replicas: ${LOCAL_RUNNERS_PER_REPO:-2}
+      replicas: ${LOCAL_RUNNERS_PER_REPO:-1}
     environment:
       <<: *runner-env
       REPO_URL: https://github.com/nickpclarke/AgentArmy
@@ -88,7 +88,7 @@ services:
   runner-frontend:
     <<: *runner
     deploy:
-      replicas: ${LOCAL_RUNNERS_PER_REPO:-2}
+      replicas: ${LOCAL_RUNNERS_PER_REPO:-1}
     environment:
       <<: *runner-env
       REPO_URL: https://github.com/nickpclarke/frontend-core
@@ -97,7 +97,7 @@ services:
   runner-backend:
     <<: *runner
     deploy:
-      replicas: ${LOCAL_RUNNERS_PER_REPO:-2}
+      replicas: ${LOCAL_RUNNERS_PER_REPO:-1}
     environment:
       <<: *runner-env
       REPO_URL: https://github.com/nickpclarke/backend-core
@@ -106,7 +106,7 @@ services:
   runner-middle:
     <<: *runner
     deploy:
-      replicas: ${LOCAL_RUNNERS_PER_REPO:-2}
+      replicas: ${LOCAL_RUNNERS_PER_REPO:-1}
     environment:
       <<: *runner-env
       REPO_URL: https://github.com/nickpclarke/middle-core
