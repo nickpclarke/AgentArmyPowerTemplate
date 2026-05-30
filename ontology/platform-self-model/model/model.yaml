@@ -220,6 +220,14 @@ types:
     properties:
       - { id: level, range: string, cardinality: "0..1", description: "Capability-map level (L0/L1/L2)." }
 
+  - id: Surface
+    stereotype: kind
+    parent: SystemComponent
+    identity: functional-complex
+    rigidity: rigid
+    gufo_type: gufo:Kind
+    description: "A user-experience space (a product/ops surface, e.g. Crucible) through which one or more platform capabilities are interfaced. The 'noun/place' you interact with; the capability is the 'verb' it exposes (untool product ontology: Crucible/Refinery/Registry/Workspace/Fleet-Console)."
+
   - id: ReleaseTrain
     stereotype: kind
     identity: functional-complex
@@ -314,6 +322,15 @@ relators:
     roles:
       - { name: capability, participant_type: Capability,      cardinality: "1..1" }
       - { name: realizedBy, participant_type: SystemComponent, cardinality: "1..*" }
+    bfo_pattern: interdependent-roles
+    provenance: { source: "self-model", generated_by: "self-model", recorded_at: "2026-05-30T00:00:00Z" }
+
+  - id: capability-exposure
+    stereotype: relator
+    description: "Reifies that a Surface (UX space, e.g. Crucible) exposes one or more Capabilities to a user. The surface is where you interface with the capability; the capability is the verb the surface fronts."
+    roles:
+      - { name: surface, participant_type: Surface,    cardinality: "1..1" }
+      - { name: exposes, participant_type: Capability, cardinality: "1..*" }
     bfo_pattern: interdependent-roles
     provenance: { source: "self-model", generated_by: "self-model", recorded_at: "2026-05-30T00:00:00Z" }
 

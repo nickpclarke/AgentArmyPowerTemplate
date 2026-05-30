@@ -84,6 +84,20 @@ capabilities:
   - { id: cap-secrets,       type: Capability, name: "Credentials & secrets brokering",  level: L2, evolutionStage: Product }
   - { id: cap-observability, type: Capability, name: "Observability",                    level: L2, evolutionStage: Product }
   - { id: cap-event-mesh,    type: Capability, name: "Event mesh",                       level: L1, evolutionStage: Product }
+  - { id: cap-forge,         type: Capability, name: "Forge — materialize ontology → Object Model", level: L2, evolutionStage: Genesis }
+  - { id: cap-refine,        type: Capability, name: "Refine — snap JSON → typed fragments",        level: L2, evolutionStage: Genesis }
+  - { id: cap-registry,      type: Capability, name: "Registry — ingest / assay / bridge ontologies", level: L2, evolutionStage: Genesis }
+  - { id: cap-swarm,         type: Capability, name: "Swarm synthesis — assemble agents + evidence-grounded answers", level: L1, evolutionStage: Genesis }
+  - { id: cap-uda,           type: Capability, name: "Universal Data Adapter — serve the Object Model from the optimal backend", level: L1, evolutionStage: Genesis }
+  - { id: cap-sieve,         type: Capability, name: "Ontology conformance sieve (SHACL gate)",     level: L2, evolutionStage: Genesis }
+
+# UX surfaces — the spaces you interface a capability through (untool product ontology §3).
+surfaces:
+  - { id: srf-crucible,      type: Surface, name: "Crucible",      evolutionStage: Genesis }
+  - { id: srf-refinery,      type: Surface, name: "Refinery",      evolutionStage: Genesis }
+  - { id: srf-registry,      type: Surface, name: "Registry",      evolutionStage: Genesis }
+  - { id: srf-workspace,     type: Surface, name: "Workspace",     evolutionStage: Genesis }
+  - { id: srf-fleet-console, type: Surface, name: "Fleet Console", evolutionStage: Custom }
 
 decisions:
   - { id: adr-002, type: ArchitecturalDecision, number: "002", title: "JWT-forwarding auth contract", decisionStatus: Accepted }
@@ -157,6 +171,20 @@ capability-realization:
   - { id: cr-secrets,       capability: cap-secrets,       realizedBy: [ctr-creds, plat-keyvault] }
   - { id: cr-observability, capability: cap-observability, realizedBy: [ctr-otel] }
   - { id: cr-event-mesh,    capability: cap-event-mesh,    realizedBy: [plat-nats, ctr-event-bridge] }
+  - { id: cr-forge,         capability: cap-forge,         realizedBy: [ctr-forge, repo-forge] }
+  - { id: cr-refine,        capability: cap-refine,        realizedBy: [ctr-abstraction, repo-backend-core] }
+  - { id: cr-registry,      capability: cap-registry,      realizedBy: [ctr-fuseki, repo-backend-core] }
+  - { id: cr-swarm,         capability: cap-swarm,         realizedBy: [army-claude, army-copilot, repo-agentarmy] }
+  - { id: cr-uda,           capability: cap-uda,           realizedBy: [repo-backend-core] }
+  - { id: cr-sieve,         capability: cap-sieve,         realizedBy: [ctr-fuseki] }
+
+# capability exposure — wires UX surfaces to the capabilities they front (surface = space, capability = verb)
+capability-exposure:
+  - { id: ce-crucible, surface: srf-crucible,      exposes: [cap-ontology, cap-forge] }
+  - { id: ce-refinery, surface: srf-refinery,      exposes: [cap-refine] }
+  - { id: ce-registry, surface: srf-registry,      exposes: [cap-registry] }
+  - { id: ce-workspace, surface: srf-workspace,    exposes: [cap-swarm, cap-knowledge] }
+  - { id: ce-fleet,    surface: srf-fleet-console, exposes: [cap-observability, cap-agent-orch] }
 
 # release delivery — wires release trains to what they deliver
 release-delivery:

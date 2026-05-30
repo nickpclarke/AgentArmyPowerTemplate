@@ -29,6 +29,7 @@ on:
     # Keep the two lists in lockstep; the last two entries are the sync machinery itself.
     paths:
       - "AGENTS.md"
+      - "ontology/platform-self-model/generated/lexicon.yaml"
       - ".agent/hub.json"
       - ".agent/environments.json"
       - ".github/ISSUE_TEMPLATE/epic-handoff.md"

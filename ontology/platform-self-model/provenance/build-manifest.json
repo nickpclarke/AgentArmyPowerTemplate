@@ -1,16 +1,17 @@
 {
   "snapshot": "2026-05-30",
   "inputs": {
-    "model/model.yaml": "64bc326bb2a61b56",
-    "model/instances.yaml": "abe5dca7f1e746a1"
+    "model/model.yaml": "04ab6be21aa670b5",
+    "model/instances.yaml": "a61c59e255f2387a"
   },
   "outputs": {
-    "persistence/arcadedb-schema.sql": "439d70fbe97f5f64",
-    "generated/SystemModel.g.cs": "2d6f7eb38eb3ef7a",
-    "semantic/model.gufo.ttl": "a4cde2bfff4a6346",
-    "instances/fragments.json": "a71c6f1cccf5373d",
+    "persistence/arcadedb-schema.sql": "18249377c9c61476",
+    "generated/SystemModel.g.cs": "cf856fe59a53bcb2",
+    "semantic/model.gufo.ttl": "378ce8d67713915b",
+    "instances/fragments.json": "158649b7fdd53c41",
     "viz/self-model.contracts.mmd": "97666f16b7a9e99b",
     "viz/self-model.tiers.mmd": "a29bdf47cb1367dc",
-    "viz/self-model-graph.html": "d582387dc47fa244"
+    "viz/self-model-graph.html": "31dcdf675ccaed05",
+    "generated/lexicon.yaml": "275d4d6d279bbbd5"
   }
 }

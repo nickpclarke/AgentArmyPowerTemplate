@@ -93,6 +93,12 @@
     rdfs:label "Capability" ;
     rdfs:comment "A business/platform capability the system provides, independent of how it is implemented." .
 
+:Surface a owl:Class ;
+    rdfs:subClassOf gufo:Kind ;
+    rdfs:subClassOf :SystemComponent ;
+    rdfs:label "Surface" ;
+    rdfs:comment "A user-experience space (a product/ops surface, e.g. Crucible) through which one or more platform capabilities are interfaced. The 'noun/place' you interact with; the capability is the 'verb' it exposes (untool product ontology: Crucible/Refinery/Registry/Workspace/Fleet-Console)." .
+
 :ReleaseTrain a owl:Class ;
     rdfs:subClassOf gufo:Kind ;
     rdfs:label "ReleaseTrain" ;
@@ -112,6 +118,9 @@
 
 :capability_realization a owl:Class ; rdfs:subClassOf gufo:Relator ;
     rdfs:comment "Reifies that a platform capability is realised by one or more system components (repos, containers, platforms, armies)." .
+
+:capability_exposure a owl:Class ; rdfs:subClassOf gufo:Relator ;
+    rdfs:comment "Reifies that a Surface (UX space, e.g. Crucible) exposes one or more Capabilities to a user. The surface is where you interface with the capability; the capability is the verb the surface fronts." .
 
 :release_delivery a owl:Class ; rdfs:subClassOf gufo:Relator ;
     rdfs:comment "Reifies that a SAFE release train delivers one or more system components (capabilities, repos, contracts)." .

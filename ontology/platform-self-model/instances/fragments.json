@@ -676,6 +676,111 @@
       }
     },
     {
+      "id": "cap-forge",
+      "type": "Capability",
+      "iri": "https://agentarmy.dev/self#cap-forge",
+      "props": {
+        "name": "Forge \u2014 materialize ontology \u2192 Object Model",
+        "level": "L2",
+        "evolutionStage": "Genesis"
+      }
+    },
+    {
+      "id": "cap-refine",
+      "type": "Capability",
+      "iri": "https://agentarmy.dev/self#cap-refine",
+      "props": {
+        "name": "Refine \u2014 snap JSON \u2192 typed fragments",
+        "level": "L2",
+        "evolutionStage": "Genesis"
+      }
+    },
+    {
+      "id": "cap-registry",
+      "type": "Capability",
+      "iri": "https://agentarmy.dev/self#cap-registry",
+      "props": {
+        "name": "Registry \u2014 ingest / assay / bridge ontologies",
+        "level": "L2",
+        "evolutionStage": "Genesis"
+      }
+    },
+    {
+      "id": "cap-swarm",
+      "type": "Capability",
+      "iri": "https://agentarmy.dev/self#cap-swarm",
+      "props": {
+        "name": "Swarm synthesis \u2014 assemble agents + evidence-grounded answers",
+        "level": "L1",
+        "evolutionStage": "Genesis"
+      }
+    },
+    {
+      "id": "cap-uda",
+      "type": "Capability",
+      "iri": "https://agentarmy.dev/self#cap-uda",
+      "props": {
+        "name": "Universal Data Adapter \u2014 serve the Object Model from the optimal backend",
+        "level": "L1",
+        "evolutionStage": "Genesis"
+      }
+    },
+    {
+      "id": "cap-sieve",
+      "type": "Capability",
+      "iri": "https://agentarmy.dev/self#cap-sieve",
+      "props": {
+        "name": "Ontology conformance sieve (SHACL gate)",
+        "level": "L2",
+        "evolutionStage": "Genesis"
+      }
+    },
+    {
+      "id": "srf-crucible",
+      "type": "Surface",
+      "iri": "https://agentarmy.dev/self#srf-crucible",
+      "props": {
+        "name": "Crucible",
+        "evolutionStage": "Genesis"
+      }
+    },
+    {
+      "id": "srf-refinery",
+      "type": "Surface",
+      "iri": "https://agentarmy.dev/self#srf-refinery",
+      "props": {
+        "name": "Refinery",
+        "evolutionStage": "Genesis"
+      }
+    },
+    {
+      "id": "srf-registry",
+      "type": "Surface",
+      "iri": "https://agentarmy.dev/self#srf-registry",
+      "props": {
+        "name": "Registry",
+        "evolutionStage": "Genesis"
+      }
+    },
+    {
+      "id": "srf-workspace",
+      "type": "Surface",
+      "iri": "https://agentarmy.dev/self#srf-workspace",
+      "props": {
+        "name": "Workspace",
+        "evolutionStage": "Genesis"
+      }
+    },
+    {
+      "id": "srf-fleet-console",
+      "type": "Surface",
+      "iri": "https://agentarmy.dev/self#srf-fleet-console",
+      "props": {
+        "name": "Fleet Console",
+        "evolutionStage": "Custom"
+      }
+    },
+    {
       "id": "adr-002",
       "type": "ArchitecturalDecision",
       "iri": "https://agentarmy.dev/self#adr-002",
@@ -1990,6 +2095,244 @@
         {
           "role": "realizedBy",
           "target": "ctr-event-bridge",
+          "ordinal": 2
+        }
+      ]
+    },
+    {
+      "id": "cr-forge",
+      "type": "capability_realization",
+      "iri": "https://agentarmy.dev/self#cr-forge",
+      "props": {},
+      "bindings": [
+        {
+          "role": "capability",
+          "target": "cap-forge",
+          "ordinal": 0
+        },
+        {
+          "role": "realizedBy",
+          "target": "ctr-forge",
+          "ordinal": 1
+        },
+        {
+          "role": "realizedBy",
+          "target": "repo-forge",
+          "ordinal": 2
+        }
+      ]
+    },
+    {
+      "id": "cr-refine",
+      "type": "capability_realization",
+      "iri": "https://agentarmy.dev/self#cr-refine",
+      "props": {},
+      "bindings": [
+        {
+          "role": "capability",
+          "target": "cap-refine",
+          "ordinal": 0
+        },
+        {
+          "role": "realizedBy",
+          "target": "ctr-abstraction",
+          "ordinal": 1
+        },
+        {
+          "role": "realizedBy",
+          "target": "repo-backend-core",
+          "ordinal": 2
+        }
+      ]
+    },
+    {
+      "id": "cr-registry",
+      "type": "capability_realization",
+      "iri": "https://agentarmy.dev/self#cr-registry",
+      "props": {},
+      "bindings": [
+        {
+          "role": "capability",
+          "target": "cap-registry",
+          "ordinal": 0
+        },
+        {
+          "role": "realizedBy",
+          "target": "ctr-fuseki",
+          "ordinal": 1
+        },
+        {
+          "role": "realizedBy",
+          "target": "repo-backend-core",
+          "ordinal": 2
+        }
+      ]
+    },
+    {
+      "id": "cr-swarm",
+      "type": "capability_realization",
+      "iri": "https://agentarmy.dev/self#cr-swarm",
+      "props": {},
+      "bindings": [
+        {
+          "role": "capability",
+          "target": "cap-swarm",
+          "ordinal": 0
+        },
+        {
+          "role": "realizedBy",
+          "target": "army-claude",
+          "ordinal": 1
+        },
+        {
+          "role": "realizedBy",
+          "target": "army-copilot",
+          "ordinal": 2
+        },
+        {
+          "role": "realizedBy",
+          "target": "repo-agentarmy",
+          "ordinal": 3
+        }
+      ]
+    },
+    {
+      "id": "cr-uda",
+      "type": "capability_realization",
+      "iri": "https://agentarmy.dev/self#cr-uda",
+      "props": {},
+      "bindings": [
+        {
+          "role": "capability",
+          "target": "cap-uda",
+          "ordinal": 0
+        },
+        {
+          "role": "realizedBy",
+          "target": "repo-backend-core",
+          "ordinal": 1
+        }
+      ]
+    },
+    {
+      "id": "cr-sieve",
+      "type": "capability_realization",
+      "iri": "https://agentarmy.dev/self#cr-sieve",
+      "props": {},
+      "bindings": [
+        {
+          "role": "capability",
+          "target": "cap-sieve",
+          "ordinal": 0
+        },
+        {
+          "role": "realizedBy",
+          "target": "ctr-fuseki",
+          "ordinal": 1
+        }
+      ]
+    },
+    {
+      "id": "ce-crucible",
+      "type": "capability_exposure",
+      "iri": "https://agentarmy.dev/self#ce-crucible",
+      "props": {},
+      "bindings": [
+        {
+          "role": "surface",
+          "target": "srf-crucible",
+          "ordinal": 0
+        },
+        {
+          "role": "exposes",
+          "target": "cap-ontology",
+          "ordinal": 1
+        },
+        {
+          "role": "exposes",
+          "target": "cap-forge",
+          "ordinal": 2
+        }
+      ]
+    },
+    {
+      "id": "ce-refinery",
+      "type": "capability_exposure",
+      "iri": "https://agentarmy.dev/self#ce-refinery",
+      "props": {},
+      "bindings": [
+        {
+          "role": "surface",
+          "target": "srf-refinery",
+          "ordinal": 0
+        },
+        {
+          "role": "exposes",
+          "target": "cap-refine",
+          "ordinal": 1
+        }
+      ]
+    },
+    {
+      "id": "ce-registry",
+      "type": "capability_exposure",
+      "iri": "https://agentarmy.dev/self#ce-registry",
+      "props": {},
+      "bindings": [
+        {
+          "role": "surface",
+          "target": "srf-registry",
+          "ordinal": 0
+        },
+        {
+          "role": "exposes",
+          "target": "cap-registry",
+          "ordinal": 1
+        }
+      ]
+    },
+    {
+      "id": "ce-workspace",
+      "type": "capability_exposure",
+      "iri": "https://agentarmy.dev/self#ce-workspace",
+      "props": {},
+      "bindings": [
+        {
+          "role": "surface",
+          "target": "srf-workspace",
+          "ordinal": 0
+        },
+        {
+          "role": "exposes",
+          "target": "cap-swarm",
+          "ordinal": 1
+        },
+        {
+          "role": "exposes",
+          "target": "cap-knowledge",
+          "ordinal": 2
+        }
+      ]
+    },
+    {
+      "id": "ce-fleet",
+      "type": "capability_exposure",
+      "iri": "https://agentarmy.dev/self#ce-fleet",
+      "props": {},
+      "bindings": [
+        {
+          "role": "surface",
+          "target": "srf-fleet-console",
+          "ordinal": 0
+        },
+        {
+          "role": "exposes",
+          "target": "cap-observability",
+          "ordinal": 1
+        },
+        {
+          "role": "exposes",
+          "target": "cap-agent-orch",
           "ordinal": 2
         }
       ]

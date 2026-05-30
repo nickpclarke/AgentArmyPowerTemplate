@@ -134,6 +134,24 @@
 
 ---
 
+## System Ontology — Components, Capabilities & Surfaces
+
+The platform self-model (`ontology/platform-self-model/`) distinguishes a **capability** (the verb — a functional disposition) from a **surface** (the UX space you interface it through). Both project from one ontology.
+
+**Capability** — A functional disposition the system provides, independent of how it's implemented (T-Box `Capability`). The *verb*.
+
+**Surface** — A user-experience space (product/ops UI) through which one or more capabilities are interfaced (T-Box `Surface`). The *noun/place*. Encoded as `Surface ──capability-exposure──▶ Capability`.
+
+**forge** (`agentarmy-forge`, ARC-ADR-029) — The **capability** that materializes an ontology into the **Object Model** projection (typed source: C#/TS/Python/Rust). The Materialize→Object-Model arm of Crucible — *not* a synonym for Crucible. In the self-model: `cap-forge` realized-by `ctr-forge`/`repo-forge`.
+
+**Crucible** — The flagship **surface** (untool product ontology, `Crucible.html`): the *corpus → ontology* experience (`Corpus → Ground → Derive → Materialize`). You interface the forge capability *through* Crucible. In the self-model: `srf-crucible ──exposes──▶ cap-forge`.
+
+**UDA (Universal Data Adapter)** — The runtime **read-seam** (`backend-core/rust-api-v2/src/uda.rs`) that hydrates the generated Object Model from the cost/latency-optimal backend (ArcadeDB, BigQuery, Postgres, DBOS, ontology sieve) per a data object's access pattern. forge *emits* the typed objects; UDA *serves* them.
+
+**Object Model** — One of three lockstep projections of the materialized ontology (Knowledge Graph · Vector DB · Object Model). The typed objects the armies call directly.
+
+---
+
 ## Related Docs
 
 - **[Armies Overview](armies-overview.md)** — Three armies model

@@ -43,6 +43,7 @@ CREATE PROPERTY ArchitecturalDecision.title IF NOT EXISTS STRING;
 CREATE PROPERTY ArchitecturalDecision.decisionStatus IF NOT EXISTS STRING;
 CREATE VERTEX TYPE Capability IF NOT EXISTS EXTENDS SystemComponent;
 CREATE PROPERTY Capability.level IF NOT EXISTS STRING;
+CREATE VERTEX TYPE Surface IF NOT EXISTS EXTENDS SystemComponent;
 CREATE VERTEX TYPE ReleaseTrain IF NOT EXISTS EXTENDS HyperNode;
 CREATE PROPERTY ReleaseTrain.trainId IF NOT EXISTS STRING;
 CREATE PROPERTY ReleaseTrain.theme IF NOT EXISTS STRING;
@@ -69,6 +70,7 @@ CREATE VERTEX TYPE governed_by_decision IF NOT EXISTS EXTENDS RelatorVertex;
 CREATE VERTEX TYPE partner_engagement IF NOT EXISTS EXTENDS RelatorVertex;
 CREATE PROPERTY partner_engagement.nature IF NOT EXISTS STRING;
 CREATE VERTEX TYPE capability_realization IF NOT EXISTS EXTENDS RelatorVertex;
+CREATE VERTEX TYPE capability_exposure IF NOT EXISTS EXTENDS RelatorVertex;
 CREATE VERTEX TYPE release_delivery IF NOT EXISTS EXTENDS RelatorVertex;
 
 CREATE INDEX IF NOT EXISTS ON OntologyElement (ontologyIri) UNIQUE;

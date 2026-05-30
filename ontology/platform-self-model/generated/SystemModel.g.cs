@@ -96,6 +96,12 @@ public sealed record Capability(
         string Name,
         string? Level) : IHyperElement;
 
+/// <summary>A user-experience space (a product/ops surface, e.g. Crucible) through which one or more platform capabilities are interfaced. The 'noun/place' you interact with; the capability is the 'verb' it exposes (untool product ontology: Crucible/Refinery/Registry/Workspace/Fleet-Console).</summary>
+public sealed record Surface(
+        string Id,
+        string OntologyIri,
+        string Name) : IHyperElement;
+
 /// <summary>A SAFE release train: a strategic theme grouping features over program increments.</summary>
 public sealed record ReleaseTrain(
         string Id,
@@ -165,6 +171,12 @@ public sealed record PArtnerEngagement(
 
 /// <summary>Relator: Reifies that a platform capability is realised by one or more system components (repos, containers, platforms, armies).</summary>
 public sealed record CApabilityRealization(
+        string Id,
+        string OntologyIri,
+        IReadOnlyList<RoleBinding> Bindings) : IHyperElement;
+
+/// <summary>Relator: Reifies that a Surface (UX space, e.g. Crucible) exposes one or more Capabilities to a user. The surface is where you interface with the capability; the capability is the verb the surface fronts.</summary>
+public sealed record CApabilityExposure(
         string Id,
         string OntologyIri,
         IReadOnlyList<RoleBinding> Bindings) : IHyperElement;

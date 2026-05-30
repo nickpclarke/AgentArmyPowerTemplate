@@ -44,6 +44,35 @@ sandboxed spoke agent usually can't reach) the hub board directly. You also neve
 by hand: the `notify-hub` workflow reports your merged PRs, closed issues, and comments to the
 hub automatically. Just do the work and close your issues — the hub reconciles the rest.
 
+## The platform — untool.ai (agent-army-first) & its vocabulary
+
+You are building **untool.ai**: an *agent-army-first* platform where one materialized ontology
+becomes the substrate three ways (Knowledge Graph · Vector DB · **Object Model**), and the armies
+operate over it. Use the platform's own names — they come from the **system ontology** (the
+self-model digital twin, `ontology/platform-self-model/`; agent-facing lexicon generated to
+`ontology/platform-self-model/generated/lexicon.yaml`).
+
+**The core distinction — don't conflate them:**
+- A **capability** is the *verb* (a functional disposition, independent of implementation).
+- A **surface** is the *space* (a UX product/ops surface) you interface a capability *through*.
+- Relationship: `Surface ──exposes──▶ Capability ──realized-by──▶ component`.
+
+**Surfaces (spaces) → the capabilities (verbs) they expose:**
+
+| Surface | Exposes | 
+|---|---|
+| **Crucible** | corpus → ontology pipeline + **forge** (materialize → Object Model) |
+| **Refinery** | snap JSON → typed fragments |
+| **Registry** | ingest / assay / bridge ontologies |
+| **Workspace** | swarm synthesis (evidence-grounded) + knowledge graph |
+| **Fleet Console** | observability + agent orchestration |
+
+Key capabilities you'll hear named: **forge** (the codegen verb — materialize ontology → typed
+Object Model in C#/TS/Python/Rust; *not* a synonym for Crucible, which is the surface), **UDA**
+(Universal Data Adapter — the runtime read-seam that *serves* the Object Model from the
+cost/latency-optimal backend), **sieve** (the SHACL ontology-conformance gate). Full vocabulary:
+the [Glossary](https://nickpclarke.github.io/AgentArmy/glossary/) (§ System ontology).
+
 ## Design system — one source of truth
 
 Any UI, visual, or **graph / data-viz** work binds to the shipped **frontend-core** design

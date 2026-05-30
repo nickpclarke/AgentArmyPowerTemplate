@@ -143,6 +143,12 @@ It runs three ways: the **SessionStart hook** (dry-run, every local session), a 
 - **Knowledge/ontology cluster** (formality gradient): `taxonomist` → `ontologist-generalist` → `ontologist-ufo` / `ontologist-bfo` → `knowledge-engineer`. See [.claude/agents/categories/12-knowledge-ontology/README.md](.claude/agents/categories/12-knowledge-ontology/README.md).
 - **Data Vault cluster** (lifecycle): `data-vault-architect` → `data-vault-modeler` → `data-vault-engineer`. Anchor: [ARC-ADR-026](docs/decisions/ARC-ADR-026-data-vault-2-1-methodology.md). Strategy: [docs/data-vault/](docs/data-vault/).
 
+### System ontology — canonical vocabulary (all agents)
+
+The platform names itself in a **system ontology** (the self-model digital twin). Use these names. Source of truth: `ontology/platform-self-model/model/{model,instances}.yaml`; the agent-facing lexicon is **generated** to [ontology/platform-self-model/generated/lexicon.yaml](ontology/platform-self-model/generated/lexicon.yaml) (regenerate with `python tools/selfmodel/emit.py` after editing the model — never hand-edit generated files).
+
+The core distinction: a **capability** is the *verb* (a functional disposition — e.g. **forge** = materialize ontology → Object Model; **UDA** = serve the Object Model); a **surface** is the *space* you interface it through (e.g. **Crucible**, Refinery, Registry, Workspace, Fleet Console). `Surface ──exposes──▶ Capability ──realized-by──▶ component`. Don't conflate a surface with its capability (forge ≠ Crucible). See [docs/glossary.md](docs/glossary.md#system-ontology--components-capabilities--surfaces).
+
 **HITL escalation:** when an agent hits a creative fork or judgment call beyond its authority, route to `hitl-coordinator` (creates a Decision Artifact on the board). See HITL Decision Pattern below.
 
 **Local docker fleet:** use the **untool fleet suite** (`mcp__local-fleet__fleet_*`). Read-only tools (`fleet_ps` / `fleet_inspect` / `fleet_logs`) are auto-approvable; write tools (`fleet_up` / `fleet_down` / `fleet_restart` / `fleet_build` / `fleet_deploy`) require per-call approval — they execute arbitrary code in the operator's docker host. See [tools/mcp-local-fleet/README.md](tools/mcp-local-fleet/README.md).
