@@ -69,3 +69,27 @@ Option C's original caveat ("you build all the broker code") proved minor here b
 3. `store.resolve(user, system)` is **server-side only** — backend-core injects the secret into the outbound call (option A). There is **no endpoint that returns a raw secret**.
 4. Audit every register/delete (`audit.emit`); rotation = a new KV secret version. **Live-verified** end-to-end against `akv01-agentarmy` (put/list/resolve/delete).
 5. The store is **backend-agnostic** — swapping to a dedicated vault or OpenBao later changes only `store.py`. Dev input surface (a small console UI / `/_dev` helper) is a follow-up as we iterate.
+
+## Worked example — BYO graph backend (Neo4j / Aura)
+
+The broker generalizes past SaaS APIs to **infrastructure a user brings**. The hub default
+graph DB is **ArcadeDB** (Platform tier, openCypher) — but a user/spoke may prefer their own
+Neo4j or a managed **Neo4j Aura**. That is a brokered system like any other, not a fork of the
+hub: the hub **never runs Neo4j itself**, so there is no split-brain with ArcadeDB.
+
+- **Register:** `cred-{user}-neo4j` (a `NEO4J_PASSWORD` for a self-hosted/external instance) or
+  `cred-{user}-aura` (a `NEO4J_AURA_CLIENT_SECRET`) — raw value stays server-side per the
+  standard contract.
+- **Proxy tools:** the Docker MCP Toolkit Neo4j connectors (`neo4j`, `neo4j-cypher`,
+  `neo4j-memory`, `neo4j-cloud-aura-api`) are enabled **opt-in, off by default** in a dedicated
+  `agentarmy-byo-neo4j` profile. **Two credential paths:** the *brokered* path (this ADR) keeps
+  the raw key server-side in `cred-{user}-neo4j` and resolves it via backend-core; the *local-dev*
+  path lets a solo operator set the secret into Docker's local keychain directly. Bridging the
+  broker into a Docker MCP secrets engine is follow-up work. Wire-up + tiering + both flows:
+  [tools/docker-mcp-gordon-wireup.md](../../tools/docker-mcp-gordon-wireup.md).
+- **Design-time bridge stays hub-side:** `neo4j-data-modeling` (no DB, no secret) projects a
+  property-graph model to OWL Turtle / Pydantic / Cypher ingest that targets **ArcadeDB or a BYO
+  Neo4j alike** — feeds the ontology pipeline ([ARC-ADR-030](ARC-ADR-030-data-to-ontology-ingestion-pipeline.md),
+  [ARC-ADR-032](ARC-ADR-032-ontology-sift-sort-authoring-loop.md)).
+- **Guardrail:** never run a *hub-side* Neo4j alongside ArcadeDB for the **same data in the same
+  layer**; BYO external/Aura, scoped by broker creds, is the intended pattern.
