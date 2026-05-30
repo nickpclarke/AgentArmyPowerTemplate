@@ -43,7 +43,7 @@ Perspectives): **UFO is the authoring Perspective, BFO the realist-interop proje
 `MidLevelMapper` reads `mid:bfoUpper` and `mid:gufoArchetype` as **two Perspectives reconciled by
 explicit per-concept commitments + a divergence registry** — where they genuinely differ (e.g.
 UFO «role» ≠ BFO role; a UFO relator has no native BFO kind), the divergence is *recorded*, not forced.
-See [ARC-ADR-038 — Foundations as Perspectives](../decisions/ARC-ADR-038-foundations-as-perspectives.md).
+See [ARC-ADR-039 — Foundations as Perspectives](../decisions/ARC-ADR-039-foundations-as-perspectives.md).
 
 | Perspective | Roots / carving |
 |---|---|
@@ -59,7 +59,7 @@ and `ChatCompletionRequest` all resolve to the same concept).
 > **Two Perspectives, not a 1:1 map.** The `BFO upper` and `gUFO archetype` columns below are two
 > *Perspectives* on each concept, not interchangeable coordinates. Clean rows are correspondences that
 > hold; irreducible differences (e.g. UFO «role» vs BFO role) live in the **divergence registry** —
-> see §1.1 and [ARC-ADR-038](../decisions/ARC-ADR-038-foundations-as-perspectives.md).
+> see §1.1 and [ARC-ADR-039](../decisions/ARC-ADR-039-foundations-as-perspectives.md).
 
 | Pack | Concept | BFO upper | gUFO archetype |
 |---|---|---|---|

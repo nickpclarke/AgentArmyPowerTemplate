@@ -1,11 +1,11 @@
-# ARC-ADR-038 — Pace-Layered RDF↔LPG Projection: a Drift-Sensing Operational Frontier and Dream-Consolidated Ontology Graduation
+# ARC-ADR-041 — Pace-Layered RDF↔LPG Projection: a Drift-Sensing Operational Frontier and Dream-Consolidated Ontology Graduation
 
 | Field | Value |
 |---|---|
-| ID | ARC-ADR-038 |
-| Status | Proposed |
+| ID | ARC-ADR-041 |
+| Status | Accepted |
 | Date | 2026-05-30 |
-| Deciders | Hub owner (Nicky Clarke) |
+| Deciders | Hub owner (Nicky Clarke) — approved 2026-05-30 |
 | Supersedes | — |
 | Superseded by | — |
 | Tags | ontology, pace-layering, lpg, rdf, projection, drift, emergence, graduation, dreaming, annealing, ufo, bfo, ice, provenance |
@@ -204,3 +204,5 @@ Three foundational pressure-tests converged on one verdict: *the naïve single-f
 | Version | Date | Author | Change |
 |---|---|---|---|
 | 0.1 | 2026-05-30 | Claude Code (assisted) | Initial Proposed — pace-layered RDF↔LPG projection with a drift-sensing operational frontier and dream-consolidated graduation; folds in the UFO / BFO / KR&R pressure-test findings; composes ADR-016/019/029/030/032. |
+| 0.2 | 2026-05-30 | Claude Code (assisted) | Renumbered ARC-ADR-038 → ARC-ADR-041 (038 retained by *Unified Process & Time*; 039 = *Foundations*; 040 = *Graph Visualization*). No content change. |
+| 0.3 | 2026-05-30 | Hub owner | **Accepted.** Pace-layering architecture approved. Open questions (dreamer trigger, ICE handling, substrate, dream auditability, energy function) remain documented follow-ups. |

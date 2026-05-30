@@ -1,8 +1,8 @@
-# ARC-ADR-038 — Foundations as Perspectives (UFO ⊕ BFO via a DSRP Frame)
+# ARC-ADR-039 — Foundations as Perspectives (UFO ⊕ BFO via a DSRP Frame)
 
 | Field | Value |
 |---|---|
-| ID | ARC-ADR-038 |
+| ID | ARC-ADR-039 |
 | Status | Accepted |
 | Date | 2026-05-30 |
 | Deciders | Hub owner (Nicky Clarke) — 2026-05-30 |
@@ -87,3 +87,5 @@ Generate the mapping with an ontology matcher. Rejected — OAEI shows foundatio
 - Labs note: `obsidian/labs/AgentArmyLabs/vision/Foundations as Perspectives — UFO, BFO, and DSRP.md` (full citations + well-grounded-vs-speculative ledger).
 - [ARC-ADR-016](ARC-ADR-016-ontology-representation-reification-hyperedges.md) (reification / hyperedges) · [ARC-ADR-019](ARC-ADR-019-ontology-reasoning-layer.md) (reasoning) · [ARC-ADR-033](ARC-ADR-033-fsharp-ontology-compiler-core.md) (F# core).
 - Guizzardi et al., *UFO*, Applied Ontology 2022 · Smith, *Beyond Concepts*, FOIS 2004 · OAEI · SUGOI / DOL · Cabrera, DSRP · Spivak, *Functorial Data Migration* (arXiv:1009.1166).
+
+| 1.1 | 2026-05-30 | Claude Code (assisted) | Renumbered ARC-ADR-038 → ARC-ADR-039 to resolve a concurrent-merge numbering collision (038 retained by *Unified Process & Time Architecture*; *Graph Visualization* holds 040). No content change. |
