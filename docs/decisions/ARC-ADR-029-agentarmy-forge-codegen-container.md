@@ -166,6 +166,22 @@ Avoid **Option 4** — frontend-core and backend-core already hand-maintain type
 
 ---
 
+## Direction principle — contract/ontology-first, NOT database-introspection-first
+
+Forge's single input is a **validated ontology / data-platform contract** (`data-platform-contract.g.json`, or RDF/OWL from `/ontology/snapshot`). It does **not** introspect a live database schema to derive types. The flow is fixed:
+
+```
+ontology / contract  ──forge──▶  typed Object Model (C#/TS/Python/Rust + per-backend SELECTs)
+```
+
+This matters for a common framing trap: *"auto-create our Rust data objects from Neo4j structures."* In this architecture that decomposes into two **separate** jobs, neither of which is "introspect Neo4j → types":
+- **Generation** stays forge's job, fed by the **contract** (the source of truth). `neo4j-data-modeling` (Docker MCP) is a *design-time* aid to author/round-trip a graph model into that contract — it is not a forge input source, and there is no `neo4j_source` parser (sources are blob/file/http only).
+- **Serving** is the **UDA**'s job (`backend-core/rust-api-v2/src/uda.rs`): once a Neo4j/Aura `Backend` exists (backend-core#151), the UDA *hydrates* the forge-generated objects from Neo4j at runtime. UDA never generates types.
+
+So: a graph backend is something forge's output is **served from**, never **generated from**. A DB-introspection-first path would be a deliberate new decision (its own ADR), not an extension of forge.
+
+---
+
 ## Related Decisions
 
 - **[ARC-ADR-023](ARC-ADR-023-container-tiering-strategy.md):** Container tiering — forge is a function-tier image per the split-rule discipline.
