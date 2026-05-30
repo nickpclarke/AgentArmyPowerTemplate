@@ -8,9 +8,11 @@
 # Prerequisites (run from the directory containing this script):
 #   - az CLI authenticated:  az login && az account set --subscription AASub1
 #   - az containerapp extension: az extension add --name containerapp
-#   - docker (or podman) available and running
 #   - Key Vault `akv01-agentarmy` accessible from the current account
 #   - The runner resource group already exists (or pass --create-rg)
+#
+# The runner image is built server-side by ACR Tasks (`az acr build`), so NO local
+# Docker daemon is required — this script runs cleanly from Azure Cloud Shell.
 #
 # Usage:
 #   ./deploy.sh \
@@ -21,11 +23,18 @@
 #     --keyvault-name    akv01-agentarmy              \
 #     --runner-version   2.317.0                      \
 #     [--image-tag       <git-sha or 'latest'>]       \
-#     [--create-rg]
+#     [--create-rg]                                   \
+#     [--acr-admin]      # pull via ACR admin Basic-auth (registries w/o AAD data-plane pull) \
+#     [--skip-build]     # deploy a pre-pushed --image-tag; skip the az acr build step
+#
+# Registries without AAD data-plane auth (image pull AND `az acr build` push fail
+# with UNAUTHORIZED): deploy with `--skip-build --image-tag <existing> --acr-admin`.
+# The runner Job then pulls via admin Basic-auth (cf. ARC #179 + the fleet's
+# acr-pwd pattern); the build is skipped because its push hits the same wall.
 #
 # Environment variables override CLI flags:
 #   SUBSCRIPTION, RESOURCE_GROUP, LOCATION, ACR_NAME, KV_NAME,
-#   RUNNER_VERSION, IMAGE_TAG, CREATE_RG
+#   RUNNER_VERSION, IMAGE_TAG, CREATE_RG, ACR_ADMIN, SKIP_BUILD
 
 set -euo pipefail
 
@@ -42,6 +51,8 @@ IMAGE_NAME="aca-github-runner"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 KV_SECRET_NAME="GHRUNNERPAT"
 CREATE_RG="${CREATE_RG:-false}"
+ACR_ADMIN="${ACR_ADMIN:-false}"     # pull via ACR admin Basic-auth (registries w/o AAD data-plane pull)
+SKIP_BUILD="${SKIP_BUILD:-false}"   # deploy a pre-pushed image; skip the az acr build step
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -58,6 +69,8 @@ while [[ $# -gt 0 ]]; do
     --runner-version) RUNNER_VERSION="$2"; shift 2 ;;
     --image-tag)      IMAGE_TAG="$2";      shift 2 ;;
     --create-rg)      CREATE_RG="true";    shift   ;;
+    --acr-admin)      ACR_ADMIN="true";    shift   ;;
+    --skip-build)     SKIP_BUILD="true";   shift   ;;
     --help|-h)
       sed -n '/^# Usage:/,/^$/p' "${BASH_SOURCE[0]}"
       exit 0
@@ -82,6 +95,11 @@ fi
 ACR_LOGIN_SERVER="${ACR_NAME}.azurecr.io"
 FULL_IMAGE="${ACR_LOGIN_SERVER}/${IMAGE_NAME}:${IMAGE_TAG}"
 
+PULL_AUTH_DESC="managed identity"
+BUILD_DESC="az acr build (ACR Tasks)"
+[[ "${ACR_ADMIN}" == "true" ]]  && PULL_AUTH_DESC="ACR admin Basic-auth"
+[[ "${SKIP_BUILD}" == "true" ]] && BUILD_DESC="skipped (--skip-build)"
+
 echo ""
 echo "========================================================================"
 echo "  ACA GitHub Runner — deploy"
@@ -93,6 +111,8 @@ echo "  ACR           : ${ACR_LOGIN_SERVER}"
 echo "  Image         : ${FULL_IMAGE}"
 echo "  Runner binary : v${RUNNER_VERSION}"
 echo "  Key Vault     : ${KV_NAME}  (secret: ${KV_SECRET_NAME})"
+echo "  Build         : ${BUILD_DESC}"
+echo "  Image pull    : ${PULL_AUTH_DESC}"
 echo "========================================================================"
 echo ""
 
@@ -161,24 +181,50 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 4 — Build and push the runner image to ACR
+# Step 4 — Build and push the runner image to ACR (server-side, no local Docker)
+#   `az acr build` uploads the build context to ACR Tasks, builds the image in the
+#   cloud, and pushes the result in a single step — so this runs from Azure Cloud
+#   Shell (or any az-authenticated shell) with no Docker daemon present.
+#   --skip-build deploys an already-pushed --image-tag instead (required on
+#   registries whose push path is unavailable over AAD data-plane auth).
 # ---------------------------------------------------------------------------
-echo "==> [4/6] Logging in to ACR: ${ACR_LOGIN_SERVER}"
-az acr login --name "${ACR_NAME}"
+if [[ "${SKIP_BUILD}" == "true" ]]; then
+  echo "==> [4/6] Skipping build (--skip-build); deploying existing image: ${FULL_IMAGE}"
+else
+  echo "==> [4/6] Building + pushing image via ACR Tasks: ${FULL_IMAGE}"
+  echo "    Build ARG RUNNER_VERSION=${RUNNER_VERSION}"
 
-echo "==> Building image: ${FULL_IMAGE}"
-echo "    Build ARG RUNNER_VERSION=${RUNNER_VERSION}"
+  az acr build \
+    --registry "${ACR_NAME}" \
+    --image "${IMAGE_NAME}:${IMAGE_TAG}" \
+    --build-arg "RUNNER_VERSION=${RUNNER_VERSION}" \
+    --file Dockerfile \
+    "${SCRIPT_DIR}"
 
-docker build \
-  --build-arg "RUNNER_VERSION=${RUNNER_VERSION}" \
-  --tag "${FULL_IMAGE}" \
-  --file "${SCRIPT_DIR}/Dockerfile" \
-  "${SCRIPT_DIR}"
+  echo "    Image built and pushed successfully."
+fi
 
-echo "==> Pushing image: ${FULL_IMAGE}"
-docker push "${FULL_IMAGE}"
-
-echo "    Image pushed successfully."
+# ---------------------------------------------------------------------------
+# Registry pull credentials — managed identity by default; ACR admin Basic-auth
+# when --acr-admin is set. The bicep flips to `useAdminCreds` when acrPassword is
+# supplied, wiring the Job's registry to Basic auth. The password flows straight
+# into a secure ARM parameter -> an ACA secret; it is never echoed here or written
+# to the template. Use this on registries that don't honor AAD data-plane RBAC for
+# pulls (the runner's managed identity gets UNAUTHORIZED otherwise).
+# ---------------------------------------------------------------------------
+ADMIN_PARAMS=()
+if [[ "${ACR_ADMIN}" == "true" ]]; then
+  echo "==> Resolving ACR admin credentials for image pull (--acr-admin)"
+  ACR_ADMIN_USER="$(az acr credential show --name "${ACR_NAME}" --query username --output tsv)"
+  ACR_ADMIN_PW="$(az acr credential show --name "${ACR_NAME}" --query 'passwords[0].value' --output tsv)"
+  if [[ -z "${ACR_ADMIN_USER}" || -z "${ACR_ADMIN_PW}" ]]; then
+    echo "    ERROR: could not read ACR admin credentials — is the admin user enabled?" >&2
+    echo "      az acr update -n ${ACR_NAME} --admin-enabled true" >&2
+    exit 1
+  fi
+  ADMIN_PARAMS=(--parameters "acrUsername=${ACR_ADMIN_USER}" --parameters "acrPassword=${ACR_ADMIN_PW}")
+  echo "    Admin creds resolved; the runner Job will pull via Basic auth."
+fi
 
 # ---------------------------------------------------------------------------
 # Step 5 — What-if preview (shows what Bicep will create/modify)
@@ -192,7 +238,8 @@ az deployment group what-if \
   --parameters     "imageTag=${IMAGE_TAG}" \
   --parameters     "keyVaultName=${KV_NAME}" \
   --parameters     "kvSecretNamePat=${KV_SECRET_NAME}" \
-  --parameters     "acrLoginServer=${ACR_LOGIN_SERVER}"
+  --parameters     "acrLoginServer=${ACR_LOGIN_SERVER}" \
+  ${ADMIN_PARAMS[@]+"${ADMIN_PARAMS[@]}"}
 
 # ---------------------------------------------------------------------------
 # Step 6 — Confirm and deploy
@@ -213,6 +260,7 @@ az deployment group create \
   --parameters     "keyVaultName=${KV_NAME}" \
   --parameters     "kvSecretNamePat=${KV_SECRET_NAME}" \
   --parameters     "acrLoginServer=${ACR_LOGIN_SERVER}" \
+  ${ADMIN_PARAMS[@]+"${ADMIN_PARAMS[@]}"} \
   --output         json \
   | tee /tmp/aca-runner-deploy-output.json
 
@@ -229,10 +277,11 @@ az deployment group show \
 
 echo ""
 echo "  Next steps:"
-echo "    1. Update your workflows to use:  runs-on: [self-hosted, aca-linux]"
+echo "    1. Set your workflow's runs-on to match the runner labels (see"
+echo "       runnerLabels in main.bicepparam):  runs-on: [self-hosted, <label>]"
 echo "    2. Trigger a workflow run — KEDA will start a runner Job automatically."
-echo "    3. Monitor executions:"
+echo "    3. Monitor executions (one Job per repo, named gh-runner-<repo>):"
 echo "       az containerapp job execution list \\"
 echo "         --resource-group ${RESOURCE_GROUP} \\"
-echo "         --name job-runner-agentarmy-AgentArmy-ci"
+echo "         --name gh-runner-<repo>"
 echo "========================================================================"

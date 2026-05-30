@@ -46,7 +46,7 @@ state accumulates. Each new job gets a clean container from the pinned image.
 | Requirement | Notes |
 |---|---|
 | Azure CLI + containerapp extension | `az extension add --name containerapp` |
-| Docker (or Podman) | Used locally to build and push the image |
+| _(no local Docker)_ | The image is built server-side by ACR Tasks (`az acr build`) — runs from Azure Cloud Shell or any az-authenticated shell, no daemon needed |
 | Subscription **AASub1** | `az account set --subscription AASub1` |
 | ACR **agentarmy.azurecr.io** | Shared registry, already exists |
 | Key Vault **akv01-agentarmy** | Shared vault, already exists |
@@ -133,6 +133,31 @@ The script:
 4. Builds and pushes the runner image to ACR.
 5. Runs `az deployment group what-if` so you can review changes before they apply.
 6. Asks for confirmation, then runs `az deployment group create`.
+
+### Registries without AAD data-plane auth
+
+Some registries don't honor Azure-AD data-plane auth for image **pull or push** —
+the managed-identity pull and `az acr build` both fail with `UNAUTHORIZED:
+authentication required`, even when the caller has `AcrPush`/`Owner`. (This is the
+case for the shared `agentarmy` registry, which is why the fleet pulls via the
+`acr-pwd` admin secret — cf. ARC #179.) For these, build the image once where a
+Docker push works, then deploy the already-pushed image with admin Basic-auth:
+
+```bash
+./deploy.sh \
+  --subscription   AASub1                 \
+  --resource-group rg-arcade-platform     \
+  --acr-name       agentarmy              \
+  --keyvault-name  akv01-agentarmy         \
+  --skip-build                             \   # the build's push hits the same AAD wall
+  --image-tag      2.334.0-tools           \   # an already-pushed tag
+  --acr-admin                                  # pull via ACR admin user/password
+```
+
+`--acr-admin` reads the registry's admin user/password (`az acr credential show`)
+and passes them as the `acrUsername` / `acrPassword` bicep params; the password is
+stored only as an ACA secret, never echoed or written to the template. The admin
+user must be enabled (`az acr update -n <acr> --admin-enabled true`).
 
 ---
 
