@@ -70,3 +70,7 @@ tests/artifacts/business-objects/*.md
 # Note: mempalace.yaml is intentionally NOT ignored — it's a curated template artifact
 # (see docs/mempalace.md). `mempalace init` will try to re-add it here; leave it out.
 entities.json
+
+# untool.ai separate-site build artifacts
+untool-docs-src/
+site-untool/

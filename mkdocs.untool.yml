@@ -1,0 +1,84 @@
+# untool.ai PLATFORM docs — a SEPARATE site from the AgentArmy template docs (mkdocs.yml).
+#
+# Builds ONLY platform content from an assembled, curated tree (untool-docs-src/, produced by
+# tools/build-untool-docs.sh) so no AgentArmy army/template/agent-glossary pages leak in.
+# Deployed to docs.untool.ai (Cloudflare Pages). The AgentArmy site stays at github.io/AgentArmy.
+#
+# Build:  ./tools/build-untool-docs.sh   (assembles untool-docs-src/, then `mkdocs build -f mkdocs.untool.yml`)
+site_name: untool.ai
+site_description: untool.ai — an ontology-driven platform. The point of a tool is not the tool; it is the work.
+site_author: untool.ai
+site_url: https://docs.untool.ai/
+repo_url: https://github.com/nickpclarke/AgentArmy
+repo_name: nickpclarke/AgentArmy
+docs_dir: untool-docs-src
+site_dir: site-untool
+copyright: © untool.ai
+
+theme:
+  name: material
+  logo: null
+  favicon: null
+  icon:
+    repo: fontawesome/brands/github
+  # untool.ai brand: warm paper/ink, ONE blue accent (docs/stylesheets/untool.css).
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font: false
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - navigation.prune
+    - content.code.copy
+    - toc.follow
+    - search.suggest
+    - search.highlight
+
+plugins:
+  - search:
+      lang: en
+  # No explicit nav: awesome-pages builds it from the assembled tree (+ .pages titles/order),
+  # so the untool site's nav is exactly what the build script stages — nothing more.
+  - awesome-pages
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      use_pygments: true
+  - pymdownx.inlinehilite
+  - pymdownx.emoji:
+      emoji_index: !!python/name:pymdownx.emoji.twemoji
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.snippets
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - tables
+  - attr_list
+  - footnotes
+  - md_in_html
+
+extra_css:
+  - stylesheets/untool.css
