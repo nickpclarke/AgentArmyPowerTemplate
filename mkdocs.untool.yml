@@ -17,6 +17,7 @@ copyright: © untool.ai
 
 theme:
   name: material
+  custom_dir: overrides   # footer override (legal links) — overrides/partials/copyright.html
   logo: null
   favicon: null
   icon:
@@ -82,3 +83,7 @@ markdown_extensions:
 
 extra_css:
   - stylesheets/untool.css
+
+extra_javascript:
+  # Renders the brand wordmark in the header (un · **tool** · .ai). Instant-nav-safe.
+  - javascripts/wordmark.js

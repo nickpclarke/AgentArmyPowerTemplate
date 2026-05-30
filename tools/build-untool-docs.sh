@@ -25,6 +25,12 @@ cp docs/untool/ontology-and-use-cases.md   "$SRC/ontology-and-use-cases.md"
 cp docs/untool-platform.md                 "$SRC/platform-architecture.md"
 cp docs/stylesheets/untool.css             "$SRC/stylesheets/untool.css"
 
+# Brand wordmark JS + footer-only legal pages (hidden from nav via legal/.pages).
+mkdir -p "$SRC/javascripts" "$SRC/legal"
+cp docs/untool/javascripts/wordmark.js     "$SRC/javascripts/wordmark.js"
+cp docs/untool/legal/*.md                  "$SRC/legal/"
+cp docs/untool/legal/.pages                "$SRC/legal/.pages"
+
 # Top-level order/titles (awesome-pages).
 cat > "$SRC/.pages" <<'PAGES'
 nav:
