@@ -15,8 +15,9 @@ name: notify hub (artifacts)
 #
 # Synced to every spoke from the hub — edit it in the hub. Guarded to no-op in the hub.
 #
-# Auth: PROJECT_TOKEN (classic PAT, repo + project scope on the hub) in the spoke's secrets.
-# If absent, the step skips (won't fail the spoke's CI).
+# Auth: the built-in GITHUB_TOKEN lists changed files in the spoke. PROJECT_TOKEN
+# (classic PAT, repo + project scope on the hub) is only required when a matching
+# PM artifact must be dispatched to the hub. If absent, non-artifact PRs still pass.
 
 on:
   pull_request:
@@ -33,7 +34,8 @@ jobs:
     steps:
       - name: Detect PM artifact and dispatch to hub
         env:
-          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_TITLE: ${{ github.event.pull_request.title }}
@@ -45,18 +47,19 @@ jobs:
           PR_MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
         run: |
           set -euo pipefail
-          if [ -z "${GH_TOKEN:-}" ]; then
-            echo "PROJECT_TOKEN not set in this spoke — skipping artifact callback." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
 
           # Changed files in this PR (paginated; path only).
-          files="$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
+          files="$(GH_TOKEN="${GITHUB_TOKEN}" gh api "repos/${REPO}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
 
           # Keep only PM-artifact paths.
           matched="$(printf '%s\n' "$files" | grep -E '^(spikes/|docs/research/|docs/decisions/)' || true)"
           if [ -z "$matched" ]; then
             echo "PR #${PR_NUMBER} touches no PM artifacts (spikes/**, docs/research/**, docs/decisions/**) — nothing to report." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if [ -z "${PROJECT_TOKEN:-}" ]; then
+            echo "PROJECT_TOKEN not set in this spoke — cannot dispatch $(printf '%s\n' "$matched" | wc -l) PM artifact file(s) to the hub." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
@@ -88,6 +91,6 @@ jobs:
             --arg url "$PR_URL" --arg author "$PR_AUTHOR" --arg state "$state" \
             --arg kind "$kind" --arg sha "$sha" --argjson files "$files_json" \
             '{event_type:"spoke-artifact", client_payload:{repo:$repo, number:$number, title:$title, url:$url, author:$author, state:$state, kind:$kind, sha:$sha, files:$files}}' \
-          | gh api repos/nickpclarke/AgentArmy/dispatches --method POST --input -
+          | GH_TOKEN="${PROJECT_TOKEN}" gh api repos/nickpclarke/AgentArmy/dispatches --method POST --input -
 
           echo "Reported ${kind} artifact PR #${PR_NUMBER} (${state}) to hub — $(printf '%s\n' "$matched" | wc -l) file(s)." >> "$GITHUB_STEP_SUMMARY"
