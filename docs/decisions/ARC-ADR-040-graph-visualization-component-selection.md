@@ -50,10 +50,48 @@ Cytoscape.js · Sigma.js (+Graphology) · vis-network · D3/d3-force · react-fo
 
 **Fleet-heartbeat integration.** Add a read-only drift check to `tools/fleet-heartbeat.mjs`: compare the approved lib + semver here against the installed version in each spoke's `package.json`; on major-version drift or a *rejected* lib being installed, file a deduped `agent-army-task` Enabler tagged `viz-lib-drift`. Start dry-run-report-only; promote to `--apply` after two stable quarterly cycles (same graduation path as other heartbeat checks).
 
+## Companion lane — static diagram-as-code (Mermaid now, Kroki later) — *Proposed*
+
+> **Scope note.** The tier table above governs the **interactive** graph (a live, pannable
+> hypergraph viewer). This section governs the **static diagram-as-code** lane — narrative
+> diagrams emitted *from the model* as text and rendered to SVG/PNG for docs, ADRs, and the
+> Obsidian arch-views. They are different problems with different tools; do not conflate them.
+> This lane is **Proposed** (captured here so a prior verbal decision stops being lost); the
+> interactive-tier decision above remains **Accepted**.
+
+**What exists today (built).** `tools/selfmodel/emit.py` already projects the self-model to
+**Mermaid** — `viz/self-model.contracts.mmd` (contract integration web) and
+`viz/self-model.tiers.mmd` (containers by tier). The docs site renders Mermaid inline via
+`pymdownx.superfences`. So the **model → diagram-text** half of this lane is real and shipping;
+Mermaid is the default static format.
+
+**The gap (why this section exists).** Mermaid is one notation. The platform also wants
+**richer / formal** diagram families the model can project into — notably **ArchiMate** (formal
+EA layered views, pairing with the TOGAF/EA agent roster) and others (PlantUML, C4-PlantUML,
+GraphViz/DOT, D2, BPMN). Authoring a bespoke renderer per format is the wrong move.
+
+**Proposed choice — [Kroki](https://kroki.io) as the unified render gateway.** One HTTP endpoint
+that renders ~25 diagram-as-code formats (Mermaid, PlantUML, ArchiMate, C4-PlantUML, GraphViz,
+D2, BPMN, Excalidraw, …) from text → SVG/PNG. The model keeps emitting *text*; Kroki turns any
+supported notation into an image with no per-format renderer to own.
+
+| Concern | Direction |
+|---|---|
+| **Default format** | **Mermaid** (already emitted; native in mkdocs) — keep for most narrative diagrams |
+| **Formal EA views** | **ArchiMate** via Kroki — backlog; C4 (Mermaid-native) is the simpler interim |
+| **Render gateway** | **Kroki**, **self-hosted** (container) so ontology/diagram text never leaves the box — same data-egress posture as the rest of the fleet |
+| **Boundary** | Static images for docs/ADRs/Obsidian. NOT the interactive viewer (that's the tier table). NOT a replacement for `.mmd` emission (Kroki renders what `emit.py` emits) |
+
+**Open questions before this graduates to Accepted:** (1) self-hosted Kroki container tier +
+image.json, or call the public service for non-sensitive diagrams only? (2) does `emit.py` gain
+an ArchiMate projection, or do we hand-author ArchiMate? (3) build-time pre-render to committed
+SVG vs. live Kroki fetch in mkdocs. Resolve via a spike before flipping to Accepted.
+
 ## Consequences
 
 - **Good:** a defensible current choice (MIT, zero cost, fits the hypergraph), an explicit measured exit ramp, and a process that prevents silent drift. The web component is reused on desktop and (via WebView) mobile — one investment, three targets.
 - **Cost / risk:** Cytoscape's canvas renderer ceiling (~3–5k elements) means a migration is *expected* as the twin grows — budgeted, not surprising. Compound-node UX does not survive a move to Sigma (flat projection instead) — a known UX shift to plan for.
+- **Static lane:** the Mermaid emission is live; Kroki + ArchiMate are *Proposed* — captured here so the prior verbal decision isn't lost again, not yet built.
 
 ## More information
 
@@ -63,3 +101,4 @@ Cytoscape.js · Sigma.js (+Graphology) · vis-network · D3/d3-force · react-fo
 | Date | Change |
 |---|---|
 | 2026-05-30 | Initial decision: Cytoscape.js (web/desktop), Sigma.js (scale), 3d-force-graph/G6 (3D), WebView (mobile). Program established. |
+| 2026-05-31 | Added the **static diagram-as-code companion lane** (*Proposed*): Mermaid (already emitted by `emit.py`) as default, **Kroki** as the unified render gateway, **ArchiMate** as the formal-EA backlog format. Captures a prior verbal decision that was never written down; interactive-tier decision unchanged. |
