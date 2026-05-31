@@ -179,6 +179,7 @@ nav:
     - Incremental Loading: dlt-incremental.md
   - Untool.ai Platform:
     - Platform Architecture: untool-platform.md
+    - Platform Messaging Update System: platform-messaging-update-system.md
     - Ontology & Use Cases: untool/ontology-and-use-cases.md
     # Per-layer platform docs are SYNCED from each spoke repo into docs/platform/<spoke>/
     # at build time (see .github/workflows/deploy-docs.yml). awesome-pages expands this

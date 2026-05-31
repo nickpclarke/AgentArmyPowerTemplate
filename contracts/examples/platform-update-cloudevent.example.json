@@ -1,0 +1,14 @@
+{
+  "specversion": "1.0",
+  "id": "caplog-2026-05-31-platform-messaging-update-system",
+  "source": "urn:agentarmy:platform-capability-log",
+  "type": "platform.capability.changed.v1",
+  "subject": "platform.capability.platform.messaging.update-system",
+  "time": "2026-05-31T19:05:00Z",
+  "datacontenttype": "application/json",
+  "dataschema": "https://agentarmy.dev/contracts/platform-update-cloudevent.schema.json",
+  "data": {
+    "capabilityId": "platform.messaging.update-system",
+    "status": "planned"
+  }
+}

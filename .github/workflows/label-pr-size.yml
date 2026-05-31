@@ -13,9 +13,9 @@ permissions:
 
 jobs:
   label-size:
-    # Self-hosted (free, off the metered minutes). Uses github-script (octokit +
-    # GITHUB_TOKEN) so no `gh` CLI is required on the runner.
-    runs-on: [self-hosted, linux]
+    # Uses github-script (octokit + GITHUB_TOKEN) and no repo checkout, so keep
+    # the PR gate on GitHub-hosted runners instead of waiting for local capacity.
+    runs-on: ubuntu-latest
     steps:
       - name: Apply size + deep-review labels
         uses: actions/github-script@v7

@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentarmy.dev/contracts/platform-update-subscription.schema.json",
+  "title": "AgentArmy Platform Update Subscription Registry",
+  "description": "Subscription registry consumed by the event-bridge project-webhooks mode for capability platform.messaging.update-system.",
+  "type": "object",
+  "required": ["capabilityId", "subscriptions"],
+  "additionalProperties": false,
+  "properties": {
+    "capabilityId": {
+      "const": "platform.messaging.update-system"
+    },
+    "subscriptions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/subscription" }
+    }
+  },
+  "$defs": {
+    "subjectPattern": {
+      "type": "string",
+      "pattern": "^(platform\\.(capability|adoption|hvfs)|fleet\\.agent)(\\.([A-Za-z0-9_-]+|\\*|>))+$|^platform\\.security(\\.([A-Za-z0-9_-]+|\\*|>))+$"
+    },
+    "subscription": {
+      "type": "object",
+      "required": ["id", "active", "subjects", "sink"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{2,127}$"
+        },
+        "active": { "type": "boolean" },
+        "subjects": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/subjectPattern" },
+          "uniqueItems": true
+        },
+        "filters": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "eventTypes": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "uniqueItems": true
+            },
+            "sources": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "uniqueItems": true
+            },
+            "dataEquals": {
+              "type": "object",
+              "additionalProperties": {
+                "type": ["string", "number", "integer", "boolean", "null"]
+              }
+            }
+          }
+        },
+        "sink": {
+          "type": "object",
+          "required": ["url", "auth"],
+          "additionalProperties": false,
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https://"
+            },
+            "auth": {
+              "oneOf": [
+                { "$ref": "#/$defs/hmacAuth" },
+                { "$ref": "#/$defs/cloudflareAccessAuth" }
+              ]
+            }
+          }
+        },
+        "replayable": {
+          "type": "boolean",
+          "default": false
+        },
+        "securityTrusted": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "hmacAuth": {
+      "type": "object",
+      "required": ["type", "secretRef"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "hmac-sha256" },
+        "secretRef": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Secret reference. Use akv:// references for production and for every platform.security.* subscription."
+        },
+        "keyId": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "cloudflareAccessAuth": {
+      "type": "object",
+      "required": ["type", "clientIdSecretRef", "clientSecretSecretRef"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "cloudflare-access-service-token" },
+        "clientIdSecretRef": { "type": "string", "minLength": 1 },
+        "clientSecretSecretRef": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

@@ -27,6 +27,8 @@
     { "repo": "hub", "path": "contracts/problem-details.openapi.yaml", "mediaType": "application/vnd.oai.openapi+yaml" },
     { "repo": "hub", "path": "contracts/forge-control.openapi.yaml", "mediaType": "application/vnd.oai.openapi+yaml" },
     { "repo": "hub", "path": "contracts/webhook-receiver.openapi.yaml", "mediaType": "application/vnd.oai.openapi+yaml" },
+    { "repo": "hub", "path": "contracts/platform-update-subscription.schema.json", "mediaType": "application/schema+json" },
+    { "repo": "hub", "path": "contracts/platform-update-cloudevent.schema.json", "mediaType": "application/schema+json" },
     { "repo": "hub", "path": "contracts/runbook-orchestrator.openapi.yaml", "mediaType": "application/vnd.oai.openapi+yaml" },
     { "repo": "hub", "path": "templates/ontology-project/ontology.ir.schema.json", "mediaType": "application/schema+json" },
     { "repo": "hub", "path": "templates/ontology-project/constraints/model.shacl.ttl", "mediaType": "text/turtle" },

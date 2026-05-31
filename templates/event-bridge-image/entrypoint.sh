@@ -2,6 +2,7 @@
 # Dispatch for the AgentArmy event-bridge image.
 #   serve-inbound  (default)  uvicorn webhook-receiver on $PORT (default 8080)
 #   relay-outbound            nats-relay (JetStream push-consumer → POST SINK_URL)
+#   project-webhooks          subscription-aware NATS CloudEvents → webhook sinks
 #   <any command>             runs as-is (sh, python, nats CLI passthrough, …)
 set -e
 
@@ -15,6 +16,10 @@ case "${1:-serve-inbound}" in
   relay-outbound)
     shift 2>/dev/null || true
     exec python /opt/agentarmy/scripts/nats-relay.py "$@"
+    ;;
+  project-webhooks)
+    shift 2>/dev/null || true
+    exec python /opt/agentarmy/scripts/webhook_projector.py "$@"
     ;;
   *)
     exec "$@"

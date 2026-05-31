@@ -35,7 +35,10 @@ permissions:
 
 jobs:
   scan:
-    runs-on: [self-hosted, linux]
+    # GitHub-hosted Ubuntu provides Docker for build and Trivy container gates.
+    # Keep this PR gate off the local runner pool so capability adoption is not
+    # blocked when docker-local capacity is unavailable.
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -54,6 +57,8 @@ jobs:
       # actions/checkout@v4 SHA-pinned per ADR-024 supply-chain hardening.
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
 
       # Only scan an image dir if THIS PR actually touched it (or if dispatched
       # explicitly via workflow_dispatch input). Saves cycles on unrelated PRs.
@@ -67,50 +72,63 @@ jobs:
           BASE_SHA:     ${{ github.event.pull_request.base.sha }}
           HEAD_SHA:     ${{ github.event.pull_request.head.sha }}
         run: |
-          set -euo pipefail
-          if [ -n "$DISPATCH_DIR" ]; then
-            if [ "$DISPATCH_DIR" = "$(basename "$IMAGE_DIR")" ]; then
-              echo "scan=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "scan=false" >> "$GITHUB_OUTPUT"
-            fi
+          $ErrorActionPreference = "Stop"
+          if ($env:DISPATCH_DIR) {
+            if ($env:DISPATCH_DIR -eq (Split-Path -Leaf $env:IMAGE_DIR)) {
+              "scan=true" >> $env:GITHUB_OUTPUT
+            } else {
+              "scan=false" >> $env:GITHUB_OUTPUT
+            }
             exit 0
-          fi
-          changed=$(git diff --name-only "$BASE_SHA".."$HEAD_SHA" -- "$IMAGE_DIR/")
-          if [ -n "$changed" ] || git diff --name-only "$BASE_SHA".."$HEAD_SHA" | grep -q image-security-scan.yml; then
-            echo "scan=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "scan=false" >> "$GITHUB_OUTPUT"
-          fi
+          }
+          $changed = git diff --name-only "$env:BASE_SHA..$env:HEAD_SHA" -- "$env:IMAGE_DIR/"
+          $allChanged = git diff --name-only "$env:BASE_SHA..$env:HEAD_SHA"
+          if ($changed -or ($allChanged | Select-String -SimpleMatch "image-security-scan.yml")) {
+            "scan=true" >> $env:GITHUB_OUTPUT
+          } else {
+            "scan=false" >> $env:GITHUB_OUTPUT
+          }
 
       - name: Build image (local tag)
         if: steps.should_scan.outputs.scan == 'true'
         env:
           IMAGE_NAME: ${{ matrix.image.name }}
           IMAGE_DIR:  ${{ matrix.image.dir }}
-        run: docker build -t "$IMAGE_NAME:scan" "$IMAGE_DIR"
+        run: docker build -t "${env:IMAGE_NAME}:scan" "$env:IMAGE_DIR"
 
-      # aquasecurity/trivy-action SHA-pinned. --format cyclonedx writes the SBOM;
-      # --format table writes the human-readable CVE report. Two runs because
-      # Trivy doesn't multi-emit in one invocation.
+      - name: Export image tar
+        if: steps.should_scan.outputs.scan == 'true'
+        env:
+          IMAGE_NAME: ${{ matrix.image.name }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          docker save "${env:IMAGE_NAME}:scan" -o "image-${env:IMAGE_NAME}.tar"
+
+      # Invoke the pinned Trivy image directly against a saved image tar.
       - name: Trivy scan (CVE table)
         if: steps.should_scan.outputs.scan == 'true'
-        uses: aquasecurity/trivy-action@7c2007bcb556501da015201bcba5aa14069b74e2 # 0.23.0
-        with:
-          image-ref: ${{ matrix.image.name }}:scan
-          format: table
-          exit-code: '0'  # never fail here — the gate is the next step
-          severity: CRITICAL,HIGH,MEDIUM,LOW
-          ignore-unfixed: false
-          output: trivy-${{ matrix.image.name }}.txt
+        env:
+          IMAGE_NAME: ${{ matrix.image.name }}
+        run: |
+          $ErrorActionPreference = "Continue"
+          $workspace = (Get-Location).Path
+          docker run --rm -v "${workspace}:/work" aquasec/trivy:0.55.0 image `
+            --input "/work/image-${env:IMAGE_NAME}.tar" `
+            --format table `
+            --severity CRITICAL,HIGH,MEDIUM,LOW `
+            --output "/work/trivy-${env:IMAGE_NAME}.txt"
 
       - name: Trivy scan (CycloneDX SBOM)
         if: steps.should_scan.outputs.scan == 'true'
-        uses: aquasecurity/trivy-action@7c2007bcb556501da015201bcba5aa14069b74e2 # 0.23.0
-        with:
-          image-ref: ${{ matrix.image.name }}:scan
-          format: cyclonedx
-          output: sbom-${{ matrix.image.name }}.cdx.json
+        env:
+          IMAGE_NAME: ${{ matrix.image.name }}
+        run: |
+          $ErrorActionPreference = "Continue"
+          $workspace = (Get-Location).Path
+          docker run --rm -v "${workspace}:/work" aquasec/trivy:0.55.0 image `
+            --input "/work/image-${env:IMAGE_NAME}.tar" `
+            --format cyclonedx `
+            --output "/work/sbom-${env:IMAGE_NAME}.cdx.json"
 
       # CVE gate — fail the workflow on any CRITICAL or HIGH CVE unless the PR
       # carries label `risk-accepted`. All github context goes through env: to
@@ -120,23 +138,25 @@ jobs:
         env:
           IMAGE_NAME: ${{ matrix.image.name }}
         run: |
-          set -euo pipefail
-          if docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-                aquasec/trivy:0.55.0 image --severity CRITICAL,HIGH \
-                  --exit-code 1 --ignore-unfixed "$IMAGE_NAME:scan"; then
-            echo "no CRITICAL/HIGH CVEs — gate green"
+          $ErrorActionPreference = "Stop"
+          $workspace = (Get-Location).Path
+          docker run --rm -v "${workspace}:/work" aquasec/trivy:0.55.0 image `
+            --input "/work/image-${env:IMAGE_NAME}.tar" `
+            --severity CRITICAL,HIGH `
+            --exit-code 1 `
+            --ignore-unfixed
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "no CRITICAL/HIGH CVEs - gate green"
             exit 0
-          fi
-          # CVEs present — yield only if risk-accepted label is on the PR.
-          labels=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/$REPO/issues/$PR/labels" \
-            | grep -oE '"name":\s*"[^"]+"' | head -10 || true)
-          if echo "$labels" | grep -q '"name": *"risk-accepted"'; then
-            echo "CRITICAL/HIGH CVEs found, but PR has risk-accepted label — gate yields"
+          }
+          $labels = Invoke-RestMethod `
+            -Headers @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = "application/vnd.github+json" } `
+            -Uri "https://api.github.com/repos/$env:REPO/issues/$env:PR/labels"
+          if (($labels.name) -contains "risk-accepted") {
+            Write-Host "CRITICAL/HIGH CVEs found, but PR has risk-accepted label - gate yields"
             exit 0
-          fi
-          echo "::error::CVEs found at CRITICAL/HIGH severity. Either fix them, or add the 'risk-accepted' label to this PR (with justification in the PR body)."
+          }
+          Write-Error "CVEs found at CRITICAL/HIGH severity. Either fix them, or add the 'risk-accepted' label to this PR with justification in the PR body."
           exit 1
 
       - name: Upload CVE report + SBOM artifacts

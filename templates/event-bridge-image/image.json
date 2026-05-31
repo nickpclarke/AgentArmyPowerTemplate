@@ -3,7 +3,7 @@
   "name": "agentarmy-event-bridge",
   "kind": "single",
   "base": "python:3.12-slim",
-  "description": "AgentArmy HTTP↔NATS event-bus bridge — inbound webhook receiver (HMAC-verified, CloudEvents v1.0) and outbound NATS-to-HTTP relay (JetStream push-consumer + retry/DLQ). One image, two modes (serve-inbound / relay-outbound). Realizes ARC-ADR-022 on top of middle-core's NATS JetStream + CloudEvents broker choice (ARC-ADR-001 / PR #73).",
+  "description": "AgentArmy HTTP↔NATS event-bus bridge — inbound webhook receiver (HMAC-verified, CloudEvents v1.0), generic outbound NATS-to-HTTP relay, and subscription-aware NATS-to-webhook projector for capability platform.messaging.update-system. Realizes ARC-ADR-022 on top of middle-core's NATS JetStream + CloudEvents broker choice (ARC-ADR-001 / PR #73).",
   "owner": "hub template",
   "tier": "function",
   "services": [
@@ -13,7 +13,7 @@
       "role": "api",
       "ports": ["8080:8080"],
       "healthcheck": { "http": "/healthz", "expect": 200 },
-      "entrypointModes": ["serve-inbound", "relay-outbound"]
+      "entrypointModes": ["serve-inbound", "relay-outbound", "project-webhooks"]
     }
   ],
   "secrets": [
@@ -28,6 +28,7 @@
     { "path": "entrypoint.sh", "purpose": "serve-inbound (default, uvicorn) | relay-outbound | <cmd>." },
     { "path": "scripts/webhook_receiver.py", "purpose": "FastAPI inbound receiver: HMAC verify -> replay dedup -> CloudEvents v1.0 envelope -> JetStream publish (auto-creates FLEET stream on boot)." },
     { "path": "scripts/nats-relay.py", "purpose": "JetStream push-consumer that POSTs each event to SINK_URL; acks on 2xx, naks on non-2xx (JS redeliver -> DLQ in Phase 1). Emits the cross-cluster clock-skew SLI on each receive (ARC-ADR-038 §5)." },
+    { "path": "scripts/webhook_projector.py", "purpose": "Subscription-aware projector for platform.messaging.update-system: filters canonical NATS CloudEvent families and POSTs structured CloudEvents to active webhook sinks with per-subscription auth." },
     { "path": "scripts/clock_skew.py", "purpose": "Clock-skew SLI: parses the temporal-envelope HLC from each received CloudEvent and prints an NDJSON fleet.clock.skew_ms metric (ARC-ADR-038 §5, ARC-ADR-010). Stdlib-only; graceful no-op for events without an hlc." }
   ],
   "setup": { "sh": "setup.sh", "ps1": "setup.ps1" },
@@ -43,6 +44,7 @@
   "volumes": [],
   "contract": [
     { "service": "bridge", "type": "openapi", "spec": "../../contracts/webhook-receiver.openapi.yaml", "registry": "docs/contracts.md", "mock": "https://27f2561e-8b6b-473b-9be3-95607ac7dcd1.mock.pstmn.io", "governingAdr": "ARC-ADR-022", "note": "Inbound HTTP surface (POST /webhooks/github + GET /healthz). Distinct from the broker-side contract (CloudEvents v1.0 over JetStream, registered as 'Event bus')." },
+    { "service": "bridge", "type": "prose", "spec": "../../contracts/platform-update-subscription.schema.json", "registry": "docs/contracts.md", "governingAdr": "ARC-ADR-022", "note": "JSON Schema subscription registry for project-webhooks mode under capability platform.messaging.update-system." },
     { "service": "bridge", "type": "prose", "registry": "docs/contracts.md", "note": "Outbound NATS→HTTP relay is governed by ARC-ADR-022; its sink endpoint is configured per-deployment (SINK_URL)." }
   ]
 }
