@@ -33,12 +33,29 @@ services:
       ARCADEDB_SERVICE_USER: platform_reader
       ARCADEDB_ROOT_PASSWORD_FILE: /run/secrets/arcadedb_root_password
       ARCADEDB_SERVICE_PASSWORD_FILE: /run/secrets/arcadedb_password
+      # Pin an explicit dev heap. This OVERRIDES the image's container-aware
+      # default (ARCADEDB_OPTS_MEMORY=-XX:Initial/MaxRAMPercentage in
+      # arcadedb-image/Dockerfile). Heap only — do NOT add a GC flag here:
+      # ArcadeDB's server.sh defaults JAVA_OPTS to ZGC and appends this value,
+      # so a second collector (e.g. -XX:+UseG1GC) is a fatal "Multiple garbage
+      # collectors selected" JVM error and the container won't boot.
+      ARCADEDB_OPTS_MEMORY: "-Xms1G -Xmx1536m"
     secrets:
       - arcadedb_root_password
       - arcadedb_password
     volumes:
       - arcadedb_config:/home/arcadedb/config
       - arcadedb_data:/home/arcadedb/databases
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
     healthcheck:
       test:
         - CMD-SHELL
