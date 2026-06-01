@@ -258,6 +258,17 @@ The platform self-model (`ontology/platform-self-model/`) distinguishes a **capa
 
 **forge** (`agentarmy-forge`, ARC-ADR-029) — The **capability** that materializes an ontology into the **Object Model** projection (typed source: C#/TS/Python/Rust). The Materialize→Object-Model arm of Crucible — *not* a synonym for Crucible. In the self-model: `cap-forge` realized-by `ctr-forge`/`repo-forge`.
 
+> **"forge" is one capability, not a free-floating verb.** Three things share the
+> stem and must not be conflated: (1) `cap-forge` — *the* capability above;
+> (2) `agentarmy-forge` / `repo-forge` — the spoke that *realizes* it (the generator
+> runtime); (3) downstream consumers that *use* forge. **commons-core is a consumer**
+> — it invokes the forge capability to emit typed SDK clients from backend-core
+> contracts; it is **not** a second forge and does not absorb the generator
+> (ARC-ADR-029 extracted forge into its own repo; the backend-core/commons boundary
+> ADR keeps runtime out of commons). Per the capability-naming rule, consumers say
+> "invoke/consume the forge capability" and should **not** coin new `forge*` terms
+> (e.g. prefer "contract-to-client SDK emit" over "forge intake / forged clients").
+
 **Crucible** — The flagship **surface** (untool product ontology, `Crucible.html`): the *corpus → ontology* experience (`Corpus → Ground → Derive → Materialize`). You interface the forge capability *through* Crucible. In the self-model: `srf-crucible ──exposes──▶ cap-forge`.
 
 **UDA (Universal Data Adapter)** — The runtime **read-seam** (`backend-core/rust-api-v2/src/uda.rs`) that hydrates the generated Object Model from the cost/latency-optimal backend (ArcadeDB, BigQuery, Postgres, DBOS, ontology sieve) per a data object's access pattern. forge *emits* the typed objects; UDA *serves* them.
