@@ -18,10 +18,12 @@ Project-management artifacts — **spikes, research notes, and ADRs** — harves
 
 | Kind | Artifact | PR | Author | Harvested |
 |---|---|---|---|---|
+| Decision | feat: AG-UI consumer manifest (#107) + certified-module auto-discovery over NATS (#109) | [#108](https://github.com/nickpclarke/middle-core/pull/108) | nickpclarke | 2026-06-01 |
 | Decision | docs(adr): pub/sub broker + shared workspace and concurrency model | [#73](https://github.com/nickpclarke/middle-core/pull/73) | nickpclarke | 2026-05-27 |
 
 **Files:**
 
 - [middle-core/docs/decisions/ARC-ADR-001-pubsub-broker-selection.md](middle-core/docs/decisions/ARC-ADR-001-pubsub-broker-selection.md)
 - [middle-core/docs/decisions/ARC-ADR-002-shared-workspace-concurrency-model.md](middle-core/docs/decisions/ARC-ADR-002-shared-workspace-concurrency-model.md)
+- [middle-core/docs/decisions/ARC-ADR-003-certified-module-autodiscovery.md](middle-core/docs/decisions/ARC-ADR-003-certified-module-autodiscovery.md)
 

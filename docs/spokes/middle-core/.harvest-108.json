@@ -1,0 +1,9 @@
+{
+  "repo": "nickpclarke/middle-core",
+  "number": "108",
+  "title": "feat: AG-UI consumer manifest (#107) + certified-module auto-discovery over NATS (#109)",
+  "url": "https://github.com/nickpclarke/middle-core/pull/108",
+  "author": "nickpclarke",
+  "kind": "decision",
+  "date": "2026-06-01"
+}
