@@ -23,6 +23,6 @@ Auto-generated agent inventory. Last updated: 2026-05-27 15:01:01 UTC
 ## How This Works
 
 - Counts are updated automatically daily and whenever agents are added/removed
-- Workflow: [update-agent-counts.yml](.github/workflows/update-agent-counts.yml)
+- Workflow: [update-agent-counts.yml](https://github.com/nickpclarke/AgentArmy/blob/main/.github/workflows/update-agent-counts.yml)
 - Each count includes all agent definition files (.md) in the category folder and subfolders
 - Excludes README.md and TAXONOMY.md reference files

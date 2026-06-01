@@ -54,7 +54,7 @@ jobs:
             echo "## How This Works"
             echo ""
             echo "- Counts are updated automatically daily and whenever agents are added/removed"
-            echo "- Workflow: [update-agent-counts.yml](.github/workflows/update-agent-counts.yml)"
+            echo "- Workflow: [update-agent-counts.yml](https://github.com/nickpclarke/AgentArmy/blob/main/.github/workflows/update-agent-counts.yml)"
             echo "- Each count includes all agent definition files (.md) in the category folder and subfolders"
             echo "- Excludes README.md and TAXONOMY.md reference files"
 

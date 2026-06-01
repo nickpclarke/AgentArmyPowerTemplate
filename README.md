@@ -211,7 +211,7 @@ For the same queries inside GitHub Copilot Chat (`@board-manager`), `extensions/
 
 ### Agent roster
 
-Specialist agents available out of the box across 11 categories, including a dedicated **Enterprise Architecture** category covering TOGAF ADM, Wardley Mapping, business capabilities, data architecture, platform engineering, and US regulatory compliance (FedRAMP, FISMA, HIPAA, CMMC, SOX, CCPA).
+Specialist agents available out of the box across the shared category roster, including dedicated **Enterprise Architecture** and **Knowledge Ontology** categories covering TOGAF ADM, Wardley Mapping, business capabilities, data architecture, platform engineering, foundational ontology modeling, and US regulatory compliance (FedRAMP, FISMA, HIPAA, CMMC, SOX, CCPA).
 
 See [docs/agents.md](docs/agents.md) for the full categorised roster and agent-chaining patterns.
 

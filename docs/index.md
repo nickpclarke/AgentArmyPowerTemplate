@@ -27,7 +27,7 @@ All significant work is tracked as GitHub issues on the project board. Agents op
 
 - :busts_in_silhouette: **Agent Roster**
   
-  Specialist agent definitions across 11 categories. Find the right expert for your task.
+  Specialist agent definitions across the full category roster. Find the right expert for your task.
   
   [View All Agents →](agents.md)
 
@@ -95,7 +95,7 @@ Single source of truth for all work:
 ## Repository Structure
 
 ```
-.claude/agents/categories/    → specialist agent definitions (11 categories)
+.claude/agents/categories/    → specialist agent definitions
 .claude/commands/             → local slash commands (/wardley, /ea-adr, /capability-map)
 .github/workflows/            → GitHub Actions: auto-status, routing, board commands, docs build
 docs/                         → This documentation

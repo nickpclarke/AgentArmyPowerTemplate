@@ -135,7 +135,7 @@ nav:
     - Spoke Work Intake: spoke-work-intake.md
     - Agent Collaboration (cross-repo): agent-collaboration.md
   - Claude Code Army:
-    - All 159 Agents: agents-glossary/index.md
+    - All Agents: agents-glossary/index.md
     - Original Roster: agents.md
     - Language Routing Guide: language-routing.md
     - Using Claude Code: claude-code-guide.md
