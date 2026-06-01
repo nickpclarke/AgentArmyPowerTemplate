@@ -1,0 +1,53 @@
+# Acronym Squasher — keeps the docs free of undefined acronyms ("meaning unpacker").
+#
+# Two gates, both driven by tools/acronyms.mjs against docs/glossary.md:
+#   1. No undefined ACRONYM introduced by THIS PR (scoped to changed docs — a "no new
+#      debt" gate, so pre-existing acronyms in untouched files don't block unrelated PRs).
+#   2. docs/includes/abbreviations.md is regenerated from the glossary (no drift) — the
+#      file MkDocs auto-appends to every page to render hover tooltips.
+#
+# Scoped to docs/tooling changes so it stays off the critical path for code PRs.
+name: Acronym coverage
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**/*.md'
+      - 'tools/acronyms.mjs'
+      - '.github/workflows/acronym-coverage.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  acronyms:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # need history to diff against the base branch
+          ref: ${{ github.event.pull_request.head.sha }}   # the PR's own tip, not the merge with base
+                                                            # (so main's debt can't cause false drift/gaps)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: No new undefined acronyms in changed docs
+        env:
+          BASE_REF: ${{ github.base_ref }}   # via env to avoid run-step script injection
+        run: |
+          git fetch --no-tags origin "$BASE_REF" || true
+          changed=$(git diff --name-only "origin/$BASE_REF"...HEAD -- 'docs/**/*.md' 2>/dev/null \
+                    | grep -vE 'docs/(includes|agents-glossary)/' || true)
+          if [ -z "$changed" ]; then echo "No changed docs to check."; exit 0; fi
+          echo "Checking changed docs:"; echo "$changed"
+          node tools/acronyms.mjs --acronyms --ci --files $changed
+
+      - name: Abbreviations are in sync with the glossary
+        run: |
+          node tools/acronyms.mjs abbr
+          if ! git diff --quiet docs/includes/abbreviations.md; then
+            echo "::error::docs/includes/abbreviations.md is stale. Run 'node tools/acronyms.mjs abbr' and commit the result."
+            git --no-pager diff docs/includes/abbreviations.md
+            exit 1
+          fi

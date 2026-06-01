@@ -66,6 +66,11 @@ tests/artifacts/doctor/*.md
 tests/artifacts/business-objects/*.json
 tests/artifacts/business-objects/*.md
 
+# Gordon ⇄ Claude bridge — .docker/ is its OWN git repo (remote: agent-army-docker-bridge),
+# the async exchange channel between Docker's Gordon agent and Claude. It must never be
+# embedded into the hub as a gitlink, so the hub ignores it entirely.
+.docker/
+
 # MemPalace machine-specific generated file (detected people/projects). Do not commit.
 # Note: mempalace.yaml is intentionally NOT ignored — it's a curated template artifact
 # (see docs/mempalace.md). `mempalace init` will try to re-add it here; leave it out.

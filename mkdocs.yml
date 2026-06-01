@@ -67,7 +67,12 @@ plugins:
   # tree, so newly-synced spoke pages appear with no hand-editing of nav.
   - awesome-pages
 
+# docs/includes/abbreviations.md is a snippet auto-appended to every page, not a standalone page
+exclude_docs: |
+  includes/
+
 markdown_extensions:
+  - abbr          # renders <abbr> tooltips from docs/includes/abbreviations.md (the "meaning unpacker")
   - admonition
   - pymdownx.details
   - pymdownx.superfences
@@ -81,7 +86,11 @@ markdown_extensions:
       emoji_generator: !!python/name:pymdownx.emoji.to_svg
   - pymdownx.tasklist:
       custom_checkbox: true
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      auto_append:
+        - includes/abbreviations.md   # append acronym defs to every page so abbr tooltips render site-wide
+      base_path:
+        - docs
   - toc:
       permalink: true
       toc_depth: 3
@@ -238,4 +247,5 @@ nav:
     - Memory Palace System: mempalace.md
     - FAQ: faq.md
     - Glossary: glossary.md
+    - Acronym Squasher: acronym-squasher.md
     - Contributing: contributing.md
