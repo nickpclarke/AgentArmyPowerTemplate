@@ -1,0 +1,69 @@
+name: runbook-orchestrator-doctor
+
+# Closes the CI half of #317: run the runbook-orchestrator image's doctor on
+# changes to its directory.
+#
+#   - manifest  : fast, no Docker — validates image.json + schema + declared
+#                 artifacts via agentarmy-doctor. Runs on every change.
+#   - live-doctor: the full build + NATS round-trip (setup.sh) — needs a Docker
+#                 host, so it runs on the self-hosted [docker-local] runner and
+#                 is gated (LOCAL_DOCKER_SMOKE_ENABLED or manual dispatch),
+#                 matching local-docker-smoke.yml. Docker CI is trusted-only,
+#                 never arbitrary untrusted-PR execution.
+#
+# A general per-image lane (templates/*-image/**) is the natural next step but
+# is deferred: not every image's setup.sh is CI-self-contained (some need KV /
+# secrets), so this stays scoped to the runbook image, which is.
+
+on:
+  pull_request:
+    paths:
+      - 'templates/runbook-orchestrator-image/**'
+  push:
+    branches: [main]
+    paths:
+      - 'templates/runbook-orchestrator-image/**'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runbook-doctor-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  manifest:
+    name: manifest validation (offline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate image.json + artifacts (Image Standard)
+        run: node tools/agentarmy-doctor.mjs image templates/runbook-orchestrator-image
+
+  live-doctor:
+    name: live doctor (build + NATS round-trip)
+    needs: manifest
+    if: ${{ vars.LOCAL_DOCKER_SMOKE_ENABLED == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: [self-hosted, docker-local]
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Docker
+        shell: bash
+        run: docker version && docker compose version
+      - name: Build + run + doctor (fleet.siem.phishing -> fleet.runbook.completed)
+        shell: bash
+        run: |
+          cd templates/runbook-orchestrator-image
+          ./setup.sh
+      - name: Tear down
+        if: always()
+        shell: bash
+        run: |
+          cd templates/runbook-orchestrator-image
+          ./setup.sh --down || true
