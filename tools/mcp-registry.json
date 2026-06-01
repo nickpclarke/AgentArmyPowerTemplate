@@ -20,6 +20,15 @@
       "taskName": "AgentArmy-AbstractionMCP",
       "launcher": "${HOME}/.agentarmy/serve-abstraction-mcp.cmd",
       "description": "abstraction meta-service MCP (abstract_schemas, build_adapter) — ARC-ADR-036."
+    },
+    {
+      "name": "consensus",
+      "remote": true,
+      "url": "https://mcp.consensus.app/mcp",
+      "auth": "bearer",
+      "tokenEnv": "CONSENSUS_API_KEY",
+      "tokenSecret": "consensus-api",
+      "description": "Consensus (MCP) — peer-reviewed academic research search (search / fetch / peer_reviewed_search / medical_evidence_search). REMOTE third-party MCP: no local port / tunnel ingress / logon task — reconcile emits its .mcp.json block pointing straight at the upstream url. DIRECT path: bypasses the backend-core Agent Gateway governance from backend-core#171 (client-side cap + FinOps attribution + SSRF/injection scrubbing); Consensus self-enforces the Pro 1000-calls/month quota server-side. Governed path (route via backend-core /a2a/v1 behind an MCP→REST shim) tracked as a follow-up. Token: KV secret 'consensus-api' → env CONSENSUS_API_KEY."
     }
   ]
 }

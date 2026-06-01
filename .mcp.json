@@ -15,6 +15,13 @@
         "CF-Access-Client-Id": "${CF_ACCESS_CLIENT_ID}",
         "CF-Access-Client-Secret": "${CF_ACCESS_CLIENT_SECRET}"
       }
+    },
+    "consensus": {
+      "type": "http",
+      "url": "${CONSENSUS_MCP_URL:-https://mcp.consensus.app/mcp}",
+      "headers": {
+        "Authorization": "Bearer ${CONSENSUS_API_KEY}"
+      }
     }
   }
 }

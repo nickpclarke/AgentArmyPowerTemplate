@@ -52,6 +52,11 @@ function loadRegistry() {
   const reg = JSON.parse(readFileSync(p, "utf8"));
   reg.hostname ||= "mcp.untool.ai";
   for (const s of reg.servers) {
+    // Remote servers are third-party MCPs we don't host: they have a `url`, no
+    // local `port`, and we wire neither tunnel ingress nor a logon task — we
+    // only emit their .mcp.json block pointing straight at the upstream url.
+    s._remote = !!(s.remote || (s.url && !s.port));
+    if (s._remote) continue;
     s.taskName ||= `AgentArmy-MCP-${s.name}`;
     s._launcher = resolve(s.launcher || path.join(AGENT_DIR, `serve-mcp-${s.name}.cmd`));
     s._generate = !s.launcher; // generate a launcher only when none was supplied
@@ -83,7 +88,7 @@ function ps(script) { return execFileSync("powershell.exe", ["-NoProfile", "-Non
 // preserved verbatim.
 function desiredMcpRules(reg) {
   const rules = [];
-  for (const s of reg.servers.filter((x) => !x.default && x.path))
+  for (const s of reg.servers.filter((x) => !x._remote && !x.default && x.path))
     rules.push({ hostname: reg.hostname, path: `^${s.path}`, service: `http://localhost:${s.port}` });
   const def = reg.servers.find((x) => x.default);
   if (def) rules.push({ hostname: reg.hostname, service: `http://localhost:${def.port}` });
@@ -152,9 +157,16 @@ function reconcileTask(s, apply) {
 function mcpBlock(reg) {
   const servers = {};
   for (const s of reg.servers) {
-    const ROUTE = s.default ? "/mcp" : s.path;
     const UP = s.name.toUpperCase().replaceAll("-", "_");
     const headers = {};
+    if (s._remote) {
+      // Third-party upstream: point straight at its url, auth with its own token
+      // env var (no CF Access headers — that's our tunnel's scheme, not theirs).
+      if (s.auth === "bearer") headers.Authorization = `Bearer \${${s.tokenEnv || `${UP}_MCP_TOKEN`}}`;
+      servers[s.name] = { type: "http", url: `\${${UP}_MCP_URL:-${s.url}}`, headers };
+      continue;
+    }
+    const ROUTE = s.default ? "/mcp" : s.path;
     if (s.auth === "bearer") headers.Authorization = `Bearer \${${UP}_MCP_TOKEN}`;
     headers["CF-Access-Client-Id"] = "${CF_ACCESS_CLIENT_ID}";
     headers["CF-Access-Client-Secret"] = "${CF_ACCESS_CLIENT_SECRET}";
@@ -167,6 +179,11 @@ function mcpBlock(reg) {
 function cmdList(reg) {
   log(`${C.cyan}MCP registry${C.reset}  host=${reg.hostname}  (${reg.servers.length} server(s))`);
   for (const s of reg.servers) {
+    if (s._remote) {
+      log(`  ${C.cyan}${s.name.padEnd(14)}${C.reset} ${"(remote)".padEnd(6)} ${String(s.url).padEnd(26)} auth=${s.auth.padEnd(6)} task=—`);
+      log(`    ${C.dim}upstream: ${s.url}  •  ${s.description || ""}${C.reset}`);
+      continue;
+    }
     const route = s.default ? "(default /mcp + /healthz)" : s.path;
     log(`  ${C.cyan}${s.name.padEnd(14)}${C.reset} :${s.port}  ${String(route).padEnd(26)} auth=${s.auth.padEnd(6)} task=${s.taskName}`);
     log(`    ${C.dim}cloud: https://${reg.hostname}${s.default ? "/mcp" : s.path}  •  ${s.description || ""}${C.reset}`);
@@ -178,6 +195,10 @@ function portUp(port) {
 async function cmdStatus(reg) {
   log(`${C.cyan}MCP serving status${C.reset}`);
   for (const s of reg.servers) {
+    if (s._remote) {
+      log(`  ${C.cyan}•${C.reset} ${s.name.padEnd(14)} remote     ${s.url} ${C.dim}(third-party — not health-checked here)${C.reset}`);
+      continue;
+    }
     const state = taskState(s.taskName) || "—";
     const up = await portUp(s.port);
     const mark = state === "Running" && up ? C.green + "✓" : C.red + "✗";
@@ -187,7 +208,10 @@ async function cmdStatus(reg) {
 async function cmdReconcile(reg, apply) {
   log(`${C.cyan}reconcile${C.reset} ${apply ? C.yellow + "(APPLY)" + C.reset : C.dim + "(dry-run — pass --apply to change anything)" + C.reset}`);
   await reconcileIngress(reg, apply);
-  for (const s of reg.servers) reconcileTask(s, apply);
+  for (const s of reg.servers) {
+    if (s._remote) { ok(`remote ${s.name}: third-party MCP (${s.url}) — no tunnel/task, .mcp.json only`); continue; }
+    reconcileTask(s, apply);
+  }
   const block = mcpBlock(reg);
   const out = path.join(REPO, "tools", "mcp-registry.generated.mcp.json");
   if (apply) { writeFileSync(out, JSON.stringify(block, null, 2) + "\n"); ok(`.mcp.json block written: ${path.relative(REPO, out)} (copy into consumers' .mcp.json)`); }
