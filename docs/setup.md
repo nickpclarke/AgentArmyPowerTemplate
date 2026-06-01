@@ -445,7 +445,7 @@ The validation job runs `--subscription AASub1`, which will not resolve under yo
 
 ## Optional: Azure Static Web Apps
 
-This repo includes `swa-cli.config.json` for Azure SWA deployment. To enable:
+Create a local `swa-cli.config.json` for Azure SWA deployment. To enable:
 
 ```bash
 npm install -g @azure/static-web-apps-cli
