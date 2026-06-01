@@ -79,3 +79,9 @@ entities.json
 # untool.ai separate-site build artifacts
 untool-docs-src/
 site-untool/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example

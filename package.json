@@ -6,11 +6,14 @@
   "scripts": {
     "test:e2e": "playwright test",
     "health": "node tools/health/monitor.mjs",
-    "prepare": "husky"
+    "prepare": "husky",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
     "@types/node": "^25.9.1",
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "wrangler": "^4.95.0"
   }
 }
