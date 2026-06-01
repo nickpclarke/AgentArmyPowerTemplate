@@ -333,6 +333,7 @@
 *[TZ]: Time Zone
 *[UAT]: User Acceptance Testing
 *[UC]: Use Case
+*[UDA]: Universal Data Adapter
 *[UFO]: Unified Foundational Ontology
 *[UI]: User Interface
 *[ULID]: Universally-unique Lexicographically-sortable Identifier

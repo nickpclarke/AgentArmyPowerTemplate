@@ -41,7 +41,8 @@
     "scripts/sync_agents_to_codex.py",
     "scripts/sync_agents_to_antigravity.py",
     "tools/status.mjs",
-    "tools/fleet-heartbeat.mjs"
+    "tools/fleet-heartbeat.mjs",
+    "tools/checks/tier-separation.mjs"
   ],
   "$ownership_note": "templates/arcadedb-image (and future templates/*-image/ platform images: fuseki, event-bridge, …) are intentionally NOT synced — they're hub-owned platform infra per ARC-ADR-023. Spokes consume the running instances via env (ARCADEDB_URL, NATS_URL, …), not by vendoring the Dockerfile.",
   "deny": [

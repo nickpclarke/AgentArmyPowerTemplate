@@ -72,6 +72,27 @@ overwrites a spoke's own `CLAUDE.md`, since that is repo-specific.
 **Never synced** (hard denylist, enforced even if added to the manifest):
 `CLAUDE.md`, `settings.local.json`, `*.local.json`, `.claude/worktrees/`, `.env`, credentials.
 
+## What a spoke gets for free — don't rebuild this
+
+Because `.mcp.json` is one of the synced paths, a dressed spoke **consumes the
+hub's `local-fleet` MCP server** (the one process running on `:8765`, reached via
+`LOCAL_FLEET_MCP_URL` + CF-Access service tokens) rather than implementing any of
+it. A spoke inherits, at runtime and with zero local code:
+
+- **Fleet coordination** — `fleet_agent_join` / `fleet_agent_handoff` /
+  `fleet_agent_memo_read|write` (durable agent identity, NATS-backed handoffs).
+- **Conformance** — `fleet_check_tiers` (ARC-ADR-023 cross-tier lint) and the
+  other read-only fleet checks.
+- **Docker / repo / board primitives** — `fleet_ps`, `fleet_logs`,
+  `fleet_search_code`, `fleet_get_kanban`, … per the server's tool roster.
+
+⚠️ **An un-dressed spoke is not a greenfield.** If a freshly-scaffolded spoke
+"has no fleet tools," it is un-synced, not missing a feature — run the dressing
+sync below. Never re-implement the coordination / VFS / conformance plane inside a
+spoke (e.g. in Python/SQLite): that fragments the single-server architecture.
+Background: the Labs note *Single-Repo Vantage — Why Spokes Consume the Hub*
+(`obsidian/labs/AgentArmyLabs/`).
+
 ## Adding a spoke
 
 Add the repo name to `spokes` in [`scripts/spoke_sync.config.json`](../scripts/spoke_sync.config.json),

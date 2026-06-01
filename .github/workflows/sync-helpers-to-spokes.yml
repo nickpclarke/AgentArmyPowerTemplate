@@ -59,6 +59,7 @@ on:
       - "scripts/sync_agents_to_antigravity.py"
       - "tools/status.mjs"
       - "tools/fleet-heartbeat.mjs"
+      - "tools/checks/tier-separation.mjs"
       - "scripts/spoke_sync.config.json"
       - "scripts/sync_helpers_to_spokes.py"
 

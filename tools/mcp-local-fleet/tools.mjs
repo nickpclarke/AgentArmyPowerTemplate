@@ -23,6 +23,7 @@ import {
   assertGitRepo, currentBranch, workingTreeStatus, fetchBranch,
   checkoutBranch, fastForward, currentSha, shortLog,
 } from "./git-helpers.mjs";
+import { checkRepoDir } from "../checks/tier-separation.mjs";
 
 const execFileP = promisify(execFile);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -416,6 +417,32 @@ async function deploy({ service, branch, no_cache = false, no_restart = false, r
   });
 }
 
+// ---------- conformance: tier separation (ARC-ADR-023) -----------------------
+// Read-only lint: does a checkout bundle Platform-tier infra (ArcadeDB, Postgres,
+// NATS, Fuseki, …) into an Application/Function spoke's compose/Dockerfile instead
+// of consuming it via env? Defaults to the hub checkout this server runs in —
+// which legitimately defines platform infra, so it returns ok with a hint to
+// point `path` at a spoke worktree. The detection lives in the shared, unit-tested
+// module (tools/checks/tier-separation.mjs) so this tool and the fleet heartbeat
+// stay in lockstep.
+async function checkTiers({ path: dir = null } = {}) {
+  const target = dir ? path.resolve(dir) : ROOT;
+  const repoName = dir ? path.basename(target) : "AgentArmy";
+  const res = checkRepoDir(target, { repo: repoName });
+  let note;
+  if (res.isHub) {
+    note = "This path is the hub (it legitimately defines platform infra under templates/local-stack). Pass `path` to a spoke worktree to lint it.";
+  } else if (res.ok) {
+    note = "No cross-tier bundling found — platform infra is consumed via env, not bundled (ARC-ADR-023).";
+  } else {
+    note = `${res.violations.length} cross-tier bundling violation(s): an Application/Function spoke must consume platform infra via env (e.g. ARCADEDB_URL), not run it locally (ARC-ADR-023).`;
+  }
+  return {
+    ok: res.ok, repo: repoName, isHub: res.isHub, root: res.root,
+    scanned: res.scanned, violations: res.violations, note,
+  };
+}
+
 // ---------- registry ---------------------------------------------------------
 //
 // Tools are functionally UNIVERSAL: they speak docker, which is the same
@@ -541,5 +568,19 @@ export const TOOLS = [
     },
     annotations: { readOnlyHint: false, idempotentHint: false, destructiveHint: true, openWorldHint: true },
     risk: "high", handler: deploy,
+  },
+
+  // --- conformance (read-only lint) ---
+  {
+    name: "fleet_check_tiers",
+    description: "Lint a checkout for ARC-ADR-023 cross-tier bundling — Platform-tier infra (ArcadeDB, Postgres, NATS, Fuseki, …) bundled into an Application/Function spoke's docker-compose or Dockerfile instead of consumed via env. Read-only. Defaults to the hub checkout this server runs in (which legitimately defines platform infra); pass `path` to lint a specific spoke worktree.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        path: { type: "string", description: "Absolute path to a repo checkout to lint. Defaults to the hub repo this server runs in." },
+      },
+    },
+    annotations: { readOnlyHint: true, idempotentHint: true, destructiveHint: false, openWorldHint: false },
+    risk: "low", handler: checkTiers,
   },
 ];

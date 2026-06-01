@@ -22,6 +22,7 @@
 
 import { execFileSync } from 'node:child_process';
 import { readFileSync, existsSync, statfsSync } from 'node:fs';
+import { scanTierSeparation, isComposeFile, isDockerfile } from './checks/tier-separation.mjs';
 
 const OWNER = 'nickpclarke';
 const HUB = 'AgentArmy';
@@ -196,6 +197,24 @@ for (const repo of [HUB, ...SPOKES]) {
       add(repo, 'warn', 'tier-bundle-antipattern',
         `${repo}/${path} ("${entry.name}") is tier=application but kind=multi-service — likely bundles Platform DBs into an app image. ADR-023 retires this 'fusion image' pattern; split into image.json (app only) + a separate stack file referencing templates/local-stack.`);
     }
+  }
+}
+
+// ---- 2c+. Cross-tier bundling in compose / Dockerfiles (ARC-ADR-023) -------
+// The 2c manifest scan only sees image.json (few exist yet). The real leak
+// vector is a spoke wiring a Platform DB / broker straight into a docker-compose
+// or Dockerfile. Reuse the shared tier-separation core over each spoke's remote
+// tree (the hub legitimately defines platform infra, so it is not scanned). This
+// closes the ARC-ADR-023 §Implementation item: "fleet-heartbeat should warn on
+// cross-tier bundling."
+for (const spoke of SPOKES) {
+  if (treeFetchFailed.has(spoke)) continue; // a phantom-empty tree would false-positive
+  const candidates = safeTree(spoke).filter((p) => isComposeFile(p) || isDockerfile(p));
+  if (!candidates.length) continue;
+  const files = candidates.map((p) => ({ path: p, content: fetchFile(spoke, p) || '' }));
+  const { violations } = scanTierSeparation({ files, repo: spoke, isHub: false });
+  for (const v of violations) {
+    add(spoke, 'warn', 'cross-tier-bundling', v.detail);
   }
 }
 
