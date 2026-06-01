@@ -9,7 +9,7 @@ what it serves, and how its layers fit together.
 
 ## Start here
 
-- **[Platform Architecture](../untool-platform.md)** — the system at a glance: surfaces vs.
+- **[Platform Architecture](platform-architecture.md)** — the system at a glance: surfaces vs.
   capabilities, the universal data adapter, and how the pieces compose.
 - **[Ontology & Use Cases](ontology-and-use-cases.md)** — the object model: reified relations
   as holons, foundations as perspectives, and what the platform is *for*.
