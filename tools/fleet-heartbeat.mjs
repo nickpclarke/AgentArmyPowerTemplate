@@ -411,6 +411,32 @@ if (DISK_PROBE) {
   }
 }
 
+// ---- 3e. Hub templates/ guard — direct-edit detection (boundary enforcement) ----
+// templates/ is the canonical source the whole fleet builds and ships from: the
+// image.json manifests, the local-stack compose build contexts, the ACA/GCP deploy
+// lanes, and the self-model digital twin all read it. The Docker-host agent (Gordon)
+// stages Docker-image work in the bridge repo's .docker/ and it reaches the hub ONLY
+// via a reviewed PR — never by editing templates/ in place. Any uncommitted change to
+// templates/ in the MAIN worktree is an out-of-band edit (feature worktrees legitimately
+// carry templates WIP, so we deliberately check only the main tree to keep signal high).
+// Emitted as warn — never auto-dispatched — so it gets eyeballed and reverted.
+// Fully guarded: where git is unavailable (cloud cron, no checkout) the check no-ops.
+try {
+  const git = (cwd, args) => {
+    try { return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); }
+    catch { return ''; }
+  };
+  const wtRaw = git(process.cwd(), ['worktree', 'list', '--porcelain']);
+  // git lists the main worktree first; fall back to cwd if listing fails.
+  const mainWt = (wtRaw.split('\n').find((l) => l.startsWith('worktree ')) || `worktree ${process.cwd()}`).slice(9).trim();
+  const dirty = git(mainWt, ['status', '--porcelain', '--', 'templates/']);
+  if (dirty) {
+    const files = dirty.split('\n').map((l) => l.slice(3)).filter(Boolean);
+    add(HUB, 'warn', 'hub-templates-direct-edit',
+      `Uncommitted edit(s) to canonical hub templates/ in the MAIN worktree (${mainWt}): ${files.join(', ')}. templates/ is promote-only via reviewed PR — Docker-image work stages in the bridge .docker/. If this is an out-of-band edit (e.g. the Docker-host agent), review + revert; if it's intended hub work, move it to a PR branch.`);
+  }
+} catch { /* git unavailable — skip the guard rather than fail the heartbeat */ }
+
 // ---- 4. Dispatch (optional, --apply) ---------------------------------------
 const dispatched = [];
 if (APPLY) {
