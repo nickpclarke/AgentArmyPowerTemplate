@@ -1,7 +1,7 @@
-# Replace @OWNER_OR_TEAM before publishing a derived repository.
+# Public template repository owner.
 
-*                         @OWNER_OR_TEAM
-/.github/                 @OWNER_OR_TEAM
-/scripts/                 @OWNER_OR_TEAM
-/.claude/agents/          @OWNER_OR_TEAM
-/docs/                    @OWNER_OR_TEAM
+*                         @nickpclarke
+/.github/                 @nickpclarke
+/scripts/                 @nickpclarke
+/.claude/agents/          @nickpclarke
+/docs/                    @nickpclarke
