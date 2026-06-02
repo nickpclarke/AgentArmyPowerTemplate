@@ -251,7 +251,12 @@ def cmd_decisions():
         for i in items:
             created = datetime.fromisoformat(i['createdAt'].replace('Z', '+00:00'))
             age = (now - created).days
-            names = ', '.join(f"@{a['login']}" for a in i.get('assignees', [])) or '_(unassigned)_'
+            assignees = []
+            for assignee in i.get('assignees', []):
+                login = assignee.get('login') if isinstance(assignee, dict) else None
+                if login:
+                    assignees.append(f"@{login}")
+            names = ', '.join(assignees) or '_(unassigned)_'
             lines.append(f"- #{i['number']}: **{i['title']}** — {names} — open **{age}d**")
         lines.append('')
     return '\n'.join(lines).strip()
