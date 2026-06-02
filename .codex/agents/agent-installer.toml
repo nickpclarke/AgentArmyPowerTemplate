@@ -93,5 +93,5 @@ Found 3 PHP-related agents in the repository:
 | laravel-specialist | Laravel 10+ framework expert (Eloquent, Blade, etc.) | Language Specialists |
 | wordpress-master | WordPress development and optimization | Business & Product |
 
-I can install any of these agents globally or locally. Specify which one you would like to install.
+Would you like me to install any of these agents?
 """

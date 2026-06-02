@@ -11,6 +11,7 @@ import json
 import subprocess
 import re
 import sys
+from datetime import datetime, timezone
 
 OWNER          = os.environ['OWNER']
 PROJECT_NUMBER = int(os.environ['PROJECT_NUMBER'])
@@ -34,15 +35,42 @@ def graphql(query, **vars):
 
 
 def post(body):
-    subprocess.run(['gh', 'issue', 'comment', ISSUE_NUM,
-                    '--repo', FULL_REPO, '--body', body])
+    r = subprocess.run(
+        ['gh', 'issue', 'comment', ISSUE_NUM, '--repo', FULL_REPO, '--body', body],
+        capture_output=True,
+        text=True,
+    )
+    if r.returncode != 0:
+        raise RuntimeError(f"Failed to post comment: {r.stderr.strip()}")
 
 
 def get_items():
     q = '''query($owner: String!, $number: Int!) {
       user(login: $owner) {
         projectV2(number: $number) {
-          items(first: 100) {
+          items(first: 500) {
+            nodes {
+              content { ... on Issue { title number } }
+              fieldValues(first: 15) {
+                nodes {
+                  ... on ProjectV2ItemFieldSingleSelectValue {
+                    name field { ... on ProjectV2SingleSelectField { name } }
+                  }
+                  ... on ProjectV2ItemFieldTextValue {
+                    text field { ... on ProjectV2Field { name } }
+                  }
+                  ... on ProjectV2ItemFieldIterationValue {
+                    title field { ... on ProjectV2IterationField { name } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      organization(login: $owner) {
+        projectV2(number: $number) {
+          items(first: 500) {
             nodes {
               content { ... on Issue { title number } }
               fieldValues(first: 15) {
@@ -63,9 +91,16 @@ def get_items():
         }
       }
     }'''
-    nodes = graphql(q, owner=OWNER, number=PROJECT_NUMBER) \
-              .get('user', {}).get('projectV2', {}) \
-              .get('items', {}).get('nodes', [])
+    data = graphql(q, owner=OWNER, number=PROJECT_NUMBER)
+    user_project = data.get('user', {}).get('projectV2')
+    org_project = data.get('organization', {}).get('projectV2')
+    if user_project is not None:
+        project = user_project
+    elif org_project is not None:
+        project = org_project
+    else:
+        project = {}
+    nodes = project.get('items', {}).get('nodes', [])
     items = []
     for node in nodes:
         if not node.get('content'):
@@ -110,10 +145,13 @@ def cmd_status():
     done  = counts.get('Done', 0)
     pct   = round(done * 100 / total) if total else 0
     rows  = [
-        ['🔵 Todo',        counts.get('Todo', 0)],
-        ['🟡 In Progress', counts.get('In progress', 0)],
-        ['🟢 Done',        done],
-        ['**Total**',      f'**{total}**'],
+        ['🔵 Todo',              counts.get('Todo', 0)],
+        ['⚪ Ready',             counts.get('Ready', 0)],
+        ['🟡 In Progress',       counts.get('In Progress', 0)],
+        ['🟠 In Review',         counts.get('In Review', 0)],
+        ['🟢 Done',              done],
+        ['🟣 Awaiting Decision', counts.get('Awaiting Decision', 0)],
+        ['**Total**',            f'**{total}**'],
     ]
     return md_table('## 📋 Board Status', ['Status', 'Count'], rows) \
            + f'\n\n**{pct}% complete**'
@@ -127,7 +165,12 @@ def cmd_sprint():
     sprint = active[0]['iteration']
     lines  = [f'## 🏃 Sprint: {sprint}', '']
     for i in active:
-        icon = '🟡' if i['status'] == 'In progress' else '🔵'
+        icon = {
+            'Ready': '⚪',
+            'In Progress': '🟡',
+            'In Review': '🟠',
+            'Awaiting Decision': '🟣',
+        }.get(i['status'], '🔵')
         lines.append(f"{icon} #{i['number']}: {i['title']} _({i.get('size','?')})_")
     return '\n'.join(lines)
 
@@ -166,12 +209,57 @@ def cmd_pi(pi_name):
     done  = counts.get('Done', 0)
     pct   = round(done * 100 / total) if total else 0
     rows  = [
-        ['Todo',         counts.get('Todo', 0)],
-        ['In Progress',  counts.get('In progress', 0)],
-        ['Done',         done],
+        ['Todo',              counts.get('Todo', 0)],
+        ['Ready',             counts.get('Ready', 0)],
+        ['In Progress',       counts.get('In Progress', 0)],
+        ['In Review',         counts.get('In Review', 0)],
+        ['Done',              done],
+        ['Awaiting Decision', counts.get('Awaiting Decision', 0)],
     ]
     return md_table(f'## 🗓 {pi_name or "PI"} Progress', ['Status', 'Count'], rows) \
            + f'\n\n**{pct}% of {total} items complete**'
+
+
+def cmd_decisions():
+    r = subprocess.run(
+        [
+            'gh', 'issue', 'list', '--repo', FULL_REPO,
+            '--label', 'hitl-decision', '--state', 'open',
+            '--json', 'number,title,assignees,labels,createdAt',
+        ],
+        capture_output=True,
+        text=True,
+    )
+    issues = json.loads(r.stdout) if r.returncode == 0 else []
+    if not issues:
+        return '✅ No open decision artifacts.'
+
+    now = datetime.now(timezone.utc)
+    groups = {}
+    for issue in issues:
+        atype = 'human'
+        for label in issue.get('labels', []):
+            if label['name'].startswith('assignee:'):
+                atype = label['name'].replace('assignee:', '')
+                break
+        groups.setdefault(atype, []).append(issue)
+
+    lines = ['## 🧭 Open Decision Artifacts', '']
+    for atype, items in sorted(groups.items()):
+        lines.append(f'### Assignee: `{atype}`')
+        lines.append('')
+        for i in items:
+            created = datetime.fromisoformat(i['createdAt'].replace('Z', '+00:00'))
+            age = (now - created).days
+            assignees = []
+            for assignee in i.get('assignees', []):
+                login = assignee.get('login') if isinstance(assignee, dict) else None
+                if login:
+                    assignees.append(f"@{login}")
+            names = ', '.join(assignees) or '_(unassigned)_'
+            lines.append(f"- #{i['number']}: **{i['title']}** — {names} — open **{age}d**")
+        lines.append('')
+    return '\n'.join(lines).strip()
 
 
 def cmd_help():
@@ -180,9 +268,10 @@ def cmd_help():
         '',
         '| Command | Description |',
         '|---------|-------------|',
-        '| `/board-status` | Board overview — Todo / In Progress / Done |',
+        '| `/board-status` | Board overview — status breakdown + % complete |',
         '| `/sprint` | Items in the current iteration |',
         '| `/blocked` | Issues with `blocked-by` label |',
+        '| `/decisions` | Open HITL Decision Artifacts grouped by assignee type |',
         '| `/p0` | Open P0 priority items |',
         '| `/pi PI-1` | Progress for a specific Program Increment |',
         '| `/board-help` | This help message |',
@@ -197,6 +286,7 @@ def main():
     if   '/board-status' in cmd: out = cmd_status()
     elif '/sprint'       in cmd: out = cmd_sprint()
     elif '/blocked'      in cmd: out = cmd_blocked()
+    elif '/decisions'    in cmd: out = cmd_decisions()
     elif '/p0'           in cmd: out = cmd_p0()
     elif '/pi '          in cmd:
         m       = re.search(r'/pi\s+(pi-?\s*\d+)', cmd, re.IGNORECASE)

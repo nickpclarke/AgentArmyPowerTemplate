@@ -30,10 +30,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # PROJECT_TOKEN (classic PAT) lets the push to main bypass branch
-          # protection, mirroring update-agent-counts.yml. Falls back to the
-          # built-in token where protection allows it.
-          token: ${{ secrets.PROJECT_TOKEN || github.token }}
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
