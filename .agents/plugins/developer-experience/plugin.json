@@ -5,7 +5,7 @@
   "author": {
     "name": "AgentArmyPowerTemplate maintainers"
   },
-  "repository": "https://github.com/OWNER/AgentArmyPowerTemplate",
+  "repository": "https://github.com/nickpclarke/AgentArmyPowerTemplate",
   "license": "MIT",
   "agents": [
     "./dependency-manager.md",
