@@ -51,31 +51,26 @@ jobs:
         run: |
           echo "Validating plugin.json files..."
 
-          for plugin_file in .claude/agents/*/.claude-plugin/plugin.json; do
-            if [ -f "$plugin_file" ]; then
-              dir=$(dirname $(dirname "$plugin_file"))
-              echo "Checking $dir..."
+          for plugin_file in .claude/agents/categories/*/.claude-plugin/plugin.json; do
+            [ -f "$plugin_file" ] || continue
+            dir="$(dirname "$(dirname "$plugin_file")")"
+            echo "Checking $dir..."
 
-              # Check for phantom entries (referenced but don't exist)
-              jq -r '.agents[]' "$plugin_file" | while read agent_ref; do
-                agent_path="$dir/$agent_ref"
-                if [ ! -f "$agent_path" ]; then
-                  echo "❌ ERROR: Phantom agent in $plugin_file: $agent_ref does not exist"
-                  exit 1
-                fi
-              done
+            jq -r '.agents[]' "$plugin_file" | while read agent_ref; do
+              agent_path="$dir/$agent_ref"
+              if [ ! -f "$agent_path" ]; then
+                echo "❌ ERROR: Phantom agent in $plugin_file: $agent_ref does not exist"
+                exit 1
+              fi
+            done
 
-              # Check for invisible agents (exist but not referenced)
-              for agent_file in "$dir"/*.md; do
-                if [ -f "$agent_file" ]; then
-                  agent_name=$(basename "$agent_file")
-                  if ! jq -r '.agents[]' "$plugin_file" | grep -q "$agent_name"; then
-                    echo "❌ ERROR: Invisible agent in $dir: $agent_name not in plugin.json"
-                    exit 1
-                  fi
-                fi
-              done
-            fi
+            while IFS= read -r agent_file; do
+              rel="./${agent_file#$dir/}"
+              if ! jq -r '.agents[]' "$plugin_file" | grep -qx "$rel"; then
+                echo "❌ ERROR: Invisible agent in $dir: $rel not in plugin.json"
+                exit 1
+              fi
+            done < <(find "$dir" -type f -name "*.md")
           done
 
           echo "✅ All plugin.json files are valid"

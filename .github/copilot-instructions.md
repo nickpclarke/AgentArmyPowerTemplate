@@ -1,6 +1,6 @@
 # Copilot Coding Agent Instructions
 
-You are working in the **AgentArmyPowerTemplatePowerTemplate** repository. This is a reusable template, not an application.
+You are working in the **AgentArmyPowerTemplate** repository. This is a reusable template, not an application.
 
 ## Deliverables
 

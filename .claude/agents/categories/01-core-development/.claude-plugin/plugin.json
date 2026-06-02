@@ -3,9 +3,9 @@
   "version": "1.0.2",
   "description": "Starter specialist agents for 01-core-development.",
   "author": {
-    "name": "AgentArmyPowerTemplatePowerTemplate maintainers"
+    "name": "AgentArmyPowerTemplate maintainers"
   },
-  "repository": "https://github.com/OWNER/AgentArmyPowerTemplatePowerTemplate",
+  "repository": "https://github.com/OWNER/AgentArmyPowerTemplate",
   "license": "MIT",
   "agents": [
     "./api-designer.md",

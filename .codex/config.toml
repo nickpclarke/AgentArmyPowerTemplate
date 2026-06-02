@@ -1,4 +1,4 @@
-# Project-level Codex defaults for AgentArmyPowerTemplatePowerTemplate.
+# Project-level Codex defaults for AgentArmyPowerTemplate.
 # Keep provider API keys and machine-specific settings out of this committed file.
 
 [shell_environment_policy]

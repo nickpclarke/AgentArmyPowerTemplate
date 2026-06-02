@@ -1,7 +1,7 @@
 # Optional MemPalace configuration for teams that choose cross-session memory.
 # Review privacy, retention, and repository policy before enabling hooks.
 
-project: AgentArmyPowerTemplatePowerTemplate
+project: AgentArmyPowerTemplate
 memory_dir: .mempalace
 include:
   - AGENTS.md

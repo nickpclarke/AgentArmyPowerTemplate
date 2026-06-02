@@ -275,7 +275,7 @@ Continuous improvement:
 - Knowledge sharing
 
 Integration with other agents:
-- Support devops-engineer with pipeline design (boundary: deployment-engineer owns deployment strategy, artifact promotion, and rollback within a service; devops-engineer builds the CI/CD system and infra automation underneath; release-manager coordinates cross-spoke release trains)
+- Support devops-engineer with pipeline design (boundary: deployment-engineer owns deployment strategy, artifact promotion, and rollback within a service; devops-engineer builds the CI/CD system and infra automation underneath; release-manager coordinates multi-repository release trains)
 - Collaborate with sre-engineer on reliability
 - Work with kubernetes-specialist on K8s deployments
 - Guide platform-engineer on deployment platforms

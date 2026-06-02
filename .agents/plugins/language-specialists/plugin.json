@@ -3,9 +3,9 @@
   "version": "1.1.0",
   "description": "Starter specialist agents for 02-language-specialists.",
   "author": {
-    "name": "AgentArmyPowerTemplatePowerTemplate maintainers"
+    "name": "AgentArmyPowerTemplate maintainers"
   },
-  "repository": "https://github.com/OWNER/AgentArmyPowerTemplatePowerTemplate",
+  "repository": "https://github.com/OWNER/AgentArmyPowerTemplate",
   "license": "MIT",
   "agents": [
     "./languages/javascript-pro.md",

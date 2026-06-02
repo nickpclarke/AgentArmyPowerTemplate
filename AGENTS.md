@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Shared guidance for AI agents working in AgentArmyPowerTemplatePowerTemplate-derived repositories.
+Shared guidance for AI agents working in AgentArmyPowerTemplate-derived repositories.
 
 ## Purpose
 

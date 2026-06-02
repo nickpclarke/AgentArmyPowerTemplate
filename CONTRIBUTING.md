@@ -1,4 +1,4 @@
-# Contributing to AgentArmyPowerTemplatePowerTemplate
+# Contributing to AgentArmyPowerTemplate
 
 Thanks for improving the template. The full guide lives in `docs/contributing.md`; this file is the root quick reference.
 

@@ -1,10 +1,10 @@
 # CLAUDE.md
 
-Claude Code guidance for AgentArmyPowerTemplatePowerTemplate.
+Claude Code guidance for AgentArmyPowerTemplate.
 
 ## Repository role
 
-AgentArmyPowerTemplatePowerTemplate is a reusable template, not an application. Default work products are Markdown, GitHub Actions, issue/PR templates, agent definitions, and MkDocs configuration.
+AgentArmyPowerTemplate is a reusable template, not an application. Default work products are Markdown, GitHub Actions, issue/PR templates, agent definitions, and MkDocs configuration.
 
 ## Working rules
 

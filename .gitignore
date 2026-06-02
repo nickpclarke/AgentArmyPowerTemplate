@@ -1,87 +1,26 @@
-# Personal Claude Code settings — contains API keys and permissions
-.claude/settings.local.json
-.codex/config.local.toml
-# Codex spawns per-agent worktrees here — never meant to be tracked. Without
-# this rule, `git status --porcelain` sees them as untracked and tools that
-# enforce "clean working tree" (e.g. fleet_deploy) refuse to proceed.
-.codex/worktrees/
-
-# Obsidian vault (in-repo Labs surface): track the note content, not per-user
-# app state or the deleted-notes trash (the latter can recurse and blow MAX_PATH).
-obsidian/**/.obsidian/
-obsidian/**/.trash/
-
-# Synced spoke platform docs — populated at build time by scripts/sync-spoke-docs.sh
-# (each spoke is the source of truth; we don't commit copies). Keep index.md + .pages.
-docs/platform/frontend-core/
-docs/platform/backend-core/
-docs/platform/middle-core/
-
-# Environment variables — contains Azure/API credentials
-.env
-extensions/board-manager/.env
-extensions/arcadedb-cockpit/.env
-
-# ArcadeDB image template local secrets — keep only the placeholder README
-templates/arcadedb-image/examples/.secrets/*
-!templates/arcadedb-image/examples/.secrets/README.md
-
-# Dependencies
-node_modules/
-
-# Playwright runtime output
-playwright-report/
-test-results/
-
-# Python build artifacts
+# Python
 __pycache__/
 *.py[cod]
-*.egg-info/
-*.egg
+.venv/
+venv/
 
-# .NET build artifacts
-bin/
-obj/
+# Node
+node_modules/
+npm-debug.log*
 
-# Pipeline runtime output (DuckDB files, parquet, dlt state)
-pipelines/data/
-pipelines/.dlt/
-
-# Azure SWA config has user-specific subscription IDs — keep .example only
-swa-cli.config.json
-
-# Generated DuckDB databases and dlt pipeline state
-*.duckdb
-pipelines/.dlt_state/
-
-# MkDocs build output
+# MkDocs
 site/
 
-# Claude Code agent worktrees (created by isolation: "worktree" — not source files)
-.claude/worktrees/
+# Local environment and secrets
+.env
+.env.*
+*.local
+.claude/settings.local.json
+.codex/config.local.toml
+.mempalace/private/
 
-# Generated diagnostics artifacts
-tests/artifacts/doctor/*.json
-tests/artifacts/doctor/*.md
-tests/artifacts/business-objects/*.json
-tests/artifacts/business-objects/*.md
-
-# Gordon ⇄ Claude bridge — .docker/ is its OWN git repo (remote: agent-army-docker-bridge),
-# the async exchange channel between Docker's Gordon agent and Claude. It must never be
-# embedded into the hub as a gitlink, so the hub ignores it entirely.
-.docker/
-
-# MemPalace machine-specific generated file (detected people/projects). Do not commit.
-# Note: mempalace.yaml is intentionally NOT ignored — it's a curated template artifact
-# (see docs/mempalace.md). `mempalace init` will try to re-add it here; leave it out.
-entities.json
-
-# untool.ai separate-site build artifacts
-untool-docs-src/
-site-untool/
-
-# wrangler files
-.wrangler
-.dev.vars*
-!.dev.vars.example
-!.env.example
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

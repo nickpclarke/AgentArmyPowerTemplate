@@ -50,7 +50,7 @@ jobs:
             ITEM_ID=$(gh api graphql \
               -f query='query($owner: String!, $repo: String!, $issue: Int!, $project: Int!) { repository(owner: $owner, name: $repo) { issue(number: $issue) { projectItems(first: 20) { nodes { id project { number } } } } } }' \
               -f owner="$REPO_OWNER" -f repo="$REPO_NAME" -F issue="$ISSUE_NUM" -F project="$PROJECT_NUMBER" \
-              --jq '.data.repository.issue.projectItems.nodes[] | select(.project.number == $project) | .id' 2>/dev/null || true)
+              --jq ".data.repository.issue.projectItems.nodes[] | select(.project.number == (${PROJECT_NUMBER} | tonumber)) | .id" 2>/dev/null || true)
 
             if [[ -z "$ITEM_ID" ]]; then
               echo "Issue #$ISSUE_NUM is not on project $PROJECT_NUMBER; skipping."

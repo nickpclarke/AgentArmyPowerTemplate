@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/OWNER/AgentArmyPowerTemplatePowerTemplate/blob/main/.claude/agent-schema.json",
+  "$id": "https://github.com/OWNER/AgentArmyPowerTemplate/blob/main/.claude/agent-schema.json",
   "title": "AgentArmyPowerTemplate Agent Frontmatter Schema",
   "description": "JSON Schema for validating the YAML frontmatter of AgentArmyPowerTemplate agent definition files (.claude/agents/categories/**/*.md). Compatible with AJV and any draft-07 JSON Schema validator.",
   "type": "object",

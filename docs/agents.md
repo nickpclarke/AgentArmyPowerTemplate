@@ -1,6 +1,6 @@
 # Starter Agents
 
-AgentArmyPowerTemplatePowerTemplate ships with a starter roster instead of the full specialist catalog. The goal is to cover common template work without overwhelming new repositories.
+AgentArmyPowerTemplate ships with a starter roster instead of the full specialist catalog. The goal is to cover common template work without overwhelming new repositories.
 
 ## Included clusters
 

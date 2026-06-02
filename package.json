@@ -1,5 +1,5 @@
 {
-  "name": "agentarmy-power-template-power-template",
+  "name": "agentarmy-power-template",
   "version": "1.0.0",
   "description": "Reusable AI-powered GitHub and Markdown workflow template.",
   "type": "module",

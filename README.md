@@ -1,6 +1,6 @@
-# AgentArmyPowerTemplatePowerTemplate
+# AgentArmyPowerTemplate
 
-AgentArmyPowerTemplatePowerTemplate is a reusable GitHub repository template for AI-powered Markdown-first delivery. It packages documentation practices, specialist-agent guidance, GitHub Projects workflows, issue and pull-request conventions, and a MkDocs site without assuming any specific application runtime.
+AgentArmyPowerTemplate is a reusable GitHub repository template for AI-powered Markdown-first delivery. It packages documentation practices, specialist-agent guidance, GitHub Projects workflows, issue and pull-request conventions, and a MkDocs site without assuming any specific application runtime.
 
 ## What is included
 

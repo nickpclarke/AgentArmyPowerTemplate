@@ -1,6 +1,6 @@
-# AgentArmyPowerTemplatePowerTemplate
+# AgentArmyPowerTemplate
 
-AgentArmyPowerTemplatePowerTemplate is a clean, reusable template for teams that want AI-assisted delivery with GitHub, Markdown, MkDocs, and specialist-agent guidance.
+AgentArmyPowerTemplate is a clean, reusable template for teams that want AI-assisted delivery with GitHub, Markdown, MkDocs, and specialist-agent guidance.
 
 The template intentionally excludes application runtime infrastructure. Bring your own product, platform, and deployment stack in the derived repository.
 

@@ -1,13 +1,13 @@
-site_name: AgentArmyPowerTemplatePowerTemplate
+site_name: AgentArmyPowerTemplate
 site_description: Reusable AI-powered GitHub and Markdown workflow template
-site_author: AgentArmyPowerTemplatePowerTemplate contributors
-site_url: https://OWNER.github.io/AgentArmyPowerTemplatePowerTemplate/
-repo_url: https://github.com/OWNER/AgentArmyPowerTemplatePowerTemplate
-repo_name: OWNER/AgentArmyPowerTemplatePowerTemplate
+site_author: AgentArmyPowerTemplate contributors
+site_url: https://OWNER.github.io/AgentArmyPowerTemplate/
+repo_url: https://github.com/OWNER/AgentArmyPowerTemplate
+repo_name: OWNER/AgentArmyPowerTemplate
 edit_uri: edit/main/docs/
 docs_dir: docs
 site_dir: site
-copyright: Copyright © 2026 AgentArmyPowerTemplatePowerTemplate contributors. Licensed under MIT.
+copyright: Copyright © 2026 AgentArmyPowerTemplate contributors. Licensed under MIT.
 
 theme:
   name: material
@@ -76,7 +76,7 @@ extra_css:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/OWNER/AgentArmyPowerTemplatePowerTemplate
+      link: https://github.com/OWNER/AgentArmyPowerTemplate
       name: GitHub Repository
 
 nav:

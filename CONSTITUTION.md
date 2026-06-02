@@ -1,6 +1,6 @@
 # CONSTITUTION.md
 
-Behavioral principles for agents operating in AgentArmyPowerTemplatePowerTemplate-derived repositories.
+Behavioral principles for agents operating in AgentArmyPowerTemplate-derived repositories.
 
 ## Article I — Template neutrality
 

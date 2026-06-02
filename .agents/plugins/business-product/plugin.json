@@ -3,9 +3,9 @@
   "version": "1.0.2",
   "description": "Starter specialist agents for 08-business-product.",
   "author": {
-    "name": "AgentArmyPowerTemplatePowerTemplate maintainers"
+    "name": "AgentArmyPowerTemplate maintainers"
   },
-  "repository": "https://github.com/OWNER/AgentArmyPowerTemplatePowerTemplate",
+  "repository": "https://github.com/OWNER/AgentArmyPowerTemplate",
   "license": "MIT",
   "agents": [
     "./business-analyst.md",

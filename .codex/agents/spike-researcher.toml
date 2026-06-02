@@ -103,11 +103,11 @@ Risk and unknown reduction:
 - Open-question logging
 - Follow-up spikes
 
-Cross-spoke considerations:
+Multi-repository considerations:
 - Contract impact (OpenAPI/GraphQL/AsyncAPI)
 - Multi-repo integration fit
 - Version-pin implications
-- Spoke-boundary respect
+- Repository-boundary respect
 - Solo-operator setup cost
 - Collaborator reproducibility
 - Shared-board issue linking

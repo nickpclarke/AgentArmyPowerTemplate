@@ -7,12 +7,9 @@ to Codex custom agents (.codex/agents/) as TOML profiles.
 import re
 from pathlib import Path
 
-# PyYAML is preferred, but this script is SYNCED into spoke repos and run by the Codex
-# SessionStart hook (.codex/hooks.json). A fresh Codex microVM / spoke may not have
-# PyYAML installed — a hard `import yaml` would crash the startup hook. So we degrade to
-# a tiny stdlib parser that reads the only two frontmatter fields we need (name,
-# description). The static .codex/agents/*.toml are already shipped by the dressing sync,
-# so the hook is a refresh, not a hard dependency.
+# PyYAML is preferred, and the SessionStart hook may run in a bare environment. A hard `import yaml`
+# would crash the startup hook, so we degrade to a tiny stdlib parser that reads the
+# fields needed for generated Codex profiles.
 try:
     import yaml  # type: ignore
 except ModuleNotFoundError:
