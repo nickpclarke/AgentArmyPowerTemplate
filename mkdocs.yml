@@ -78,32 +78,34 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/nickpclarke/AgentArmyPowerTemplate
-      name: GitHub Repository
 
 nav:
   - Home: index.md
   - Getting Started:
-      - Setup: setup.md
-      - Quick Start: quick-start.md
-      - Onboarding: onboarding.md
-      - Contributing: contributing.md
-  - GitHub Practices:
-      - GitHub Projects: github-projects.md
-      - Issue Conventions: issue-conventions.md
-      - PR Review Loop: pr-review-loop.md
-      - Human-in-the-Loop: hitl.md
-      - Copilot: copilot.md
-      - Codex: codex.md
-  - Agent Guidance:
-      - Starter Agents: agents.md
-      - Generated Agent Glossary: agents-glossary/index.md
-      - Routing Matrix: routing-matrix.md
-      - Optional MemPalace: mempalace.md
-  - Planning & Delivery:
-      - SAFe: safe.md
-      - Wardley Mapping: wardley.md
-      - Capability Maps: capability-maps.md
-  - ADRs & Markdown:
-      - Architecture Decisions: architecture-decisions.md
+      - Setup & Installation: setup.md
+      - Quick Start Guide: quick-start.md
+      - Team Onboarding Checklist: onboarding.md
+      - Contributing Standards: contributing.md
+  - Armies & Roster:
+      - Armies Overview: armies-overview.md
+      - Complete Agent Roster: agents.md
+      - Complete Agent Glossary: agents-glossary/index.md
+      - Agent Routing Matrix: routing-matrix.md
+      - Agent Routing Reference: agent-routing.md
+      - Agent Synchronization: agent-sync.md
+      - Optional Memory Palace: mempalace.md
+  - GitHub Workflow Practices:
+      - GitHub Projects v2: github-projects.md
+      - Issue Schema & Conventions: issue-conventions.md
+      - PR Autonomous Review Loop: pr-review-loop.md
+      - Human-in-the-Loop Decisions: hitl.md
+      - GitHub Copilot Configuration: copilot.md
+      - Codex Environment Setup: codex.md
+  - Planning & Strategic Delivery:
+      - Lightweight SAFe Delivery: safe.md
+      - Wardley Mapping Strategy: wardley.md
+      - Capability Mapping Strategy: capability-maps.md
+  - Architectural Decisions:
+      - ADR Overview & Rules: architecture-decisions.md
       - ADR Directory: decisions/README.md
-      - Glossary: glossary.md
+      - Terminology Glossary: glossary.md
