@@ -1,0 +1,211 @@
+# Infrastructure Subagents
+
+Infrastructure subagents are your DevOps and cloud computing experts, specializing in building, deploying, and maintaining modern infrastructure. These specialists handle everything from CI/CD pipelines to cloud architecture, from container orchestration to database administration. They ensure your applications run reliably, scale efficiently, and deploy seamlessly across any environment.
+
+## When to Use Infrastructure Subagents
+
+Use these subagents when you need to:
+- **Design cloud architectures** for scalability and reliability
+- **Implement CI/CD pipelines** for automated deployments
+- **Orchestrate containers** with Kubernetes and Docker
+- **Manage infrastructure as code** with modern tools
+- **Optimize database performance** and administration
+- **Set up monitoring and observability** systems
+- **Respond to incidents** and ensure high availability
+- **Secure infrastructure** and implement best practices
+
+## Available Subagents
+
+### [**aws-infra-engineer**](aws-infra-engineer.md) - AWS cloud infrastructure and automation specialist
+Expert in AWS resource design, multi-account Organizations, IAM/SCP, ECS Fargate, RDS Aurora, Bedrock, CDK, and IaC patterns via CloudFormation, CDK, and Terraform.
+
+**Use when:** Deploying containers to ECS Fargate or App Runner, writing CDK constructs, configuring AWS Bedrock model access, setting up OIDC keyless GitHub Actions → AWS auth, or provisioning RDS/DynamoDB/ElastiCache.
+
+### [**api-gateway-engineer**](api-gateway-engineer.md) - API gateway configuration and policy specialist
+Edge gateway expert who owns gateway runtime configuration and policy. Masters rate limiting, edge authentication/authorization, request routing across spoke APIs, and developer portal setup. Ensures policy enforcement, runtime resilience, and safe progressive delivery at the edge.
+
+**Use when:** Configuring API gateways, enforcing rate limits and edge authN/Z, routing traffic across spoke APIs, or standing up a developer portal.
+
+### [**azure-infra-engineer**](azure-infra-engineer.md) - Azure cloud infrastructure and automation specialist  
+Expert in Azure resource design, virtual networking, identity integration, and infrastructure-as-code patterns via PowerShell, Bicep, and Az modules.
+
+**Use when:** Designing Azure environments, deploying resources safely, integrating with M365, or creating automation scripts for Azure services and hybrid identity.
+
+### [**cloud-architect**](cloud-architect.md) - AWS/GCP/Azure specialist
+Multi-cloud expert designing scalable, cost-effective cloud solutions. Masters cloud-native architectures, serverless patterns, and cloud migration strategies. Ensures optimal resource utilization across major cloud providers.
+
+**Use when:** Designing cloud architectures, migrating to cloud, optimizing cloud costs, implementing multi-cloud strategies, or choosing cloud services.
+
+### [**database-administrator**](database-administrator.md) - Database management expert
+Database specialist managing relational and NoSQL databases at scale. Expert in performance tuning, replication, backup strategies, and high availability. Ensures data integrity and optimal database performance.
+
+**Use when:** Setting up databases, optimizing query performance, implementing backup strategies, designing database schemas, or troubleshooting database issues.
+
+### [**docker-expert**](docker-expert.md) - Docker containerization and optimization specialist
+Expert in production-grade Dockerfiles, multi-stage builds, security hardening, and container performance optimization. Masters image size reduction, build caching, and enterprise deployment patterns.
+
+**Use when:** Building optimized Dockerfiles, reducing image sizes, implementing multi-stage builds, securing container images, configuring Docker Compose, or integrating container builds into CI/CD pipelines.
+
+### [**deployment-engineer**](deployment-engineer.md) - Deployment automation specialist
+Deployment expert automating application releases across environments. Masters blue-green deployments, canary releases, and rollback strategies. Ensures zero-downtime deployments with confidence.
+
+**Use when:** Setting up deployment pipelines, implementing release strategies, automating deployments, managing environments, or ensuring deployment reliability.
+
+### [**devops-engineer**](devops-engineer.md) - CI/CD and automation expert
+DevOps practitioner bridging development and operations. Expert in CI/CD pipelines, automation tools, and DevOps culture. Accelerates delivery while maintaining stability and security.
+
+**Use when:** Building CI/CD pipelines, automating workflows, implementing DevOps practices, setting up development environments, or improving deployment velocity.
+
+### [**devops-incident-responder**](devops-incident-responder.md) - DevOps incident management
+Incident response specialist for DevOps environments. Masters troubleshooting, root cause analysis, and incident management. Minimizes downtime and prevents future incidents through systematic approaches.
+
+**Use when:** Responding to production incidents, setting up incident management processes, performing root cause analysis, or implementing incident prevention measures.
+
+### [**gcp-infra-engineer**](gcp-infra-engineer.md) - GCP cloud infrastructure and automation specialist
+Expert in GCP resource design, org/folder/project hierarchy, IAM, Cloud Run, GKE, Cloud SQL, Vertex AI, and IaC via Terraform google provider, Cloud Build, and Cloud Deploy.
+
+**Use when:** Deploying containers to Cloud Run, writing Terraform for GCP resources, configuring Workload Identity Federation for keyless GitHub Actions → GCP auth, or provisioning Cloud SQL / Firestore / Vertex AI endpoints.
+
+### [**finops-engineer**](finops-engineer.md) - Cloud cost engineering specialist
+FinOps expert who owns cost as the primary deliverable. Masters cost visibility, unit economics, rightsizing, Reserved Instance/Savings Plan commitments, and showback/chargeback across spokes. Drives down spend per unit of value while preserving reliability and engineering velocity.
+
+**Use when:** Building cost visibility, improving unit economics, rightsizing resources, planning commitments, or implementing showback/chargeback across spokes.
+
+### [**incident-responder**](incident-responder.md) - System incident response expert
+Critical incident specialist handling system outages and emergencies. Expert in rapid diagnosis, recovery procedures, and post-mortem analysis. Restores service quickly while learning from failures.
+
+**Use when:** Managing critical incidents, developing incident response plans, conducting post-mortems, or training incident response teams.
+
+### [**kubernetes-specialist**](kubernetes-specialist.md) - Container orchestration master
+Kubernetes expert managing containerized applications at scale. Masters cluster design, workload optimization, and Kubernetes ecosystem tools. Ensures reliable container orchestration in production.
+
+**Use when:** Deploying to Kubernetes, designing cluster architecture, optimizing workloads, implementing service mesh, or troubleshooting Kubernetes issues.
+
+### [**network-engineer**](network-engineer.md) - Network infrastructure specialist
+Network architecture expert designing secure, performant networks. Masters SDN, load balancing, and network security. Ensures reliable connectivity and optimal network performance.
+
+**Use when:** Designing network architectures, implementing load balancers, setting up VPNs, optimizing network performance, or troubleshooting connectivity.
+
+### [**observability-engineer**](observability-engineer.md) - Telemetry instrumentation specialist
+Observability expert who owns producing telemetry data. Masters OpenTelemetry instrumentation, metrics/logs/traces pipelines, collector configuration, and Prometheus/Grafana dashboards. Ensures signal quality, cardinality control, and trustworthy data that powers reliability and performance work.
+
+**Use when:** Instrumenting services with OpenTelemetry, building metrics/logs/traces pipelines, configuring collectors, or creating Prometheus/Grafana dashboards.
+
+### [**platform-engineer**](platform-engineer.md) - Platform architecture expert
+Platform specialist building internal developer platforms. Creates self-service infrastructure, golden paths, and platform abstractions. Empowers developers while maintaining governance.
+
+**Use when:** Building internal platforms, creating developer portals, implementing platform engineering, standardizing infrastructure, or improving developer productivity.
+
+### [**security-engineer**](security-engineer.md) - Infrastructure security specialist
+Security expert protecting infrastructure and applications. Masters security hardening, compliance, and threat prevention. Implements defense-in-depth strategies across all layers.
+
+**Use when:** Securing infrastructure, implementing security policies, achieving compliance, performing security audits, or responding to security incidents.
+
+### [**sre-engineer**](sre-engineer.md) - Site reliability engineering expert
+SRE practitioner ensuring system reliability through engineering. Masters SLIs/SLOs, error budgets, and chaos engineering. Balances feature velocity with system stability.
+
+**Use when:** Implementing SRE practices, defining SLOs, setting up monitoring, performing chaos engineering, or improving system reliability.
+
+### [**terraform-engineer**](terraform-engineer.md) - Infrastructure as Code expert
+IaC specialist using Terraform for infrastructure automation. Masters module design, state management, and multi-environment deployments. Ensures infrastructure consistency and repeatability.
+
+**Use when:** Writing Terraform code, designing IaC architecture, managing Terraform state, creating reusable modules, or automating infrastructure provisioning.
+
+### [**terragrunt-expert**](terragrunt-expert.md) - Terragrunt orchestration and DRY IaC specialist
+Senior Terragrunt expert orchestrating OpenTofu/Terraform infrastructure at scale. Masters stack architecture, unit composition, dependency management, and DRY configuration patterns. Ensures enterprise-grade infrastructure automation with focus on code reuse and maintainability.
+
+**Use when:** Orchestrating Terraform modules with Terragrunt, implementing DRY configurations across environments, managing complex dependency graphs, designing multi-account/multi-region infrastructure, or migrating from monolithic Terraform to modular Terragrunt stacks.
+
+### [**vercel-engineer**](vercel-engineer.md) - Vercel full-stack platform specialist
+Expert in Vercel platform configuration for full-stack applications: serverless and edge Functions, Vercel Postgres (Neon), KV (Upstash Redis), Blob, preview environments, monorepo (turborepo), and Vercel AI SDK integration for streaming LLM responses.
+
+**Use when:** Configuring `vercel.json`, setting up Vercel storage (Postgres/KV/Blob), adding edge middleware for auth or geolocation, managing environment variables across preview/production, or wiring the Vercel AI SDK for Claude/OpenAI streaming.
+
+### [**windows-infra-admin**](windows-infra-admin.md) - Windows infrastructure and Active Directory automation expert  
+Deep expertise in automating AD, DNS, DHCP, GPO, server configuration, and domain services using PowerShell. Focuses on safe change workflows, idempotent operations, and enterprise-grade operational patterns.
+
+**Use when:** Managing domain infrastructure, modifying AD objects, updating DNS/DHCP records, automating GPO tasks, or performing server-level automation in enterprise environments.
+
+## Quick Selection Guide
+
+| If you need to... | Use this subagent |
+|-------------------|-------------------|
+| Deploy to AWS (ECS/Fargate, RDS, Bedrock, CDK) | **aws-infra-engineer** |
+| Deploy to GCP (Cloud Run, Cloud SQL, Vertex AI) | **gcp-infra-engineer** |
+| Deploy to Vercel (Functions, Postgres, KV, edge) | **vercel-engineer** |
+| Configure an API gateway | **api-gateway-engineer** |
+| Engineer cloud cost / FinOps | **finops-engineer** |
+| Instrument telemetry / observability | **observability-engineer** |
+| Design cloud architecture | **cloud-architect** |
+| Manage databases | **database-administrator** |
+| Build/optimize containers | **docker-expert** |
+| Automate deployments | **deployment-engineer** |
+| Build CI/CD pipelines | **devops-engineer** |
+| Handle DevOps incidents | **devops-incident-responder** |
+| Manage critical outages | **incident-responder** |
+| Deploy with Kubernetes | **kubernetes-specialist** |
+| Design networks | **network-engineer** |
+| Build developer platforms | **platform-engineer** |
+| Secure infrastructure | **security-engineer** |
+| Implement SRE practices | **sre-engineer** |
+| Write infrastructure code | **terraform-engineer** |
+| Orchestrate Terraform/OpenTofu modules | **terragrunt-expert** |
+
+## Common Infrastructure Patterns
+
+**Zero-Ops PaaS Starter (Vercel + Neon + Claude API):**
+- **vercel-engineer** for hosting, storage, and edge functions
+- **llm-architect** for LLM integration pattern and provider abstraction
+- **finops-engineer** for spend alerts and cost attribution per spoke
+
+**Cloud-Native Application:**
+- **cloud-architect** for architecture design
+- **docker-expert** for container optimization
+- **kubernetes-specialist** for container orchestration
+- **devops-engineer** for CI/CD pipeline
+- **sre-engineer** for reliability
+
+**Enterprise Infrastructure:**
+- **terraform-engineer** for IaC
+- **network-engineer** for networking
+- **security-engineer** for security
+- **database-administrator** for data layer
+
+**Platform Engineering:**
+- **platform-engineer** for platform design
+- **deployment-engineer** for deployment automation
+- **devops-engineer** for tooling
+- **cloud-architect** for infrastructure
+
+**IaC at Scale:**
+- **terragrunt-expert** for orchestration and DRY configs
+- **terraform-engineer** for module development
+- **cloud-architect** for multi-cloud strategy
+- **security-engineer** for compliance
+
+**Incident Management:**
+- **incident-responder** for critical incidents
+- **devops-incident-responder** for DevOps issues
+- **sre-engineer** for prevention
+- **security-engineer** for security incidents
+
+## Getting Started
+
+1. **Assess your infrastructure needs** and current challenges
+2. **Choose the appropriate specialist** based on your requirements
+3. **Provide context** about your environment and constraints
+4. **Share existing configurations** if applicable
+5. **Follow the specialist's recommendations** for best practices
+
+## Best Practices
+
+- **Start with architecture:** Design before implementation
+- **Automate everything:** Manual processes don't scale
+- **Security first:** Build security into every layer
+- **Monitor proactively:** Observability prevents incidents
+- **Document thoroughly:** Future you will thank you
+- **Test infrastructure:** Infrastructure code needs testing too
+- **Plan for failure:** Design for resilience
+- **Iterate continuously:** Infrastructure evolves with needs
+
+Choose your infrastructure specialist and build reliable systems today!
