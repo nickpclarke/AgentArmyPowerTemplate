@@ -11,6 +11,7 @@ import json
 import subprocess
 import re
 import sys
+from datetime import datetime, timezone
 
 OWNER          = os.environ['OWNER']
 PROJECT_NUMBER = int(os.environ['PROJECT_NUMBER'])
@@ -93,7 +94,12 @@ def get_items():
     data = graphql(q, owner=OWNER, number=PROJECT_NUMBER)
     user_project = data.get('user', {}).get('projectV2')
     org_project = data.get('organization', {}).get('projectV2')
-    project = user_project if user_project is not None else org_project if org_project is not None else {}
+    if user_project is not None:
+        project = user_project
+    elif org_project is not None:
+        project = org_project
+    else:
+        project = {}
     nodes = project.get('items', {}).get('nodes', [])
     items = []
     for node in nodes:
@@ -215,8 +221,6 @@ def cmd_pi(pi_name):
 
 
 def cmd_decisions():
-    from datetime import datetime, timezone
-
     r = subprocess.run(
         [
             'gh', 'issue', 'list', '--repo', FULL_REPO,
