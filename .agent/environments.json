@@ -1,5 +1,5 @@
 {
-  "_comment": "Fleet environments registry — synced from the AgentArmy hub to every spoke under .agent/environments.json. A sandboxed spoke agent (microVM with no hub board access) reads this to discover where every other layer lives at runtime. DO NOT edit in a spoke — the next hub sync overwrites it. Update on the hub, the daily fleet-sync routine pushes it out.",
+  "_comment": "Fleet environments registry — synced from the AgentArmyPowerTemplate hub to every spoke under .agent/environments.json. A sandboxed spoke agent (microVM with no hub board access) reads this to discover where every other layer lives at runtime. DO NOT edit in a spoke — the next hub sync overwrites it. Update on the hub, the daily fleet-sync routine pushes it out.",
   "schema_version": "1",
   "updated": "2026-05-26",
   "environments": {
@@ -21,7 +21,7 @@
       "aca_environment_name": "cae-arcade-platform",
       "resource_group": "rg-arcade-platform",
       "region": "eastus",
-      "key_vault": "akv01-agentarmy",
+      "key_vault": "akv01-agentarmy-power-template",
       "container_registry": "arcadeplatformacr.azurecr.io",
       "apps": {
         "frontend_core": {
@@ -68,8 +68,8 @@
     "middle_core_calling_backend": "BACKEND_CORE_URL env var set from environments.json.dev.apps.backend_core.url; JWT minted using AUTH_JWT_SECRET (HS256 dev) or OIDC (prod)"
   },
   "see_also": [
-    "https://nickpclarke.github.io/AgentArmy/environments/",
-    "https://nickpclarke.github.io/AgentArmy/running-locally/",
-    "https://nickpclarke.github.io/AgentArmy/env-handling/"
+    "https://OWNER.github.io/AgentArmyPowerTemplatePowerTemplate/environments/",
+    "https://OWNER.github.io/AgentArmyPowerTemplatePowerTemplate/running-locally/",
+    "https://OWNER.github.io/AgentArmyPowerTemplatePowerTemplate/env-handling/"
   ]
 }

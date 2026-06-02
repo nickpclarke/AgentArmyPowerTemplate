@@ -1,14 +1,14 @@
 # ExecPlan: Backend-Core Platform Domain Model
 
-Issue: https://github.com/nickpclarke/AgentArmy/issues/91
+Issue: https://github.com/OWNER/AgentArmyPowerTemplatePowerTemplate/issues/91
 
 ## Goal
 
-Define the intended backend-core object model and business rules behind the AgentArmy Platform API. The output should make the OpenAPI contract useful as a control-plane contract for agent routing, work coordination, diagnostics evidence, platform configuration, and the learning loop.
+Define the intended backend-core object model and business rules behind the AgentArmyPowerTemplate Platform API. The output should make the OpenAPI contract useful as a control-plane contract for agent routing, work coordination, diagnostics evidence, platform configuration, and the learning loop.
 
 ## Context
 
-AgentArmy is a starter template and coordination hub, not an application. The current repository has an OpenAPI contract (`index.yaml` and `postman/specs/index.yaml`) and an optional `backend-core` service declaration in `agentarmy.services.json`.
+AgentArmyPowerTemplate is a starter template and coordination hub, not an application. The current repository has an OpenAPI contract (`index.yaml` and `postman/specs/index.yaml`) and an optional `backend-core` service declaration in `agentarmy-power-template.services.json`.
 
 The sibling repos clarify the platform direction:
 
@@ -38,7 +38,7 @@ The business-object layer can deploy as `middle-core`: a separate core container
 - `AGENTS.md`
 - `index.yaml`
 - `postman/specs/index.yaml`
-- `agentarmy.services.json`
+- `agentarmy-power-template.services.json`
 - `templates/business-object-catalog.example.json`
 - `templates/middle-core/`
 - `scripts/middle-core/Start-MiddleCoreLocal.ps1`
@@ -50,7 +50,7 @@ The business-object layer can deploy as `middle-core`: a separate core container
 - `C:\Dev\frontend-core\README.md`
 - `C:\Dev\frontend-core\src\App.svelte`
 - `C:\Dev\frontend-core\src\components\Cockpit.svelte`
-- `C:\Dev\frontend-core\agentarmy-console\README.md`
+- `C:\Dev\frontend-core\agentarmy-power-template-console\README.md`
 - `docs/routing-decision-tree.md`
 - `docs/routing-matrix.md`
 - `docs/github-projects.md`
@@ -108,7 +108,7 @@ node tools/validate-routing.mjs
 node tools/business-object-catalog.mjs validate
 docker build -f templates/middle-core/Dockerfile -t middle-core:local .
 .\scripts\middle-core\Start-MiddleCoreLocal.ps1
-node tools/agentarmy-doctor.mjs
+node tools/agentarmy-power-template-doctor.mjs
 python -m mkdocs build --strict
 ```
 
@@ -129,6 +129,6 @@ For this pass, validation should prove the new documentation can be rendered and
 - Model `PlatformCapability`, `Scenario`, and `McpToolBinding` as first-class concepts because the sibling frontend/backend repos show the platform is also a modular capability exerciser over ArcadeDB and future service surfaces.
 - Add a business-object middle layer so scenarios, UI cards, diagnostics, graph views, and MCP tools can share stable nouns instead of binding directly to raw provider records or generic control-plane tables.
 - Treat `middle-core` as the deployable home for business-object contracts, scenario contracts, and meta-service projections. It should not own raw ArcadeDB storage; it composes `backend-core` capability services and platform operational services.
-- Use a typed service implementation for deployable `middle-core`. The repo-local catalog CLI can stay JavaScript because it follows AgentArmy's dependency-light tooling pattern, but the container starter is C#/.NET with records, enums, and nullable checks.
+- Use a typed service implementation for deployable `middle-core`. The repo-local catalog CLI can stay JavaScript because it follows AgentArmyPowerTemplate's dependency-light tooling pattern, but the container starter is C#/.NET with records, enums, and nullable checks.
 - Add a local deployment script for reviewers so `middle-core` can be built, run, and smoked on localhost before promotion into a standalone repo.
 - Business objects should be derived through the supporting ontology: persona goals lead to use cases, use cases describe activities, activities reveal phenomena, phenomena are named as ontology concepts, and business objects become versioned projections of those concepts.

@@ -1,5 +1,0 @@
-@prefix ex: <https://example.org/> .
-
-# Conformant — has the required ex:name. The sieve MUST accept this.
-ex:alice  a       ex:Person ;
-          ex:name "Alice" .

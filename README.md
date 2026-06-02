@@ -1,323 +1,40 @@
-# AgentArmy
+# AgentArmyPowerTemplatePowerTemplate
 
-A GitHub repository template for AI-powered software development using a coordinated fleet of Claude Code agents, Codex support, and GitHub Projects v2 as the shared project management backbone.
+AgentArmyPowerTemplatePowerTemplate is a reusable GitHub repository template for AI-powered Markdown-first delivery. It packages documentation practices, specialist-agent guidance, GitHub Projects workflows, issue and pull-request conventions, and a MkDocs site without assuming any specific application runtime.
 
-## What Is This?
+## What is included
 
-AgentArmy deploys **two coordinated AI armies** against your codebase, unified by GitHub Projects v2 as the shared coordination plane:
+- Markdown guidance for humans, Claude Code, Codex, and GitHub Copilot.
+- A starter specialist-agent roster for planning, engineering, documentation, delivery, quality, and review work.
+- GitHub Actions for Projects v2 board automation, PR review routing, stale-item hygiene, ADR numbering, acronym coverage, and docs publishing.
+- Issue templates, PR template, security policy, routing policy, and CODEOWNERS placeholders.
+- MkDocs Material documentation organized around setup, collaboration, agent guidance, delivery practices, and ADRs.
+- Optional MemPalace documentation for teams that want cross-session memory hooks.
 
-| Layer | What it does |
-|---|---|
-| **Claude Code army** | Specialist sub-agents running locally — deep work, architecture, SAFE planning, complex implementation, security |
-| **GitHub Copilot army** | GitHub-native agents — inline PR review, simple task coding, IDE suggestions, natural language board queries |
-| **GitHub Projects v2** | Shared source of truth for all tasks, stories, and features — both armies read and write here |
-| **GitHub Actions** | Automation that routes issues to the right army and keeps the board in sync |
-| **MemPalace** | Cross-session persistent memory — Claude retains context across conversations via Stop and PreCompact hooks |
+## Quick start
 
-The two armies divide work by complexity and context: Copilot handles fast, bounded, GitHub-integrated tasks; Claude Code handles deep, strategic, multi-file work. See [docs/copilot.md](docs/copilot.md) for the full division of duties.
-
-## Concept
-
-AgentArmy scales beyond a single repo using a universal **N-Layer Hub & Spoke model**: keep this template as the **Hub**, then stamp out a separate **Spoke repo per layer** (UI, API, worker, mobile, infra, etc.). Spokes run in isolated AI sandboxes and stay decoupled through **contract-driven development** (OpenAPI/GraphQL/AsyncAPI/shared types).
-
-See [docs/n-layer-architecture.md](docs/n-layer-architecture.md) for the end-to-end contract-first workflow.
-
-```
-You / Team
-    │
-    ├─────────────────────────────────────────────────────────────┐
-    ▼                                                             ▼
-Claude Code (local)                              GitHub Copilot (github-native)
-    │                                                             │
-    ├── Design-time agents                        ├── PR inline review (all PRs)
-    │     product-manager · architect-reviewer    ├── Coding agent (copilot-task label)
-    │     business-analyst · scrum-master         ├── IDE autocompletion
-    │                                             └── @board-manager extension
-    ├── Build-time agents
-    │     frontend-developer · backend-developer
-    │     typescript-pro · python-pro · ...
-    │
-    ├── Quality agents
-    │     code-reviewer · security-auditor
-    │     qa-expert · performance-engineer
-    │
-    └── Operations agents
-          devops-engineer · sre-engineer
-          cloud-architect · deployment-engineer
-    │                                                             │
-    └─────────────────────┬───────────────────────────────────────┘
-                          │
-                 GitHub Projects v2
-          (shared board · Type · PI · Iteration)
-                routing labels: copilot-task / agent-army-task
-```
-
-## Quick Start
-
-### Prerequisites
-
-- [Claude Code](https://claude.ai/code) — CLI or desktop app
-- [GitHub CLI](https://cli.github.com) — `gh` in PATH, authenticated
-- GitHub account with a project board attached to this repo
-
-### 1. Fork and clone
+1. Create a new repository from this template.
+2. Replace placeholder owner/repository URLs in `mkdocs.yml`, `.github/CODEOWNERS`, and any setup examples.
+3. Create a GitHub Projects v2 board and set repository variable `PROJECT_NUMBER`.
+4. Create a `PROJECT_TOKEN` secret with the minimum scopes needed to read/write the project board.
+5. Install documentation dependencies and build the site:
 
 ```bash
-gh repo fork nickpclarke/AgentArmy --clone
-cd AgentArmy
+pip install -r requirements-docs.txt
+python scripts/validate_agents.py
+python scripts/generate_agent_docs.py
+python -m mkdocs build
 ```
 
-### 2. Authenticate GitHub CLI with project scope
+See `docs/setup.md` and `docs/quick-start.md` for the complete template adoption path.
 
-```bash
-gh auth refresh -h github.com -s read:project,project
-```
+## Starter labels
 
-Complete the device flow at `https://github.com/login/device`.
+- `copilot-task` — bounded issues suitable for GitHub Copilot coding agent.
+- `ai-agent-task` — complex or multi-file issues for Claude Code / local specialist agents.
+- `needs-deep-review` — large PRs that should receive deeper human or agent review.
+- `hitl-decision` / `awaiting-human` — decision artifacts and blocked work.
 
-### 3. Create your GitHub Project board
+## License
 
-```bash
-gh project create --owner YOUR_USERNAME --title "AgentArmy"
-
-gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
-  --name "Type" --data-type "SINGLE_SELECT" \
-  --single-select-options "Epic,Feature,Story,Enabler,Bug,Spike,Decision"
-
-gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
-  --name "PI" --data-type "TEXT"
-```
-
-### 4. Install MemPalace
-
-```bash
-pip install mempalace
-mempalace init
-```
-
-The hooks are already wired — Claude will automatically save and load context across sessions.
-
-### 5. Install Claude Code plugins
-
-Open Claude Code in this directory and run:
-
-```
-/plugin
-/reload-plugins
-```
-
-### 6. Set the PROJECT_TOKEN secret and PROJECT_NUMBER variable
-
-GitHub Actions and external runners do not inherit your local `gh` login. Store the runner token as a secret and the non-sensitive project number as a variable:
-
-1. Go to `https://github.com/settings/tokens` → **Tokens (classic)**
-2. Generate a token with `project`, `repo`, `workflow`, and `read:org` scopes
-3. Store it: `gh secret set PROJECT_TOKEN --repo YOUR_USERNAME/AgentArmy`
-4. Store the board number: `gh variable set PROJECT_NUMBER --repo YOUR_USERNAME/AgentArmy --body "PROJECT_NUM"`
-
-Use `PROJECT_TOKEN` exactly. A secret named `PAT` will not be read unless you also edit the workflows. See [docs/setup.md](docs/setup.md) for the complete setup guide and [docs/onboarding.md](docs/onboarding.md) for sanity checks.
-
----
-
-## What's Included
-
-### GitHub Projects board — 21 fields
-
-Key fields for SAFE:
-
-| Field | Type | Purpose |
-|---|---|---|
-| Status | Single Select | Todo → Ready → In Progress → In Review → Done (+ Awaiting Decision) — auto-managed |
-| **Type** | Single Select | Epic / Feature / Story / Enabler / Bug / Spike / Decision |
-| **PI** | Text | Program Increment (e.g. `PI-1`) |
-| Priority | Single Select | P0 / P1 / P2 |
-| Size | Single Select | XS / S / M / L / XL |
-| Estimate | Number | Story points |
-| Iteration | Iteration | Sprint assignment |
-| Start / Target date | Date | Sprint planning dates |
-| Parent issue | — | Feature → Story hierarchy |
-
-Full reference: [docs/github-projects.md](docs/github-projects.md)
-
-### GitHub Actions (`.github/workflows/`)
-
-| Workflow | Trigger | What it does |
-|---|---|---|
-| `auto-add-to-project` | Issue / PR opened | Adds every new item to the board automatically |
-| `auto-status` | PR opened / merged | Moves linked issues to *In Progress* or *Done* |
-| `copilot-review` | PR opened | Requests Copilot first-pass review; flags large PRs for deep review |
-| `copilot-coding-agent` | Issue labelled | Routes `copilot-task` to Copilot, `agent-army-task` to Claude Code |
-| `stale` | Mondays 09:00 UTC | Warns at 14 days idle, closes at 21 (P0/Epic exempt) |
-| `label-pr-size` | PR opened / synced | Labels PRs XS→XL by line count |
-| `pi-report` | Fridays 08:00 UTC | Posts a per-Status progress summary to Actions |
-| `template-sanity-check` | Manual dispatch | Verifies runner-side `PROJECT_TOKEN`, `PROJECT_NUMBER`, and optional end-to-end issue auto-add |
-
-### Codex support
-
-Codex uses `AGENTS.md` as its repository instruction file, `.codex/hooks.json` for MemPalace lifecycle hooks, and `.codex/config.toml` for committed project-safe defaults. Keep personal API keys in local user config, environment variables, or an untracked `.codex/config.local.toml`.
-
-When Claude Code and Codex are both active on one PC, use Codex desktop's **New worktree** flow for Codex task work. Keep Claude Code in the main repository folder for stewardship/integration, and let Codex work in its own isolated branch/folder.
-
-See [docs/codex.md](docs/codex.md) for the Codex workflow, including how to reuse Claude Code agent definitions as routing and review lenses.
-
-### Claude Code plugins (9 installed via `/plugin`)
-
-| Plugin | Key skills |
-|---|---|
-| `commit-commands` | `/commit`, `/commit-push-pr`, `/clean_gone` |
-| `pr-review-toolkit` | `/review-pr` — multi-agent PR review |
-| `mempalace` | Cross-session memory palace for agent context |
-| `claude-md-management` | `/revise-claude-md`, CLAUDE.md quality auditing |
-| `skill-creator` | Build, test, and benchmark custom skills |
-| `claude-code-setup` | Automation workflow recommender |
-| `frontend-design` | Production-grade UI generation |
-| `figma` | Figma ↔ code design translation |
-| `playground` | Experimental sandbox |
-
-Plus built-in Claude Code skills: `update-config`, `simplify`, `fewer-permission-prompts`, `loop`, `claude-api`, `init`, `review`, `security-review`.
-
-**EA skills** (local commands in `.claude/commands/`):
-
-| Skill | What it does |
-|---|---|
-| `/wardley [domain]` | Full Wardley analysis pipeline — value chain, map (OWM), doctrine, climate, gameplay |
-| `/ea-adr [decision]` | Architecture Decision Record in MADR v4.0 format |
-| `/capability-map [domain]` | Business capability model + investment heat map |
-
-**Obsidian skills** (vendored in `.claude/skills/` from [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills), MIT) — model-invoked, auto-triggered by file type/context:
-
-| Skill | Triggers on |
-|---|---|
-| `obsidian-markdown` | `.md` with wikilinks, embeds, callouts, properties |
-| `obsidian-bases` | `.base` files — views, filters, formulas, summaries |
-| `json-canvas` | `.canvas` files — nodes, edges, groups, connections |
-| `obsidian-cli` | Vault operations / plugin & theme dev via the Obsidian CLI |
-| `defuddle` | Clean-markdown web extraction (needs `npm install -g defuddle`) |
-
-### Board slash commands (no hosting required)
-
-Comment on any issue or PR to query the board — no server, no registration needed:
-
-```
-/board-status       → status breakdown + % complete
-/sprint             → items in the current iteration
-/blocked            → open issues with blocked-by label
-/p0                 → open P0 priority items
-/pi PI-1            → progress for a specific Program Increment
-/board-help         → command reference
-```
-
-For the same queries inside GitHub Copilot Chat (`@board-manager`), `extensions/board-manager/` contains an Azure-deployable Copilot Extension. See [docs/copilot.md](docs/copilot.md).
-
-### Agent roster
-
-Specialist agents available out of the box across the shared category roster, including dedicated **Enterprise Architecture** and **Knowledge Ontology** categories covering TOGAF ADM, Wardley Mapping, business capabilities, data architecture, platform engineering, foundational ontology modeling, and US regulatory compliance (FedRAMP, FISMA, HIPAA, CMMC, SOX, CCPA).
-
-See [docs/agents.md](docs/agents.md) for the full categorised roster and agent-chaining patterns.
-
----
-
-## SAFE Support
-
-This template maps SAFE constructs onto GitHub's object model, working well at team and program level.
-
-**What works well:**
-- Sprint/iteration cadence via the Iteration field
-- Feature → Story 2-level hierarchy via Parent issue
-- PI tracking via Milestones + PI text field
-- Priority and estimation fields
-- Automated status flow via GitHub Actions
-
-**Known limitations:**
-- Hierarchy is max 2 levels — Epics tracked by label convention
-- No native PI construct — use Milestones as the container
-- No WSJF calculator — script it as a future Action
-- No dependency graph — use linked issues + `blocked-by` label
-- No capacity planning — tracked manually per sprint
-
-Full guide including workarounds: [docs/safe.md](docs/safe.md)
-
----
-
-## Security Notes
-
-- Keep personal Codex provider settings in user config, environment variables, or untracked `.codex/config.local.toml`.
-
-- `.claude/settings.local.json` contains personal permissions — **gitignore this in your fork**
-- `.env` contains API keys — also gitignore
-- `PROJECT_TOKEN` must never be committed — store as a repo secret only
-- `PROJECT_NUMBER` is not sensitive; store it as a repo variable, not a secret
-
----
-
-## Repository Structure
-
-```
-.
-├── .claude/
-│   └── settings.local.json        # Claude Code permissions (gitignore in your fork)
-├── .github/
-│   └── workflows/
-│       ├── auto-add-to-project.yml
-│       ├── auto-status.yml
-│       ├── board-commands.yml         # /board-status /sprint /blocked /p0 /pi
-│       ├── copilot-review.yml         # Copilot first-pass + deep-review flagging
-│       ├── copilot-coding-agent.yml   # Issue routing: copilot-task / agent-army-task
-│       ├── label-pr-size.yml
-│       ├── pi-report.yml
-│       ├── template-sanity-check.yml
-│       └── stale.yml
-├── extensions/
-│   └── board-manager/             # @board-manager Copilot Extension (optional, Azure-deployable)
-│       ├── server.js
-│       ├── package.json
-│       ├── Dockerfile
-│       └── .env.example
-├── docs/
-│   ├── agents.md                  # Agent roster and usage guide
-│   ├── copilot.md                 # Two-army architecture and Copilot setup
-│   ├── github-projects.md         # Board field reference
-│   ├── mempalace.md               # MemPalace install, rooms, MCP tools, troubleshooting
-│   ├── onboarding.md              # Template setup and runner sanity checks
-│   ├── safe.md                    # SAFE workflow guide
-│   └── setup.md                   # Detailed setup instructions
-├── CLAUDE.md                      # AI assistant guidance (read by Claude Code)
-└── README.md                      # This file
-```
-
----
-
-## Extending the Template
-
-**Add a custom skill:**
-```
-/skill-creator
-```
-
-**Add a project board field:**
-```bash
-gh project field-create PROJECT_NUM --owner YOUR_USERNAME \
-  --name "FIELD_NAME" --data-type "SINGLE_SELECT" \
-  --single-select-options "opt1,opt2,opt3"
-```
-
-**Add a GitHub Action:** drop a `.yml` in `.github/workflows/`. Use `secrets.PROJECT_TOKEN` for any action that writes to the project board.
-
-**Run an onboarding sanity check:**
-```powershell
-.\scripts\onboarding-check.ps1 -Owner YOUR_USERNAME -Repo AgentArmy -ProjectNumber 1
-```
-
-If Windows blocks local scripts, use `powershell -ExecutionPolicy Bypass -File .\scripts\onboarding-check.ps1 -Owner YOUR_USERNAME -Repo AgentArmy -ProjectNumber 1`.
-
----
-
-## Docs
-
-- [Full setup guide](docs/setup.md)
-- [Onboarding sanity check](docs/onboarding.md)
-- [Agent roster](docs/agents.md)
-- [GitHub Copilot integration & two-army architecture](docs/copilot.md)
-- [GitHub Projects field reference](docs/github-projects.md)
-- [MemPalace setup](docs/mempalace.md)
-- [SAFE workflow guide](docs/safe.md)
+This template is provided under the MIT License. Review `LICENSE` before publishing a derived repository.

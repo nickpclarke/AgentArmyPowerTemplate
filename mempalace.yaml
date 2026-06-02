@@ -1,30 +1,13 @@
-wing: agentarmy
-rooms:
-- name: agents
-  description: Agent definitions, categories, and selection guidance
-  keywords:
-  - agent
-  - subagent
-  - specialist
-  - claude
-- name: github
-  description: GitHub Projects, Actions workflows, board commands, and SAFE planning
-  keywords:
-  - github
-  - project
-  - board
-  - workflow
-  - sprint
-  - pi
-  - safe
-- name: docs
-  description: Setup guides, architecture docs, and configuration references
-  keywords:
-  - docs
-  - setup
-  - readme
-  - guide
-  - config
-- name: general
-  description: Files that don't fit other rooms
-  keywords: []
+# Optional MemPalace configuration for teams that choose cross-session memory.
+# Review privacy, retention, and repository policy before enabling hooks.
+
+project: AgentArmyPowerTemplatePowerTemplate
+memory_dir: .mempalace
+include:
+  - AGENTS.md
+  - CLAUDE.md
+  - docs/**/*.md
+exclude:
+  - .git/**
+  - site/**
+  - .mempalace/private/**

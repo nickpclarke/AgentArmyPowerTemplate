@@ -1,3 +1,0 @@
-# Shell scripts must stay LF: entrypoint.sh + scripts/*.sh run inside the Linux
-# container. CRLF breaks shebangs on Windows checkouts.
-*.sh text eol=lf

@@ -1,14 +1,14 @@
 # ExecPlan: Platform Diagnostics CLI
 
-Issue: https://github.com/nickpclarke/AgentArmy/issues/80
+Issue: https://github.com/OWNER/AgentArmyPowerTemplatePowerTemplate/issues/80
 
 ## Goal
 
-Design and then implement a high-quality development CLI that can test the active frontend, backend, ArcadeDB, and future containerized microservices in the AgentArmy ecosystem. The CLI should become the fast local truth surface for "is my platform slice healthy?" while also emitting structured artifacts that other pages, cockpit panels, GitHub summaries, and docs can render.
+Design and then implement a high-quality development CLI that can test the active frontend, backend, ArcadeDB, and future containerized microservices in the AgentArmyPowerTemplate ecosystem. The CLI should become the fast local truth surface for "is my platform slice healthy?" while also emitting structured artifacts that other pages, cockpit panels, GitHub summaries, and docs can render.
 
 ## Context
 
-AgentArmy is a starter template, not a product application. This work belongs in reusable template tooling and documentation, with optional adapters for current proof surfaces such as `extensions/arcadedb-cockpit/`. The existing ArcadeDB cockpit already has a server-side proxy, read-only defaults, and a future backend contract. The CLI should reuse those ideas instead of creating a separate database access model.
+AgentArmyPowerTemplate is a starter template, not a product application. This work belongs in reusable template tooling and documentation, with optional adapters for current proof surfaces such as `extensions/arcadedb-cockpit/`. The existing ArcadeDB cockpit already has a server-side proxy, read-only defaults, and a future backend contract. The CLI should reuse those ideas instead of creating a separate database access model.
 
 The ecosystem is expected to expand into multiple spokes, services, and containers. The CLI therefore needs service discovery and adapter contracts, not a single hard-coded frontend/backend/database script.
 
@@ -54,30 +54,30 @@ The standards define:
 
 ## Proposed CLI Shape
 
-Command: `node tools/agentarmy-doctor.mjs`.
+Command: `node tools/agentarmy-power-template-doctor.mjs`.
 
 The command model should be stable enough to use locally and in CI:
 
 | Command | Purpose | Output consumers |
 |---|---|---|
-| `node tools/agentarmy-doctor.mjs` | Run the default local readiness suite across repo, tools, services, and configured containers. | Terminal, CI summary, latest JSON artifact |
-| `node tools/agentarmy-doctor.mjs services` | Discover configured services and report health, ports, compose status, and expected URLs. | Dev dashboard, service catalog |
-| `node tools/agentarmy-doctor.mjs frontend` | Run configured frontend build/lint/smoke checks when a spoke declares a frontend. | PR checks, local page status |
-| `node tools/agentarmy-doctor.mjs backend` | Run backend health, OpenAPI/schema, smoke, and contract probes when a backend is declared. | PR checks, API docs |
-| `node tools/agentarmy-doctor.mjs arcadedb` | Probe ArcadeDB readiness, databases, schema inventory, and query policy. | Arcade cockpit, graph pages |
-| `node tools/agentarmy-doctor.mjs containers` | Inspect compose or container runtime state, image age, port bindings, logs, and restart loops. | Ops pages, CI artifacts |
-| `node tools/agentarmy-doctor.mjs contracts` | Validate API, event, and database adapter contracts without needing every service online. | Release gates |
-| `node tools/agentarmy-doctor.mjs export` | Re-render the latest run as JSON, Markdown, or static page data. | Docs, dashboards, GitHub summaries |
+| `node tools/agentarmy-power-template-doctor.mjs` | Run the default local readiness suite across repo, tools, services, and configured containers. | Terminal, CI summary, latest JSON artifact |
+| `node tools/agentarmy-power-template-doctor.mjs services` | Discover configured services and report health, ports, compose status, and expected URLs. | Dev dashboard, service catalog |
+| `node tools/agentarmy-power-template-doctor.mjs frontend` | Run configured frontend build/lint/smoke checks when a spoke declares a frontend. | PR checks, local page status |
+| `node tools/agentarmy-power-template-doctor.mjs backend` | Run backend health, OpenAPI/schema, smoke, and contract probes when a backend is declared. | PR checks, API docs |
+| `node tools/agentarmy-power-template-doctor.mjs arcadedb` | Probe ArcadeDB readiness, databases, schema inventory, and query policy. | Arcade cockpit, graph pages |
+| `node tools/agentarmy-power-template-doctor.mjs containers` | Inspect compose or container runtime state, image age, port bindings, logs, and restart loops. | Ops pages, CI artifacts |
+| `node tools/agentarmy-power-template-doctor.mjs contracts` | Validate API, event, and database adapter contracts without needing every service online. | Release gates |
+| `node tools/agentarmy-power-template-doctor.mjs export` | Re-render the latest run as JSON, Markdown, or static page data. | Docs, dashboards, GitHub summaries |
 
 ## Output Contract
 
 Every command should support human and machine output:
 
 ```text
-node tools/agentarmy-doctor.mjs --format table
-node tools/agentarmy-doctor.mjs --format json --output tests/artifacts/doctor/latest.json
-node tools/agentarmy-doctor.mjs arcadedb --format markdown --output tests/artifacts/doctor/arcadedb.md
-node tools/agentarmy-doctor.mjs --write-artifacts
+node tools/agentarmy-power-template-doctor.mjs --format table
+node tools/agentarmy-power-template-doctor.mjs --format json --output tests/artifacts/doctor/latest.json
+node tools/agentarmy-power-template-doctor.mjs arcadedb --format markdown --output tests/artifacts/doctor/arcadedb.md
+node tools/agentarmy-power-template-doctor.mjs --write-artifacts
 ```
 
 The JSON artifact should use a normalized envelope:
@@ -151,7 +151,7 @@ Planning owner:
 
 Future implementation owners should use disjoint write scopes:
 
-- CLI/tooling owner: `tools/doctor/**` or `tools/agentarmy-doctor.mjs`
+- CLI/tooling owner: `tools/doctor/**` or `tools/agentarmy-power-template-doctor.mjs`
 - Artifact owner: `tests/artifacts/doctor/**`
 - ArcadeDB owner: `extensions/arcadedb-cockpit/**` only when integrating rendered results into the cockpit
 - Docs owner: `docs/platform-diagnostics-cli.md`, `docs/onboarding.md`, and setup references
@@ -191,7 +191,7 @@ Reviewers should be advisory unless assigned a disjoint file set.
 
 4. Frontend/backend adapters
    - Status: implemented for first pass.
-   - Uses `agentarmy.services.json` or `.agent/services.json`.
+   - Uses `agentarmy-power-template.services.json` or `.agent/services.json`.
    - Supports optional smoke URLs, build commands, test commands, health endpoints, and OpenAPI paths.
 
 5. Artifact surfacing
@@ -210,8 +210,8 @@ Planning validation:
 
 - `node --check extensions/arcadedb-cockpit/server.js`
 - `node --check extensions/arcadedb-cockpit/public/app.js`
-- `node --check tools/agentarmy-doctor.mjs`
-- `node tools/agentarmy-doctor.mjs --write-artifacts`
+- `node --check tools/agentarmy-power-template-doctor.mjs`
+- `node tools/agentarmy-power-template-doctor.mjs --write-artifacts`
 - `python -m mkdocs build --strict`
 
 Implementation validation:
@@ -233,7 +233,7 @@ Implementation validation:
 
 ## Decision Log
 
-- Use a normalized CLI artifact as the bridge between terminal diagnostics and future pages. Implemented as `tools/agentarmy-doctor.mjs`.
+- Use a normalized CLI artifact as the bridge between terminal diagnostics and future pages. Implemented as `tools/agentarmy-power-template-doctor.mjs`.
 - Keep the ArcadeDB browser credential-free pattern from the cockpit as a hard constraint for CLI output too.
 - Treat the first implementation as template tooling, not product application code.
 - Prefer adapter contracts and service manifests over one-off scripts as the platform grows.

@@ -1,6 +1,0 @@
-out/
-__pycache__/
-*.pyc
-# F# compiler-core build artifacts
-fsharp/bin/
-fsharp/obj/

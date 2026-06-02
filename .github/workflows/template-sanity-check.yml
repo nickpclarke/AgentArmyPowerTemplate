@@ -57,7 +57,7 @@ jobs:
           REPO: ${{ github.event.repository.name }}
           PROJECT_NUMBER: ${{ inputs.project_number || vars.PROJECT_NUMBER || '1' }}
         run: |
-          TITLE="Test: AgentArmy template sanity check $(date -u +%Y%m%d-%H%M%S)"
+          TITLE="Test: AgentArmyPowerTemplatePowerTemplate sanity check $(date -u +%Y%m%d-%H%M%S)"
           BODY="Temporary issue created by the Template sanity check workflow to verify PROJECT_TOKEN and Projects v2 auto-add. Safe to close."
           ISSUE_URL="$(gh issue create --repo "$OWNER/$REPO" --title "$TITLE" --body "$BODY")"
           ISSUE_NUMBER="${ISSUE_URL##*/}"

@@ -4,17 +4,8 @@ on:
   pull_request:
     types: [opened, closed]
 
-# Status sync authenticates with PROJECT_TOKEN (Projects v2 writes); the ambient
-# GITHUB_TOKEN needs nothing, so lock it to a read-only floor.
 permissions:
   contents: read
-
-env:
-  PROJECT_ID: PVT_kwHOAK2BFM4BYEPx
-  PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER || '1' }}
-  STATUS_FIELD_ID: PVTSSF_lAHOAK2BFM4BYEPxzhTMpA8
-  OPT_IN_PROGRESS: 47fc9ee4
-  OPT_DONE: 98236657
 
 jobs:
   sync-status:
@@ -25,95 +16,49 @@ jobs:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
           REPO_OWNER: ${{ github.repository_owner }}
           REPO_NAME: ${{ github.event.repository.name }}
+          PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER || '1' }}
         run: |
           ACTION="${{ github.event.action }}"
           MERGED="${{ github.event.pull_request.merged }}"
-
           if [[ "$ACTION" == "opened" ]]; then
-            OPTION_ID="$OPT_IN_PROGRESS"
+            TARGET_STATUS="In Progress"
           elif [[ "$ACTION" == "closed" && "$MERGED" == "true" ]]; then
-            OPTION_ID="$OPT_DONE"
+            TARGET_STATUS="Done"
           else
             echo "No status change needed: action=$ACTION merged=$MERGED"
             exit 0
           fi
 
-          # Extract issue numbers from PR body (Closes #N, Fixes #N, Resolves #N)
-          ISSUES=$(jq -r '.pull_request.body // ""' "$GITHUB_EVENT_PATH" | \
-            grep -oiE '(closes|fixes|resolves)[[:space:]]+#[0-9]+' | \
-            grep -oE '[0-9]+' || true)
-
+          ISSUES=$(jq -r '.pull_request.body // ""' "$GITHUB_EVENT_PATH" | grep -oiE '(closes|fixes|resolves)[[:space:]]+#[0-9]+' | grep -oE '[0-9]+' || true)
           if [[ -z "$ISSUES" ]]; then
             echo "No linked issues found in PR body"
             exit 0
           fi
 
+          PROJECT_JSON=$(gh project view "$PROJECT_NUMBER" --owner "$REPO_OWNER" --format json)
+          PROJECT_ID=$(echo "$PROJECT_JSON" | jq -r '.id')
+          FIELD_JSON=$(gh project field-list "$PROJECT_NUMBER" --owner "$REPO_OWNER" --format json --limit 100)
+          STATUS_FIELD_ID=$(echo "$FIELD_JSON" | jq -r '.fields[] | select(.name == "Status") | .id')
+          OPTION_ID=$(echo "$FIELD_JSON" | jq -r --arg name "$TARGET_STATUS" '.fields[] | select(.name == "Status") | .options[]? | select(.name == $name) | .id')
+
+          if [[ -z "$PROJECT_ID" || -z "$STATUS_FIELD_ID" || -z "$OPTION_ID" ]]; then
+            echo "::error::Could not resolve project, Status field, or option '$TARGET_STATUS'."
+            exit 1
+          fi
+
           for ISSUE_NUM in $ISSUES; do
-            echo "Processing issue #$ISSUE_NUM"
-
-            # Skip status transition if issue is awaiting a HITL decision
-            if [[ "$ACTION" == "opened" ]]; then
-              HAS_AWAITING=$(gh api "repos/$REPO_OWNER/$REPO_NAME/issues/$ISSUE_NUM/labels" \
-                --jq '.[].name | select(. == "awaiting-human")' 2>/dev/null || true)
-              if [[ -n "$HAS_AWAITING" ]]; then
-                # Find the decision issue blocking this one
-                DECISION_ISSUES=$(gh issue list \
-                  --repo "$REPO_OWNER/$REPO_NAME" \
-                  --label "hitl-decision" --state open \
-                  --json number,body \
-                  --jq ".[] | select(.body | test(\"#$ISSUE_NUM\")) | .number" 2>/dev/null || true)
-                DECISION_REF=""
-                if [[ -n "$DECISION_ISSUES" ]]; then
-                  FIRST=$(echo "$DECISION_ISSUES" | head -1)
-                  DECISION_REF=" See decision artifact #$FIRST for details."
-                fi
-                HITL_MSG=$(printf '> [!NOTE]\n> PR opened but status not advanced to **In Progress** — this issue is awaiting a HITL decision (`awaiting-human` label).%s Once the decision is closed, remove the `awaiting-human` label and apply `copilot-task` or `agent-army-task` to resume.' "$DECISION_REF")
-                gh issue comment "$ISSUE_NUM" \
-                  --repo "$REPO_OWNER/$REPO_NAME" \
-                  --body "$HITL_MSG"
-                echo "Issue #$ISSUE_NUM is awaiting human decision — skipping In Progress transition"
-                continue
-              fi
-            fi
-
             ITEM_ID=$(gh api graphql \
-              -f query='
-                query($owner: String!, $repo: String!, $issue: Int!) {
-                  repository(owner: $owner, name: $repo) {
-                    issue(number: $issue) {
-                      projectItems(first: 10) {
-                        nodes { id project { number } }
-                      }
-                    }
-                  }
-                }' \
-              -f owner="$REPO_OWNER" \
-              -f repo="$REPO_NAME" \
-              -F issue="$ISSUE_NUM" \
-              --jq ".data.repository.issue.projectItems.nodes[] | select(.project.number == ($PROJECT_NUMBER | tonumber)) | .id" \
-              2>/dev/null || true)
+              -f query='query($owner: String!, $repo: String!, $issue: Int!, $project: Int!) { repository(owner: $owner, name: $repo) { issue(number: $issue) { projectItems(first: 20) { nodes { id project { number } } } } } }' \
+              -f owner="$REPO_OWNER" -f repo="$REPO_NAME" -F issue="$ISSUE_NUM" -F project="$PROJECT_NUMBER" \
+              --jq '.data.repository.issue.projectItems.nodes[] | select(.project.number == $project) | .id' 2>/dev/null || true)
 
             if [[ -z "$ITEM_ID" ]]; then
-              echo "Issue #$ISSUE_NUM not on project board, skipping"
+              echo "Issue #$ISSUE_NUM is not on project $PROJECT_NUMBER; skipping."
               continue
             fi
 
             gh api graphql \
-              -f query='
-                mutation($project: ID!, $item: ID!, $field: ID!, $option: String!) {
-                  updateProjectV2ItemFieldValue(input: {
-                    projectId: $project
-                    itemId: $item
-                    fieldId: $field
-                    value: { singleSelectOptionId: $option }
-                  }) {
-                    projectV2Item { id }
-                  }
-                }' \
-              -f project="$PROJECT_ID" \
-              -f item="$ITEM_ID" \
-              -f field="$STATUS_FIELD_ID" \
-              -f option="$OPTION_ID"
-
-            echo "Updated issue #$ISSUE_NUM to option $OPTION_ID"
+              -f query='mutation($project: ID!, $item: ID!, $field: ID!, $option: String!) { updateProjectV2ItemFieldValue(input: { projectId: $project, itemId: $item, fieldId: $field, value: { singleSelectOptionId: $option } }) { projectV2Item { id } } }' \
+              -f project="$PROJECT_ID" -f item="$ITEM_ID" -f field="$STATUS_FIELD_ID" -f option="$OPTION_ID"
+            echo "Updated issue #$ISSUE_NUM to $TARGET_STATUS."
           done

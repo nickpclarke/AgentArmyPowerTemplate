@@ -1,6 +1,6 @@
 # ExecPlan: ArcadeDB Cockpit Extension
 
-Issue: https://github.com/nickpclarke/AgentArmy/issues/78
+Issue: https://github.com/OWNER/AgentArmyPowerTemplatePowerTemplate/issues/78
 
 ## Goal
 
@@ -8,7 +8,7 @@ Build a self-contained local cockpit for the ArcadeDB container used by the `cla
 
 ## Context
 
-AgentArmy is a template repository, so this work belongs in an optional extension rather than application source. The Claude worktree currently uses ArcadeDB at `http://localhost:2480`, database `knowledge`, and default test credentials managed by local environment variables.
+AgentArmyPowerTemplate is a template repository, so this work belongs in an optional extension rather than application source. The Claude worktree currently uses ArcadeDB at `http://localhost:2480`, database `knowledge`, and default test credentials managed by local environment variables.
 
 ## Non-goals
 

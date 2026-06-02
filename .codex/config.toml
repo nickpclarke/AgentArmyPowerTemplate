@@ -1,39 +1,5 @@
-# Project-level Codex defaults for the AgentArmy template.
-#
-# Keep provider API keys and machine-specific model settings out of this
-# committed file. Put local overrides in your user Codex config or an
-# untracked `.codex/config.local.toml` file if your Codex install supports it.
+# Project-level Codex defaults for AgentArmyPowerTemplatePowerTemplate.
+# Keep provider API keys and machine-specific settings out of this committed file.
 
 [shell_environment_policy]
 inherit = "core"
-
-# AgentArmy coordination plane. Keep this tool surface narrow for Codex:
-# memo/handoff/join only, not docker build/deploy controls.
-[mcp_servers.local-fleet]
-url = "${LOCAL_FLEET_MCP_URL:-http://127.0.0.1:8765/mcp}"
-bearer_token_env_var = "LOCAL_FLEET_MCP_TOKEN"
-env_http_headers = { "CF-Access-Client-Id" = "CF_ACCESS_CLIENT_ID", "CF-Access-Client-Secret" = "CF_ACCESS_CLIENT_SECRET" }
-enabled_tools = [
-  "fleet_agent_join",
-  "fleet_agent_memo_write",
-  "fleet_agent_memo_read",
-  "fleet_agent_handoff",
-]
-
-# Remote Google Cloud MCP Servers (HTTP/Streamable transport)
-[mcp_servers.gcp-bigquery]
-url = "${GCP_BIGQUERY_MCP_URL}"
-bearer_token_env_var = "GCP_BEARER_TOKEN"
-
-[mcp_servers.gcp-storage]
-url = "${GCP_STORAGE_MCP_URL}"
-bearer_token_env_var = "GCP_BEARER_TOKEN"
-
-[mcp_servers.gcp-observability]
-url = "${GCP_OBSERVABILITY_MCP_URL}"
-bearer_token_env_var = "GCP_BEARER_TOKEN"
-
-[mcp_servers.gcp-vertex-agents]
-url = "https://${GCP_REGION}-aiplatform.googleapis.com/v1/projects/${GCP_PROJECT_ID}/locations/${GCP_REGION}/agents/gcp-mcp-server:callMcp"
-bearer_token_env_var = "GCP_BEARER_TOKEN"
-

@@ -1,9 +1,0 @@
-{
-  "repo": "nickpclarke/frontend-core",
-  "number": "93",
-  "title": "feat(design-system): adopt shadcn/ui — foundation + ARC-ADR-008 (+ status/decision docs)",
-  "url": "https://github.com/nickpclarke/frontend-core/pull/93",
-  "author": "nickpclarke",
-  "kind": "decision",
-  "date": "2026-05-29"
-}

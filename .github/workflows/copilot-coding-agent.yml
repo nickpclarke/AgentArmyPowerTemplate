@@ -29,13 +29,13 @@ jobs:
             --description "Delegate to GitHub Copilot coding agent — bounded, well-defined tasks" \
             --force
 
-      - name: Ensure agent-army-task label exists
+      - name: Ensure ai-agent-task label exists
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh label create "agent-army-task" \
+          gh label create "ai-agent-task" \
             --color "7c3aed" \
-            --description "Delegate to Claude Code AgentArmy — complex, multi-file, architecture-heavy" \
+            --description "Delegate to Claude Code specialist agents — complex, multi-file, architecture-heavy" \
             --force
 
       - name: Assign issue to Copilot coding agent
@@ -69,7 +69,7 @@ jobs:
           - This is a *template repo* — changes are to docs, workflows, or config only (no app code)
           - Max ~50 lines per file
           - Single file or tightly related files
-          - If this touches multiple systems → remove \`copilot-task\`, add \`agent-army-task\`
+          - If this touches multiple systems → remove \`copilot-task\`, add \`ai-agent-task\`
 
           **What Copilot will do:**
           1. Create a branch from \`main\`
@@ -77,28 +77,28 @@ jobs:
           3. Open a PR referencing this issue with \`Closes #${{ github.event.issue.number }}\`
 
           **When the PR opens:**
-          - Gemini will auto-review
-          - Security scan will run
+          - Copilot or configured review automation will run
+          - Configured security checks will run
           - If >200 lines: \`needs-deep-review\` label auto-applied → run \`/review-pr\` in Claude Code
 
           **See also:** [AI Coordination Guide](.github/AI-COORDINATION.md)
 
-          _To escalate to Claude Code agents, remove \`copilot-task\` and add \`agent-army-task\`._
+          _To escalate to Claude Code agents, remove \`copilot-task\` and add \`ai-agent-task\`._
           EOF
           )"
 
   route-to-agent-army:
     runs-on: ubuntu-latest
-    if: github.event.label.name == 'agent-army-task'
+    if: github.event.label.name == 'ai-agent-task'
     steps:
       - name: Post routing comment
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh issue comment ${{ github.event.issue.number }} --body "$(cat <<EOF
-          **⚔️ Routed to Claude Code AgentArmy**
+          **⚔️ Routed to Claude Code specialist agents**
 
-          This issue has been flagged for the AgentArmy. Open Claude Code and run:
+          This issue has been flagged for specialist-agent work. Open Claude Code and run:
 
           \`\`\`
           Work on issue #${{ github.event.issue.number }}

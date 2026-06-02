@@ -57,7 +57,7 @@ jobs:
               M:  ['f9c74f', 'PR size: M (≤200 lines)'],
               L:  ['f3722c', 'PR size: L (≤500 lines)'],
               XL: ['d62828', 'PR size: XL (>500 lines)'],
-              'needs-deep-review': ['e11d48', 'Large PR — trigger Claude Code deep review via /review-pr'],
+              'needs-deep-review': ['e11d48', 'Large PR — trigger deep review with Claude Code or a specialist reviewer'],
             };
             for (const [name, [color, description]] of Object.entries(defs)) {
               await safe(`upsert ${name}`, async () => {

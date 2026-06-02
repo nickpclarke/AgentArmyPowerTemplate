@@ -4,20 +4,22 @@ on:
   pull_request:
     paths:
       - ".claude/agents/**"
+      - ".codex/**"
+      - ".agents/**"
       - "scripts/**"
+      - "docs/**"
+      - "mkdocs.yml"
       - ".github/workflows/validate.yml"
-      - ".github/workflows/sync-helpers-to-spokes.yml"
   push:
     branches: [main]
-    paths:
-      - ".claude/agents/**"
-      - "scripts/**"
-      - ".github/workflows/sync-helpers-to-spokes.yml"
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   validate:
-    runs-on: [self-hosted, linux]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -25,25 +27,38 @@ jobs:
         with:
           python-version: "3.11"
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Install dependencies
-        run: pip install pyyaml
+        run: pip install -r requirements-docs.txt pyyaml
 
       - name: Validate agent definitions
         run: python scripts/validate_agents.py
 
-      - name: Self-test the spoke-sync drift checker
-        run: python scripts/check_sync_path_drift.py --self-test
-
-      - name: Check spoke-sync path drift (manifest <-> trigger)
-        run: python scripts/check_sync_path_drift.py
-
-      - name: Agent docs generator runs cleanly
+      - name: Generate agent docs
         run: python scripts/generate_agent_docs.py
 
-      - name: Fail if generated glossary is out of date
+      - name: Generate subagent roster
+        run: python scripts/generate_subagent_roster.py
+
+      - name: Sync Codex agents
+        run: python scripts/sync_agents_to_codex.py
+
+      - name: Sync Antigravity plugins
+        run: python scripts/sync_agents_to_antigravity.py
+
+      - name: Generate abbreviations
+        run: node tools/acronyms.mjs abbr
+
+      - name: Build docs
+        run: python -m mkdocs build
+
+      - name: Fail if generated files are stale
         run: |
-          if ! git diff --quiet -- docs/agents-glossary/index.md; then
-            echo "::error::docs/agents-glossary/index.md is stale. Run 'python scripts/generate_agent_docs.py' and commit the result."
-            git diff -- docs/agents-glossary/index.md
+          if ! git diff --quiet -- docs/agents-glossary/index.md .agent/subagent-roster.md .codex/agents .agents/plugins docs/includes/abbreviations.md; then
+            echo "::error::Generated files are stale. Run the generation commands locally and commit the results."
+            git diff -- docs/agents-glossary/index.md .agent/subagent-roster.md .codex/agents .agents/plugins docs/includes/abbreviations.md
             exit 1
           fi

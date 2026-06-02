@@ -1,18 +1,12 @@
 # Copilot Coding Agent — Environment Setup
-# This file configures the microVM environment for the GitHub Copilot coding agent.
-# It runs before the agent starts working on any issue.
-#
-# Docs: https://docs.github.com/en/copilot/customizing-copilot/customizing-the-development-environment-for-copilot-coding-agent
 
 steps:
   - name: Install GitHub CLI
     run: |
       set -euo pipefail
       if command -v gh >/dev/null 2>&1; then
-        echo "GitHub CLI already installed:"
         gh --version
       else
-        echo "Installing GitHub CLI from the official apt repository"
         sudo mkdir -p /etc/apt/keyrings
         curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
           | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null
@@ -21,7 +15,6 @@ steps:
           | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
         sudo apt-get update
         sudo apt-get install -y gh
-        gh --version
       fi
 
   - name: Set up Python for docs validation
@@ -32,7 +25,7 @@ steps:
   - name: Install documentation dependencies
     run: pip install -r requirements-docs.txt
 
-  - name: Set up Node.js (for board-manager extension)
+  - name: Set up Node.js for docs helper scripts
     uses: actions/setup-node@v4
     with:
       node-version: "20"

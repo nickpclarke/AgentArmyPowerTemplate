@@ -1,6 +1,6 @@
 param(
   [string]$Owner = "",
-  [string]$Repo = "AgentArmy",
+  [string]$Repo = "AgentArmyPowerTemplate",
   [int]$ProjectNumber = 1,
   [switch]$CreateTestIssue
 )
@@ -61,7 +61,7 @@ if (-not $Owner) {
 
 $FullRepo = "$Owner/$Repo"
 
-Write-Host "AgentArmy onboarding sanity check"
+Write-Host "AgentArmyPowerTemplate onboarding sanity check"
 Write-Host "Repository: $FullRepo"
 Write-Host "Project:    $Owner/$ProjectNumber"
 
@@ -138,7 +138,7 @@ foreach ($workflow in $expectedWorkflows) {
 
 if ($CreateTestIssue) {
   Write-Step "End-to-end auto-add test"
-  $title = "Test: AgentArmy onboarding sanity check $(Get-Date -Format yyyyMMdd-HHmmss)"
+  $title = "Test: AgentArmyPowerTemplate onboarding sanity check $(Get-Date -Format yyyyMMdd-HHmmss)"
   $body = "Temporary issue created by scripts/onboarding-check.ps1 to verify PROJECT_TOKEN and GitHub Projects auto-add. Safe to close."
   $issue = Run-Gh -GhArgs @("issue", "create", "--repo", $FullRepo, "--title", $title, "--body", $body)
   if ($issue.Code -ne 0) {
@@ -171,7 +171,7 @@ if ($CreateTestIssue) {
 
 Write-Step "Result"
 if ($Failures.Count -eq 0) {
-  Pass "AgentArmy onboarding sanity check passed."
+  Pass "AgentArmyPowerTemplate onboarding sanity check passed."
   exit 0
 }
 

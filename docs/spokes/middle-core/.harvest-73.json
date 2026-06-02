@@ -1,9 +1,0 @@
-{
-  "repo": "nickpclarke/middle-core",
-  "number": "73",
-  "title": "docs(adr): pub/sub broker + shared workspace and concurrency model",
-  "url": "https://github.com/nickpclarke/middle-core/pull/73",
-  "author": "nickpclarke",
-  "kind": "decision",
-  "date": "2026-05-27"
-}

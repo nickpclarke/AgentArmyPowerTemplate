@@ -1,19 +1,13 @@
 {
-  "name": "agentarmy",
+  "name": "agentarmy-power-template-power-template",
   "version": "1.0.0",
-  "description": "A GitHub repository template for AI-powered software development using coordinated agent workflows.",
+  "description": "Reusable AI-powered GitHub and Markdown workflow template.",
   "type": "module",
   "scripts": {
-    "test:e2e": "playwright test",
-    "health": "node tools/health/monitor.mjs",
-    "prepare": "husky",
-    "deploy": "wrangler deploy",
-    "preview": "wrangler dev"
+    "docs:abbr": "node tools/acronyms.mjs abbr",
+    "docs:acronyms": "node tools/acronyms.mjs --ci"
   },
-  "devDependencies": {
-    "@playwright/test": "^1.60.0",
-    "@types/node": "^25.9.1",
-    "husky": "^9.1.7",
-    "wrangler": "^4.95.0"
+  "engines": {
+    "node": ">=20"
   }
 }

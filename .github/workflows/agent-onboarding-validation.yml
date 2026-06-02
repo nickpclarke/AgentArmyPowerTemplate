@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   validate-agent-mece:
-    runs-on: [self-hosted, linux]
+    runs-on: ubuntu-latest
     name: Validate Agent MECE Compliance
 
     steps:
@@ -30,7 +30,7 @@ jobs:
           echo "Checking for boundary rules in agent descriptions..."
 
           # Find all agent .md files that were added or modified
-          git diff --name-only --diff-filter=AM origin/main HEAD -- '.claude/agents/**/*.md' | while read file; do
+          git diff --name-only --diff-filter=AM ${{ github.event.pull_request.base.sha || github.event.before }} ${{ github.sha }} -- '.claude/agents/**/*.md' | while read file; do
             if [ -f "$file" ]; then
               agent_name=$(basename "$file" .md)
 
@@ -86,7 +86,7 @@ jobs:
 
           # This is a heuristic check - look for bidirectional delegation
           # (which is actually good, but flag for review)
-          git diff --name-only --diff-filter=AM origin/main HEAD -- '.claude/agents/**/*.md' | head -5 | while read file; do
+          git diff --name-only --diff-filter=AM ${{ github.event.pull_request.base.sha || github.event.before }} ${{ github.sha }} -- '.claude/agents/**/*.md' | head -5 | while read file; do
             if [ -f "$file" ]; then
               agent_name=$(basename "$file" .md)
 
@@ -102,7 +102,7 @@ jobs:
         run: |
           echo "Validating model tier assignments..."
 
-          git diff --name-only --diff-filter=AM origin/main HEAD -- '.claude/agents/**/*.md' | while read file; do
+          git diff --name-only --diff-filter=AM ${{ github.event.pull_request.base.sha || github.event.before }} ${{ github.sha }} -- '.claude/agents/**/*.md' | while read file; do
             if [ -f "$file" ]; then
               agent_name=$(basename "$file" .md)
 
@@ -180,6 +180,6 @@ jobs:
           echo "  - Check boundary rules for overlapping agents"
           echo "  - Verify circular delegation patterns (if any)"
           echo ""
-          echo "See /planning/meta/decisions/AGENT_ONBOARDING_RUBRIC.md for full validation criteria"
+          echo "See docs/contributing.md for agent validation criteria"
           echo ""
 

@@ -1,37 +1,26 @@
-name: "Story"
-description: "User-facing value, completable in a single sprint."
+name: Story
+description: Implementable unit of work
 title: "[Story]: "
-labels: ["Story"]
+labels: ["story"]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        A Story delivers user-facing value within one sprint. After creating,
-        set **Type**, **PI**, **Size**, **Estimate**, and link the **Parent
-        issue** (its Feature) on the project board. Definition of Ready requires
-        acceptance criteria below.
   - type: textarea
-    id: story
+    id: goal
     attributes:
-      label: User story
-      description: As a <role>, I want <capability>, so that <benefit>.
-      placeholder: As a developer, I want ..., so that ...
+      label: Goal
+      description: What should change?
     validations:
       required: true
   - type: textarea
     id: acceptance
     attributes:
       label: Acceptance criteria
-      description: Checklist that defines "done".
-      value: |
-        - [ ]
-        - [ ]
+      description: What must be true when this is complete?
     validations:
       required: true
-  - type: textarea
-    id: notes
+  - type: dropdown
+    id: route
     attributes:
-      label: Additional context
-      description: Links, designs, constraints, dependencies.
-    validations:
-      required: false
+      label: Suggested route
+      options:
+        - copilot-task
+        - ai-agent-task

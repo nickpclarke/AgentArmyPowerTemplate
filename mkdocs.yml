@@ -1,94 +1,65 @@
-site_name: AgentArmy
-site_description: AI-powered software development template with coordinated Claude Code, GitHub Copilot, and dlt agents
-site_author: nickpclarke
-site_url: https://nickpclarke.github.io/AgentArmy/
-repo_url: https://github.com/nickpclarke/AgentArmy
-repo_name: AgentArmy
+site_name: AgentArmyPowerTemplatePowerTemplate
+site_description: Reusable AI-powered GitHub and Markdown workflow template
+site_author: AgentArmyPowerTemplatePowerTemplate contributors
+site_url: https://OWNER.github.io/AgentArmyPowerTemplatePowerTemplate/
+repo_url: https://github.com/OWNER/AgentArmyPowerTemplatePowerTemplate
+repo_name: OWNER/AgentArmyPowerTemplatePowerTemplate
 edit_uri: edit/main/docs/
 docs_dir: docs
 site_dir: site
-copyright: Copyright © 2024 Nick Clarke. All rights reserved.
+copyright: Copyright © 2026 AgentArmyPowerTemplatePowerTemplate contributors. Licensed under MIT.
 
 theme:
   name: material
-  logo: null
-  favicon: null
   icon:
     repo: fontawesome/brands/github
     edit: material/pencil
     view: material/eye
-  # untool.ai brand: warm paper/ink, ONE blue accent. Exact tokens come from
-  # docs/stylesheets/untool.css (sourced from frontend-core fleet.css + brand manifesto).
-  # palette = custom so Material applies our CSS vars, not its stock indigo.
   palette:
     - scheme: default
-      primary: custom
-      accent: custom
+      primary: indigo
+      accent: blue
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
-      primary: custom
-      accent: custom
+      primary: indigo
+      accent: blue
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
-  # Brand uses a system type stack (one type family, no fonts of intimidation).
-  font: false
   features:
     - navigation.instant
-    - navigation.instant.prefetch
-    - navigation.instant.progress
     - navigation.tracking
     - navigation.tabs
-    - navigation.tabs.sticky
-    - navigation.expand
-    - navigation.path
-    - navigation.indexes
+    - navigation.sections
     - navigation.top
-    - navigation.prune
     - content.code.copy
-    - content.code.select
-    - content.code.annotate
     - content.action.edit
     - content.action.view
-    - content.tooltips
-    - toc.follow
-    - toc.integrate
     - search.suggest
     - search.highlight
-    - search.share
 
 plugins:
-  - search:
-      lang: en
-      separator: '[\\s\\-,:!=\\[\\]()"/]+|(?<!\\w)(?=\\w)|(?!\\w)(?=\\w)'
-  # Expands the `platform/` directory nav entry (synced spoke docs) from the file
-  # tree, so newly-synced spoke pages appear with no hand-editing of nav.
-  - awesome-pages
+  - search
 
-# docs/includes/abbreviations.md is a snippet auto-appended to every page, not a standalone page
 exclude_docs: |
   includes/
 
 markdown_extensions:
-  - abbr          # renders <abbr> tooltips from docs/includes/abbreviations.md (the "meaning unpacker")
+  - abbr
   - admonition
   - pymdownx.details
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
-  - pymdownx.highlight:
-      use_pygments: true
+  - pymdownx.highlight
   - pymdownx.inlinehilite
-  - pymdownx.emoji:
-      emoji_index: !!python/name:pymdownx.emoji.twemoji
-      emoji_generator: !!python/name:pymdownx.emoji.to_svg
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.snippets:
       auto_append:
-        - includes/abbreviations.md   # append acronym defs to every page so abbr tooltips render site-wide
+        - includes/abbreviations.md
       base_path:
         - docs
   - toc:
@@ -100,152 +71,38 @@ markdown_extensions:
   - md_in_html
 
 extra_css:
-  - stylesheets/untool.css
+  - stylesheets/theme.css
 
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/nickpclarke/AgentArmy
+      link: https://github.com/OWNER/AgentArmyPowerTemplatePowerTemplate
       name: GitHub Repository
 
 nav:
   - Home: index.md
   - Getting Started:
-    - Installation & Setup: setup.md
-    - Running Locally (fleet boot): running-locally.md
-    - Env & Secrets Handling: env-handling.md
-    - Fleet Environments (URLs): environments.md
-    - Onboarding Sanity Check: onboarding.md
-    - Quick Start: quick-start.md
-    - Platform Diagnostics CLI: platform-diagnostics-cli.md
-    - Diagnostics Standards: diagnostics-standards.md
-    - ArcadeDB Secret Hardening: arcadedb-secret-hardening.md
-    - Local Docker CI: local-docker-ci.md
-    - Playwright Browser Testing: playwright.md
-    - Generator Platform Tests: generator-platform-tests.md
-    - Lifecycle Promotion Management: lifecycle-promotion-management.md
-    - Azure Container Apps Dev Deploy: azure-container-apps-dev.md
-    - Cloud Serving Landscape: cloud-serving.md
-    - GCP Container Pipeline: gcp-cloud-run-pipeline.md
-    - Using Codex: codex.md
-  - Armies Overview:
-    - The Three Armies: armies-overview.md
-    - Routing Matrix: routing-matrix.md
-    - Agent Onboarding (Spokes): agent-onboarding.md
-    - Spoke Work Intake: spoke-work-intake.md
-    - Agent Collaboration (cross-repo): agent-collaboration.md
-  - Claude Code Army:
-    - All Agents: agents-glossary/index.md
-    - Original Roster: agents.md
-    - Language Routing Guide: language-routing.md
-    - Using Claude Code: claude-code-guide.md
-    - Spoke Helper Sync: spoke-sync.md
-    - Spoke → Hub Callback: spoke-hub-callback.md
-  - GitHub Copilot Army:
-    - Copilot Setup: copilot.md
-    - Task Labeling: copilot-tasks.md
-    - Board Manager Extension: board-manager.md
-  - Coordination & Planning:
-    - Agent Tracks (Run vs Design): agent-tracks.md
-    - Inter-Layer Contracts: contracts.md
-    - Secrets Rotation Policy: security/secrets-rotation.md
-    - Spoke Artifacts (harvested): spokes/index.md
-    - Spoke Artifact Pipeline: spoke-artifact-pipeline.md
-    - Labs (WIP Design Wiki): labs.md
-    - GitHub Projects v2: github-projects.md
-    - Postman Workspace: postman-workspace.md
-    - Backend-Core Object Model: backend-core-object-model.md
-    - Business Object Catalog: business-object-catalog.md
-    - SAFe Framework: safe.md
-    - Issue Conventions: issue-conventions.md
-    - Human-in-the-Loop: hitl.md
-    - Autonomous Review Loop: pr-review-loop.md
-    - Fleet Heartbeat & Scheduled Audit: fleet-heartbeat.md
-    - Image Standard: image-standard.md
-  - Planning & Roadmap:
-    - Platform Roadmap: roadmap/PLATFORM_ROADMAP.md
-    - Release Train Index: release-trains/release-train-index.md
-    - RT5 Ontology-Grade Persistence: release-trains/RT5-ontology-grade-persistence.md
-    - RT6 Universal Data Adapter: release-trains/RT6-universal-data-adapter.md
-    - RT7 Middle-Core Runtime: release-trains/RT7-middle-core-runtime.md
-    - RT8 Generative Platform Maturity: release-trains/RT8-generative-platform-maturity.md
-    - ArcKit Synthesis: synthesis/ARCKIT_SYNTHESIS.md
-    - Verification Levels (L1-L6): synthesis/RT-verification-levels.md
-    - Spike — ArcadeDB Upsert (PIN-S1): synthesis/RT5-PIN-S1-arcadedb-upsert.md
-    - Spike — Bitemporal Queries (PIN-S2): synthesis/RT5-PIN-S2-bitemporal-queries.md
-    - Plan — CopilotKit Generative UI: plans/copilotkit-generative-ui.md
-    - CopilotKit Rollout Coordination: plans/copilotkit-rollout-coordination.md
-  - MECE Audit & Architecture:
-    - N-Layer Architecture: n-layer-architecture.md
-    - N-Layer Spoke Rules: n-layer-spoke-rules.md
-    - Audit Overview: mece-audit/MECE_AUDIT_SUMMARY.md
-    - Audit Scorecard: mece-audit/AGENT_MECE_AUDIT_SCORECARD.md
-    - Implementation Details: mece-audit/MECE_IMPLEMENTATION_SUMMARY.md
-    - Routing Validation Tests: mece-audit/ROUTING_VALIDATION_TESTS.md
-  - dlt Data Pipelines:
-    - Pipeline Architecture: dlt-pipelines.md
-    - Source Connectors: dlt-sources.md
-    - Incremental Loading: dlt-incremental.md
-  - Untool.ai Platform:
-    - Platform Architecture: untool-platform.md
-    - Platform Messaging Update System: platform-messaging-update-system.md
-    - Ontology & Use Cases: untool/ontology-and-use-cases.md
-    # Per-layer platform docs are SYNCED from each spoke repo into docs/platform/<spoke>/
-    # at build time (see .github/workflows/deploy-docs.yml). awesome-pages expands this
-    # directory from the file tree, so synced pages appear without editing nav.
-    - Platform Layers: platform
-  - Enterprise Architecture:
-    - Wardley Maps: wardley-maps-examples.md
-    - Wardley Mapping Guide: wardley.md
-    - Capability Maps: capability-maps.md
-    - ADR Guide: architecture-decisions.md
-    - ADR Backlog (forward queue): decisions/ADR-BACKLOG.md
-    - Architecture Decisions:
-      - ARC-ADR-001 HITL Pattern: decisions/ARC-ADR-001-hitl-decision-point-pattern.md
-      - ARC-ADR-002 JWT Forwarding: decisions/ARC-ADR-002-jwt-forwarding-auth-contract.md
-      - ARC-ADR-003 No LLM Key in Browser: decisions/ARC-ADR-003-no-llm-key-in-browser.md
-      - ARC-ADR-004 LLM Provider Cerebras: decisions/ARC-ADR-004-llm-provider-cerebras.md
-      - ARC-ADR-005 backend-core OpenAPI Contract: decisions/ARC-ADR-005-backend-core-openapi-contract.md
-      - ARC-ADR-006 HITL Destructive Ops: decisions/ARC-ADR-006-hitl-destructive-ops.md
-      - ARC-ADR-007 Agent Streaming Protocol (proposed): decisions/ARC-ADR-007-agent-streaming-protocol.md
-      - ARC-ADR-008 Agent Memory Store (proposed): decisions/ARC-ADR-008-agent-memory-store.md
-      - ARC-ADR-009 Canonical Data Model + Arrow (proposed): decisions/ARC-ADR-009-canonical-data-model-arrow.md
-      - ARC-ADR-010 Observability Standard: decisions/ARC-ADR-010-observability-standard.md
-      - ARC-ADR-011 Secret Resolution + Workload Identity: decisions/ARC-ADR-011-runtime-secret-resolution-workload-identity.md
-      - ARC-ADR-012 Read-Query Caching: decisions/ARC-ADR-012-read-query-caching-invalidation.md
-      - ARC-ADR-013 Per-Connection RBAC: decisions/ARC-ADR-013-per-connection-rbac-role-taxonomy.md
-      - ARC-ADR-016 Ontology Representation (Reification & Hyperedges): decisions/ARC-ADR-016-ontology-representation-reification-hyperedges.md
-      - ARC-ADR-018 Async Job Execution Model: decisions/ARC-ADR-018-async-job-execution-model.md
-      - ARC-ADR-019 Ontology + Reasoning Layer: decisions/ARC-ADR-019-ontology-reasoning-layer.md
-      - ARC-ADR-020 Self-Hosted Runner Trust Isolation: decisions/ARC-ADR-020-self-hosted-runner-trust-isolation.md
-      - ARC-ADR-021 LLM Gateway: decisions/ARC-ADR-021-llm-gateway.md
-      - ARC-ADR-022 Event Bus Bridges: decisions/ARC-ADR-022-event-bus-bridges.md
-      - ARC-ADR-023 Container Tiering Strategy: decisions/ARC-ADR-023-container-tiering-strategy.md
-      - ARC-ADR-024 Platform Maturity Audit: decisions/ARC-ADR-024-platform-maturity-audit.md
-      - ARC-ADR-025 GCP Scope Narrowing: decisions/ARC-ADR-025-gcp-scope-narrowing.md
-      - ARC-ADR-026 Data Vault 2.1 Methodology: decisions/ARC-ADR-026-data-vault-2-1-methodology.md
-      - ARC-ADR-027 Contract Backlog Discipline: decisions/ARC-ADR-027-contract-backlog-discipline.md
-      - ARC-ADR-028 Agent Gateway (A2A/MCP): decisions/ARC-ADR-028-agent-gateway-a2a-mcp.md
-      - ARC-ADR-029 AgentArmy Forge Codegen Container: decisions/ARC-ADR-029-agentarmy-forge-codegen-container.md
-      - ARC-ADR-030 Data→Ontology Ingestion Pipeline: decisions/ARC-ADR-030-data-to-ontology-ingestion-pipeline.md
-      - ARC-ADR-031 Automated Runbook Orchestration: decisions/ARC-ADR-031-automated-runbook-orchestration.md
-      - ARC-ADR-032 Ontology Sift/Sort Authoring Loop: decisions/ARC-ADR-032-ontology-sift-sort-authoring-loop.md
-      - ARC-ADR-033 F# Ontology Compiler Core: decisions/ARC-ADR-033-fsharp-ontology-compiler-core.md
-      - ARC-ADR-034 Fleet Cross-Repo Access & Contract Distribution: decisions/ARC-ADR-034-fleet-cross-repo-access-and-contract-distribution.md
-      - ARC-ADR-035 Holonic Unified Board Architecture: decisions/ARC-ADR-035-holonic-unified-board-architecture.md
-      - ARC-ADR-036 Abstraction Validation & Distribution Service: decisions/ARC-ADR-036-abstraction-validation-distribution-service.md
-      - ARC-ADR-037 BYO-Credentials Secrets Broker: decisions/ARC-ADR-037-byo-credentials-secrets-broker.md
-      - ARC-ADR-038 Unified Process & Time: decisions/ARC-ADR-038-unified-process-and-time-architecture.md
-      - ARC-ADR-039 Foundations as Perspectives: decisions/ARC-ADR-039-foundations-as-perspectives.md
-      - ARC-ADR-040 Graph Visualization Component Selection: decisions/ARC-ADR-040-graph-visualization-component-selection.md
-      - ARC-ADR-041 Pace-Layered Projection & Graduation: decisions/ARC-ADR-041-pace-layered-projection-and-graduation.md
-      - ARC-ADR-042 Temporal Persistence (Stamp-First): decisions/ARC-ADR-042-temporal-persistence-stamp-first-store-by-access-pattern.md
-      - ARC-ADR-043 Generative Programming Pipeline (the Factory): decisions/ARC-ADR-043-ontology-driven-generative-programming-pipeline.md
-      - ARC-ADR-044 Untool Ontology-Orchestrated Swarm Intelligence: decisions/ARC-ADR-044-untool-ontology-orchestrated-swarm-intelligence.md
-      - ARC-ADR-045 Unified untool.ai Docs Site: decisions/ARC-ADR-045-unified-untool-docs-site.md
-  - Resources:
-    - Memory Palace System: mempalace.md
-    - FAQ: faq.md
-    - Glossary: glossary.md
-    - Acronym Squasher: acronym-squasher.md
-    - Contributing: contributing.md
+      - Setup: setup.md
+      - Quick Start: quick-start.md
+      - Onboarding: onboarding.md
+      - Contributing: contributing.md
+  - GitHub Practices:
+      - GitHub Projects: github-projects.md
+      - Issue Conventions: issue-conventions.md
+      - PR Review Loop: pr-review-loop.md
+      - Human-in-the-Loop: hitl.md
+      - Copilot: copilot.md
+      - Codex: codex.md
+  - Agent Guidance:
+      - Starter Agents: agents.md
+      - Generated Agent Glossary: agents-glossary/index.md
+      - Routing Matrix: routing-matrix.md
+      - Optional MemPalace: mempalace.md
+  - Planning & Delivery:
+      - SAFe: safe.md
+      - Wardley Mapping: wardley.md
+      - Capability Maps: capability-maps.md
+  - ADRs & Markdown:
+      - Architecture Decisions: architecture-decisions.md
+      - ADR Directory: decisions/README.md
+      - Glossary: glossary.md

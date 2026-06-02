@@ -1,4 +1,0 @@
-{
-  "language": "sqlscript",
-  "command": "CREATE DOCUMENT TYPE Chunk IF NOT EXISTS;\nCREATE DOCUMENT TYPE StoredObject IF NOT EXISTS;\nCREATE DOCUMENT TYPE IngestJob IF NOT EXISTS;"
-}

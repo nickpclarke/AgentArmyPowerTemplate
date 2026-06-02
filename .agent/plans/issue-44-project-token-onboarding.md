@@ -2,7 +2,7 @@
 
 ## Goal
 
-Make AgentArmy setup safer by documenting the difference between local GitHub CLI auth, GitHub Actions secrets, repository variables, and external microVM runner environment variables. Add an initial onboarding sanity-check path that can catch missing token and Project v2 configuration before real agent work starts.
+Make AgentArmyPowerTemplate setup safer by documenting the difference between local GitHub CLI auth, GitHub Actions secrets, repository variables, and external microVM runner environment variables. Add an initial onboarding sanity-check path that can catch missing token and Project v2 configuration before real agent work starts.
 
 ## Context
 
@@ -44,7 +44,7 @@ Codex owns this plan and the setup/onboarding docs for issue `#44`. Future workf
 Run:
 
 ```powershell
-.\scripts\onboarding-check.ps1 -Owner nickpclarke -Repo AgentArmy -ProjectNumber 1
+.\scripts\onboarding-check.ps1 -Owner nickpclarke -Repo AgentArmyPowerTemplate -ProjectNumber 1
 python -m mkdocs build
 ```
 

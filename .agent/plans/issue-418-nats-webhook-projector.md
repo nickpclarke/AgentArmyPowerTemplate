@@ -2,13 +2,13 @@
 
 ## Goal
 
-Adopt capability `platform.messaging.update-system` in AgentArmy by adding the
+Adopt capability `platform.messaging.update-system` in AgentArmyPowerTemplate by adding the
 smallest coherent NATS-to-webhook projector bridge for platform update
 subscriptions.
 
 ## Context
 
-- Issue: https://github.com/nickpclarke/AgentArmy/issues/418
+- Issue: https://github.com/OWNER/AgentArmyPowerTemplatePowerTemplate/issues/418
 - Target: Implement the NATS-to-webhook projector bridge for platform update subscriptions
 - Owner lens: `async-messaging-engineer`
 - Reviewer lenses: `mcp-developer`, `api-designer`, `contract-test-engineer`, `security-auditor`

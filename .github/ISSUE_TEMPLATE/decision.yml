@@ -1,0 +1,21 @@
+name: Decision
+description: Human-in-the-loop decision artifact
+title: "[Decision]: "
+labels: ["decision", "hitl-decision"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Options considered
+  - type: textarea
+    id: decision
+    attributes:
+      label: Decision needed
+    validations:
+      required: true

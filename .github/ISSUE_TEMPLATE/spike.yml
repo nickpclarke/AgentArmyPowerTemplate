@@ -1,32 +1,15 @@
-name: "Spike"
-description: "Time-boxed research to reduce uncertainty before committing to work."
+name: Spike
+description: Time-boxed research or proof of concept
 title: "[Spike]: "
-labels: ["Spike"]
+labels: ["spike"]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        A Spike is time-boxed research. After creating, set **Type**, **PI**, and
-        **Size** on the project board. The deliverable is a decision or findings,
-        not shippable code.
   - type: textarea
     id: question
     attributes:
-      label: Question to answer
-      description: What do we need to learn or decide?
-    validations:
-      required: true
-  - type: input
-    id: timebox
-    attributes:
-      label: Time box
-      placeholder: e.g. 1 day, 2 days
+      label: Research question
     validations:
       required: true
   - type: textarea
-    id: outcome
+    id: output
     attributes:
-      label: Expected outcome
-      description: What artifact ends the spike (recommendation, prototype, ADR, etc.)?
-    validations:
-      required: true
+      label: Expected output

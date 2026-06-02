@@ -1,5 +1,0 @@
-A Risk is a potential event that may harm the enterprise. A Control is a
-safeguard put in place to mitigate one or more risks. The relationship between a
-risk and the control that mitigates it is a Mitigation Case, which also names the
-Risk Owner accountable for it. A Risk Assessment is the activity in which risks
-are evaluated and controls are proposed.

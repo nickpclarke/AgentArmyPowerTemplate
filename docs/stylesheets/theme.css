@@ -1,0 +1,8 @@
+:root {
+  --apt-accent: #2563eb;
+}
+
+.md-header,
+.md-tabs {
+  background-color: var(--apt-accent);
+}
