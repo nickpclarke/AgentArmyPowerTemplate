@@ -1,9 +1,9 @@
 site_name: AgentArmyPowerTemplate
 site_description: Reusable AI-powered GitHub and Markdown workflow template
 site_author: AgentArmyPowerTemplate contributors
-site_url: https://OWNER.github.io/AgentArmyPowerTemplate/
-repo_url: https://github.com/OWNER/AgentArmyPowerTemplate
-repo_name: OWNER/AgentArmyPowerTemplate
+site_url: https://nickpclarke.github.io/AgentArmyPowerTemplate/
+repo_url: https://github.com/nickpclarke/AgentArmyPowerTemplate
+repo_name: nickpclarke/AgentArmyPowerTemplate
 edit_uri: edit/main/docs/
 docs_dir: docs
 site_dir: site
@@ -45,6 +45,7 @@ plugins:
 
 exclude_docs: |
   includes/
+  decisions/ARC-ADR-DRAFT-*.md
 
 markdown_extensions:
   - abbr
@@ -76,7 +77,7 @@ extra_css:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/OWNER/AgentArmyPowerTemplate
+      link: https://github.com/nickpclarke/AgentArmyPowerTemplate
       name: GitHub Repository
 
 nav:
