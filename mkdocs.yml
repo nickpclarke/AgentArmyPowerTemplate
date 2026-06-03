@@ -1,16 +1,18 @@
-site_name: AgentArmyPowerTemplate
-site_description: Reusable AI-powered GitHub and Markdown workflow template
-site_author: AgentArmyPowerTemplate contributors
+site_name: AgentArmy Power Template
+site_description: Run two coordinated AI armies on any codebase — Claude Code and GitHub Copilot, unified on a shared GitHub Projects board
+site_author: nickpclarke
 site_url: https://nickpclarke.github.io/AgentArmyPowerTemplate/
 repo_url: https://github.com/nickpclarke/AgentArmyPowerTemplate
-repo_name: nickpclarke/AgentArmyPowerTemplate
+repo_name: AgentArmyPowerTemplate
 edit_uri: edit/main/docs/
 docs_dir: docs
 site_dir: site
-copyright: Copyright © 2026 AgentArmyPowerTemplate contributors. Version 1.0.0. Licensed under MIT.
+copyright: Copyright © 2026 Nick Clarke. Apache-2.0.
 
 theme:
   name: material
+  logo: null
+  favicon: null
   icon:
     repo: fontawesome/brands/github
     edit: material/pencil
@@ -28,46 +30,50 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+  font: false
   features:
     - navigation.instant
+    - navigation.instant.prefetch
     - navigation.tracking
     - navigation.tabs
-    - navigation.sections
+    - navigation.tabs.sticky
+    - navigation.expand
+    - navigation.path
+    - navigation.indexes
     - navigation.top
+    - navigation.prune
     - content.code.copy
+    - content.code.select
+    - content.code.annotate
     - content.action.edit
     - content.action.view
+    - content.tooltips
+    - toc.follow
+    - toc.integrate
     - search.suggest
     - search.highlight
+    - search.share
 
 plugins:
-  - search
-  - git-revision-date-localized:
-      type: datetime
-      timezone: America/New_York
-      locale: en
-      fallback_to_build_date: true
-
-exclude_docs: |
-  includes/
-  decisions/ARC-ADR-DRAFT-*.md
+  - search:
+      lang: en
+      separator: '[\\s\\-,:!=\\[\\]()"/]+|(?<!\\w)(?=\\w)|(?!\\w)(?=\\w)'
 
 markdown_extensions:
-  - abbr
   - admonition
   - pymdownx.details
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
-  - pymdownx.highlight
+  - pymdownx.highlight:
+      use_pygments: true
   - pymdownx.inlinehilite
+  - pymdownx.emoji:
+      emoji_index: !!python/name:pymdownx.emoji.twemoji
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
   - pymdownx.tasklist:
       custom_checkbox: true
-  - pymdownx.snippets:
-      auto_append:
-        - includes/abbreviations.md
-      base_path:
-        - docs
+  - pymdownx.snippets
   - toc:
       permalink: true
       toc_depth: 3
@@ -83,34 +89,79 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/nickpclarke/AgentArmyPowerTemplate
+      name: GitHub Repository
 
 nav:
   - Home: index.md
+
   - Getting Started:
-      - Setup & Installation: setup.md
-      - Quick Start Guide: quick-start.md
-      - Team Onboarding Checklist: onboarding.md
-      - Contributing Standards: contributing.md
-  - Armies & Roster:
-      - Armies Overview: armies-overview.md
-      - Complete Agent Roster: agents.md
-      - Complete Agent Glossary: agents-glossary/index.md
-      - Agent Routing Matrix: routing-matrix.md
-      - Agent Routing Reference: agent-routing.md
-      - Agent Synchronization: agent-sync.md
-      - Optional Memory Palace: mempalace.md
-  - GitHub Workflow Practices:
-      - GitHub Projects v2: github-projects.md
-      - Issue Schema & Conventions: issue-conventions.md
-      - PR Autonomous Review Loop: pr-review-loop.md
-      - Human-in-the-Loop Decisions: hitl.md
-      - GitHub Copilot Configuration: copilot.md
-      - Codex Environment Setup: codex.md
-  - Planning & Strategic Delivery:
-      - Lightweight SAFe Delivery: safe.md
-      - Wardley Mapping Strategy: wardley.md
-      - Capability Mapping Strategy: capability-maps.md
-  - Architectural Decisions:
-      - ADR Overview & Rules: architecture-decisions.md
-      - ADR Directory: decisions/README.md
-      - Terminology Glossary: glossary.md
+    - Installation & Setup: setup.md
+    - Quick Start: quick-start.md
+    - Onboarding Sanity Check: onboarding.md
+    - Env & Secrets Handling: env-handling.md
+    - Using Codex: codex.md
+
+  - The Two Armies:
+    - Overview: armies-overview.md
+    - Routing Matrix: routing-matrix.md
+    - Agent Routing Guide: agent-routing.md
+    - Agent Tracks (Run vs Design): agent-tracks.md
+    - Agent Collaboration (cross-repo): agent-collaboration.md
+
+  - Claude Code Army:
+    - All Agents (full catalog): agents-glossary/index.md
+    - Original Roster: agents.md
+    - Language Routing Guide: language-routing.md
+    - Using Claude Code: claude-code-guide.md
+    - Spoke Helper Sync: spoke-sync.md
+
+  - GitHub Copilot Army:
+    - Copilot Setup: copilot.md
+    - Task Labeling: copilot-tasks.md
+    - Board Manager Extension: board-manager.md
+
+  - Coordination & Planning:
+    - GitHub Projects v2: github-projects.md
+    - SAFe Framework: safe.md
+    - Issue Conventions: issue-conventions.md
+    - Human-in-the-Loop (HITL): hitl.md
+    - Autonomous PR Review Loop: pr-review-loop.md
+    - Fleet Heartbeat (pattern): fleet-heartbeat.md
+    - Spoke Work Intake: spoke-work-intake.md
+    - Spoke → Hub Callback: spoke-hub-callback.md
+    - Spoke Artifact Pipeline: spoke-artifact-pipeline.md
+    - Spoke Artifacts (harvested): spokes/index.md
+
+  - Hub & Spoke Architecture:
+    - N-Layer Architecture: n-layer-architecture.md
+    - N-Layer Spoke Rules: n-layer-spoke-rules.md
+    - Spoke Lifecycle: spoke-lifecycle.md
+    - Cross-Layer Networking: cross-layer-networking.md
+    - Spoke Onboarding: agent-onboarding.md
+
+  - Data Pipelines (dlt):
+    - Pipeline Architecture: dlt-pipelines.md
+    - Source Connectors: dlt-sources.md
+    - Incremental Loading: dlt-incremental.md
+
+  - Security Patterns:
+    - Secrets Rotation: security/secrets-rotation.md
+    - Access Review: security/access-review.md
+    - Change Management: security/change-management.md
+
+  - Quality & Validation:
+    - MECE Audit Overview: mece-audit/MECE_AUDIT_SUMMARY.md
+    - Agent Audit Rubric: mece-audit/AGENT_MECE_AUDIT_RUBRIC.md
+    - Agent Audit Scorecard: mece-audit/AGENT_MECE_AUDIT_SCORECARD.md
+    - MECE Implementation: mece-audit/MECE_IMPLEMENTATION_SUMMARY.md
+    - Routing Validation Tests: mece-audit/ROUTING_VALIDATION_TESTS.md
+
+  - Reference:
+    - Glossary: glossary.md
+    - Memory Palace System: mempalace.md
+    - Wardley Mapping: wardley.md
+    - Capability Mapping: capability-maps.md
+    - Architecture Decisions: architecture-decisions.md
+    - ADR Directory: decisions/README.md
+    - Agent Synchronization: agent-sync.md
+    - Contributing: contributing.md
