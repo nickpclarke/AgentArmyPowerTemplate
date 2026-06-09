@@ -4,7 +4,7 @@ mkdocs-material>=9.4.0
 
 
 # Markdown extensions and features
-pymdown-extensions>=10.0
+pymdown-extensions>=10.21.3
 markdown>=3.4.0
 
 # Code highlighting
