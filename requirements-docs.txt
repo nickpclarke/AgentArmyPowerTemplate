@@ -1,6 +1,6 @@
 # Core MkDocs and Material Theme
 mkdocs>=1.5.0
-mkdocs-material>=9.4.0
+mkdocs-material>=9.7.6
 
 
 # Markdown extensions and features
