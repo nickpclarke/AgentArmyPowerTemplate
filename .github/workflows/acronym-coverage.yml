@@ -23,7 +23,7 @@ jobs:
   acronyms:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0   # need history to diff against the base branch
           ref: ${{ github.event.pull_request.head.sha }}   # the PR's own tip, not the merge with base
