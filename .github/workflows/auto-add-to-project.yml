@@ -14,14 +14,19 @@ permissions:
 jobs:
   add-to-project:
     runs-on: ubuntu-latest
+    env:
+      PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
     steps:
+      - name: Report unconfigured project automation
+        if: ${{ env.PROJECT_TOKEN == '' }}
+        run: echo 'Project-board automation is not configured (PROJECT_TOKEN is absent); board updates were skipped.' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/add-to-project@v1.0.2
-        if: ${{ github.event.repository.owner.type == 'Organization' }}
+        if: ${{ env.PROJECT_TOKEN != '' && github.event.repository.owner.type == 'Organization' }}
         with:
           project-url: https://github.com/orgs/${{ github.repository_owner }}/projects/${{ vars.PROJECT_NUMBER || '1' }}
           github-token: ${{ secrets.PROJECT_TOKEN }}
       - uses: actions/add-to-project@v1.0.2
-        if: ${{ github.event.repository.owner.type != 'Organization' }}
+        if: ${{ env.PROJECT_TOKEN != '' && github.event.repository.owner.type != 'Organization' }}
         with:
           project-url: https://github.com/users/${{ github.repository_owner }}/projects/${{ vars.PROJECT_NUMBER || '1' }}
           github-token: ${{ secrets.PROJECT_TOKEN }}

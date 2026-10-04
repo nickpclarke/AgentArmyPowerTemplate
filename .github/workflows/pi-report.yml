@@ -13,13 +13,20 @@ permissions:
 jobs:
   report:
     runs-on: ubuntu-latest
+    env:
+      PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
     steps:
+      - name: Report unconfigured project automation
+        if: ${{ env.PROJECT_TOKEN == '' }}
+        run: echo 'PI reporting is not configured (PROJECT_TOKEN is absent); the board report was skipped.' >> "$GITHUB_STEP_SUMMARY"
       - name: Generate PI progress report
+        if: ${{ env.PROJECT_TOKEN != '' }}
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
           OWNER: ${{ github.repository_owner }}
           PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER || '1' }}
         run: |
+          set -euo pipefail
           ITEMS_JSON=$(gh project item-list "$PROJECT_NUMBER" --owner "$OWNER" --format json --limit 500)
 
           # Status names below MUST match the board's Status single-select option
