@@ -1,14 +1,14 @@
 # Core MkDocs and Material Theme
-mkdocs>=1.5.0
+mkdocs>=1.6.1
 mkdocs-material>=9.7.6
 
 
 # Markdown extensions and features
-pymdown-extensions>=10.0
+pymdown-extensions>=10.21.3
 markdown>=3.4.0
 
 # Code highlighting
 Pygments>=2.14.0
 
 # Git revision date localized plugin
-mkdocs-git-revision-date-localized-plugin>=1.2.0
+mkdocs-git-revision-date-localized-plugin>=1.5.3

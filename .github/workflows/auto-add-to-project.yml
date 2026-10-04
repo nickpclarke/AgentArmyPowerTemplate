@@ -4,7 +4,7 @@ on:
   issues:
     types: [opened, reopened]
   pull_request:
-    types: [opened, reopened]
+    types: [opened, reopened, synchronize]
 
 # This workflow authenticates with PROJECT_TOKEN (Projects v2 writes); the ambient
 # GITHUB_TOKEN needs nothing, so lock it to a read-only floor.
@@ -14,14 +14,25 @@ permissions:
 jobs:
   add-to-project:
     runs-on: ubuntu-latest
+    env:
+      PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+      PROJECT_AUTOMATION_ENABLED: ${{ vars.PROJECT_AUTOMATION_ENABLED }}
     steps:
+      - name: Report disabled project automation
+        if: ${{ env.PROJECT_AUTOMATION_ENABLED != 'true' }}
+        run: echo 'Optional project-board automation is disabled. Set PROJECT_AUTOMATION_ENABLED=true and configure PROJECT_TOKEN to enable it.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Require token when project automation is enabled
+        if: ${{ env.PROJECT_AUTOMATION_ENABLED == 'true' && env.PROJECT_TOKEN == '' }}
+        run: |
+          echo "::error::PROJECT_AUTOMATION_ENABLED=true requires PROJECT_TOKEN."
+          exit 1
       - uses: actions/add-to-project@v1.0.2
-        if: ${{ github.event.repository.owner.type == 'Organization' }}
+        if: ${{ env.PROJECT_AUTOMATION_ENABLED == 'true' && github.event.repository.owner.type == 'Organization' }}
         with:
           project-url: https://github.com/orgs/${{ github.repository_owner }}/projects/${{ vars.PROJECT_NUMBER || '1' }}
           github-token: ${{ secrets.PROJECT_TOKEN }}
       - uses: actions/add-to-project@v1.0.2
-        if: ${{ github.event.repository.owner.type != 'Organization' }}
+        if: ${{ env.PROJECT_AUTOMATION_ENABLED == 'true' && github.event.repository.owner.type != 'Organization' }}
         with:
           project-url: https://github.com/users/${{ github.repository_owner }}/projects/${{ vars.PROJECT_NUMBER || '1' }}
           github-token: ${{ secrets.PROJECT_TOKEN }}

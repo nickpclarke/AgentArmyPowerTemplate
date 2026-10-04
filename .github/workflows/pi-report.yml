@@ -13,13 +13,26 @@ permissions:
 jobs:
   report:
     runs-on: ubuntu-latest
+    env:
+      PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+      PROJECT_AUTOMATION_ENABLED: ${{ vars.PROJECT_AUTOMATION_ENABLED }}
     steps:
+      - name: Report disabled project automation
+        if: ${{ env.PROJECT_AUTOMATION_ENABLED != 'true' }}
+        run: echo 'Optional project-board automation is disabled. Set PROJECT_AUTOMATION_ENABLED=true and configure PROJECT_TOKEN to enable it.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Require token when project automation is enabled
+        if: ${{ env.PROJECT_AUTOMATION_ENABLED == 'true' && env.PROJECT_TOKEN == '' }}
+        run: |
+          echo "::error::PROJECT_AUTOMATION_ENABLED=true requires PROJECT_TOKEN."
+          exit 1
       - name: Generate PI progress report
+        if: ${{ env.PROJECT_AUTOMATION_ENABLED == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
           OWNER: ${{ github.repository_owner }}
           PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER || '1' }}
         run: |
+          set -euo pipefail
           ITEMS_JSON=$(gh project item-list "$PROJECT_NUMBER" --owner "$OWNER" --format json --limit 500)
 
           # Status names below MUST match the board's Status single-select option
