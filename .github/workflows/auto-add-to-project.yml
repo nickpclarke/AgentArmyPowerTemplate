@@ -2,7 +2,7 @@ name: Auto-add to project
 
 on:
   issues:
-    types: [opened, reopened]
+    types: [opened, reopened, synchronize]
   pull_request:
     types: [opened, reopened]
 

@@ -2,7 +2,7 @@ name: Sync issue status with PR
 
 on:
   pull_request:
-    types: [opened, closed]
+    types: [opened, closed, synchronize]
 
 permissions:
   contents: read
