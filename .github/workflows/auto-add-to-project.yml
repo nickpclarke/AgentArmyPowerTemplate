@@ -2,9 +2,9 @@ name: Auto-add to project
 
 on:
   issues:
-    types: [opened, reopened, synchronize]
-  pull_request:
     types: [opened, reopened]
+  pull_request:
+    types: [opened, reopened, synchronize]
 
 # This workflow authenticates with PROJECT_TOKEN (Projects v2 writes); the ambient
 # GITHUB_TOKEN needs nothing, so lock it to a read-only floor.
