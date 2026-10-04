@@ -10,14 +10,27 @@ permissions:
 jobs:
   sync-status:
     runs-on: ubuntu-latest
+    env:
+      PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+      PROJECT_AUTOMATION_ENABLED: ${{ vars.PROJECT_AUTOMATION_ENABLED }}
     steps:
+      - name: Report disabled project automation
+        if: ${{ env.PROJECT_AUTOMATION_ENABLED != 'true' }}
+        run: echo 'Optional project-board automation is disabled. Set PROJECT_AUTOMATION_ENABLED=true and configure PROJECT_TOKEN to enable it.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Require token when project automation is enabled
+        if: ${{ env.PROJECT_AUTOMATION_ENABLED == 'true' && env.PROJECT_TOKEN == '' }}
+        run: |
+          echo "::error::PROJECT_AUTOMATION_ENABLED=true requires PROJECT_TOKEN."
+          exit 1
       - name: Update linked issue statuses
+        if: ${{ env.PROJECT_AUTOMATION_ENABLED == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
           REPO_OWNER: ${{ github.repository_owner }}
           REPO_NAME: ${{ github.event.repository.name }}
           PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER || '1' }}
         run: |
+          set -euo pipefail
           ACTION="${{ github.event.action }}"
           MERGED="${{ github.event.pull_request.merged }}"
           if [[ "$ACTION" == "opened" ]]; then

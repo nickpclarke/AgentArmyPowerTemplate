@@ -15,8 +15,8 @@ AgentArmyPowerTemplate is a reusable GitHub repository template for AI-powered M
 
 1. Create a new repository from this template.
 2. Replace placeholder owner/repository URLs in `mkdocs.yml`, `.github/CODEOWNERS`, and any setup examples.
-3. Create a GitHub Projects v2 board and set repository variable `PROJECT_NUMBER`.
-4. Create a `PROJECT_TOKEN` secret with the minimum scopes needed to read/write the project board.
+3. Optionally create a GitHub Projects v2 board and set repository variable `PROJECT_NUMBER`.
+4. To enable board automation, set repository variable `PROJECT_AUTOMATION_ENABLED` to `true` and create a `PROJECT_TOKEN` secret with the minimum scopes needed to read/write the project board. Board additions, status sync, and PI reports are disabled by default; configured authentication failures remain errors.
 5. Install documentation dependencies and build the site:
 
 ```bash
