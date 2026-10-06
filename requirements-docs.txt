@@ -5,7 +5,7 @@ mkdocs-material>=9.7.6
 
 # Markdown extensions and features
 pymdown-extensions>=10.21.3
-markdown>=3.10.2
+markdown>=3.11
 
 # Code highlighting
 Pygments>=2.14.0
