@@ -8,6 +8,7 @@ on:
       - ".agents/**"
       - "scripts/**"
       - "docs/**"
+      - "requirements-docs.txt"
       - "mkdocs.yml"
       - ".github/workflows/validate.yml"
   push:
